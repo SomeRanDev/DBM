@@ -9,9 +9,9 @@ DBM.version = "1.6.10";
 
 const DiscordJS = DBM.DiscordJS = require("discord.js");
 
-if(DiscordJS.version < "12.0.0") {
-	console.log("This version of Discord Bot Maker requires Discord.JS v12.\nPlease use \"Project > Module Manager\" and \"Project > Reinstall Node Modules\" to update to Discord.JS v12.");
-	throw new Error("Need Discord.JS v12 to Run!!!");
+if(DiscordJS.version < "13.0.0") {
+	console.log("This version of Discord Bot Maker requires discord.JS v13.\nPlease use \"Project > Module Manager\" and \"Project > Reinstall Node Modules\" to update to discord.js v13.");
+	throw new Error("Need discord.js v13 to run!!!");
 }
 
 //---------------------------------------------------------------------
@@ -29,22 +29,22 @@ Bot.$evts = {}; // Events
 
 Bot.bot = null;
 
-Bot.PRIVILEGED_INTENTS = GUILD_MEMBERS | GUILD_PRESENCES;
+Bot.PRIVILEGED_INTENTS = DiscordJS.Intents.GUILD_MEMBERS | DiscordJS.Intents.GUILD_PRESENCES;
 
 Bot.INTENTS_NON_PRIVILEGED_INTENTS =
-	GUILDS |
-	GUILD_BANS |
-	GUILD_EMOJIS_AND_STICKERS |
-	GUILD_INTEGRATIONS |
-	GUILD_WEBHOOKS |
-	GUILD_INVITES |
-	GUILD_VOICE_STATES |
-	GUILD_MESSAGES |
-	GUILD_MESSAGE_REACTIONS |
-	GUILD_MESSAGE_TYPING |
-	DIRECT_MESSAGES |
-	DIRECT_MESSAGE_REACTIONS |
-	DIRECT_MESSAGE_TYPING;
+	DiscordJS.Intents.GUILDS |
+	DiscordJS.Intents.GUILD_BANS |
+	DiscordJS.Intents.GUILD_EMOJIS_AND_STICKERS |
+	DiscordJS.Intents.GUILD_INTEGRATIONS |
+	DiscordJS.Intents.GUILD_WEBHOOKS |
+	DiscordJS.Intents.GUILD_INVITES |
+	DiscordJS.Intents.GUILD_VOICE_STATES |
+	DiscordJS.Intents.GUILD_MESSAGES |
+	DiscordJS.Intents.GUILD_MESSAGE_REACTIONS |
+	DiscordJS.Intents.GUILD_MESSAGE_TYPING |
+	DiscordJS.Intents.DIRECT_MESSAGES |
+	DiscordJS.Intents.DIRECT_MESSAGE_REACTIONS |
+	DiscordJS.Intents.DIRECT_MESSAGE_TYPING;
 
 Bot.ALL_INTENTS = Bot.PRIVILEGED_INTENTS | Bot.INTENTS_NON_PRIVILEGED_INTENTS;
 
