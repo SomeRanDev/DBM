@@ -120,7 +120,7 @@ Category ID:<br>
 	action: function(cache) {
 		const data = cache.actions[cache.index];
 		const server = cache.server;
-		if(this.dest(server, "channels", "create")) {
+		if(server?.channels) {
 			const name = this.evalMessage(data.channelName, cache);
 			const storage = parseInt(data.storage);
 			const reason = this.evalMessage(data.reason, cache);

@@ -131,7 +131,7 @@ module.exports = {
 	action: function(cache) {
 		const data = cache.actions[cache.index];
 		const server = cache.server;
-		if(this.dest(server, "emojis", "create")) {
+		if(server?.emojis) {
 			const type = parseInt(data.storage);
 			const varName = this.evalMessage(data.varName, cache);
 			const image = this.getVariable(type, varName, cache);

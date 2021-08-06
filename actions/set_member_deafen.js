@@ -111,7 +111,7 @@ module.exports = {
 		if(Array.isArray(member)) {
 			this.callListFunc(member.map((m) => m.voice), "setDeaf", [data.deafen === "0", reason])
 				.then(() => this.callNextAction(cache));
-		} else if(this.dest(member.voice, "setDeaf")) {
+		} else if(member?.voice) {
 			member.voice.setDeaf(data.deafen === "0", reason)
 				.then(() => this.callNextAction(cache))
 				.catch(this.displayError.bind(this, data, cache));

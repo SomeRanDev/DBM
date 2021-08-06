@@ -105,8 +105,8 @@ module.exports = {
 		if(Array.isArray(member)) {
 			this.callListFunc(member, "unban", [server, this.evalMessage(data.reason, cache)])
 				.then(() => this.callNextAction(cache));
-		} else if(member && (member.author || member.id) && this.dest(server, "members", "unban")) {
-			server.members.unban(member.author || member.id, this.evalMessage(data.reason, cache))
+		} else if((member?.author || member.id) && server?.bans) {
+			server.bans.remove(member.author ?? member.id, this.evalMessage(data.reason, cache))
 				.then(() => this.callNextAction(cache))
 				.catch(this.displayError.bind(this, data, cache));
 		} else {

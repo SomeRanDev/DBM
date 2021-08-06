@@ -171,19 +171,20 @@ module.exports = {
 	action: function(cache) {
 		const data = cache.actions[cache.index];
 		const msg = cache.msg;
+		if (!msg) return this.callNextAction(cache);
 		const infoType = parseInt(data.info);
 		const index = parseInt(this.evalMessage(data.infoIndex, cache));
 		const separator = this.getDBM().Files.data.settings.separator || "\\s+";
 		let source;
 		switch(infoType) {
 			case 0:
-				if(msg && msg.content) {
+				if(msg.content) {
 					const params = msg.content.split(new RegExp(separator));
 					source = params[index] || "";
 				}
 				break;
 			case 1:
-				if(msg && msg.content) {
+				if(msg.content) {
 					const params = msg.content.split(new RegExp(separator));
 					source = "";
 					for(let i = 0; i < index; i++) {
@@ -196,7 +197,7 @@ module.exports = {
 				}
 				break;
 			case 2:
-				if(this.dest(msg, "mentions", "members")) {
+				if(msg.mentions.members.size) {
 					const members = msg.mentions.members.array();
 					if(members[index - 1]) {
 						source = members[index - 1];
@@ -204,7 +205,7 @@ module.exports = {
 				}
 				break;
 			case 3:
-				if(this.dest(msg, "mentions", "roles")) {
+				if(msg.mentions.roles.size) {
 					const roles = msg.mentions.roles.array();
 					if(roles[index - 1]) {
 						source = roles[index - 1];
@@ -212,7 +213,7 @@ module.exports = {
 				}
 				break;
 			case 4:
-				if(this.dest(msg, "mentions", "channels")) {
+				if(msg.mentions.channels.size) {
 					const channels = msg.mentions.channels.array();
 					if(channels[index - 1]) {
 						source = channels[index - 1];

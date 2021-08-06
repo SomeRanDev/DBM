@@ -154,7 +154,7 @@ module.exports = {
 				source = this.global[varName];
 				break;
 		}
-		if(this.dest(source, "messages", "fetch")) {
+		if(source?.messages) {
 			const count = Math.min(parseInt(this.evalMessage(data.count, cache)), 100);
 			source.messages.fetch({ limit: count, before: msg.id }).then(function(messages) {
 				const condition = parseInt(data.condition);

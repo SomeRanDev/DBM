@@ -117,7 +117,7 @@ module.exports = {
 
 	action: function(cache) {
 		const server = cache.server;
-		if(!this.dest(server, "channels", "cache")) {
+		if(!server?.channels) {
 			this.callNextAction(cache);
 			return;
 		}

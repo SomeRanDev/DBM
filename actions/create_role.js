@@ -141,7 +141,7 @@ Name:<br>
 		}
 		roleData.hoist = JSON.parse(data.hoist);
 		roleData.mentionable = JSON.parse(data.mentionable);
-		if(this.dest(server, "roles", "create")) {
+		if(server?.roles) {
 			const storage = parseInt(data.storage);
 			server.roles.create({ data: roleData, reason })
 				.then((role) => {

@@ -334,7 +334,7 @@ module.exports = {
 				result = targetServer.systemChannel;
 				break;
 			case 10:
-				result = targetServer.roles.cache.get(targetServer.id);
+				result = targetServer.roles.resolve(targetServer.id);
 				break;
 			case 11:
 				result = targetServer.owner;
@@ -383,68 +383,68 @@ module.exports = {
 				break;
 			case 26:
 				await fetchMembers();
-				result = targetServer.members.cache.filter((m) => this.dest(m.user, "presence", "status") === "dnd").size;
+				result = targetServer.members.cache.filter((m) => m.user?.presence?.status === "dnd").size;
 				break;
 			case 27:
 				await fetchMembers();
-				result = targetServer.members.cache.filter((m) => this.dest(m.user, "presence", "status") === "online").size;
+				result = targetServer.members.cache.filter((m) => m.user?.presence?.status === "online").size;
 				break;
 			case 28:
 				await fetchMembers();
-				result = targetServer.members.cache.filter((m) => this.dest(m.user, "presence", "status") === "offline").size;
+				result = targetServer.members.cache.filter((m) => m.user?.presence?.status === "offline").size;
 				break;
 			case 29:
 				await fetchMembers();
-				result = targetServer.members.cache.filter((m) => this.dest(m.user, "presence", "status") === "idle").size;
+				result = targetServer.members.cache.filter((m) => m.user?.presence?.status === "idle").size;
 				break;
 			case 30:
-				result = targetServer.members.cache.filter((m) => m.user.bot).size;
+				result = targetServer.members.cache.filter((m) => m.user?.bot).size;
 				break;
 			case 31:
-				result = targetServer.channels.cache.map((c) => c.id);
+				result = [...targetServer.channels.cache.keys()];
 				break;
 			case 32:
-				result = targetServer.roles.cache.map((r) => r.id);
+				result = [...targetServer.roles.cache.keys()];
 				break;
 			case 33:
 				await fetchMembers();
-				result = targetServer.members.cache.map((m) => m.id);
+				result = [...targetServer.members.cache.keys()];
 				break;
 			case 35:
 				await fetchMembers();
-				result = targetServer.members.cache.filter((m) => !m.user.bot).size;
+				result = targetServer.members.cache.filter((m) => !m.user?.bot).size;
 				break;
 			case 37:
 				result = targetServer.roles.cache.size;
 				break;
 			case 38:
-				result = targetServer.channels.cache.filter(c => c.type !== "voice" && c.type !== "category").size;
+				result = targetServer.channels.cache.filter(c => c.type === "GUILD_TEXT" && c.type === "GUILD_NEWS").size;
 				break;
 			case 39:
-				result = targetServer.channels.cache.filter(c => c.type === "voice").size;
+				result = targetServer.channels.cache.filter(c => c.type === "GUILD_VOICE").size;
 				break;
 			case 40:
 				result = targetServer.verified;
 				break;
 			case 41:
 				const bans = await targetServer.fetchBans();
-				result = bans.array();
+				result = [...bans.values()];
 				break;
 			case 42:
 				const invites = await targetServer.fetchInvites();
-				result = invites.array();
+				result = [...invites.values()];
 				break;
 			case 43:
 				result = targetServer.explicitContentFilter;
 				break;
 			case 44:
-				result = targetServer.premiumSubscriptionCount || 0;
+				result = targetServer.premiumSubscriptionCount ?? 0;
 				break;
 			case 45:
 				result = targetServer.premiumTier;
 				break;
 			case 46:
-				result = targetServer.bannerURL();
+				result = targetServer.bannerURL({ format: "png", size: 4096 });
 				break;
 			case 47:
 				result = targetServer.features;
@@ -456,7 +456,7 @@ module.exports = {
 				result = targetServer.vanityURLCode;
 				break;
 			case 50:
-				result = targetServer.widgetChannelID;
+				result = targetServer.widgetChannelId;
 				break;
 			default:
 				break;

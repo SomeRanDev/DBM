@@ -23,7 +23,7 @@ module.exports = {
 
 	subtitle: function(data) {
 		const members = ["Mentioned User", "Command Author", "Temp Variable", "Server Variable", "Global Variable"];
-		const info = ["Member Object", "Member ID", "Member Username", "Member Display Name", "Member Color", "Member Server", "Member Last Message", "Member Highest Role", "Member Hoist Role", "Member Color Role", "Member Is Owner?", "Member Is Muted?", "Member Is Deafened?", "Member Is Bannable?", "Member Playing Status Name", "Member Status", "Member Avatar URL", "Member Roles List", "Member Roles Amount", "Member Voice Channel", "Member Discriminator", "Member Tag", "Member Created At", "Member Created Timestamp", "Member Joined At", "Member Joined Timestamp", "Member Last Message ID", "Member Permission List", "Member Flags List", "Member Client Status", "Member Custom Status"];
+		const info = ["Member Object", "Member ID", "Member Username", "Member Display Name", "Member Color", "Member Server", "Member Last Message", "Member Highest Role", "Member Hoist Role", "Member Color Role", "Member Is Owner?", "Member Is Muted?", "Member Is Deafened?", "Member Is Bannable?", "Member Playing Status Name", "Member Status", "Member Avatar URL", "Member Roles List", "Member Roles Amount", "Member Voice Channel", "Member Discriminator", "Member Tag", "Member Created At", "Member Created Timestamp", "Member Joined At", "Member Joined Timestamp", "", "Member Permission List", "Member Flags List", "Member Client Status", "Member Custom Status"];
 		return `${members[parseInt(data.member)]} - ${info[parseInt(data.info)]}`;
 	},
 
@@ -102,9 +102,6 @@ module.exports = {
 				break;
 			case 25:
 				dataType = "Timestamp";
-				break;
-			case 26:
-				dataType = "Message ID";
 				break;
 			case 27:
 			case 28:
@@ -190,7 +187,6 @@ module.exports = {
       <option value="23">Member Created Timestamp</option>
       <option value="24">Member Joined At</option>
       <option value="25">Member Joined Timestamp</option>
-      <option value="26">Member Last Message ID</option>
       <option value="27">Member Permission List</option>
       <option value="28">Member Flags List</option>
       <option value="29">Member Client Status</option>
@@ -252,9 +248,7 @@ module.exports = {
 				result = mem.id;
 				break;
 			case 2:
-				if(mem.user) {
-					result = mem.user.username;
-				}
+				result = mem.user?.username;
 				break;
 			case 3:
 				result = mem.displayName;
@@ -269,36 +263,36 @@ module.exports = {
 				result = mem.lastMessage;
 				break;
 			case 7:
-				result = this.dest(mem.roles, "highest");
+				result = mem.roles.highest;
 				break;
 			case 8:
-				result = this.dest(mem.roles, "hoist");
+				result = mem.roles.hoist;
 				break;
 			case 9:
-				result = this.dest(mem.roles, "color");
+				result = mem.roles.color;
 				break;
 			case 10:
-				if(this.dest(mem.guild, "ownerId")) {
+				if(mem.guild?.ownerId) {
 					result = mem.id === mem.guild.ownerId;
 				}
 				break;
 			case 11:
-				result = this.dest(mem.voice, "mute");
+				result = mem.voice.mute;
 				break;
 			case 12:
-				result = this.dest(mem.voice, "deaf");
+				result = mem.voice.deaf;
 				break;
 			case 13:
 				result = mem.bannable;
 				break;
 			case 14:
-				if(this.dest(mem.presence, "activities")) {
-					const status = mem.presence.activities.filter((s) => s.type !== "CUSTOM_STATUS");
-					result = status && this.dest(status[0], "name");
+				if(mem.presence?.activities.length) {
+					const status = mem.presence.activities.filter((s) => s.type !== "CUSTOM");
+					result = status[0]?.name;
 				}
 				break;
 			case 15:
-				if(this.dest(mem.presence, "status")) {
+				if(mem.presence?.status) {
 					const status = mem.presence.status;
 					if(status === "online") result = "Online";
 					else if(status === "offline") result = "Offline";
@@ -312,27 +306,25 @@ module.exports = {
 				}
 				break;
 			case 17:
-				if(this.dest(mem.roles, "cache")) {
-					result = mem.roles.cache.array();
-				}
+				result = [...mem.roles.cache.values()];
 				break;
 			case 18:
-				result = this.dest(mem.roles, "cache", "size");
+				result = mem.roles.cache.size;
 				break;
 			case 19:
-				result = this.dest(mem.voice, "channel");
+				result = mem.voice.channel;
 				break;
 			case 20:
-				result = this.dest(mem.user, "discriminator");
+				result = mem.user?.discriminator;
 				break;
 			case 21:
-				result = this.dest(mem.user, "tag");
+				result = mem.user?.tag;
 				break;
 			case 22:
-				result = this.dest(mem.user, "createdAt");
+				result = mem.user?.createdAt;
 				break;
 			case 23:
-				result = this.dest(mem.user, "createdTimestamp");
+				result = mem.user?.createdTimestamp;
 				break;
 			case 24:
 				result = mem.joinedAt;
@@ -340,25 +332,18 @@ module.exports = {
 			case 25:
 				result = mem.joinedTimestamp;
 				break;
-			case 26:
-				result = mem.lastMessageID;
-				break;
 			case 27:
-				result = mem.permissions && mem.permissions.toArray();
+				result = mem.permissions.toArray();
 				break;
 			case 28:
-				const flags = this.dest(mem.user, "flags");
-				result = flags && flags.toArray();
+				result = mem.user?.flags?.toArray();
 				break;
 			case 29:
-				const status = this.dest(mem.presence, "clientStatus");
+				const status = mem.presence?.clientStatus;
 				result = status && Object.keys(status);
 				break;
 			case 30:
-				if(this.dest(mem.presence, "activities")) {
-					const status = mem.presence.activities.filter((s) => this.dest(s, "type") === "CUSTOM_STATUS");
-					result = status && this.dest(status[0], "state");
-				}
+				result = mem.presence?.activities.find((s) => s.type === "CUSTOM")?.state;
 				break;
 			default:
 				break;

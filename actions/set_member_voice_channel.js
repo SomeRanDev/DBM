@@ -120,7 +120,7 @@ module.exports = {
 
 		if(Array.isArray(member)) {
 			this.callListFunc(member.map((m) => m.voice), "setChannel", [channel, reason]).then(() => this.callNextAction(cache));
-		} else if(this.dest(member, "voice", "setChannel")) {
+		} else if(member?.voice) {
 			member.voice.setChannel(channel, reason)
 				.then(() => this.callNextAction(cache))
 				.catch(this.displayError.bind(this, data, cache));

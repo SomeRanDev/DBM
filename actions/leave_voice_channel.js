@@ -75,9 +75,7 @@ module.exports = {
 
 	action: function(cache) {
 		const server = cache.server;
-		if(this.dest(server, "me", "voice", "channel")) {
-			server.me.voice.channel.leave();
-		}
+		server?.me?.voice.channel?.leave();
 		this.callNextAction(cache);
 	},
 

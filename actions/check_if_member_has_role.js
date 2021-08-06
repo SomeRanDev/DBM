@@ -123,13 +123,13 @@ module.exports = {
 		if(role) {
 			if(Array.isArray(member)) {
 				result = member.every(function(mem) {
-					if(this.dest(mem, "roles", "cache")) {
+					if(mem.roles) {
 						return mem.roles.cache.has(role.id);
 					} else {
 						return false;
 					}
 				});
-			} else if(this.dest(member, "roles", "cache")) {
+			} else if(member?.roles) {
 				result = member.roles.cache.has(role.id);
 			}
 		}

@@ -119,7 +119,7 @@ module.exports = {
 		const reason = this.evalMessage(data.reason, cache);
 		if(Array.isArray(member)) {
 			this.callListFunc(member.map((m) => m.roles), "remove", [role, reason]).then(() => this.callNextAction(cache));
-		} else if(this.dest(member, "roles", "cache")) {
+		} else if(member?.roles) {
 			member.roles.remove(role, reason)
 				.then(() => this.callNextAction(cache))
 				.catch(this.displayError.bind(this, data, cache));
