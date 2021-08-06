@@ -29,6 +29,25 @@ Bot.$evts = {}; // Events
 
 Bot.bot = null;
 
+Bot.PRIVILEGED_INTENTS = GUILD_MEMBERS | GUILD_PRESENCES;
+
+Bot.INTENTS_NON_PRIVILEGED_INTENTS =
+	GUILDS |
+	GUILD_BANS |
+	GUILD_EMOJIS_AND_STICKERS |
+	GUILD_INTEGRATIONS |
+	GUILD_WEBHOOKS |
+	GUILD_INVITES |
+	GUILD_VOICE_STATES |
+	GUILD_MESSAGES |
+	GUILD_MESSAGE_REACTIONS |
+	GUILD_MESSAGE_TYPING |
+	DIRECT_MESSAGES |
+	DIRECT_MESSAGE_REACTIONS |
+	DIRECT_MESSAGE_TYPING;
+
+Bot.ALL_INTENTS = Bot.PRIVILEGED_INTENTS | Bot.INTENTS_NON_PRIVILEGED_INTENTS;
+
 Bot.init = function() {
 	this.initBot();
 	this.setupBot();
@@ -38,11 +57,11 @@ Bot.init = function() {
 };
 
 Bot.initBot = function() {
-	this.bot = new DiscordJS.Client({ ws: { intents: this.intents() }});
+	this.bot = new DiscordJS.Client({ intents: this.intents() });
 };
 
 Bot.intents = function() {
-	return DiscordJS.Intents.NON_PRIVILEGED;
+	return this.INTENTS_NON_PRIVILEGED_INTENTS;
 }
 
 Bot.setupBot = function() {
@@ -53,17 +72,17 @@ Bot.onRawData = function(packet) {
 	if(packet.t !== "MESSAGE_REACTION_ADD" || packet.t !== "MESSAGE_REACTION_REMOVE") return;
 
 	const client = Bot.bot;
-	const channel = client.channels.cache.get(packet.d.channel_id);
+	const channel = client.channels.resolve(packet.d.channel_id);
 	if(channel.messages.cache.has(packet.d.message_id)) return;
 
 	channel.messages.fetch(packet.d.message_id).then(function(message) {
 		const emoji = packet.d.emoji.id ? `${packet.d.emoji.name}:${packet.d.emoji.id}` : packet.d.emoji.name;
-		const reaction = message.reactions.cache.get(emoji);
+		const reaction = message.reactions.resolve(emoji);
 		if (packet.t === "MESSAGE_REACTION_ADD") {
-			client.emit("messageReactionAdd", reaction, client.users.cache.get(packet.d.user_id));
+			client.emit("messageReactionAdd", reaction, client.users.resolve(packet.d.user_id));
 		}
 		if (packet.t === "MESSAGE_REACTION_REMOVE") {
-			client.emit("messageReactionRemove", reaction, client.users.cache.get(packet.d.user_id));
+			client.emit("messageReactionRemove", reaction, client.users.resolve(packet.d.user_id));
 		}
 	});
 };
@@ -129,7 +148,7 @@ Bot.reformatEvents = function() {
 
 Bot.initEvents = function() {
 	this.bot.on("ready", this.onReady.bind(this));
-	this.bot.on("message", this.onMessage.bind(this));
+	this.bot.on("messageCreate", this.onMessage.bind(this));
 	Events.registerEvents(this.bot);
 };
 
@@ -138,7 +157,7 @@ Bot.login = function() {
 };
 
 Bot.onReady = function() {
-	if(process.send) process.send("BotReady");
+	process.send?.("BotReady");
 	console.log("Bot is ready!"); // Tells editor to start!
 	this.restoreVariables();
 	this.preformInitialization();
@@ -160,30 +179,28 @@ Bot.preformInitialization = function() {
 };
 
 Bot.onMessage = function(msg) {
-	if(!msg.author.bot) {
-		try {
-			if(!this.checkCommand(msg)) {
-				this.onAnyMessage(msg);
-			}
-		} catch(e) {
-			console.error(e);
+	if(msg.author.bot) return;
+
+	try {
+		if(!this.checkCommand(msg)) {
+			this.onAnyMessage(msg);
 		}
+	} catch(e) {
+		console.error(e);
 	}
 };
 
 Bot.checkCommand = function(msg) {
 	let command = this.checkTag(msg.content);
-	if(command) {
-		if(!this._caseSensitive) {
-			command = command.toLowerCase();
-		}
-		const cmd = this.$cmds[command];
-		if(cmd) {
-			Actions.preformActions(msg, cmd);
-			return true;
-		}
+	if (!command) return false;
+	if(!this._caseSensitive) {
+		command = command.toLowerCase();
 	}
-	return false;
+	const cmd = this.$cmds[command];
+	if(cmd) {
+		Actions.preformActions(msg, cmd);
+		return true;
+	}
 };
 
 Bot.checkTag = function(content) {
@@ -297,7 +314,7 @@ Actions.callListFunc = function(list, funcName, args) {
 				return;
 			}
 			const item = list[curr++];
-			if(typeof(Actions.dest(item, funcName)) === "function") {
+			if(typeof item?.funcName === "function") {
 				item[funcName].apply(item, args).then(callItem).catch(callItem);
 			} else {
 				callItem();
@@ -327,14 +344,14 @@ Actions.eval = function(content, cache) {
 	const server = cache.server;
 	const client = DBM.Bot.bot;
 	const bot = DBM.Bot.bot;
-	const me = server ? server.me : null;
+	const me = server?.me ?? null;
 	let user = "", member = "", mentionedUser = "", mentionedChannel = "", defaultChannel = "";
 	if(msg) {
 		user = msg.author;
 		member = msg.member;
 		if(msg.mentions) {
-			mentionedUser = msg.mentions.users.first() || "";
-			mentionedChannel = msg.mentions.channels.first() || "";
+			mentionedUser = msg.mentions.users.first() ?? "";
+			mentionedChannel = msg.mentions.channels.first() ?? "";
 		}
 	}
 	if(server) {
@@ -398,15 +415,11 @@ Actions.checkConditions = function(msg, cmd) {
 	const permissions = cmd.permissions;
 	switch(restriction) {
 		case 0:
-			if(isServer) {
-				return this.checkPermissions(msg, permissions);
-			} else {
-				return true;
-			}
+			return isServer ? this.checkPermissions(msg, permissions) : true;
 		case 1:
 			return isServer && this.checkPermissions(msg, permissions);
 		case 2:
-			return isServer && msg.guild.ownerID === msg.member.id;
+			return isServer && msg.guild.ownerId === msg.member.id;
 		case 3:
 			return !isServer;
 		case 4:
@@ -483,7 +496,7 @@ Actions.checkPermissions = function(msg, permissions) {
 	const author = msg.member;
 	if(!author) return false;
 	if(permissions === "NONE") return true;
-	if(msg.guild.ownerID === author.id) return true;
+	if(msg.guild.ownerId === author.id) return true;
 	return author.permissions.has([permissions]);
 };
 
@@ -555,14 +568,14 @@ Actions.callNextAction = function(cache) {
 };
 
 Actions.getErrorString = function(data, cache) {
-	const type = (data.permissions || data.restriction || !data["event-type"]) ? "command" : "event";
+	const type = ('permissions' in data || 'restriction' in data || !("event-type" in data)) ? "command" : "event";
 	return `Error with the ${type} "${data.name}", Action #${cache.index + 1}`;
 };
 
 Actions.displayError = function(data, cache, err) {
 	const dbm = this.getErrorString(data, cache);
 	console.error(dbm + ":\n" + err);
-	Events.onError(dbm, err.stack ? err.stack : err, cache);
+	Events.onError(dbm, err.stack ?? err, cache);
 };
 
 Actions.getSendTarget = function(type, varName, cache) {
@@ -580,12 +593,12 @@ Actions.getSendTarget = function(type, varName, cache) {
 			}
 			break;
 		case 2:
-			if(msg && msg.mentions) {
+			if(msg?.mentions?.users.size) {
 				return msg.mentions.users.first();
 			}
 			break;
 		case 3:
-			if(msg && msg.mentions) {
+			if(msg?.mentions?.channels.size) {
 				return msg.mentions.channels.first();
 			}
 			break;
@@ -614,13 +627,13 @@ Actions.getMember = function(type, varName, cache) {
 	const server = cache.server;
 	switch(type) {
 		case 0:
-			if(msg && msg.mentions && msg.mentions.members) {
+			if(msg?.mentions?.members.size) {
 				return msg.mentions.members.first();
 			}
 			break;
 		case 1:
 			if(msg) {
-				return msg.member || msg.author;
+				return msg.member ?? msg.author;
 			}
 			break;
 		case 2:
@@ -690,17 +703,17 @@ Actions.getRole = function(type, varName, cache) {
 	const server = cache.server;
 	switch(type) {
 		case 0:
-			if(msg && msg.mentions && msg.mentions.roles) {
+			if(msg?.mentions?.roles.size) {
 				return msg.mentions.roles.first();
 			}
 			break;
 		case 1:
-			if(msg && msg.member && msg.member.roles) {
+			if(msg?.member?.roles.cache.size) {
 				return msg.member.roles.cache.first();
 			}
 			break;
 		case 2:
-			if(server && server.roles) {
+			if(server?.roles.cache.size) {
 				return server.roles.cache.first();
 			}
 			break;
@@ -729,7 +742,7 @@ Actions.getChannel = function(type, varName, cache) {
 			}
 			break;
 		case 1:
-			if(msg && msg.mentions) {
+			if(msg?.mentions.channels.size) {
 				return msg.mentions.channels.first();
 			}
 			break;
@@ -759,15 +772,15 @@ Actions.getVoiceChannel = function(type, varName, cache) {
 
 	switch(type) {
 		case 0:
-			if(msg && msg.member) {
-				return msg.member.voice && msg.member.voice.channel;
+			if(msg?.member) {
+				return msg.member.voice.channel;
 			}
 			break;
 		case 1:
-			if(msg && msg.mentions) {
+			if(msg?.mentions.members.size) {
 				const member = msg.mentions.members.first();
 				if(member) {
-					return msg.member.voice && msg.member.voice.channel;
+					return member.voice.channel;
 				}
 			}
 			break;
@@ -797,34 +810,34 @@ Actions.getList = function(type, varName, cache) {
 	switch(type) {
 		case 0:
 			if(server) {
-				return server.members.cache.array();
+				return [...server.members.cache.values()];
 			}
 			break;
 		case 1:
 			if(server) {
-				return server.channels.cache.array();
+				return [...server.channels.cache.values()];
 			}
 			break;
 		case 2:
 			if(server) {
-				return server.roles.cache.array();
+				return [...server.roles.cache.values()];
 			}
 			break;
 		case 3:
 			if(server) {
-				return server.emojis.cache.array();
+				return [...server.emojis.cache.values()];
 			}
 			break;
 		case 4:
-			return Bot.bot.guilds.cache.array();
+			return [...Bot.bot.guilds.cache.values()];
 		case 5:
-			if(msg && msg.mentions && msg.mentions.members) {
-				return msg.mentions.members.first().roles.cache.array();
+			if(msg?.mentions.members.size) {
+				return [...msg.mentions.members.first().roles.cache.values()];
 			}
 			break;
 		case 6:
-			if(msg && msg.member) {
-				return msg.member.roles.cache.array();
+			if(msg?.member) {
+				return [...msg.member.roles.cache.values()];
 			}
 			break;
 		case 7:
@@ -868,7 +881,7 @@ Actions.storeValue = function(value, type, varName, cache) {
 			break;
 		case 2:
 			if(server) {
-				if(!this.server[server.id]) this.server[server.id] = {};
+				this.server[server.id] ??= {};
 				this.server[server.id][varName] = value;
 			}
 			break;
@@ -934,18 +947,6 @@ Actions.executeResults = function(result, data, cache) {
 	}
 };
 
-Actions.dest = function(obj, ...props) {
-	if (typeof obj !== "object") return obj;
-
-	let main = obj;
-	for (const prop of props) {
-		if (!main || !prop) return main;
-		main = main[prop];
-	}
-
-	return main;
-};
-
 //---------------------------------------------------------------------
 // Events
 // Handles the various events that occur.
@@ -956,7 +957,7 @@ const Events = DBM.Events = {};
 let $evts = null;
 
 Events.data = [
-	[], [], [], [], ["guildCreate", 0, 0, 1], ["guildDelete", 0, 0, 1], ["guildMemberAdd", 1, 0, 2], ["guildMemberRemove", 1, 0, 2], ["channelCreate", 1, 0, 2, true, "arg1.type !== 'text'"], ["channelDelete", 1, 0, 2, true, "arg1.type !== 'text'"], ["roleCreate", 1, 0, 2], ["roleDelete", 1, 0, 2], ["guildBanAdd", 3, 0, 1], ["guildBanRemove", 3, 0, 1], ["channelCreate", 1, 0, 2, true, "arg1.type !== 'voice'"], ["channelDelete", 1, 0, 2, true, "arg1.type !== 'voice'"], ["emojiCreate", 1, 0, 2], ["emojiDelete", 1, 0, 2], ["messageDelete", 1, 0, 2, true], ["guildUpdate", 1, 3, 3], ["guildMemberUpdate", 1, 3, 4], ["presenceUpdate", 1, 3, 4], ["voiceStateUpdate", 1, 3, 4], ["channelUpdate", 1, 3, 4, true], ["channelPinsUpdate", 1, 0, 2, true], ["roleUpdate", 1, 3, 4], ["messageUpdate", 1, 3, 4, true, "arg2.content.length === 0"], ["emojiUpdate", 1, 3, 4], [], [], ["messageReactionRemoveAll", 1, 0, 2, true], ["guildMemberAvailable", 1, 0, 2], ["guildMembersChunk", 1, 0, 3], ["guildMemberSpeaking", 1, 3, 2], [], [], ["guildUnavailable", 1, 0, 1], ["inviteCreate", 1, 0, 2], ["inviteDelete", 1, 0, 2], ["webhookUpdate", 1, 0, 1]
+	[], [], [], [], ["guildCreate", 0, 0, 1], ["guildDelete", 0, 0, 1], ["guildMemberAdd", 1, 0, 2], ["guildMemberRemove", 1, 0, 2], ["channelCreate", 1, 0, 2, true, "arg1.type !== 'GUILD_TEXT'"], ["channelDelete", 1, 0, 2, true, "arg1.type !== 'GUILD_TEXT'"], ["roleCreate", 1, 0, 2], ["roleDelete", 1, 0, 2], ["guildBanAdd", 3, 0, 1], ["guildBanRemove", 3, 0, 1], ["channelCreate", 1, 0, 2, true, "arg1.type !== 'GUILD_VOICE'"], ["channelDelete", 1, 0, 2, true, "arg1.type !== 'GUILD_VOICE'"], ["emojiCreate", 1, 0, 2], ["emojiDelete", 1, 0, 2], ["messageDelete", 1, 0, 2, true], ["guildUpdate", 1, 3, 3], ["guildMemberUpdate", 1, 3, 4], ["presenceUpdate", 1, 3, 4], ["voiceStateUpdate", 1, 3, 4], ["channelUpdate", 1, 3, 4, true], ["channelPinsUpdate", 1, 0, 2, true], ["roleUpdate", 1, 3, 4], ["messageUpdate", 1, 3, 4, true, "!arg2.content"], ["emojiUpdate", 1, 3, 4], [], [], ["messageReactionRemoveAll", 1, 0, 2, true], ["guildMemberAvailable", 1, 0, 2], ["guildMembersChunk", 1, 0, 3], ["guildMemberSpeaking", 1, 3, 2], [], [], ["guildUnavailable", 1, 0, 1], ["inviteCreate", 1, 0, 2], ["inviteDelete", 1, 0, 2], ["webhookUpdate", 1, 0, 1]
 ];
 
 Events.registerEvents = function(bot) {
@@ -970,14 +971,10 @@ Events.registerEvents = function(bot) {
 	if($evts["28"]) bot.on("messageReactionAdd", this.onReaction.bind(this, "28"));
 	if($evts["29"]) bot.on("messageReactionRemove", this.onReaction.bind(this, "29"));
 	if($evts["34"]) bot.on("typingStart", this.onTyping.bind(this, "34"));
-	if($evts["35"]) bot.on("typingStop", this.onTyping.bind(this, "35"));
 };
 
 Events.callEvents = function(id, temp1, temp2, server, mustServe, condition, arg1, arg2) {
-	if(mustServe) {
-		if(temp1 > 0 && !arg1.guild) return;
-		if(temp2 > 0 && !arg2.guild) return;
-	}
+	if(mustServe && ((temp1 > 0 && !arg1.guild) || (temp2 > 0 && !arg2.guild))) return;
 	if(condition && eval(condition)) return;
 	const events = $evts[id];
 	if(!events) return;
@@ -997,20 +994,14 @@ Events.getObject = function(id, arg1, arg2) {
 		case 3: return arg2;
 		case 4: return arg2.guild;
 	}
-	return undefined;
 };
 
 Events.onInitialization = function(bot) {
 	const events = $evts["1"];
 	for(let i = 0; i < events.length; i++) {
 		const event = events[i];
-		const temp = {};
-		const servers = bot.guilds.cache.array();
-		for(let i = 0; i < servers.length; i++) {
-			const server = servers[i];
-			if(server) {
-				Actions.invokeEvent(event, server, temp);
-			}
+		for(const server of bot.guilds.cache.values()) {
+			Actions.invokeEvent(event, server, {});
 		}
 	}
 };
@@ -1019,26 +1010,20 @@ Events.setupIntervals = function(bot) {
 	const events = $evts["3"];
 	for(let i = 0; i < events.length; i++) {
 		const event = events[i];
-		const temp = {};
 		const time = event.temp ? parseFloat(event.temp) : 60;
-		bot.setInterval(function() {
-			const servers = bot.guilds.cache.array();
-			for(let i = 0; i < servers.length; i++) {
-				const server = servers[i];
-				if(server) {
-					Actions.invokeEvent(event, server, temp);
-				}
+		setInterval(function() {
+			for(const server of bot.guilds.cache.values()) {
+				Actions.invokeEvent(event, server, {});
 			}
-		}.bind(this), time * 1000);
+		}.bind(this), time * 1e3).unref();
 	}
 };
 
 Events.onReaction = function(id, reaction, user) {
 	const events = $evts[id];
 	if(!events) return;
-	if(!reaction.message || !reaction.message.guild) return;
-	const server = reaction.message.guild;
-	const member = server.member(user);
+	const server = reaction.message?.guild;
+	const member = server?.members.resolve(user);
 	if(!member) return;
 	for(let i = 0; i < events.length; i++) {
 		const event = events[i];
@@ -1052,9 +1037,8 @@ Events.onReaction = function(id, reaction, user) {
 Events.onTyping = function(id, channel, user) {
 	const events = $evts[id];
 	if(!events) return;
-	if(!channel.guild) return;
 	const server = channel.guild;
-	const member = server.member(user);
+	const member = server?.members.resolve(user);
 	if(!member) return;
 	for(let i = 0; i < events.length; i++) {
 		const event = events[i];
@@ -1201,7 +1185,7 @@ Files.saveData = function(file, callback) {
 Files.initEncryption = function() {
 	try {
 		this.password = require("discord-bot-maker");
-	} catch(e) {
+	} catch {
 		this.password = "";
 	}
 };
@@ -1245,9 +1229,7 @@ Files.convertItem = function(item) {
 };
 
 Files.saveServerVariable = function(serverID, varName, item) {
-	if(!this.data.serverVars[serverID]) {
-		this.data.serverVars[serverID] = {};
-	}
+	this.data.serverVars[serverID] ??= {};
 	const strItem = this.convertItem(item);
 	if(strItem !== null) {
 		this.data.serverVars[serverID][varName] = strItem;
@@ -1345,9 +1327,8 @@ Files.restoreMember = function(value, bot) {
 	const memId = split[0].slice(4);
 	const serverId = split[1].slice(2);
 	const server = bot.guilds.get(serverId);
-	if(server && server.members && server.members.cache) {
-		const member = server.members.cache.get(memId);
-		return member;
+	if(server) {
+		return server.members.resolve(memId);
 	}
 };
 
@@ -1355,45 +1336,45 @@ Files.restoreMessage = function(value, bot) {
 	const split = value.split("_");
 	const msgId = split[0].slice(4);
 	const channelId = split[1].slice(2);
-	const channel = bot.channels.cache.get(channelId);
-	if(channel && channel.messages && channel.messages.fetch) {
+	const channel = bot.channels.resolve(channelId);
+	if(channel) {
 		return channel.messages.fetch(msgId);
 	}
 };
 
 Files.restoreTextChannel = function(value, bot) {
 	const channelId = value.slice(3);
-	return bot.channels.cache.get(channelId);
+	return bot.channels.resolve(channelId);
 };
 
 Files.restoreVoiceChannel = function(value, bot) {
 	const channelId = value.slice(3);
-	return bot.channels.cache.get(channelId);
+	return bot.channels.resolve(channelId);
 };
 
 Files.restoreRole = function(value, bot) {
 	const split = value.split("_");
 	const roleId = split[0].slice(2);
 	const serverId = split[1].slice(2);
-	const server = bot.guilds.cache.get(serverId);
+	const server = bot.guilds.resolve(serverId);
 	if(server && server.roles && server.roles.cache) {
-		return server.roles.cache.get(roleId);
+		return server.roles.resolve(roleId);
 	}
 };
 
 Files.restoreServer = function(value, bot) {
 	const serverId = value.slice(2);
-	return bot.guilds.cache.get(serverId);
+	return bot.guilds.resolve(serverId);
 };
 
 Files.restoreEmoji = function(value, bot) {
 	const emojiId = value.slice(2);
-	return bot.emojis.cache.get(emojiId);
+	return bot.emojis.resolve(emojiId);
 };
 
 Files.restoreUser = function(value, bot) {
 	const userId = value.slice(4);
-	return bot.users.cache.get(userId);
+	return bot.users.resolve(userId);
 };
 
 Files.initEncryption();
@@ -1534,18 +1515,14 @@ Audio.playYt = function(url, options, id) {
 // GuildMember
 //---------------------------------------------------------------------
 
-const { Structures } = DiscordJS;
-
-Structures.extend("GuildMember", (GuildMember) => class extends GuildMember {
-	constructor(client, data, guild) {
-		super(client, data, guild);
+Reflect.defineProperty(DiscordJS.GuildMember.prototype, "unban", {
+	value: function(server, reason) {
+		return server.bans.remove(this.id, reason);
 	}
+});
 
-	unban(server, reason) {
-		return server.members.unban(this.author, reason);
-	}
-
-	data(name, defaultValue) {
+Reflect.defineProperty(DiscordJS.GuildMember.prototype, "data", {
+	value: function(name, defaultValue) {
 		const id = this.id;
 		const data = Files.data.players;
 		if(data[id] === undefined) {
@@ -1560,8 +1537,10 @@ Structures.extend("GuildMember", (GuildMember) => class extends GuildMember {
 		}
 		return data[id][name];
 	}
+});
 
-	setData(name, value) {
+Reflect.defineProperty(DiscordJS.GuildMember.prototype, "setData", {
+	value: function(name, value) {
 		const id = this.id;
 		const data = Files.data.players;
 		if(data[id] === undefined) {
@@ -1570,8 +1549,10 @@ Structures.extend("GuildMember", (GuildMember) => class extends GuildMember {
 		data[id][name] = value;
 		Files.saveData("players");
 	}
+});
 
-	addData(name, value) {
+Reflect.defineProperty(DiscordJS.GuildMember.prototype, "addData", {
+	value: function(name, value) {
 		const id = this.id;
 		const data = Files.data.players;
 		if(data[id] === undefined) {
@@ -1583,8 +1564,10 @@ Structures.extend("GuildMember", (GuildMember) => class extends GuildMember {
 			this.setData(name, this.data(name) + value);
 		}
 	}
+});
 
-	convertToString() {
+Reflect.defineProperty(DiscordJS.GuildMember.prototype, "convertToString", {
+	value: function() {
 		return `mem-${this.id}_s-${this.guild.id}`;
 	}
 });
@@ -1593,12 +1576,8 @@ Structures.extend("GuildMember", (GuildMember) => class extends GuildMember {
 // User
 //---------------------------------------------------------------------
 
-Structures.extend("User", (User) => class extends User {
-	constructor(client, data) {
-		super(client, data);
-	}
-
-	data(name, defaultValue) {
+Reflect.defineProperty(DiscordJS.User.prototype, "data", {
+	value: function(name, defaultValue) {
 		const id = this.id;
 		const data = Files.data.players;
 		if(data[id] === undefined) {
@@ -1613,8 +1592,10 @@ Structures.extend("User", (User) => class extends User {
 		}
 		return data[id][name];
 	}
+});
 
-	setData(name, value) {
+Reflect.defineProperty(DiscordJS.User.prototype, "setData", {
+	value: function(name, value) {
 		const id = this.id;
 		const data = Files.data.players;
 		if(data[id] === undefined) {
@@ -1623,8 +1604,10 @@ Structures.extend("User", (User) => class extends User {
 		data[id][name] = value;
 		Files.saveData("players");
 	}
+});
 
-	addData(name, value) {
+Reflect.defineProperty(DiscordJS.User.prototype, "addData", {
+	value: function(name, value) {
 		const id = this.id;
 		const data = Files.data.players;
 		if(data[id] === undefined) {
@@ -1636,8 +1619,10 @@ Structures.extend("User", (User) => class extends User {
 			this.setData(name, this.data(name) + value);
 		}
 	}
+});
 
-	convertToString() {
+Reflect.defineProperty(DiscordJS.User.prototype, "convertToString", {
+	value: function() {
 		return `usr-${this.id}`;
 	}
 });
@@ -1646,19 +1631,13 @@ Structures.extend("User", (User) => class extends User {
 // Guild
 //---------------------------------------------------------------------
 
-Structures.extend("Guild", (Guild) => class extends Guild {
-	constructor(client, data) {
-		super(client, data);
-	}
-
-	getDefaultChannel() {
-		let channel = this.channels.cache.get(this.id);
+Reflect.defineProperty(DiscordJS.User.prototype, "getDefaultChannel", {
+	value: function() {
+		let channel = this.channels.resolve(this.id);
 		if(!channel) {
-			this.channels.cache.array().forEach(function(c) {
-				if(c.permissionsFor(DBM.Bot.bot.user).has("SEND_MESSAGES") && c.type !== "voice" && c.type !== "category") {
-					if(!channel) {
-						channel = c;
-					} else if(channel.position > c.position) {
+			[...this.channels.cache.values()].forEach((c) => {
+				if(c.permissionsFor(DBM.Bot.bot.user)?.has(DiscordJS.Permissions.FLAGS.SEND_MESSAGES) && c.type === "GUILD_TEXT" && c.type === "GUILD_NEWS") {
+					if(!channel || channel.position > c.position) {
 						channel = c;
 					}
 				}
@@ -1666,8 +1645,10 @@ Structures.extend("Guild", (Guild) => class extends Guild {
 		}
 		return channel;
 	}
+});
 
-	data(name, defaultValue) {
+Reflect.defineProperty(DiscordJS.User.prototype, "data", {
+	value: function(name, defaultValue) {
 		const id = this.id;
 		const data = Files.data.servers;
 		if(data[id] === undefined) {
@@ -1682,8 +1663,10 @@ Structures.extend("Guild", (Guild) => class extends Guild {
 		}
 		return data[id][name];
 	}
+});
 
-	setData(name, value) {
+Reflect.defineProperty(DiscordJS.User.prototype, "setData", {
+	value: function(name, value) {
 		const id = this.id;
 		const data = Files.data.servers;
 		if(data[id] === undefined) {
@@ -1692,8 +1675,10 @@ Structures.extend("Guild", (Guild) => class extends Guild {
 		data[id][name] = value;
 		Files.saveData("servers");
 	}
+});
 
-	addData(name, value) {
+Reflect.defineProperty(DiscordJS.User.prototype, "addData", {
+	value: function(name, value) {
 		const id = this.id;
 		const data = Files.data.servers;
 		if(data[id] === undefined) {
@@ -1705,8 +1690,10 @@ Structures.extend("Guild", (Guild) => class extends Guild {
 			this.setData(name, this.data(name) + value);
 		}
 	}
+});
 
-	convertToString() {
+Reflect.defineProperty(DiscordJS.User.prototype, "convertToString", {
+	value: function() {
 		return `s-${this.id}`;
 	}
 });
@@ -1715,12 +1702,8 @@ Structures.extend("Guild", (Guild) => class extends Guild {
 // Message
 //---------------------------------------------------------------------
 
-Structures.extend("Message", (Message) => class extends Message {
-	constructor(client, data, channel) {
-		super(client, data, channel);
-	}
-
-	convertToString() {
+Reflect.defineProperty(DiscordJS.Message.prototype, "convertToString", {
+	value: function() {
 		return `msg-${this.id}_c-${this.channel.id}`;
 	}
 });
@@ -1729,19 +1712,17 @@ Structures.extend("Message", (Message) => class extends Message {
 // TextChannel
 //---------------------------------------------------------------------
 
-Structures.extend("TextChannel", (TextChannel) => class extends TextChannel {
-	constructor(guild, data) {
-		super(guild, data);
+Reflect.defineProperty(DiscordJS.TextChannel.prototype, "convertToString", {
+	value: function() {
+		return `tc-${this.id}`;
 	}
+});
 
-	overwritePerms(memberOrRole, permissions, reason) {
+Reflect.defineProperty(DiscordJS.TextChannel.prototype, "overwritePerms", {
+	value: function(memberOrRole, permissions, reason) {
 		const overwrites = this.permissionOverwrites.get(memberOrRole.id);
 		if (overwrites) return overwrites.update(permissions, reason);
-		return this.createOverwrite(memberOrRole, permissions, reason);
-	}
-
-	convertToString() {
-		return `tc-${this.id}`;
+		return this.permissionOverwrites.create(memberOrRole, permissions, reason);
 	}
 });
 
@@ -1749,19 +1730,17 @@ Structures.extend("TextChannel", (TextChannel) => class extends TextChannel {
 // VoiceChannel
 //---------------------------------------------------------------------
 
-Structures.extend("VoiceChannel", (VoiceChannel) => class extends VoiceChannel {
-	constructor(guild, data) {
-		super(guild, data);
+Reflect.defineProperty(DiscordJS.VoiceChannel.prototype, "convertToString", {
+	value: function() {
+		return `vc-${this.id}`;
 	}
+});
 
-	overwritePerms(memberOrRole, permissions, reason) {
+Reflect.defineProperty(DiscordJS.VoiceChannel.prototype, "overwritePerms", {
+	value: function(memberOrRole, permissions, reason) {
 		const overwrites = this.permissionOverwrites.get(memberOrRole.id);
 		if (overwrites) return overwrites.update(permissions, reason);
-		return this.createOverwrite(memberOrRole, permissions, reason);
-	}
-
-	convertToString() {
-		return `vc-${this.id}`;
+		return this.permissionOverwrites.create(memberOrRole, permissions, reason);
 	}
 });
 
@@ -1769,15 +1748,11 @@ Structures.extend("VoiceChannel", (VoiceChannel) => class extends VoiceChannel {
 // CategoryChannel
 //---------------------------------------------------------------------
 
-Structures.extend("CategoryChannel", (CategoryChannel) => class extends CategoryChannel {
-	constructor(guild, data) {
-		super(guild, data);
-	}
-
-	overwritePerms(memberOrRole, permissions, reason) {
+Reflect.defineProperty(DiscordJS.CategoryChannel.prototype, "overwritePerms", {
+	value: function(memberOrRole, permissions, reason) {
 		const overwrites = this.permissionOverwrites.get(memberOrRole.id);
 		if (overwrites) return overwrites.update(permissions, reason);
-		return this.createOverwrite(memberOrRole, permissions, reason);
+		return this.permissionOverwrites.create(memberOrRole, permissions, reason);
 	}
 });
 
@@ -1785,15 +1760,11 @@ Structures.extend("CategoryChannel", (CategoryChannel) => class extends Category
 // NewsChannel
 //---------------------------------------------------------------------
 
-Structures.extend("NewsChannel", (NewsChannel) => class extends NewsChannel {
-	constructor(guild, data) {
-		super(guild, data);
-	}
-
-	overwritePerms(memberOrRole, permissions, reason) {
+Reflect.defineProperty(DiscordJS.NewsChannel.prototype, "overwritePerms", {
+	value: function(memberOrRole, permissions, reason) {
 		const overwrites = this.permissionOverwrites.get(memberOrRole.id);
 		if (overwrites) return overwrites.update(permissions, reason);
-		return this.createOverwrite(memberOrRole, permissions, reason);
+		return this.permissionOverwrites.create(memberOrRole, permissions, reason);
 	}
 });
 
@@ -1801,15 +1772,11 @@ Structures.extend("NewsChannel", (NewsChannel) => class extends NewsChannel {
 // StoreChannel
 //---------------------------------------------------------------------
 
-Structures.extend("StoreChannel", (StoreChannel) => class extends StoreChannel {
-	constructor(guild, data) {
-		super(guild, data);
-	}
-
-	overwritePerms(memberOrRole, permissions, reason) {
+Reflect.defineProperty(DiscordJS.NewsChannel.prototype, "overwritePerms", {
+	value: function(memberOrRole, permissions, reason) {
 		const overwrites = this.permissionOverwrites.get(memberOrRole.id);
 		if (overwrites) return overwrites.update(permissions, reason);
-		return this.createOverwrite(memberOrRole, permissions, reason);
+		return this.permissionOverwrites.create(memberOrRole, permissions, reason);
 	}
 });
 
@@ -1817,12 +1784,8 @@ Structures.extend("StoreChannel", (StoreChannel) => class extends StoreChannel {
 // Role
 //---------------------------------------------------------------------
 
-Structures.extend("Role", (Role) => class extends Role {
-	constructor(client, data, guild) {
-		super(client, data, guild);
-	}
-
-	convertToString() {
+Reflect.defineProperty(DiscordJS.Role.prototype, "convertToString", {
+	value: function() {
 		return `r-${this.id}_s-${this.guild.id}`;
 	}
 });
@@ -1831,12 +1794,8 @@ Structures.extend("Role", (Role) => class extends Role {
 // Emoji
 //---------------------------------------------------------------------
 
-Structures.extend("GuildEmoji", (GuildEmoji) => class extends GuildEmoji {
-	constructor(client, data, guild) {
-		super(client, data, guild);
-	}
-
-	convertToString() {
+Reflect.defineProperty(DiscordJS.GuildEmoji.prototype, "convertToString", {
+	value: function() {
 		return `e-${this.id}`;
 	}
 });

@@ -4,7 +4,9 @@
   "main": "bot.js",
   "version": "1.6.10",
   "dependencies": {
-    "discord.js": "^12.2.0",
+    "@discordjs/opus": "^0.5.3",
+    "@discordjs/voice": "^0.5.5",
+    "discord.js": "^12.5.3",
     "fstorm": "latest",
     "jimp": "latest",
     "libsodium-wrappers": "latest",

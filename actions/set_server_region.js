@@ -39,7 +39,7 @@ module.exports = {
 	// Command HTML
 	//
 	// This function returns a string containing the HTML used for
-	// editting actions.
+	// editing actions.
 	//
 	// The "isEvent" parameter will be true if this action is being used
 	// for an event. Due to their nature, events lack certain information,
@@ -109,7 +109,7 @@ module.exports = {
 	//
 	// This is the function for the action within the Bot's Action class.
 	// Keep in mind event calls won't have access to the "msg" parameter,
-	// so be sure to provide checks for variable existance.
+	// so be sure to provide checks for variable existence.
 	//---------------------------------------------------------------------
 
 	action: function(cache) {
@@ -134,9 +134,9 @@ module.exports = {
 	//
 	// Upon initialization of the bot, this code is run. Using the bot's
 	// DBM namespace, one can add/modify existing functions if necessary.
-	// In order to reduce conflictions between mods, be sure to alias
+	// In order to reduce conflicts between mods, be sure to alias
 	// functions you wish to overwrite.
 	//---------------------------------------------------------------------
 
 	mod: function() {}
-}; // End of module
+};
