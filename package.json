@@ -6,7 +6,7 @@
   "dependencies": {
     "@discordjs/opus": "^0.5.3",
     "@discordjs/voice": "^0.5.5",
-    "discord.js": "^12.5.3",
+    "discord.js": "^13.0.1",
     "fstorm": "latest",
     "jimp": "latest",
     "libsodium-wrappers": "latest",
