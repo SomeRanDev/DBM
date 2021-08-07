@@ -23,7 +23,7 @@ module.exports = {
 
 	subtitle: function(data) {
 		const channels = ["Command Author's Voice Ch.", "Mentioned User's Voice Ch.", "Default Voice Channel", "Temp Variable", "Server Variable", "Global Variable"];
-		const info = ["Voice Channel Object", "Voice Channel ID", "Voice Channel Name", "Voice Channel Position", "Voice Channel User Limit", "Voice Channel Bitrate"];
+		const info = ["Voice Channel Object", "Voice Channel Id", "Voice Channel Name", "Voice Channel Position", "Voice Channel User Limit", "Voice Channel Bitrate"];
 		return `${channels[parseInt(data.channel)]} - ${info[parseInt(data.info)]}`;
 	},
 
@@ -43,7 +43,7 @@ module.exports = {
 				dataType = "Voice Channel";
 				break;
 			case 1:
-				dataType = "Voice Channel ID";
+				dataType = "Voice Channel Id";
 				break;
 			case 2:
 				dataType = "Text";
@@ -61,7 +61,7 @@ module.exports = {
 	// Action Fields
 	//
 	// These are the fields for the action. These fields are customized
-	// by creating elements with corresponding IDs in the HTML. These
+	// by creating elements with corresponding Ids in the HTML. These
 	// are also the names of the fields stored in the action's JSON data.
 	//---------------------------------------------------------------------
 
@@ -102,7 +102,7 @@ module.exports = {
 		Source Info:<br>
 		<select id="info" class="round">
 			<option value="0" selected>Voice Channel Object</option>
-			<option value="1">Voice Channel ID</option>
+			<option value="1">Voice Channel Id</option>
 			<option value="2">Voice Channel Name</option>
 			<option value="3">Voice Channel Position</option>
 			<option value="4">Voice Channel User Limit</option>

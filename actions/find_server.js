@@ -22,7 +22,7 @@ module.exports = {
 	//---------------------------------------------------------------------
 
 	subtitle: function(data) {
-		const info = ["Server ID", "Server Name", "Server Name Acronym", "Server Member Count", "Server Region", "Server Owner ID", "Server Verification Level", "Server Is Available"];
+		const info = ["Server Id", "Server Name", "Server Name Acronym", "Server Member Count", "Server Region (Removed)", "Server Owner Id", "Server Verification Level", "Server Is Available"];
 		return `Find Server by ${info[parseInt(data.info)]}`;
 	},
 
@@ -42,7 +42,7 @@ module.exports = {
 	// Action Fields
 	//
 	// These are the fields for the action. These fields are customized
-	// by creating elements with corresponding IDs in the HTML. These
+	// by creating elements with corresponding Ids in the HTML. These
 	// are also the names of the fields stored in the action's JSON data.
 	//---------------------------------------------------------------------
 
@@ -70,12 +70,12 @@ module.exports = {
 	<div style="float: left; width: 40%;">
 		Source Field:<br>
 		<select id="info" class="round">
-			<option value="0" selected>Server ID</option>
+			<option value="0" selected>Server Id</option>
 			<option value="1">Server Name</option>
 			<option value="2">Server Name Acronym</option>
 			<option value="3">Server Member Count</option>
-			<option value="4">Server Region</option>
-			<option value="5">Server Owner ID</option>
+			<option value="4">Server Region (Removed)</option>
+			<option value="5">Server Owner Id</option>
 			<option value="6">Server Verification Level</option>
 			<option value="7">Server Is Available</option>
 		</select>
@@ -136,9 +136,6 @@ module.exports = {
 				break;
 			case 3:
 				result = servers.find((s) => s.memberCount === parseInt(find));
-				break;
-			case 4:
-				result = servers.find((s) => s.region === find);
 				break;
 			case 5:
 				result = servers.find((s) => s.ownerId === find);

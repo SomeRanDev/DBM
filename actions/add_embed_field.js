@@ -29,7 +29,7 @@ module.exports = {
 	// Action Fields
 	//
 	// These are the fields for the action. These fields are customized
-	// by creating elements with corresponding IDs in the HTML. These
+	// by creating elements with corresponding Ids in the HTML. These
 	// are also the names of the fields stored in the action's JSON data.
 	//---------------------------------------------------------------------
 
@@ -114,7 +114,7 @@ module.exports = {
 		const name = this.evalMessage(data.fieldName, cache);
 		const message = this.evalMessage(data.message, cache);
 		const inline = data.inline === "0";
-		if(embed && embed.addField) {
+		if(embed?.addField) {
 			embed.addField(name, message, inline);
 		}
 		this.callNextAction(cache);

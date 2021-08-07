@@ -41,7 +41,7 @@ module.exports = {
 	// Action Fields
 	//
 	// These are the fields for the action. These fields are customized
-	// by creating elements with corresponding IDs in the HTML. These
+	// by creating elements with corresponding Ids in the HTML. These
 	// are also the names of the fields stored in the action's JSON data.
 	//---------------------------------------------------------------------
 
@@ -67,7 +67,7 @@ module.exports = {
 		return `
 Name:<br>
 <input id="channelName" class="round" type="text"><br>
-Category ID:<br>
+Category Id:<br>
 <input id= "categoryID" class="round" type="text" placeholder="Leave blank for default!" style="width: 95%"><br>
 <div style="float: left; width: 50%;">
 	Topic:<br>

@@ -23,7 +23,7 @@ module.exports = {
 
 	subtitle: function(data) {
 		const servers = ["Current Server", "Temp Variable", "Server Variable", "Global Variable"];
-		const info = ["Server Object", "Server ID", "Server Name", "Server Name Acronym", "Server Region", "Server Icon URL", "Server Verification Level", "Server Default Channel", "Server AFK Channel", "Server System Channel", "Server Default Role", "Server Owner Object", "Server Bot Member", "Server Channels List", "Server Roles List", "Server Members List", "Server Emojis List", "Server Member Count", "Server Created At", "Server AFK Timeout", "Server Available", "Server Large", "Server Joined At", "Server Channels Count", "Server Emojis Count", "Server Embed Enabled", "Server Do Not Disturb Members Count", "Server Online Members Count", "Server Offline Members Count", "Server Idle Members Count", "Server Bot Count", "Server Channels IDs List", "Server Roles IDs List", "Server Members IDs List", "", "Server Human Count", "", "Server Roles Count", "Server Text Channels Count", "Server Voice Channels Count", "Server Verified", "Server Bans List", "Server Invites List", "Server Explicit Content Filter", "Server Boosts Count", "Server Boost Tier", "Server Banner URL", "Server Features List", "Server Owner ID", "Server Vanity URL Code", "Server Widget Channel ID"];
+		const info = ["Server Object", "Server Id", "Server Name", "Server Name Acronym", "Server Region (Removed)", "Server Icon URL", "Server Verification Level", "Server Default Channel", "Server AFK Channel", "Server System Channel", "Server Default Role", "Server Owner Object", "Server Bot Member", "Server Channels List", "Server Roles List", "Server Members List", "Server Emojis List", "Server Member Count", "Server Created At", "Server AFK Timeout", "Server Available", "Server Large", "Server Joined At", "Server Channels Count", "Server Emojis Count", "Server Embed Enabled", "Server Do Not Disturb Members Count", "Server Online Members Count", "Server Offline Members Count", "Server Idle Members Count", "Server Bot Count", "Server Channels Ids List", "Server Roles Ids List", "Server Members Ids List", "", "Server Human Count", "", "Server Roles Count", "Server Text Channels Count", "Server Voice Channels Count", "Server Verified", "Server Bans List", "Server Invites List", "Server Explicit Content Filter", "Server Boosts Count", "Server Boost Tier", "Server Banner URL", "Server Features List", "Server Owner Id", "Server Vanity URL Code", "Server Widget Channel Id"];
 		return `${servers[parseInt(data.server)]} - ${info[parseInt(data.info)]}`;
 	},
 
@@ -43,13 +43,10 @@ module.exports = {
 				dataType = "Server";
 				break;
 			case 1:
-				dataType = "Server ID";
+				dataType = "Server Id";
 				break;
 			case 2:
 			case 3:
-			case 4:
-				dataType = "Text";
-				break;
 			case 5:
 				dataType = "Icon URL";
 				break;
@@ -115,7 +112,7 @@ module.exports = {
 			case 31:
 			case 32:
 			case 33:
-				dataType = "IDs List";
+				dataType = "Ids List";
 				break;
 			case 35:
 				dataType = "Number";
@@ -152,7 +149,7 @@ module.exports = {
 				dataType = "Text";
 				break;
 			case 50:
-				dataType = "Channel ID";
+				dataType = "Channel Id";
 				break;
 		}
 		return ([data.varName2, dataType]);
@@ -162,7 +159,7 @@ module.exports = {
 	// Action Fields
 	//
 	// These are the fields for the action. These fields are customized
-	// by creating elements with corresponding IDs in the HTML. These
+	// by creating elements with corresponding Ids in the HTML. These
 	// are also the names of the fields stored in the action's JSON data.
 	//---------------------------------------------------------------------
 
@@ -203,11 +200,11 @@ module.exports = {
 		Source Info:<br>
 		<select id="info" class="round">
       <option value="0">Server Object</options>
-      <option value="1">Server ID</options>
+      <option value="1">Server Id</options>
       <option value="2">Server Name</options>
       <option value="3">Server Name Acronym</options>
       <option value="17">Server Member Count</options>
-      <option value="4">Server Region</options>
+      <option value="4">Server Region (Removed)</options>
       <option value="5">Server Icon URL</options>
       <option value="6">Server Verification Level</options>
       <option value="7">Server Default Channel</options>
@@ -216,7 +213,7 @@ module.exports = {
       <option value="8">Server AFK Channel</options>
       <option value="19">Server AFK Timeout</options>
       <option value="10">Server Default Role</options>
-      <option value="48">Server Owner ID</options>
+      <option value="48">Server Owner Id</options>
       <option value="11">Server Owner Object</options>
       <option value="12">Server Bot Member</options>
       <option value="18">Server Created At</options>
@@ -226,14 +223,14 @@ module.exports = {
       <option value="40">Server Verified</options>
       <option value="23">Server Channels Count</options>
       <option value="13">Server Channels List</options>
-      <option value="31">Server Channels IDs List</options>
+      <option value="31">Server Channels Ids List</options>
       <option value="37">Server Roles Count</options>
       <option value="14">Server Roles List</options>
-      <option value="32">Server Roles IDs List</options>
+      <option value="32">Server Roles Ids List</options>
       <option value="30">Server Bot Count</options>
       <option value="35">Server Human Count</options>
       <option value="15">Server Members List</options>
-      <option value="33">Server Members IDs List</options>
+      <option value="33">Server Members Ids List</options>
       <option value="16">Server Emojis List</options>
       <option value="24">Server Emojis Count</options>
       <option value="25">Server Embed Enabled</options>
@@ -250,7 +247,7 @@ module.exports = {
       <option value="46">Server Banner URL</options>
       <option value="47">Server Features List</options>
       <option value="49">Server Vanity URL Code</options>
-      <option value="50">Server Widget Channel ID</options>
+      <option value="50">Server Widget Channel Id</options>
 		</select>
 	</div>
 </div><br>
@@ -296,11 +293,10 @@ module.exports = {
 		const varName = this.evalMessage(data.varName, cache);
 		const info = parseInt(data.info);
 		const targetServer = this.getServer(server, varName, cache);
-		if(!targetServer) {
-			this.callNextAction(cache);
-			return;
-		}
-		const fetchMembers = async () => targetServer.memberCount !== targetServer.members.cache.size ? await targetServer.members.fetch() : null;
+		if(!targetServer) return this.callNextAction(cache);
+		const fetchMembers = async () => targetServer.memberCount !== targetServer.members.cache.size
+			? await targetServer.members.fetch()
+			: null;
 		let result;
 		switch(info) {
 			case 0:
@@ -315,8 +311,8 @@ module.exports = {
 			case 3:
 				result = targetServer.nameAcronym;
 				break;
-			case 4:
-				result = targetServer.region;
+			case 4: // Server region
+				result = "unknown";
 				break;
 			case 5:
 				result = targetServer.iconURL({ dynamic: true, format: "png", size: 4096 });
@@ -337,22 +333,22 @@ module.exports = {
 				result = targetServer.roles.resolve(targetServer.id);
 				break;
 			case 11:
-				result = targetServer.owner;
+				result = await targetServer.fetchOwner();
 				break;
 			case 12:
 				result = targetServer.me;
 				break;
 			case 13:
-				result = targetServer.channels.cache.array();
+				result = [...targetServer.channels.cache.values()];
 				break;
 			case 14:
-				result = targetServer.roles.cache.array();
+				result = [...targetServer.roles.cache.values()];
 				break;
 			case 15:
-				result = targetServer.members.cache.array();
+				result = [...targetServer.members.cache.values()];
 				break;
 			case 16:
-				result = targetServer.emojis.cache.array();
+				result = [...targetServer.emojis.cache.values()];
 				break;
 			case 17:
 				result = targetServer.memberCount;
@@ -379,7 +375,7 @@ module.exports = {
 				result = targetServer.emojis.cache.size;
 				break;
 			case 25:
-				result = targetServer.embedEnabled;
+				result = !!targetServer.widgetEnabled;
 				break;
 			case 26:
 				await fetchMembers();

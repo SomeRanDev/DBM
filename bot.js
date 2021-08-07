@@ -1228,11 +1228,11 @@ Files.convertItem = function(item) {
 	return null;
 };
 
-Files.saveServerVariable = function(serverID, varName, item) {
-	this.data.serverVars[serverID] ??= {};
+Files.saveServerVariable = function(serverId, varName, item) {
+	this.data.serverVars[serverId] ??= {};
 	const strItem = this.convertItem(item);
 	if(strItem !== null) {
-		this.data.serverVars[serverID][varName] = strItem;
+		this.data.serverVars[serverId][varName] = strItem;
 	}
 	this.saveData("serverVars");
 };

@@ -20,7 +20,7 @@ module.exports = {
 	//---------------------------------------------------------------------
 	subtitle: function(data) {
 		const message = ["Command Message", "Temp Variable", "Server Variable", "Global Variable"];
-		const info = ["Message Object", "Message ID", "Message Text", "Message Author", "Message Channel", "Message Timestamp", "Message is Pinned", "Message is TTS", "Message Attachments List", "Message Edits", "", "", "Messages Reactions Count", "Mentioned Users List", "Mentioned Users Count", "Message URL", "Message Creation Date", "Message Content Length", "Message Attachments Count", "Message Guild", "Message Type", "Message Webhook ID", "Message Embed Object"];
+		const info = ["Message Object", "Message Id", "Message Text", "Message Author", "Message Channel", "Message Timestamp", "Message is Pinned", "Message is TTS", "Message Attachments List", "Message Edits", "", "", "Messages Reactions Count", "Mentioned Users List", "Mentioned Users Count", "Message URL", "Message Creation Date", "Message Content Length", "Message Attachments Count", "Message Guild", "Message Type", "Message Webhook Id", "Message Embed Object"];
 		return `${message[parseInt(data.message)]} - ${info[parseInt(data.info)]}`;
 	},
 
@@ -39,7 +39,7 @@ module.exports = {
 				dataType = "Message";
 				break;
 			case 1:
-				dataType = "Message ID";
+				dataType = "Message Id";
 				break;
 			case 2:
 				dataType = "Text";
@@ -87,7 +87,7 @@ module.exports = {
 				dataType = "Message Type";
 				break;
 			case 21:
-				dataType = "Webhook ID";
+				dataType = "Webhook Id";
 				break;
 			case 22:
 				dataType = "Embed Message";
@@ -100,7 +100,7 @@ module.exports = {
 	// Action Fields
 	//
 	// These are the fields for the action. These fields are customized
-	// by creating elements with corresponding IDs in the HTML. These
+	// by creating elements with corresponding Ids in the HTML. These
 	// are also the names of the fields stored in the action's JSON data.
 	//---------------------------------------------------------------------
 	fields: ["message", "varName", "info", "storage", "varName2"],
@@ -139,7 +139,7 @@ module.exports = {
 		Source Info:<br>
 		<select id="info" class="round">
 			<option value="0" selected>Message Object</option>
-			<option value="1">Message ID</option>
+			<option value="1">Message Id</option>
 			<option value="2">Message Text</option>
 			<option value="3">Message Author</option>
 			<option value="4">Message Channel</option>
@@ -157,7 +157,7 @@ module.exports = {
 			<option value="18">Message Attachments Count</option>
 			<option value="19">Message Guild</option>
 			<option value="20">Message Type</option>
-			<option value="21">Message Webhook ID</option>
+			<option value="21">Message Webhook Id</option>
 			<option value="22">Message Embed Object</option>
 		</select>
 	</div>
@@ -233,7 +233,7 @@ module.exports = {
 				result = msg.tts;
 				break;
 			case 8:
-				result = msg.attachments.array();
+				result = [...msg.attachments.values()];
 				break;
 			case 9:
 				result = msg.edits;
@@ -242,7 +242,7 @@ module.exports = {
 				result = msg.reactions.cache.size;
 				break;
 			case 13:
-				result = msg.mentions.users.array();
+				result = [...msg.mentions.users.values()];
 				break;
 			case 14:
 				result = msg.mentions.users.size;
@@ -266,7 +266,7 @@ module.exports = {
 				result = msg.type;
 				break;
 			case 21:
-				result = msg.webhookID;
+				result = msg.webhookId;
 				break;
 			case 22:
 				result = msg.embeds[0];

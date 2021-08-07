@@ -38,7 +38,7 @@ module.exports = {
 	// Action Fields
 	//
 	// These are the fields for the action. These fields are customized
-	// by creating elements with corresponding IDs in the HTML. These
+	// by creating elements with corresponding Ids in the HTML. These
 	// are also the names of the fields stored in the action's JSON data.
 	//---------------------------------------------------------------------
 
@@ -125,13 +125,13 @@ module.exports = {
 					value = msg.content.split(/\s+/).length - 1;
 					break;
 				case 1:
-					value = msg.mentions.members.array().length;
+					value = msg.mentions.members.size;
 					break;
 				case 2:
-					value = msg.mentions.channels.array().length;
+					value = msg.mentions.channels.size;
 					break;
 				case 3:
-					value = msg.mentions.roles.array().length;
+					value = msg.mentions.roles.size;
 					break;
 			}
 			const comparison = parseInt(data.comparison);

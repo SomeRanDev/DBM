@@ -22,7 +22,7 @@ module.exports = {
 	//---------------------------------------------------------------------
 
 	subtitle: function(data) {
-		const info = ["Role ID", "Role Name", "Role Color", "Role Position"];
+		const info = ["Role Id", "Role Name", "Role Color", "Role Position"];
 		return `Find Role by ${info[parseInt(data.info)]}`;
 	},
 
@@ -42,7 +42,7 @@ module.exports = {
 	// Action Fields
 	//
 	// These are the fields for the action. These fields are customized
-	// by creating elements with corresponding IDs in the HTML. These
+	// by creating elements with corresponding Ids in the HTML. These
 	// are also the names of the fields stored in the action's JSON data.
 	//---------------------------------------------------------------------
 
@@ -70,7 +70,7 @@ module.exports = {
 	<div style="float: left; width: 40%;">
 		Source Field:<br>
 		<select id="info" class="round">
-			<option value="0" selected>Role ID</option>
+			<option value="0" selected>Role Id</option>
 			<option value="1">Role Name</option>
       <option value="2">Role Color</option>
       <option value="3">Role Position</option>

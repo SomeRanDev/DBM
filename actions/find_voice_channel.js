@@ -22,7 +22,7 @@ module.exports = {
 	//---------------------------------------------------------------------
 
 	subtitle: function(data) {
-		const info = ["Voice Channel ID", "Voice Channel Name", "Voice Channel Position", "Voice Channel User Limit", "Voice Channel Bitrate", "Voice Channel Category ID"];
+		const info = ["Voice Channel Id", "Voice Channel Name", "Voice Channel Position", "Voice Channel User Limit", "Voice Channel Bitrate", "Voice Channel Category Id"];
 		return `Find Voice Channel by ${info[parseInt(data.info)]}`;
 	},
 
@@ -42,7 +42,7 @@ module.exports = {
 	// Action Fields
 	//
 	// These are the fields for the action. These fields are customized
-	// by creating elements with corresponding IDs in the HTML. These
+	// by creating elements with corresponding Ids in the HTML. These
 	// are also the names of the fields stored in the action's JSON data.
 	//---------------------------------------------------------------------
 
@@ -70,12 +70,12 @@ module.exports = {
 	<div style="float: left; width: 40%;">
 		Source Field:<br>
 		<select id="info" class="round">
-			<option value="0" selected>Voice Channel ID</option>
+			<option value="0" selected>Voice Channel Id</option>
 			<option value="1">Voice Channel Name</option>
 			<option value="2">Voice Channel Position</option>
 			<option value="3">Voice Channel User Limit</option>
       <option value="4">Voice Channel Bitrate (kbps)</option>
-      <option value="5">Voice Channel Category ID</option>
+      <option value="5">Voice Channel Category Id</option>
 		</select>
 	</div>
 	<div style="float: right; width: 55%;">
@@ -124,7 +124,7 @@ module.exports = {
 		const data = cache.actions[cache.index];
 		const info = parseInt(data.info);
 		const find = this.evalMessage(data.find, cache);
-		const channels = server.channels.cache.filter((c) => c.type === "voice");
+		const channels = server.channels.cache.filter((c) => c.type === "GUILD_VOICE");
 		let result;
 		switch(info) {
 			case 0:

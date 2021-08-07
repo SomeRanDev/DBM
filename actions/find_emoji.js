@@ -22,7 +22,7 @@ module.exports = {
 	//---------------------------------------------------------------------
 
 	subtitle: function(data) {
-		const info = ["Emoji ID", "Emoji Name"];
+		const info = ["Emoji Id", "Emoji Name"];
 		return `Find Emoji by ${info[parseInt(data.info)]}`;
 	},
 
@@ -42,7 +42,7 @@ module.exports = {
 	// Action Fields
 	//
 	// These are the fields for the action. These fields are customized
-	// by creating elements with corresponding IDs in the HTML. These
+	// by creating elements with corresponding Ids in the HTML. These
 	// are also the names of the fields stored in the action's JSON data.
 	//---------------------------------------------------------------------
 
@@ -70,7 +70,7 @@ module.exports = {
 	<div style="float: left; width: 40%;">
 		Source Field:<br>
 		<select id="info" class="round">
-			<option value="0" selected>Emoji ID</option>
+			<option value="0" selected>Emoji Id</option>
 			<option value="1">Emoji Name</option>
 		</select>
 	</div>

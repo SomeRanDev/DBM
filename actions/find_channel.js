@@ -22,7 +22,7 @@ module.exports = {
 	//---------------------------------------------------------------------
 
 	subtitle: function(data) {
-		const info = ["Channel ID", "Channel Name", "Channel Topic", "Channel Position", "Channel Category ID"];
+		const info = ["Channel Id", "Channel Name", "Channel Topic", "Channel Position", "Channel Category Id"];
 		return `Find Channel by ${info[parseInt(data.info)]}`;
 	},
 
@@ -42,7 +42,7 @@ module.exports = {
 	// Action Fields
 	//
 	// These are the fields for the action. These fields are customized
-	// by creating elements with corresponding IDs in the HTML. These
+	// by creating elements with corresponding Ids in the HTML. These
 	// are also the names of the fields stored in the action's JSON data.
 	//---------------------------------------------------------------------
 
@@ -70,11 +70,11 @@ module.exports = {
 	<div style="float: left; width: 40%;">
 		Source Field:<br>
 		<select id="info" class="round">
-			<option value="0" selected>Channel ID</option>
+			<option value="0" selected>Channel Id</option>
 			<option value="1">Channel Name</option>
       <option value="2">Channel Topic</option>
       <option value="3">Channel Position</option>
-      <option value="4">Channel Category ID</option>
+      <option value="4">Channel Category Id</option>
 		</select>
 	</div>
 	<div style="float: right; width: 55%;">
@@ -123,7 +123,7 @@ module.exports = {
 		const data = cache.actions[cache.index];
 		const info = parseInt(data.info);
 		const find = this.evalMessage(data.find, cache);
-		const channels = server.channels.cache.filter((c) => c.type !== "voice" && c.type !== "category");
+		const channels = server.channels.cache.filter((c) => c.type === "GUILD_TEXT" && c.type === "GUILD_NEWS");
 		let result;
 		switch(info) {
 			case 0:

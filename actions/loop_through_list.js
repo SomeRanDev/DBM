@@ -23,14 +23,14 @@ module.exports = {
 
 	subtitle: function(data) {
 		const list = ["Server Members", "Server Channels", "Server Roles", "Server Emojis", "All Bot Servers", "Mentioned User Roles", "Command Author Roles", "Temp Variable", "Server Variable", "Global Variable"];
-		return `Loop ${list[parseInt(data.list)]} through Event ID "${data.source}"`;
+		return `Loop ${list[parseInt(data.list)]} through Event Id "${data.source}"`;
 	},
 
 	//---------------------------------------------------------------------
 	// Action Fields
 	//
 	// These are the fields for the action. These fields are customized
-	// by creating elements with corresponding IDs in the HTML. These
+	// by creating elements with corresponding Ids in the HTML. These
 	// are also the names of the fields stored in the action's JSON data.
 	//---------------------------------------------------------------------
 

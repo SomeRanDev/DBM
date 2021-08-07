@@ -23,7 +23,7 @@ module.exports = {
 
 	subtitle: function(data) {
 		const members = ["Mentioned User", "Command Author", "Temp Variable", "Server Variable", "Global Variable"];
-		const info = ["Member Object", "Member ID", "Member Username", "Member Display Name", "Member Color", "Member Server", "Member Last Message", "Member Highest Role", "Member Hoist Role", "Member Color Role", "Member Is Owner?", "Member Is Muted?", "Member Is Deafened?", "Member Is Bannable?", "Member Playing Status Name", "Member Status", "Member Avatar URL", "Member Roles List", "Member Roles Amount", "Member Voice Channel", "Member Discriminator", "Member Tag", "Member Created At", "Member Created Timestamp", "Member Joined At", "Member Joined Timestamp", "", "Member Permission List", "Member Flags List", "Member Client Status", "Member Custom Status"];
+		const info = ["Member Object", "Member Id", "Member Username", "Member Display Name", "Member Color", "Member Server", "Member Last Message (Removed)", "Member Highest Role", "Member Hoist Role", "Member Color Role", "Member Is Owner?", "Member Is Muted?", "Member Is Deafened?", "Member Is Bannable?", "Member Playing Status Name", "Member Status", "Member Avatar URL", "Member Roles List", "Member Roles Amount", "Member Voice Channel", "Member Discriminator", "Member Tag", "Member Created At", "Member Created Timestamp", "Member Joined At", "Member Joined Timestamp", "Last Message Id (Removed)", "Member Permission List", "Member Flags List", "Member Client Status", "Member Custom Status"];
 		return `${members[parseInt(data.member)]} - ${info[parseInt(data.info)]}`;
 	},
 
@@ -43,7 +43,7 @@ module.exports = {
 				dataType = "Server Member";
 				break;
 			case 1:
-				dataType = "Server Member ID";
+				dataType = "Member Id";
 				break;
 			case 2:
 			case 3:
@@ -54,9 +54,6 @@ module.exports = {
 				break;
 			case 5:
 				dataType = "Server";
-				break;
-			case 6:
-				dataType = "Message";
 				break;
 			case 7:
 			case 8:
@@ -119,7 +116,7 @@ module.exports = {
 	// Action Fields
 	//
 	// These are the fields for the action. These fields are customized
-	// by creating elements with corresponding IDs in the HTML. These
+	// by creating elements with corresponding Ids in the HTML. These
 	// are also the names of the fields stored in the action's JSON data.
 	//---------------------------------------------------------------------
 
@@ -160,14 +157,15 @@ module.exports = {
 		Source Info:<br>
 		<select id="info" class="round">
 			<option value="0" selected>Member Object</option>
-			<option value="1">Member ID</option>
+			<option value="1">Member Id</option>
 			<option value="2">Member Username</option>
 			<option value="3">Member Display Name</option>
 			<option value="4">Member Color</option>
 			<option value="15">Member Status</option>
 			<option value="16">Member Avatar URL</option>
 			<option value="5">Member Server</option>
-			<option value="6">Member Last Message</option>
+			<option value="6">Member Last Message (Removed)</option>
+			<option value="26">Member Last Message Id (Removed)</option>
 			<option value="17">Member Role List</option>
 			<option value="7">Member Highest Role</option>
 			<option value="8">Member Hoist Role</option>
@@ -259,9 +257,6 @@ module.exports = {
 			case 5:
 				result = mem.guild;
 				break;
-			case 6:
-				result = mem.lastMessage;
-				break;
 			case 7:
 				result = mem.roles.highest;
 				break;
@@ -272,9 +267,7 @@ module.exports = {
 				result = mem.roles.color;
 				break;
 			case 10:
-				if(mem.guild?.ownerId) {
-					result = mem.id === mem.guild.ownerId;
-				}
+				result = mem.id === mem.guild?.ownerId;
 				break;
 			case 11:
 				result = mem.voice.mute;

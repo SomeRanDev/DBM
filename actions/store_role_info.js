@@ -23,7 +23,7 @@ module.exports = {
 
 	subtitle: function(data) {
 		const roles = ["Mentioned Role", "1st Author Role", "1st Server Role", "Temp Variable", "Server Variable", "Global Variable"];
-		const info = ["Role Object", "Role ID", "Role Name", "Role Color", "Role Position", "Role Timestamp", "Role Is Mentionable?", "Role Is Separate From Others?", "Role Is Managed?", "Role Members List", "Role Creation Date", "Role Permissions", "Role Members Amount"];
+		const info = ["Role Object", "Role Id", "Role Name", "Role Color", "Role Position", "Role Timestamp", "Role Is Mentionable?", "Role Is Separate From Others?", "Role Is Managed?", "Role Members List", "Role Creation Date", "Role Permissions", "Role Members Amount"];
 		return `${roles[parseInt(data.role)]} - ${info[parseInt(data.info)]}`;
 	},
 
@@ -43,7 +43,7 @@ module.exports = {
 				dataType = "Role";
 				break;
 			case 1:
-				dataType = "Role ID";
+				dataType = "Role Id";
 				break;
 			case 2:
 				dataType = "Text";
@@ -80,7 +80,7 @@ module.exports = {
 	// Action Fields
 	//
 	// These are the fields for the action. These fields are customized
-	// by creating elements with corresponding IDs in the HTML. These
+	// by creating elements with corresponding Ids in the HTML. These
 	// are also the names of the fields stored in the action's JSON data.
 	//---------------------------------------------------------------------
 
@@ -121,7 +121,7 @@ module.exports = {
 		Source Info:<br>
 		<select id="info" class="round">
 			<option value="0" selected>Role Object</option>
-			<option value="1">Role ID</option>
+			<option value="1">Role Id</option>
 			<option value="2">Role Name</option>
 			<option value="3">Role Color</option>
 			<option value="4">Role Position</option>
@@ -212,7 +212,7 @@ module.exports = {
 				result = targetRole.managed;
 				break;
 			case 9:
-				result = targetRole.members.array();
+				result = [...targetRole.members.values()];
 				break;
 			case 10:
 				result = targetRole.createdAt;

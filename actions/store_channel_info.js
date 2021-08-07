@@ -23,7 +23,7 @@ module.exports = {
 
 	subtitle: function(data) {
 		const channels = ["Same Channel", "Mentioned Channel", "1st Server Channel", "Temp Variable", "Server Variable", "Global Variable"];
-		const info = ["Channel Object", "Channel ID", "Channel Name", "Channel Topic", "Channel Last Message", "Channel Position", "Channel Is NSFW?", "Channel Is DM?", "Channel Is Deleteable?", "Channel Creation Date", "Channel Category ID", "Channel Created At", "Channel Created At Timestamp"];
+		const info = ["Channel Object", "Channel Id", "Channel Name", "Channel Topic", "Channel Last Message (Removed)", "Channel Position", "Channel Is NSFW?", "Channel Is DM?", "Channel Is Deleteable?", "Channel Creation Date", "Channel Category Id", "Channel Created At", "Channel Created At Timestamp"];
 		return `${channels[parseInt(data.channel)]} - ${info[parseInt(data.info)]}`;
 	},
 
@@ -43,14 +43,11 @@ module.exports = {
 				dataType = "Channel";
 				break;
 			case 1:
-				dataType = "Channel ID";
+				dataType = "Channel Id";
 				break;
 			case 2:
 			case 3:
 				dataType = "Text";
-				break;
-			case 4:
-				dataType = "Message";
 				break;
 			case 5:
 				dataType = "Number";
@@ -61,7 +58,7 @@ module.exports = {
 				dataType = "Boolean";
 				break;
 			case 10:
-				dataType = "Category ID";
+				dataType = "Category Id";
 				break;
 			case 11:
 				dataType = "Date";
@@ -77,7 +74,7 @@ module.exports = {
 	// Action Fields
 	//
 	// These are the fields for the action. These fields are customized
-	// by creating elements with corresponding IDs in the HTML. These
+	// by creating elements with corresponding Ids in the HTML. These
 	// are also the names of the fields stored in the action's JSON data.
 	//---------------------------------------------------------------------
 
@@ -118,17 +115,17 @@ module.exports = {
 		Source Info:<br>
 		<select id="info" class="round">
 			<option value="0" selected>Channel Object</option>
-			<option value="1">Channel ID</option>
+			<option value="1">Channel Id</option>
 			<option value="2">Channel Name</option>
 			<option value="3">Channel Topic</option>
-			<option value="4">Channel Last Message</option>
+			<option value="4">Channel Last Message (Removed)</option>
 			<option value="5">Channel Position</option>
 			<option value="6">Channel Is NSFW?</option>
 			<option value="7">Channel Is DM?</option>
 			<option value="8">Channel Is Deleteable?</option>
 			<option value="9">Channel Creation Date</option>
 			<option value="12">Channel Creation Timestamp</option>
-			<option value="10">Channel Category ID</option>
+			<option value="10">Channel Category Id</option>
 		</select>
 	</div>
 </div><br>
@@ -193,6 +190,9 @@ module.exports = {
 			case 3:
 				result = targetChannel.topic;
 				break;
+			case 4:
+				result = "";
+				break;
 			case 5:
 				result = targetChannel.position;
 				break;
@@ -218,21 +218,12 @@ module.exports = {
 			default:
 				break;
 		}
-		if(info === 4) {
-			targetChannel.messages.fetch(targetChannel.lastMessageID).then(function(resultMessage) {
-				const storage = parseInt(data.storage);
-				const varName2 = this.evalMessage(data.varName2, cache);
-				this.storeValue(resultMessage, storage, varName2, cache);
-				this.callNextAction(cache);
-			}.bind(this)).catch(this.displayError.bind(this, data, cache));
-		} else if(result !== undefined) {
+		if(result !== undefined) {
 			const storage = parseInt(data.storage);
 			const varName2 = this.evalMessage(data.varName2, cache);
 			this.storeValue(result, storage, varName2, cache);
-			this.callNextAction(cache);
-		} else {
-			this.callNextAction(cache);
 		}
+		this.callNextAction(cache);
 	},
 
 	//---------------------------------------------------------------------

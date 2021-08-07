@@ -67,7 +67,7 @@ module.exports = {
 	// Action Fields
 	//
 	// These are the fields for the action. These fields are customized
-	// by creating elements with corresponding IDs in the HTML. These
+	// by creating elements with corresponding Ids in the HTML. These
 	// are also the names of the fields stored in the action's JSON data.
 	//---------------------------------------------------------------------
 
@@ -198,7 +198,7 @@ module.exports = {
 				break;
 			case 2:
 				if(msg.mentions.members.size) {
-					const members = msg.mentions.members.array();
+					const members = [...msg.mentions.members.values()];
 					if(members[index - 1]) {
 						source = members[index - 1];
 					}
@@ -206,7 +206,7 @@ module.exports = {
 				break;
 			case 3:
 				if(msg.mentions.roles.size) {
-					const roles = msg.mentions.roles.array();
+					const roles = [...msg.mentions.roles.values()];
 					if(roles[index - 1]) {
 						source = roles[index - 1];
 					}
@@ -214,7 +214,7 @@ module.exports = {
 				break;
 			case 4:
 				if(msg.mentions.channels.size) {
-					const channels = msg.mentions.channels.array();
+					const channels = [...msg.mentions.channels.values()];
 					if(channels[index - 1]) {
 						source = channels[index - 1];
 					}
