@@ -15,7 +15,7 @@ if(DiscordJS.version < "13.0.0") {
 }
 
 //---------------------------------------------------------------------
-// Bot
+//#region Bot
 // Contains functions for controlling the bot.
 //---------------------------------------------------------------------
 
@@ -275,8 +275,10 @@ Bot.checkRegExps = function(msg) {
 	}
 };
 
+//#endregion
+
 //---------------------------------------------------------------------
-// Actions
+//#region Actions
 // Contains functions for bot actions.
 //---------------------------------------------------------------------
 
@@ -947,8 +949,10 @@ Actions.executeResults = function(result, data, cache) {
 	}
 };
 
+//#endregion
+
 //---------------------------------------------------------------------
-// Events
+//#region Events
 // Handles the various events that occur.
 //---------------------------------------------------------------------
 
@@ -1061,8 +1065,10 @@ Events.onError = function(text, text2, cache) {
 	}
 };
 
+//#endregion
+
 //---------------------------------------------------------------------
-// Images
+//#region Images
 // Contains functions for image management.
 //---------------------------------------------------------------------
 
@@ -1105,8 +1111,10 @@ Images.drawImageOnImage = function(img1, img2, x, y) {
 	}
 };
 
+//#endregion
+
 //---------------------------------------------------------------------
-// Files
+//#region Files
 // Contains functions for file management.
 //---------------------------------------------------------------------
 
@@ -1379,8 +1387,10 @@ Files.restoreUser = function(value, bot) {
 
 Files.initEncryption();
 
+//#endregion
+
 //---------------------------------------------------------------------
-// Audio
+//#region Audio
 // Contains functions for voice channel stuff.
 //---------------------------------------------------------------------
 
@@ -1510,6 +1520,12 @@ Audio.playYt = function(url, options, id) {
 	this.dispatchers[id] = this.connections[id].play(stream, options);
 	return true;
 };
+
+//#endregion
+
+//---------------------------------------------------------------------
+//#region Custom structures
+//---------------------------------------------------------------------
 
 //---------------------------------------------------------------------
 // GuildMember
@@ -1799,6 +1815,8 @@ Reflect.defineProperty(DiscordJS.GuildEmoji.prototype, "convertToString", {
 		return `e-${this.id}`;
 	}
 });
+
+//#endregion
 
 //---------------------------------------------------------------------
 // Start Bot
