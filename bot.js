@@ -456,8 +456,8 @@ Actions.checkTimeRestriction = function(msg, cmd) {
 	}
 };
 
-Actions.generateTimeString = function(miliSeconds) {
-	let remaining = miliSeconds;
+Actions.generateTimeString = function(milliseconds) {
+	let remaining = milliseconds;
 	const times = [];
 
 	const days = Math.floor(remaining / 60 / 60 / 24);
@@ -499,7 +499,7 @@ Actions.checkPermissions = function(msg, permissions) {
 	if(!author) return false;
 	if(permissions === "NONE") return true;
 	if(msg.guild.ownerId === author.id) return true;
-	return author.permissions.has([permissions]);
+	return author.permissions.has(permissions);
 };
 
 Actions.invokeActions = function(msg, actions) {
@@ -1647,7 +1647,7 @@ Reflect.defineProperty(DiscordJS.User.prototype, "convertToString", {
 // Guild
 //---------------------------------------------------------------------
 
-Reflect.defineProperty(DiscordJS.User.prototype, "getDefaultChannel", {
+Reflect.defineProperty(DiscordJS.Guild.prototype, "getDefaultChannel", {
 	value: function() {
 		let channel = this.channels.resolve(this.id);
 		if(!channel) {
@@ -1663,7 +1663,23 @@ Reflect.defineProperty(DiscordJS.User.prototype, "getDefaultChannel", {
 	}
 });
 
-Reflect.defineProperty(DiscordJS.User.prototype, "data", {
+Reflect.defineProperty(DiscordJS.Guild.prototype, "getDefaultVoiceChannel", {
+	value: function() {
+		let channel = this.channels.resolve(this.id);
+		if(!channel) {
+			[...this.channels.cache.values()].forEach((c) => {
+				if(c.permissionsFor(DBM.Bot.bot.user)?.has(DiscordJS.Permissions.FLAGS.SEND_MESSAGES) && c.type === "GUILD_VOICE") {
+					if(!channel || channel.position > c.position) {
+						channel = c;
+					}
+				}
+			});
+		}
+		return channel;
+	}
+});
+
+Reflect.defineProperty(DiscordJS.Guild.prototype, "data", {
 	value: function(name, defaultValue) {
 		const id = this.id;
 		const data = Files.data.servers;
@@ -1681,7 +1697,7 @@ Reflect.defineProperty(DiscordJS.User.prototype, "data", {
 	}
 });
 
-Reflect.defineProperty(DiscordJS.User.prototype, "setData", {
+Reflect.defineProperty(DiscordJS.Guild.prototype, "setData", {
 	value: function(name, value) {
 		const id = this.id;
 		const data = Files.data.servers;
@@ -1693,7 +1709,7 @@ Reflect.defineProperty(DiscordJS.User.prototype, "setData", {
 	}
 });
 
-Reflect.defineProperty(DiscordJS.User.prototype, "addData", {
+Reflect.defineProperty(DiscordJS.Guild.prototype, "addData", {
 	value: function(name, value) {
 		const id = this.id;
 		const data = Files.data.servers;
@@ -1708,7 +1724,7 @@ Reflect.defineProperty(DiscordJS.User.prototype, "addData", {
 	}
 });
 
-Reflect.defineProperty(DiscordJS.User.prototype, "convertToString", {
+Reflect.defineProperty(DiscordJS.Guild.prototype, "convertToString", {
 	value: function() {
 		return `s-${this.id}`;
 	}
@@ -1734,14 +1750,6 @@ Reflect.defineProperty(DiscordJS.TextChannel.prototype, "convertToString", {
 	}
 });
 
-Reflect.defineProperty(DiscordJS.TextChannel.prototype, "overwritePerms", {
-	value: function(memberOrRole, permissions, reason) {
-		const overwrites = this.permissionOverwrites.get(memberOrRole.id);
-		if (overwrites) return overwrites.update(permissions, reason);
-		return this.permissionOverwrites.create(memberOrRole, permissions, reason);
-	}
-});
-
 //---------------------------------------------------------------------
 // VoiceChannel
 //---------------------------------------------------------------------
@@ -1749,50 +1757,6 @@ Reflect.defineProperty(DiscordJS.TextChannel.prototype, "overwritePerms", {
 Reflect.defineProperty(DiscordJS.VoiceChannel.prototype, "convertToString", {
 	value: function() {
 		return `vc-${this.id}`;
-	}
-});
-
-Reflect.defineProperty(DiscordJS.VoiceChannel.prototype, "overwritePerms", {
-	value: function(memberOrRole, permissions, reason) {
-		const overwrites = this.permissionOverwrites.get(memberOrRole.id);
-		if (overwrites) return overwrites.update(permissions, reason);
-		return this.permissionOverwrites.create(memberOrRole, permissions, reason);
-	}
-});
-
-//---------------------------------------------------------------------
-// CategoryChannel
-//---------------------------------------------------------------------
-
-Reflect.defineProperty(DiscordJS.CategoryChannel.prototype, "overwritePerms", {
-	value: function(memberOrRole, permissions, reason) {
-		const overwrites = this.permissionOverwrites.get(memberOrRole.id);
-		if (overwrites) return overwrites.update(permissions, reason);
-		return this.permissionOverwrites.create(memberOrRole, permissions, reason);
-	}
-});
-
-//---------------------------------------------------------------------
-// NewsChannel
-//---------------------------------------------------------------------
-
-Reflect.defineProperty(DiscordJS.NewsChannel.prototype, "overwritePerms", {
-	value: function(memberOrRole, permissions, reason) {
-		const overwrites = this.permissionOverwrites.get(memberOrRole.id);
-		if (overwrites) return overwrites.update(permissions, reason);
-		return this.permissionOverwrites.create(memberOrRole, permissions, reason);
-	}
-});
-
-//---------------------------------------------------------------------
-// StoreChannel
-//---------------------------------------------------------------------
-
-Reflect.defineProperty(DiscordJS.NewsChannel.prototype, "overwritePerms", {
-	value: function(memberOrRole, permissions, reason) {
-		const overwrites = this.permissionOverwrites.get(memberOrRole.id);
-		if (overwrites) return overwrites.update(permissions, reason);
-		return this.permissionOverwrites.create(memberOrRole, permissions, reason);
 	}
 });
 

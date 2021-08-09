@@ -137,11 +137,11 @@ module.exports = {
 
 		const options = { [data.permission]: [true, null, false][parseInt(data.state)] };
 
-		if(member && member.id) {
+		if(member?.id) {
 			if(Array.isArray(channel)) {
-				this.callListFunc(channel, "overwritePerms", [member, options, reason]).then(() => this.callNextAction(cache));
-			} else if(channel && channel.overwritePermissions) {
-				channel.overwritePerms(member, options, reason)
+				this.callListFunc(channel.permissionOverwrites, "edit", [member, options, { reason, type: 1 }]).then(() => this.callNextAction(cache));
+			} else if(channel?.permissionOverwrites) {
+				channel.permissionOverwrites.edit(member, options, { reason, type: 1 })
 					.then(() => this.callNextAction(cache))
 					.catch(this.displayError.bind(this, data, cache));
 			} else {
