@@ -1,127 +1,151 @@
 module.exports = {
-	//---------------------------------------------------------------------
-	// Action Name
-	//
-	// This is the name of the action displayed in the editor.
-	//---------------------------------------------------------------------
-	name: "Store Message Info",
+  //---------------------------------------------------------------------
+  // Action Name
+  //
+  // This is the name of the action displayed in the editor.
+  //---------------------------------------------------------------------
+  name: "Store Message Info",
 
-	//---------------------------------------------------------------------
-	// Action Section
-	//
-	// This is the section the action will fall into.
-	//---------------------------------------------------------------------
-	section: "Messaging",
+  //---------------------------------------------------------------------
+  // Action Section
+  //
+  // This is the section the action will fall into.
+  //---------------------------------------------------------------------
+  section: "Messaging",
 
-	//---------------------------------------------------------------------
-	// Action Subtitle
-	//
-	// This function generates the subtitle displayed next to the name.
-	//---------------------------------------------------------------------
-	subtitle: function(data) {
-		const message = ["Command Message", "Temp Variable", "Server Variable", "Global Variable"];
-		const info = ["Message Object", "Message Id", "Message Text", "Message Author", "Message Channel", "Message Timestamp", "Message is Pinned", "Message is TTS", "Message Attachments List", "Message Edits", "", "", "Messages Reactions Count", "Mentioned Users List", "Mentioned Users Count", "Message URL", "Message Creation Date", "Message Content Length", "Message Attachments Count", "Message Guild", "Message Type", "Message Webhook Id", "Message Embed Object"];
-		return `${message[parseInt(data.message, 10)]} - ${info[parseInt(data.info, 10)]}`;
-	},
+  //---------------------------------------------------------------------
+  // Action Subtitle
+  //
+  // This function generates the subtitle displayed next to the name.
+  //---------------------------------------------------------------------
+  subtitle: function (data) {
+    const message = ["Command Message", "Temp Variable", "Server Variable", "Global Variable"];
+    const info = [
+      "Message Object",
+      "Message Id",
+      "Message Text",
+      "Message Author",
+      "Message Channel",
+      "Message Timestamp",
+      "Message is Pinned",
+      "Message is TTS",
+      "Message Attachments List",
+      "Message Edits",
+      "",
+      "",
+      "Messages Reactions Count",
+      "Mentioned Users List",
+      "Mentioned Users Count",
+      "Message URL",
+      "Message Creation Date",
+      "Message Content Length",
+      "Message Attachments Count",
+      "Message Guild",
+      "Message Type",
+      "Message Webhook Id",
+      "Message Embed Object",
+    ];
+    return `${message[parseInt(data.message, 10)]} - ${info[parseInt(data.info, 10)]}`;
+  },
 
-	//---------------------------------------------------------------------
-	// Action Storage Function
-	//
-	// Stores the relevant variable info for the editor.
-	//---------------------------------------------------------------------
-	variableStorage: function(data, varType) {
-		const type = parseInt(data.storage, 10);
-		if(type !== varType) return;
-		const info = parseInt(data.info, 10);
-		let dataType = "Unknown Type";
-		switch(info) {
-			case 0:
-				dataType = "Message";
-				break;
-			case 1:
-				dataType = "Message Id";
-				break;
-			case 2:
-				dataType = "Text";
-				break;
-			case 3:
-				dataType = "Server Member";
-				break;
-			case 4:
-				dataType = "Channel";
-				break;
-			case 5:
-				dataType = "Text";
-				break;
-			case 6:
-			case 7:
-				dataType = "Boolean";
-				break;
-			case 8:
+  //---------------------------------------------------------------------
+  // Action Storage Function
+  //
+  // Stores the relevant variable info for the editor.
+  //---------------------------------------------------------------------
+  variableStorage: function (data, varType) {
+    const type = parseInt(data.storage, 10);
+    if (type !== varType) return;
+    const info = parseInt(data.info, 10);
+    let dataType = "Unknown Type";
+    switch (info) {
+      case 0:
+        dataType = "Message";
+        break;
+      case 1:
+        dataType = "Message Id";
+        break;
+      case 2:
+        dataType = "Text";
+        break;
+      case 3:
+        dataType = "Server Member";
+        break;
+      case 4:
+        dataType = "Channel";
+        break;
+      case 5:
+        dataType = "Text";
+        break;
+      case 6:
+      case 7:
+        dataType = "Boolean";
+        break;
+      case 8:
         dataType = "Date";
-			case 9:
+      case 9:
         dataType = "Messages List";
-			case 12:
-				dataType = "Number";
-				break;
-			case 13:
-				dataType = "Array";
-				break;
-			case 14:
-				dataType = "Number";
-				break;
-			case 15:
-				dataType = "URL";
-				break;
-			case 16:
-				dataType = "Date";
-				break;
-			case 17:
-			case 18:
-				dataType = "Number";
-				break;
-			case 19:
-				dataType = "Guild";
-				break;
-			case 20:
-				dataType = "Message Type";
-				break;
-			case 21:
-				dataType = "Webhook Id";
-				break;
-			case 22:
-				dataType = "Embed Message";
-				break;
-		}
-		return ([data.varName2, dataType]);
-	},
+      case 12:
+        dataType = "Number";
+        break;
+      case 13:
+        dataType = "Array";
+        break;
+      case 14:
+        dataType = "Number";
+        break;
+      case 15:
+        dataType = "URL";
+        break;
+      case 16:
+        dataType = "Date";
+        break;
+      case 17:
+      case 18:
+        dataType = "Number";
+        break;
+      case 19:
+        dataType = "Guild";
+        break;
+      case 20:
+        dataType = "Message Type";
+        break;
+      case 21:
+        dataType = "Webhook Id";
+        break;
+      case 22:
+        dataType = "Embed Message";
+        break;
+    }
+    return [data.varName2, dataType];
+  },
 
-	//---------------------------------------------------------------------
-	// Action Fields
-	//
-	// These are the fields for the action. These fields are customized
-	// by creating elements with corresponding Ids in the HTML. These
-	// are also the names of the fields stored in the action's JSON data.
-	//---------------------------------------------------------------------
-	fields: ["message", "varName", "info", "storage", "varName2"],
+  //---------------------------------------------------------------------
+  // Action Fields
+  //
+  // These are the fields for the action. These fields are customized
+  // by creating elements with corresponding Ids in the HTML. These
+  // are also the names of the fields stored in the action's JSON data.
+  //---------------------------------------------------------------------
+  fields: ["message", "varName", "info", "storage", "varName2"],
 
-	//---------------------------------------------------------------------
-	// Command HTML
-	//
-	// This function returns a string containing the HTML used for
-	// editing actions.
-	//
-	// The "isEvent" parameter will be true if this action is being used
-	// for an event. Due to their nature, events lack certain information,
-	// so edit the HTML to reflect this.
-	//
-	// The "data" parameter stores constants for select elements to use.
-	// Each is an array: index 0 for commands, index 1 for events.
-	// The names are: sendTargets, members, roles, channels,
-	//                messages, servers, variables
-	//---------------------------------------------------------------------
-	html: function(isEvent, data) {
-		return `
+  //---------------------------------------------------------------------
+  // Command HTML
+  //
+  // This function returns a string containing the HTML used for
+  // editing actions.
+  //
+  // The "isEvent" parameter will be true if this action is being used
+  // for an event. Due to their nature, events lack certain information,
+  // so edit the HTML to reflect this.
+  //
+  // The "data" parameter stores constants for select elements to use.
+  // Each is an array: index 0 for commands, index 1 for events.
+  // The names are: sendTargets, members, roles, channels,
+  //                messages, servers, variables
+  //---------------------------------------------------------------------
+  html: function (isEvent, data) {
+    return `
 <div>
 	<div style="float: left; width: 35%;">
 		Source Message:<br>
@@ -174,121 +198,121 @@ module.exports = {
 		<input id="varName2" class="round" type="text"><br>
 	</div>
 </div>`;
-	},
+  },
 
-	//---------------------------------------------------------------------
-	// Action Editor Init Code
-	//
-	// When the HTML is first applied to the action editor, this code
-	// is also run. This helps add modifications or setup reactionary
-	// functions for the DOM elements.
-	//---------------------------------------------------------------------
-	init: function() {
-		const { glob, document } = this;
+  //---------------------------------------------------------------------
+  // Action Editor Init Code
+  //
+  // When the HTML is first applied to the action editor, this code
+  // is also run. This helps add modifications or setup reactionary
+  // functions for the DOM elements.
+  //---------------------------------------------------------------------
+  init: function () {
+    const { glob, document } = this;
 
-		glob.messageChange(document.getElementById("message"), "varNameContainer");
-	},
+    glob.messageChange(document.getElementById("message"), "varNameContainer");
+  },
 
-	//---------------------------------------------------------------------
-	// Action Bot Function
-	//
-	// This is the function for the action within the Bot's Action class.
-	// Keep in mind event calls won't have access to the "msg" parameter,
-	// so be sure to provide checks for variable existence.
-	//---------------------------------------------------------------------
-	action: function(cache) {
-		const data = cache.actions[cache.index];
-		const message = parseInt(data.message, 10);
-		const varName = this.evalMessage(data.varName, cache);
-		const info = parseInt(data.info, 10);
-		const msg = this.getMessage(message, varName, cache);
-		if(!msg) {
-			this.callNextAction(cache);
-			return;
-		}
-		let result;
-		switch(info) {
-			case 0:
-				result = msg;
-				break;
-			case 1:
-				result = msg.id;
-				break;
-			case 2:
-				result = msg.content;
-				break;
-			case 3:
-				result = msg.member || msg.author;
-				break;
-			case 4:
-				result = msg.channel;
-				break;
-			case 5:
-				result = msg.createdTimestamp;
-				break;
-			case 6:
-				result = msg.pinned;
-				break;
-			case 7:
-				result = msg.tts;
-				break;
-			case 8:
-				result = [...msg.attachments.values()];
-				break;
-			case 9:
-				result = msg.edits;
-				break;
-			case 12:
-				result = msg.reactions.cache.size;
-				break;
-			case 13:
-				result = [...msg.mentions.users.values()];
-				break;
-			case 14:
-				result = msg.mentions.users.size;
-				break;
-			case 15:
-				result = msg.url;
-				break;
-			case 16:
-				result = msg.createdAt;
-				break;
-			case 17:
-				result = msg.content.length;
-				break;
-			case 18:
-				result = msg.attachments.size;
-				break;
-			case 19:
-				result = msg.guild;
-				break;
-			case 20:
-				result = msg.type;
-				break;
-			case 21:
-				result = msg.webhookId;
-				break;
-			case 22:
-				result = msg.embeds[0];
-				break;
-			default:
-				break;
-		}
-		if(result !== undefined) {
-			const storage = parseInt(data.storage, 10);
-			const varName2 = this.evalMessage(data.varName2, cache);
-			this.storeValue(result, storage, varName2, cache);
-		}
-		this.callNextAction(cache);
-	},
+  //---------------------------------------------------------------------
+  // Action Bot Function
+  //
+  // This is the function for the action within the Bot's Action class.
+  // Keep in mind event calls won't have access to the "msg" parameter,
+  // so be sure to provide checks for variable existence.
+  //---------------------------------------------------------------------
+  action: function (cache) {
+    const data = cache.actions[cache.index];
+    const message = parseInt(data.message, 10);
+    const varName = this.evalMessage(data.varName, cache);
+    const info = parseInt(data.info, 10);
+    const msg = this.getMessage(message, varName, cache);
+    if (!msg) {
+      this.callNextAction(cache);
+      return;
+    }
+    let result;
+    switch (info) {
+      case 0:
+        result = msg;
+        break;
+      case 1:
+        result = msg.id;
+        break;
+      case 2:
+        result = msg.content;
+        break;
+      case 3:
+        result = msg.member || msg.author;
+        break;
+      case 4:
+        result = msg.channel;
+        break;
+      case 5:
+        result = msg.createdTimestamp;
+        break;
+      case 6:
+        result = msg.pinned;
+        break;
+      case 7:
+        result = msg.tts;
+        break;
+      case 8:
+        result = [...msg.attachments.values()];
+        break;
+      case 9:
+        result = msg.edits;
+        break;
+      case 12:
+        result = msg.reactions.cache.size;
+        break;
+      case 13:
+        result = [...msg.mentions.users.values()];
+        break;
+      case 14:
+        result = msg.mentions.users.size;
+        break;
+      case 15:
+        result = msg.url;
+        break;
+      case 16:
+        result = msg.createdAt;
+        break;
+      case 17:
+        result = msg.content.length;
+        break;
+      case 18:
+        result = msg.attachments.size;
+        break;
+      case 19:
+        result = msg.guild;
+        break;
+      case 20:
+        result = msg.type;
+        break;
+      case 21:
+        result = msg.webhookId;
+        break;
+      case 22:
+        result = msg.embeds[0];
+        break;
+      default:
+        break;
+    }
+    if (result !== undefined) {
+      const storage = parseInt(data.storage, 10);
+      const varName2 = this.evalMessage(data.varName2, cache);
+      this.storeValue(result, storage, varName2, cache);
+    }
+    this.callNextAction(cache);
+  },
 
-	//---------------------------------------------------------------------
-	// Action Bot Mod
-	//
-	// Upon initialization of the bot, this code is run. Using the bot's
-	// DBM namespace, one can add/modify existing functions if necessary.
-	// In order to reduce conflicts between mods, be sure to alias
-	// functions you wish to overwrite.
-	//---------------------------------------------------------------------
-	mod: function() {}
+  //---------------------------------------------------------------------
+  // Action Bot Mod
+  //
+  // Upon initialization of the bot, this code is run. Using the bot's
+  // DBM namespace, one can add/modify existing functions if necessary.
+  // In order to reduce conflicts between mods, be sure to alias
+  // functions you wish to overwrite.
+  //---------------------------------------------------------------------
+  mod: function () {},
 };

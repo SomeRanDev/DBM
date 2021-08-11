@@ -1,103 +1,124 @@
 module.exports = {
-	//---------------------------------------------------------------------
-	// Action Name
-	//
-	// This is the name of the action displayed in the editor.
-	//---------------------------------------------------------------------
+  //---------------------------------------------------------------------
+  // Action Name
+  //
+  // This is the name of the action displayed in the editor.
+  //---------------------------------------------------------------------
 
-	name: "Store Channel Info",
+  name: "Store Channel Info",
 
-	//---------------------------------------------------------------------
-	// Action Section
-	//
-	// This is the section the action will fall into.
-	//---------------------------------------------------------------------
+  //---------------------------------------------------------------------
+  // Action Section
+  //
+  // This is the section the action will fall into.
+  //---------------------------------------------------------------------
 
-	section: "Channel Control",
+  section: "Channel Control",
 
-	//---------------------------------------------------------------------
-	// Action Subtitle
-	//
-	// This function generates the subtitle displayed next to the name.
-	//---------------------------------------------------------------------
+  //---------------------------------------------------------------------
+  // Action Subtitle
+  //
+  // This function generates the subtitle displayed next to the name.
+  //---------------------------------------------------------------------
 
-	subtitle: function(data) {
-		const channels = ["Same Channel", "Mentioned Channel", "1st Server Channel", "Temp Variable", "Server Variable", "Global Variable"];
-		const info = ["Channel Object", "Channel Id", "Channel Name", "Channel Topic", "Channel Last Message (Removed)", "Channel Position", "Channel Is NSFW?", "Channel Is DM?", "Channel Is Deleteable?", "Channel Creation Date", "Channel Category Id", "Channel Created At", "Channel Created At Timestamp"];
-		return `${channels[parseInt(data.channel, 10)]} - ${info[parseInt(data.info, 10)]}`;
-	},
+  subtitle: function (data) {
+    const channels = [
+      "Same Channel",
+      "Mentioned Channel",
+      "1st Server Channel",
+      "Temp Variable",
+      "Server Variable",
+      "Global Variable",
+    ];
+    const info = [
+      "Channel Object",
+      "Channel Id",
+      "Channel Name",
+      "Channel Topic",
+      "Channel Last Message (Removed)",
+      "Channel Position",
+      "Channel Is NSFW?",
+      "Channel Is DM?",
+      "Channel Is Deleteable?",
+      "Channel Creation Date",
+      "Channel Category Id",
+      "Channel Created At",
+      "Channel Created At Timestamp",
+    ];
+    return `${channels[parseInt(data.channel, 10)]} - ${info[parseInt(data.info, 10)]}`;
+  },
 
-	//---------------------------------------------------------------------
-	// Action Storage Function
-	//
-	// Stores the relevant variable info for the editor.
-	//---------------------------------------------------------------------
+  //---------------------------------------------------------------------
+  // Action Storage Function
+  //
+  // Stores the relevant variable info for the editor.
+  //---------------------------------------------------------------------
 
-	variableStorage: function(data, varType) {
-		const type = parseInt(data.storage, 10);
-		if(type !== varType) return;
-		const info = parseInt(data.info, 10);
-		let dataType = "Unknown Type";
-		switch(info) {
-			case 0:
-				dataType = "Channel";
-				break;
-			case 1:
-				dataType = "Channel Id";
-				break;
-			case 2:
-			case 3:
-				dataType = "Text";
-				break;
-			case 5:
-				dataType = "Number";
-				break;
-			case 6:
-			case 7:
-			case 8:
-				dataType = "Boolean";
-				break;
-			case 10:
-				dataType = "Category Id";
-				break;
-			case 11:
-				dataType = "Date";
-				break;
-			case 12:
-				dataType = "Timestamp";
-				break;
-		}
-		return ([data.varName2, dataType]);
-	},
+  variableStorage: function (data, varType) {
+    const type = parseInt(data.storage, 10);
+    if (type !== varType) return;
+    const info = parseInt(data.info, 10);
+    let dataType = "Unknown Type";
+    switch (info) {
+      case 0:
+        dataType = "Channel";
+        break;
+      case 1:
+        dataType = "Channel Id";
+        break;
+      case 2:
+      case 3:
+        dataType = "Text";
+        break;
+      case 5:
+        dataType = "Number";
+        break;
+      case 6:
+      case 7:
+      case 8:
+        dataType = "Boolean";
+        break;
+      case 10:
+        dataType = "Category Id";
+        break;
+      case 11:
+        dataType = "Date";
+        break;
+      case 12:
+        dataType = "Timestamp";
+        break;
+    }
+    return [data.varName2, dataType];
+  },
 
-	//---------------------------------------------------------------------
-	// Action Fields
-	//
-	// These are the fields for the action. These fields are customized
-	// by creating elements with corresponding Ids in the HTML. These
-	// are also the names of the fields stored in the action's JSON data.
-	//---------------------------------------------------------------------
+  //---------------------------------------------------------------------
+  // Action Fields
+  //
+  // These are the fields for the action. These fields are customized
+  // by creating elements with corresponding Ids in the HTML. These
+  // are also the names of the fields stored in the action's JSON data.
+  //---------------------------------------------------------------------
 
-	fields: ["channel", "varName", "info", "storage", "varName2"],
+  fields: ["channel", "varName", "info", "storage", "varName2"],
 
-	//---------------------------------------------------------------------
-	// Command HTML
-	//
-	// This function returns a string containing the HTML used for
-	// editing actions.
-	//
-	// The "isEvent" parameter will be true if this action is being used
-	// for an event. Due to their nature, events lack certain information,
-	// so edit the HTML to reflect this.
-	//
-	// The "data" parameter stores constants for select elements to use.
-	// Each is an array: index 0 for commands, index 1 for events.
-	// The names are: sendTargets, members, roles, channels,
-	//                messages, servers, variables
-	//---------------------------------------------------------------------
+  //---------------------------------------------------------------------
+  // Command HTML
+  //
+  // This function returns a string containing the HTML used for
+  // editing actions.
+  //
+  // The "isEvent" parameter will be true if this action is being used
+  // for an event. Due to their nature, events lack certain information,
+  // so edit the HTML to reflect this.
+  //
+  // The "data" parameter stores constants for select elements to use.
+  // Each is an array: index 0 for commands, index 1 for events.
+  // The names are: sendTargets, members, roles, channels,
+  //                messages, servers, variables
+  //---------------------------------------------------------------------
 
-	html: function(isEvent, data) {
-		return `
+  html: function (isEvent, data) {
+    return `
 <div>
 	<div style="float: left; width: 35%;">
 		Source Channel:<br>
@@ -141,99 +162,99 @@ module.exports = {
 		<input id="varName2" class="round" type="text"><br>
 	</div>
 </div>`;
-	},
+  },
 
-	//---------------------------------------------------------------------
-	// Action Editor Init Code
-	//
-	// When the HTML is first applied to the action editor, this code
-	// is also run. This helps add modifications or setup reactionary
-	// functions for the DOM elements.
-	//---------------------------------------------------------------------
+  //---------------------------------------------------------------------
+  // Action Editor Init Code
+  //
+  // When the HTML is first applied to the action editor, this code
+  // is also run. This helps add modifications or setup reactionary
+  // functions for the DOM elements.
+  //---------------------------------------------------------------------
 
-	init: function() {
-		const { glob, document } = this;
+  init: function () {
+    const { glob, document } = this;
 
-		glob.channelChange(document.getElementById("channel"), "varNameContainer");
-	},
+    glob.channelChange(document.getElementById("channel"), "varNameContainer");
+  },
 
-	//---------------------------------------------------------------------
-	// Action Bot Function
-	//
-	// This is the function for the action within the Bot's Action class.
-	// Keep in mind event calls won't have access to the "msg" parameter,
-	// so be sure to provide checks for variable existence.
-	//---------------------------------------------------------------------
+  //---------------------------------------------------------------------
+  // Action Bot Function
+  //
+  // This is the function for the action within the Bot's Action class.
+  // Keep in mind event calls won't have access to the "msg" parameter,
+  // so be sure to provide checks for variable existence.
+  //---------------------------------------------------------------------
 
-	action: function(cache) {
-		const data = cache.actions[cache.index];
-		const DiscordJS = this.getDBM().DiscordJS;
-		const channel = parseInt(data.channel, 10);
-		const varName = this.evalMessage(data.varName, cache);
-		const info = parseInt(data.info, 10);
-		const targetChannel = this.getChannel(channel, varName, cache);
-		if(!targetChannel) {
-			this.callNextAction(cache);
-			return;
-		}
-		let result;
-		switch(info) {
-			case 0:
-				result = targetChannel;
-				break;
-			case 1:
-				result = targetChannel.id;
-				break;
-			case 2:
-				result = targetChannel.name;
-				break;
-			case 3:
-				result = targetChannel.topic;
-				break;
-			case 4:
-				result = "";
-				break;
-			case 5:
-				result = targetChannel.position;
-				break;
-			case 6:
-				result = targetChannel.nsfw;
-				break;
-			case 7:
-				result = targetChannel.type === 'DM';
-				break;
-			case 8:
-				result = targetChannel.deletable;
-				break;
-			case 9:
-			case 11:
-				result = targetChannel.createdAt;
-				break;
-			case 10:
-				result = targetChannel.parentId;
-				break;
-			case 12:
-				result = targetChannel.createdTimestamp;
-				break;
-			default:
-				break;
-		}
-		if(result !== undefined) {
-			const storage = parseInt(data.storage, 10);
-			const varName2 = this.evalMessage(data.varName2, cache);
-			this.storeValue(result, storage, varName2, cache);
-		}
-		this.callNextAction(cache);
-	},
+  action: function (cache) {
+    const data = cache.actions[cache.index];
+    const DiscordJS = this.getDBM().DiscordJS;
+    const channel = parseInt(data.channel, 10);
+    const varName = this.evalMessage(data.varName, cache);
+    const info = parseInt(data.info, 10);
+    const targetChannel = this.getChannel(channel, varName, cache);
+    if (!targetChannel) {
+      this.callNextAction(cache);
+      return;
+    }
+    let result;
+    switch (info) {
+      case 0:
+        result = targetChannel;
+        break;
+      case 1:
+        result = targetChannel.id;
+        break;
+      case 2:
+        result = targetChannel.name;
+        break;
+      case 3:
+        result = targetChannel.topic;
+        break;
+      case 4:
+        result = "";
+        break;
+      case 5:
+        result = targetChannel.position;
+        break;
+      case 6:
+        result = targetChannel.nsfw;
+        break;
+      case 7:
+        result = targetChannel.type === "DM";
+        break;
+      case 8:
+        result = targetChannel.deletable;
+        break;
+      case 9:
+      case 11:
+        result = targetChannel.createdAt;
+        break;
+      case 10:
+        result = targetChannel.parentId;
+        break;
+      case 12:
+        result = targetChannel.createdTimestamp;
+        break;
+      default:
+        break;
+    }
+    if (result !== undefined) {
+      const storage = parseInt(data.storage, 10);
+      const varName2 = this.evalMessage(data.varName2, cache);
+      this.storeValue(result, storage, varName2, cache);
+    }
+    this.callNextAction(cache);
+  },
 
-	//---------------------------------------------------------------------
-	// Action Bot Mod
-	//
-	// Upon initialization of the bot, this code is run. Using the bot's
-	// DBM namespace, one can add/modify existing functions if necessary.
-	// In order to reduce conflicts between mods, be sure to alias
-	// functions you wish to overwrite.
-	//---------------------------------------------------------------------
+  //---------------------------------------------------------------------
+  // Action Bot Mod
+  //
+  // Upon initialization of the bot, this code is run. Using the bot's
+  // DBM namespace, one can add/modify existing functions if necessary.
+  // In order to reduce conflicts between mods, be sure to alias
+  // functions you wish to overwrite.
+  //---------------------------------------------------------------------
 
-	mod: function() {}
+  mod: function () {},
 };

@@ -13,5 +13,8 @@
     "opusscript": "latest",
     "ytdl-core": "latest"
   },
-  "is-music-bot": true
+  "is-music-bot": true,
+  "devDependencies": {
+    "prettier": "^2.3.2"
+  }
 }
