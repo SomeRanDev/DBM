@@ -413,7 +413,7 @@ Actions.preformActions = function(msg, cmd) {
 
 Actions.checkConditions = function(msg, cmd) {
 	const isServer = Boolean(msg.guild && msg.member);
-	const restriction = parseInt(cmd.restriction);
+	const restriction = parseInt(cmd.restriction, 10);
 	const permissions = cmd.permissions;
 	switch(restriction) {
 		case 0:
@@ -897,13 +897,13 @@ Actions.storeValue = function(value, type, varName, cache) {
 
 Actions.executeResults = function(result, data, cache) {
 	if(result) {
-		const type = parseInt(data.iftrue);
+		const type = parseInt(data.iftrue, 10);
 		switch(type) {
 			case 0:
 				this.callNextAction(cache);
 				break;
 			case 2:
-				const val = parseInt(this.evalMessage(data.iftrueVal, cache));
+				const val = parseInt(this.evalMessage(data.iftrueVal, cache), 10);
 				const index = Math.max(val - 1, 0);
 				if(cache.actions[index]) {
 					cache.index = index - 1;
@@ -911,7 +911,7 @@ Actions.executeResults = function(result, data, cache) {
 				}
 				break;
 			case 3:
-				const amnt = parseInt(this.evalMessage(data.iftrueVal, cache));
+				const amnt = parseInt(this.evalMessage(data.iftrueVal, cache), 10);
 				const index2 = cache.index + amnt + 1;
 				if(cache.actions[index2]) {
 					cache.index = index2 - 1;
@@ -922,13 +922,13 @@ Actions.executeResults = function(result, data, cache) {
 				break;
 		}
 	} else {
-		const type = parseInt(data.iffalse);
+		const type = parseInt(data.iffalse, 10);
 		switch(type) {
 			case 0:
 				this.callNextAction(cache);
 				break;
 			case 2:
-				const val = parseInt(this.evalMessage(data.iffalseVal, cache));
+				const val = parseInt(this.evalMessage(data.iffalseVal, cache), 10);
 				const index = Math.max(val - 1, 0);
 				if(cache.actions[index]) {
 					cache.index = index - 1;
@@ -936,7 +936,7 @@ Actions.executeResults = function(result, data, cache) {
 				}
 				break;
 			case 3:
-				const amnt = parseInt(this.evalMessage(data.iffalseVal, cache));
+				const amnt = parseInt(this.evalMessage(data.iffalseVal, cache), 10);
 				const index2 = cache.index + amnt + 1;
 				if(cache.actions[index2]) {
 					cache.index = index2 - 1;

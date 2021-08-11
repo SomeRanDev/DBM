@@ -83,7 +83,7 @@ module.exports = {
 	action: function(cache) {
 		const botClient = this.getDBM().Bot.bot.user;
 		const data = cache.actions[cache.index];
-		const afk = parseInt(data.afk);
+		const afk = parseInt(data.afk, 10);
 		if(botClient && botClient.setAFK) {
 			botClient.setAFK(afk === 0)
 				.then(() => this.callNextAction(cache))

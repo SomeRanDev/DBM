@@ -23,7 +23,7 @@ module.exports = {
 
 	subtitle: function(data) {
 		const info = ["Role Id", "Role Name", "Role Color", "Role Position"];
-		return `Find Role by ${info[parseInt(data.info)]}`;
+		return `Find Role by ${info[parseInt(data.info, 10)]}`;
 	},
 
 	//---------------------------------------------------------------------
@@ -33,7 +33,7 @@ module.exports = {
 	//---------------------------------------------------------------------
 
 	variableStorage: function(data, varType) {
-		const type = parseInt(data.storage);
+		const type = parseInt(data.storage, 10);
 		if(type !== varType) return;
 		return ([data.varName, "Role"]);
 	},
@@ -120,7 +120,7 @@ module.exports = {
 			return;
 		}
 		const data = cache.actions[cache.index];
-		const info = parseInt(data.info);
+		const info = parseInt(data.info, 10);
 		const find = this.evalMessage(data.find, cache);
 		const roles = server.roles.cache;
 		let result;
@@ -135,13 +135,13 @@ module.exports = {
 				result = roles.find((r) => r.hexColor === find);
 				break;
 			case 3:
-				result = roles.find((r) => r.position === parseInt(find));
+				result = roles.find((r) => r.position === parseInt(find, 10));
 				break;
 			default:
 				break;
 		}
 		if(result !== undefined) {
-			const storage = parseInt(data.storage);
+			const storage = parseInt(data.storage, 10);
 			const varName = this.evalMessage(data.varName, cache);
 			this.storeValue(result, storage, varName, cache);
 		}

@@ -32,7 +32,7 @@ module.exports = {
 	//---------------------------------------------------------------------
 
 	variableStorage: function(data, varType) {
-		const type = parseInt(data.storage);
+		const type = parseInt(data.storage, 10);
 		if(type !== varType) return;
 		return ([data.varName, "Role"]);
 	},
@@ -137,12 +137,12 @@ Name:<br>
 			roleData.color = this.evalMessage(data.color, cache);
 		}
 		if(data.position) {
-			roleData.position = parseInt(this.evalMessage(data.position, cache));
+			roleData.position = parseInt(this.evalMessage(data.position, cache), 10);
 		}
 		roleData.hoist = JSON.parse(data.hoist);
 		roleData.mentionable = JSON.parse(data.mentionable);
 		if(server?.roles) {
-			const storage = parseInt(data.storage);
+			const storage = parseInt(data.storage, 10);
 			server.roles.create({ data: roleData, reason })
 				.then((role) => {
 					const varName = this.evalMessage(data.varName, cache);

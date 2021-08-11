@@ -23,7 +23,7 @@ module.exports = {
 
 	subtitle: function(data) {
 		const channels = ["Mentioned User", "Command Author", "Temp Variable", "Server Variable", "Global Variable"];
-		return `${channels[parseInt(data.member)]}`;
+		return `${channels[parseInt(data.member, 10)]}`;
 	},
 
 	//---------------------------------------------------------------------
@@ -100,11 +100,11 @@ module.exports = {
 
 	action: function(cache) {
 		const data = cache.actions[cache.index];
-		const type = parseInt(data.member);
+		const type = parseInt(data.member, 10);
 		const varName = this.evalMessage(data.varName, cache);
 		const member = this.getMember(type, varName, cache);
 		const reason = this.evalMessage(data.reason, cache);
-		const days = parseInt(data.days) || 0;
+		const days = parseInt(data.days, 10) || 0;
 		if(Array.isArray(member)) {
 			this.callListFunc(member, "ban", [{ days, reason }]).then(() => this.callNextAction(cache));
 		} else if(member && member.ban) {

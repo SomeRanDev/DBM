@@ -23,7 +23,7 @@ module.exports = {
 
 	subtitle: function(data) {
 		const servers = ["Current Server", "Temp Variable", "Server Variable", "Global Variable"];
-		return `${servers[parseInt(data.server)]}`;
+		return `${servers[parseInt(data.server, 10)]}`;
 	},
 
 	//---------------------------------------------------------------------
@@ -92,7 +92,7 @@ module.exports = {
 
 	action: function(cache) {
 		const data = cache.actions[cache.index];
-		const type = parseInt(data.server);
+		const type = parseInt(data.server, 10);
 		const varName = this.evalMessage(data.varName, cache);
 		const server = this.getServer(type, varName, cache);
 		if(server) {

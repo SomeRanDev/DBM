@@ -23,7 +23,7 @@ module.exports = {
 
 	subtitle: function(data) {
 		const storeTypes = ["", "Temp Variable", "Server Variable", "Global Variable"];
-		return `${storeTypes[parseInt(data.storage)]} (${data.varName}) -> [${data.width}, ${data.height}]`;
+		return `${storeTypes[parseInt(data.storage, 10)]} (${data.varName}) -> [${data.width}, ${data.height}]`;
 	},
 
 	//---------------------------------------------------------------------
@@ -102,7 +102,7 @@ module.exports = {
 
 	action: function(cache) {
 		const data = cache.actions[cache.index];
-		const storage = parseInt(data.storage);
+		const storage = parseInt(data.storage, 10);
 		const varName = this.evalMessage(data.varName, cache);
 		const image = this.getVariable(storage, varName, cache);
 		if(!image) {
@@ -113,15 +113,15 @@ module.exports = {
 		let height = this.evalMessage(data.height, cache);
 		if(width.endsWith("%")) {
 			const percent = width.replace("%", "");
-			width = image.bitmap.width * (parseInt(percent) / 100);
+			width = image.bitmap.width * (parseInt(percent, 10) / 100);
 		} else {
-			width = parseInt(width);
+			width = parseInt(width, 10);
 		}
 		if(height.endsWith("%")) {
 			const percent = height.replace("%", "");
-			height = image.bitmap.height * (parseInt(percent) / 100);
+			height = image.bitmap.height * (parseInt(percent, 10) / 100);
 		} else {
-			height = parseInt(height);
+			height = parseInt(height, 10);
 		}
 		image.resize(width, height);
 		this.callNextAction(cache);

@@ -24,7 +24,7 @@ module.exports = {
 	subtitle: function(data) {
 		const roles = ["Mentioned Role", "1st Author Role", "1st Server Role", "Temp Variable", "Server Variable", "Global Variable"];
 		const info = ["Role Object", "Role Id", "Role Name", "Role Color", "Role Position", "Role Timestamp", "Role Is Mentionable?", "Role Is Separate From Others?", "Role Is Managed?", "Role Members List", "Role Creation Date", "Role Permissions", "Role Members Amount"];
-		return `${roles[parseInt(data.role)]} - ${info[parseInt(data.info)]}`;
+		return `${roles[parseInt(data.role, 10)]} - ${info[parseInt(data.info, 10)]}`;
 	},
 
 	//---------------------------------------------------------------------
@@ -34,9 +34,9 @@ module.exports = {
 	//---------------------------------------------------------------------
 
 	variableStorage: function(data, varType) {
-		const type = parseInt(data.storage);
+		const type = parseInt(data.storage, 10);
 		if(type !== varType) return;
-		const info = parseInt(data.info);
+		const info = parseInt(data.info, 10);
 		let dataType = "Unknown Type";
 		switch(info) {
 			case 0:
@@ -174,9 +174,9 @@ module.exports = {
 
 	action: function(cache) {
 		const data = cache.actions[cache.index];
-		const role = parseInt(data.role);
+		const role = parseInt(data.role, 10);
 		const varName = this.evalMessage(data.varName, cache);
-		const info = parseInt(data.info);
+		const info = parseInt(data.info, 10);
 		const targetRole = this.getRole(role, varName, cache);
 		if(!targetRole) {
 			this.callNextAction(cache);
@@ -227,7 +227,7 @@ module.exports = {
 				break;
 		}
 		if(result !== undefined) {
-			const storage = parseInt(data.storage);
+			const storage = parseInt(data.storage, 10);
 			const varName2 = this.evalMessage(data.varName2, cache);
 			this.storeValue(result, storage, varName2, cache);
 		}

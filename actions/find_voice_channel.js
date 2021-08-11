@@ -23,7 +23,7 @@ module.exports = {
 
 	subtitle: function(data) {
 		const info = ["Voice Channel Id", "Voice Channel Name", "Voice Channel Position", "Voice Channel User Limit", "Voice Channel Bitrate", "Voice Channel Category Id"];
-		return `Find Voice Channel by ${info[parseInt(data.info)]}`;
+		return `Find Voice Channel by ${info[parseInt(data.info, 10)]}`;
 	},
 
 	//---------------------------------------------------------------------
@@ -33,7 +33,7 @@ module.exports = {
 	//---------------------------------------------------------------------
 
 	variableStorage: function(data, varType) {
-		const type = parseInt(data.storage);
+		const type = parseInt(data.storage, 10);
 		if(type !== varType) return;
 		return ([data.varName, "Voice Channel"]);
 	},
@@ -122,7 +122,7 @@ module.exports = {
 			return;
 		}
 		const data = cache.actions[cache.index];
-		const info = parseInt(data.info);
+		const info = parseInt(data.info, 10);
 		const find = this.evalMessage(data.find, cache);
 		const channels = server.channels.cache.filter((c) => c.type === "GUILD_VOICE");
 		let result;
@@ -134,13 +134,13 @@ module.exports = {
 				result = channels.find((c) => c.name === find);
 				break;
 			case 2:
-				result = channels.find((c) => c.position === parseInt(find));
+				result = channels.find((c) => c.position === parseInt(find, 10));
 				break;
 			case 3:
-				result = channels.find((c) => c.userLimit === parseInt(find));
+				result = channels.find((c) => c.userLimit === parseInt(find, 10));
 				break;
 			case 4:
-				result = channels.find((c) => c.bitrate === parseInt(find) / 1000);
+				result = channels.find((c) => c.bitrate === parseInt(find, 10) / 1000);
 				break;
 			case 5:
 				result = channels.find((c) => c.parentId === find);
@@ -149,7 +149,7 @@ module.exports = {
 				break;
 		}
 		if(result !== undefined) {
-			const storage = parseInt(data.storage);
+			const storage = parseInt(data.storage, 10);
 			const varName = this.evalMessage(data.varName, cache);
 			this.storeValue(result, storage, varName, cache);
 			this.callNextAction(cache);

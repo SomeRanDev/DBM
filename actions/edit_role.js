@@ -23,7 +23,7 @@ module.exports = {
 
 	subtitle: function(data) {
 		const roles = ["Mentioned Role", "1st Author Role", "1st Server Role", "Temp Variable", "Server Variable", "Global Variable"];
-		return `${roles[parseInt(data.storage)]}`;
+		return `${roles[parseInt(data.storage, 10)]}`;
 	},
 
 	//---------------------------------------------------------------------
@@ -129,7 +129,7 @@ module.exports = {
 			roleData.color = this.evalMessage(data.color, cache);
 		}
 		if(data.position) {
-			roleData.position = parseInt(this.evalMessage(data.position, cache));
+			roleData.position = parseInt(this.evalMessage(data.position, cache), 10);
 		}
 		if(data.hoist !== "none") {
 			roleData.hoist = JSON.parse(data.hoist);
@@ -137,7 +137,7 @@ module.exports = {
 		if(data.mentionable !== "none") {
 			roleData.mentionable = JSON.parse(data.mentionable);
 		}
-		const storage = parseInt(data.storage);
+		const storage = parseInt(data.storage, 10);
 		const varName = this.evalMessage(data.varName, cache);
 		const role = this.getRole(storage, varName, cache);
 		if(Array.isArray(role)) {

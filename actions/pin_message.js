@@ -23,7 +23,7 @@ module.exports = {
 
 	subtitle: function(data) {
 		const names = ["Command Message", "Temp Variable", "Server Variable", "Global Variable"];
-		const index = parseInt(data.storage);
+		const index = parseInt(data.storage, 10);
 		return data.storage === "0" ? `Pin ${names[index]}` : `Pin ${names[index]} (${data.varName})`;
 	},
 
@@ -93,7 +93,7 @@ module.exports = {
 
 	action: function(cache) {
 		const data = cache.actions[cache.index];
-		const storage = parseInt(data.storage);
+		const storage = parseInt(data.storage, 10);
 		const varName = this.evalMessage(data.varName, cache);
 		const message = this.getMessage(storage, varName, cache);
 		if(Array.isArray(message)) {

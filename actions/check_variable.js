@@ -23,7 +23,7 @@ module.exports = {
 
 	subtitle: function(data) {
 		const results = ["Continue Actions", "Stop Action Sequence", "Jump To Action", "Jump Forward Actions"];
-		return `If True: ${results[parseInt(data.iftrue)]} ~ If False: ${results[parseInt(data.iffalse)]}`;
+		return `If True: ${results[parseInt(data.iftrue, 10)]} ~ If False: ${results[parseInt(data.iffalse, 10)]}`;
 	},
 
 	//---------------------------------------------------------------------
@@ -123,13 +123,13 @@ module.exports = {
 
 	action: function(cache) {
 		const data = cache.actions[cache.index];
-		const type = parseInt(data.storage);
+		const type = parseInt(data.storage, 10);
 		const varName = this.evalMessage(data.varName, cache);
 		const variable = this.getVariable(type, varName, cache);
 		let result = false;
 		if(variable) {
 			const val1 = variable;
-			const compare = parseInt(data.comparison);
+			const compare = parseInt(data.comparison, 10);
 			let val2 = this.evalMessage(data.value, cache);
 			if(compare !== 6) val2 = this.eval(val2, cache);
 			if(val2 === false) val2 = this.evalMessage(data.value, cache);

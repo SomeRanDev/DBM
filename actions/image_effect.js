@@ -24,7 +24,7 @@ module.exports = {
 	subtitle: function(data) {
 		const storeTypes = ["", "Temp Variable", "Server Variable", "Global Variable"];
 		const effect = ["Greyscale", "Invert", "Normalize", "Remove Transparency", "Apply Minor Blur", "Apply Major Blur", "Apply Sepia", "Dither"];
-		return `${storeTypes[parseInt(data.storage)]} (${data.varName}) -> ${effect[parseInt(data.effect)]}`;
+		return `${storeTypes[parseInt(data.storage, 10)]} (${data.varName}) -> ${effect[parseInt(data.effect, 10)]}`;
 	},
 
 	//---------------------------------------------------------------------
@@ -108,14 +108,14 @@ module.exports = {
 
 	action: function(cache) {
 		const data = cache.actions[cache.index];
-		const storage = parseInt(data.storage);
+		const storage = parseInt(data.storage, 10);
 		const varName = this.evalMessage(data.varName, cache);
 		const image = this.getVariable(storage, varName, cache);
 		if(!image) {
 			this.callNextAction(cache);
 			return;
 		}
-		const effect = parseInt(data.effect);
+		const effect = parseInt(data.effect, 10);
 		switch(effect) {
 			case 0:
 				image.greyscale();

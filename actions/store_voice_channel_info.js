@@ -24,7 +24,7 @@ module.exports = {
 	subtitle: function(data) {
 		const channels = ["Command Author's Voice Ch.", "Mentioned User's Voice Ch.", "Default Voice Channel", "Temp Variable", "Server Variable", "Global Variable"];
 		const info = ["Voice Channel Object", "Voice Channel Id", "Voice Channel Name", "Voice Channel Position", "Voice Channel User Limit", "Voice Channel Bitrate"];
-		return `${channels[parseInt(data.channel)]} - ${info[parseInt(data.info)]}`;
+		return `${channels[parseInt(data.channel, 10)]} - ${info[parseInt(data.info, 10)]}`;
 	},
 
 	//---------------------------------------------------------------------
@@ -34,9 +34,9 @@ module.exports = {
 	//---------------------------------------------------------------------
 
 	variableStorage: function(data, varType) {
-		const type = parseInt(data.storage);
+		const type = parseInt(data.storage, 10);
 		if(type !== varType) return;
-		const info = parseInt(data.info);
+		const info = parseInt(data.info, 10);
 		let dataType = "Unknown Type";
 		switch(info) {
 			case 0:
@@ -148,9 +148,9 @@ module.exports = {
 
 	action: function(cache) {
 		const data = cache.actions[cache.index];
-		const channel = parseInt(data.channel);
+		const channel = parseInt(data.channel, 10);
 		const varName = this.evalMessage(data.varName, cache);
-		const info = parseInt(data.info);
+		const info = parseInt(data.info, 10);
 		const targetChannel = this.getVoiceChannel(channel, varName, cache);
 		if(!targetChannel) {
 			this.callNextAction(cache);
@@ -180,7 +180,7 @@ module.exports = {
 				break;
 		}
 		if(result !== undefined) {
-			const storage = parseInt(data.storage);
+			const storage = parseInt(data.storage, 10);
 			const varName2 = this.evalMessage(data.varName2, cache);
 			this.storeValue(result, storage, varName2, cache);
 			this.callNextAction(cache);

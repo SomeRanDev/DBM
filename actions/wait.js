@@ -23,7 +23,7 @@ module.exports = {
 
 	subtitle: function(data) {
 		const measurements = ["Milliseconds", "Seconds", "Minutes", "Hours"];
-		return `${data.time} ${measurements[parseInt(data.measurement)]}`;
+		return `${data.time} ${measurements[parseInt(data.measurement, 10)]}`;
 	},
 
 	//---------------------------------------------------------------------
@@ -91,8 +91,8 @@ module.exports = {
 
 	action: function(cache) {
 		const data = cache.actions[cache.index];
-		const time = parseInt(this.evalMessage(data.time, cache));
-		const type = parseInt(data.measurement);
+		const time = parseInt(this.evalMessage(data.time, cache), 10);
+		const type = parseInt(data.measurement, 10);
 		switch(type) {
 			case 0:
 				setTimeout(this.callNextAction.bind(this, cache), time);

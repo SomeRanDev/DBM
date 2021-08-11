@@ -23,7 +23,7 @@ module.exports = {
 
 	subtitle: function(data) {
 		const info = ["Channel Id", "Channel Name", "Channel Topic", "Channel Position", "Channel Category Id"];
-		return `Find Channel by ${info[parseInt(data.info)]}`;
+		return `Find Channel by ${info[parseInt(data.info, 10)]}`;
 	},
 
 	//---------------------------------------------------------------------
@@ -33,7 +33,7 @@ module.exports = {
 	//---------------------------------------------------------------------
 
 	variableStorage: function(data, varType) {
-		const type = parseInt(data.storage);
+		const type = parseInt(data.storage, 10);
 		if(type !== varType) return;
 		return ([data.varName, "Channel"]);
 	},
@@ -121,7 +121,7 @@ module.exports = {
 			return;
 		}
 		const data = cache.actions[cache.index];
-		const info = parseInt(data.info);
+		const info = parseInt(data.info, 10);
 		const find = this.evalMessage(data.find, cache);
 		const channels = server.channels.cache.filter((c) => c.type === "GUILD_TEXT" && c.type === "GUILD_NEWS");
 		let result;
@@ -136,7 +136,7 @@ module.exports = {
 				result = channels.find((c) => c.topic === find);
 				break;
 			case 3:
-				result = channels.find((c) => c.position === parseInt(find));
+				result = channels.find((c) => c.position === parseInt(find, 10));
 				break;
 			case 4:
 				result = channels.find((c) => c.parentId === find);
@@ -145,7 +145,7 @@ module.exports = {
 				break;
 		}
 		if(result !== undefined) {
-			const storage = parseInt(data.storage);
+			const storage = parseInt(data.storage, 10);
 			const varName = this.evalMessage(data.varName, cache);
 			this.storeValue(result, storage, varName, cache);
 			this.callNextAction(cache);

@@ -23,7 +23,7 @@ module.exports = {
 
 	subtitle: function(data) {
 		const channels = ["Same Channel", "Mentioned Channel", "1st Server Channel", "Temp Variable", "Server Variable", "Global Variable"];
-		return `Delete ${data.count} messages from ${channels[parseInt(data.channel)] || "Nothing"}`;
+		return `Delete ${data.count} messages from ${channels[parseInt(data.channel, 10)] || "Nothing"}`;
 	},
 
 	//---------------------------------------------------------------------
@@ -98,7 +98,7 @@ module.exports = {
 		const { glob, document } = this;
 
 		glob.onChange2 = function(event) {
-			const value = parseInt(event.value);
+			const value = parseInt(event.value, 10);
 			const varNameInput = document.getElementById("varNameContainer2");
 			if(value === 0) {
 				varNameInput.style.display = "none";
@@ -123,7 +123,7 @@ module.exports = {
 		const data = cache.actions[cache.index];
 		const server = cache.server;
 		let source;
-		const channel = parseInt(data.channel);
+		const channel = parseInt(data.channel, 10);
 		const msg = cache.msg;
 		const varName = this.evalMessage(data.varName, cache);
 		switch(channel) {
@@ -155,9 +155,9 @@ module.exports = {
 				break;
 		}
 		if(source?.messages) {
-			const count = Math.min(parseInt(this.evalMessage(data.count, cache)), 100);
+			const count = Math.min(parseInt(this.evalMessage(data.count, cache), 10), 100);
 			source.messages.fetch({ limit: count, before: msg.id }).then(function(messages) {
-				const condition = parseInt(data.condition);
+				const condition = parseInt(data.condition, 10);
 				if(condition === 1) {
 					let author;
 					try {

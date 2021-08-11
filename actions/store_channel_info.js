@@ -24,7 +24,7 @@ module.exports = {
 	subtitle: function(data) {
 		const channels = ["Same Channel", "Mentioned Channel", "1st Server Channel", "Temp Variable", "Server Variable", "Global Variable"];
 		const info = ["Channel Object", "Channel Id", "Channel Name", "Channel Topic", "Channel Last Message (Removed)", "Channel Position", "Channel Is NSFW?", "Channel Is DM?", "Channel Is Deleteable?", "Channel Creation Date", "Channel Category Id", "Channel Created At", "Channel Created At Timestamp"];
-		return `${channels[parseInt(data.channel)]} - ${info[parseInt(data.info)]}`;
+		return `${channels[parseInt(data.channel, 10)]} - ${info[parseInt(data.info, 10)]}`;
 	},
 
 	//---------------------------------------------------------------------
@@ -34,9 +34,9 @@ module.exports = {
 	//---------------------------------------------------------------------
 
 	variableStorage: function(data, varType) {
-		const type = parseInt(data.storage);
+		const type = parseInt(data.storage, 10);
 		if(type !== varType) return;
-		const info = parseInt(data.info);
+		const info = parseInt(data.info, 10);
 		let dataType = "Unknown Type";
 		switch(info) {
 			case 0:
@@ -168,9 +168,9 @@ module.exports = {
 	action: function(cache) {
 		const data = cache.actions[cache.index];
 		const DiscordJS = this.getDBM().DiscordJS;
-		const channel = parseInt(data.channel);
+		const channel = parseInt(data.channel, 10);
 		const varName = this.evalMessage(data.varName, cache);
-		const info = parseInt(data.info);
+		const info = parseInt(data.info, 10);
 		const targetChannel = this.getChannel(channel, varName, cache);
 		if(!targetChannel) {
 			this.callNextAction(cache);
@@ -200,7 +200,7 @@ module.exports = {
 				result = targetChannel.nsfw;
 				break;
 			case 7:
-				result = targetChannel instanceof DiscordJS.DMChannel;
+				result = targetChannel.type === 'DM';
 				break;
 			case 8:
 				result = targetChannel.deletable;
@@ -219,7 +219,7 @@ module.exports = {
 				break;
 		}
 		if(result !== undefined) {
-			const storage = parseInt(data.storage);
+			const storage = parseInt(data.storage, 10);
 			const varName2 = this.evalMessage(data.varName2, cache);
 			this.storeValue(result, storage, varName2, cache);
 		}

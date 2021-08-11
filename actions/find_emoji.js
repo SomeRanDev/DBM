@@ -23,7 +23,7 @@ module.exports = {
 
 	subtitle: function(data) {
 		const info = ["Emoji Id", "Emoji Name"];
-		return `Find Emoji by ${info[parseInt(data.info)]}`;
+		return `Find Emoji by ${info[parseInt(data.info, 10)]}`;
 	},
 
 	//---------------------------------------------------------------------
@@ -33,7 +33,7 @@ module.exports = {
 	//---------------------------------------------------------------------
 
 	variableStorage: function(data, varType) {
-		const type = parseInt(data.storage);
+		const type = parseInt(data.storage, 10);
 		if(type !== varType) return;
 		return ([data.varName, "Emoji"]);
 	},
@@ -114,7 +114,7 @@ module.exports = {
 	action: function(cache) {
 		const data = cache.actions[cache.index];
 		const bot = this.getDBM().Bot.bot;
-		const info = parseInt(data.info);
+		const info = parseInt(data.info, 10);
 		const find = this.evalMessage(data.find, cache);
 		const emojis = bot.emojis.cache;
 		let result;
@@ -129,7 +129,7 @@ module.exports = {
 				break;
 		}
 		if(result !== undefined) {
-			const storage = parseInt(data.storage);
+			const storage = parseInt(data.storage, 10);
 			const varName = this.evalMessage(data.varName, cache);
 			this.storeValue(result, storage, varName, cache);
 		}

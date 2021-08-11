@@ -23,7 +23,7 @@ module.exports = {
 
 	subtitle: function(data) {
 		const channels = ["Mentioned User", "Command Author", "Temp Variable", "Server Variable", "Global Variable"];
-		return `${channels[parseInt(data.member)]}`;
+		return `${channels[parseInt(data.member, 10)]}`;
 	},
 
 	//---------------------------------------------------------------------
@@ -33,7 +33,7 @@ module.exports = {
 	//---------------------------------------------------------------------
 
 	variableStorage: function(data, varType) {
-		const type = parseInt(data.storage);
+		const type = parseInt(data.storage, 10);
 		if(type !== varType) return;
 		return ([data.varName2, "Image"]);
 	},
@@ -116,13 +116,13 @@ module.exports = {
 
 	action: function(cache) {
 		const data = cache.actions[cache.index];
-		const type = parseInt(data.member);
+		const type = parseInt(data.member, 10);
 		const varName = this.evalMessage(data.varName, cache);
 		const member = this.getMember(type, varName, cache);
 		const Images = this.getDBM().Images;
 		Images.getImage(member.user.displayAvatarURL({ format: "png" })).then(function(image) {
 			const varName2 = this.evalMessage(data.varName2, cache);
-			const storage = parseInt(data.storage);
+			const storage = parseInt(data.storage, 10);
 			this.storeValue(image, storage, varName2, cache);
 			this.callNextAction(cache);
 		}.bind(this)).catch(this.displayError.bind(this, data, cache));

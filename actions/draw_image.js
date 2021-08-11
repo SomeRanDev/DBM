@@ -23,7 +23,7 @@ module.exports = {
 
 	subtitle: function(data) {
 		const storeTypes = ["", "Temp Variable", "Server Variable", "Global Variable"];
-		return `${storeTypes[parseInt(data.storage2)]} (${data.varName2}) -> ${storeTypes[parseInt(data.storage)]} (${data.varName})`;
+		return `${storeTypes[parseInt(data.storage2, 10)]} (${data.varName2}) -> ${storeTypes[parseInt(data.storage, 10)]} (${data.varName})`;
 	},
 
 	//---------------------------------------------------------------------
@@ -122,22 +122,22 @@ module.exports = {
 
 	action: function(cache) {
 		const data = cache.actions[cache.index];
-		const storage = parseInt(data.storage);
+		const storage = parseInt(data.storage, 10);
 		const varName = this.evalMessage(data.varName, cache);
 		const image = this.getVariable(storage, varName, cache);
 		if(!image || !image.composite) {
 			this.callNextAction(cache);
 			return;
 		}
-		const storage2 = parseInt(data.storage2);
+		const storage2 = parseInt(data.storage2, 10);
 		const varName2 = this.evalMessage(data.varName2, cache);
 		const image2 = this.getVariable(storage2, varName2, cache);
 		if(!image2) {
 			this.callNextAction(cache);
 			return;
 		}
-		const x = parseInt(this.evalMessage(data.x, cache));
-		const y = parseInt(this.evalMessage(data.y, cache));
+		const x = parseInt(this.evalMessage(data.x, cache), 10);
+		const y = parseInt(this.evalMessage(data.y, cache), 10);
 		const mask = data.mask;
 		if(mask === "2") {
 			image.mask(image2, x, y);

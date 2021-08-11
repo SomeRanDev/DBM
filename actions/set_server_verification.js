@@ -23,7 +23,7 @@ module.exports = {
 
 	subtitle: function(data) {
 		const verifications = ["None", "Low", "Medium", "(╯°□°）╯︵ ┻━┻", "┻━┻彡 ヽ(ಠДಠ)ノ彡┻━┻﻿"];
-		return `${verifications[parseInt(data.verification)]}`;
+		return `${verifications[parseInt(data.verification, 10)]}`;
 	},
 
 	//---------------------------------------------------------------------
@@ -106,15 +106,15 @@ module.exports = {
 
 	action: function(cache) {
 		const data = cache.actions[cache.index];
-		const type = parseInt(data.server);
+		const type = parseInt(data.server, 10);
 		const varName = this.evalMessage(data.varName, cache);
 		const server = this.getServer(type, varName, cache);
 		const reason = this.evalMessage(data.reason, cache);
 		if(Array.isArray(server)) {
-			this.callListFunc(server, "setVerificationLevel", [parseInt(data.verification), reason])
+			this.callListFunc(server, "setVerificationLevel", [parseInt(data.verification, 10), reason])
 				.then(() => this.callNextAction(cache));
 		} else if(server && server.setVerificationLevel) {
-			server.setVerificationLevel(parseInt(data.verification), reason)
+			server.setVerificationLevel(parseInt(data.verification, 10), reason)
 				.then(() => this.callNextAction(cache))
 				.catch(this.displayError.bind(this, data, cache));
 		} else {

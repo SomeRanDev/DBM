@@ -32,7 +32,7 @@ module.exports = {
 	//---------------------------------------------------------------------
 
 	variableStorage: function(data, varType) {
-		const type = parseInt(data.storage);
+		const type = parseInt(data.storage, 10);
 		if(type !== varType) return;
 		return ([data.varName, "Image"]);
 	},
@@ -106,7 +106,7 @@ module.exports = {
 		const Images = this.getDBM().Images;
 		Images.getImage(this.evalMessage(data.url, cache)).then(function(image) {
 			const varName = this.evalMessage(data.varName, cache);
-			const storage = parseInt(data.storage);
+			const storage = parseInt(data.storage, 10);
 			this.storeValue(image, storage, varName, cache);
 			this.callNextAction(cache);
 		}.bind(this)).catch(this.displayError.bind(this, data, cache));

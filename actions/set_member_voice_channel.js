@@ -23,7 +23,7 @@ module.exports = {
 
 	subtitle: function(data) {
 		const members = ["Mentioned User", "Command Author", "Temp Variable", "Server Variable", "Global Variable"];
-		return `${members[parseInt(data.member)]}`;
+		return `${members[parseInt(data.member, 10)]}`;
 	},
 
 	//---------------------------------------------------------------------
@@ -109,11 +109,11 @@ module.exports = {
 
 	action: function(cache) {
 		const data = cache.actions[cache.index];
-    const storage = parseInt(data.member);
+    const storage = parseInt(data.member, 10);
     const varName = this.evalMessage(data.varName, cache);
     const member = this.getMember(storage, varName, cache);
 
-    const storage2 = parseInt(data.channel);
+    const storage2 = parseInt(data.channel, 10);
     const varName2 = this.evalMessage(data.varName2, cache);
     const channel = this.getVoiceChannel(storage2, varName2, cache);
 		const reason = this.evalMessage(data.reason, cache);

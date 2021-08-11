@@ -23,7 +23,7 @@ module.exports = {
 
 	subtitle: function(data) {
 		const channels = ["Same Channel", "Command Author", "Mentioned User", "Mentioned Channel", "Default Channel", "Temp Variable", "Server Variable", "Global Variable"];
-		return `${channels[parseInt(data.channel)]}: "${data.message.replace(/[\n\r]+/, "")}"`;
+		return `${channels[parseInt(data.channel, 10)]}: "${data.message.replace(/[\n\r]+/, "")}"`;
 	},
 
 	//---------------------------------------------------------------------
@@ -33,7 +33,7 @@ module.exports = {
 	//---------------------------------------------------------------------
 
 	variableStorage: function(data, varType) {
-		const type = parseInt(data.storage);
+		const type = parseInt(data.storage, 10);
 		if(type !== varType) return;
 		return ([data.varName2, "Message"]);
 	},
@@ -121,7 +121,7 @@ module.exports = {
 
 	action: function(cache) {
 		const data = cache.actions[cache.index];
-		const channel = parseInt(data.channel);
+		const channel = parseInt(data.channel, 10);
 		const message = data.message;
 		if(channel === undefined || message === undefined) return;
 		const varName = this.evalMessage(data.varName, cache);
@@ -129,14 +129,14 @@ module.exports = {
 		if(Array.isArray(target)) {
 			this.callListFunc(target, "send", [this.evalMessage(message, cache), { tts: true }]).then(function(resultMsg) {
 				const varName2 = this.evalMessage(data.varName2, cache);
-				const storage = parseInt(data.storage);
+				const storage = parseInt(data.storage, 10);
 				this.storeValue(resultMsg, storage, varName2, cache);
 				this.callNextAction(cache);
 			}.bind(this));
 		} else if(target && target.send) {
 			target.send(this.evalMessage(message, cache), { tts: true }).then(function(resultMsg) {
 				const varName2 = this.evalMessage(data.varName2, cache);
-				const storage = parseInt(data.storage);
+				const storage = parseInt(data.storage, 10);
 				this.storeValue(resultMsg, storage, varName2, cache);
 				this.callNextAction(cache);
 			}.bind(this)).catch(this.displayError.bind(this, data, cache));

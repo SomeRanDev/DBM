@@ -30,8 +30,8 @@ module.exports = {
 			"Server Variable",
 			"Global Variable"
 		];
-		const index = parseInt(data.storage);
-		return parseInt(data.storage) < 3 ? `${names[index]}` : `${names[index]} - ${data.varName}`;
+		const index = parseInt(data.storage, 10);
+		return parseInt(data.storage, 10) < 3 ? `${names[index]}` : `${names[index]} - ${data.varName}`;
 	},
 
 	//---------------------------------------------------------------------
@@ -104,7 +104,7 @@ module.exports = {
 
 	action: function(cache) {
 		const data = cache.actions[cache.index];
-		const storage = parseInt(data.storage);
+		const storage = parseInt(data.storage, 10);
 		const varName = this.evalMessage(data.varName, cache);
 		const channel = this.getChannel(storage, varName, cache);
 		const reason = this.evalMessage(data.reason, cache);

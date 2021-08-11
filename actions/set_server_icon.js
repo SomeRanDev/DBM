@@ -23,7 +23,7 @@ module.exports = {
 
 	subtitle: function(data) {
 		const storeTypes = ["", "Temp Variable", "Server Variable", "Global Variable"];
-		return `${storeTypes[parseInt(data.storage)]} (${data.varName2})`;
+		return `${storeTypes[parseInt(data.storage, 10)]} (${data.varName2})`;
 	},
 
 	//---------------------------------------------------------------------
@@ -109,12 +109,12 @@ module.exports = {
 
 	action: function(cache) {
 		const data = cache.actions[cache.index];
-		const type = parseInt(data.server);
+		const type = parseInt(data.server, 10);
 		const varName = this.evalMessage(data.varName, cache);
 		const server = this.getServer(type, varName, cache);
 		const reason = this.evalMessage(data.reason, cache);
 		if(Array.isArray(server) || (server && server.setIcon)) {
-			const type = parseInt(data.storage);
+			const type = parseInt(data.storage, 10);
 			const varName2 = this.evalMessage(data.varName2, cache);
 			const image = this.getVariable(type, varName2, cache);
 			const Images = this.getDBM().Images;

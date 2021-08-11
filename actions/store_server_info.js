@@ -24,7 +24,7 @@ module.exports = {
 	subtitle: function(data) {
 		const servers = ["Current Server", "Temp Variable", "Server Variable", "Global Variable"];
 		const info = ["Server Object", "Server Id", "Server Name", "Server Name Acronym", "Server Region (Removed)", "Server Icon URL", "Server Verification Level", "Server Default Channel", "Server AFK Channel", "Server System Channel", "Server Default Role", "Server Owner Object", "Server Bot Member", "Server Channels List", "Server Roles List", "Server Members List", "Server Emojis List", "Server Member Count", "Server Created At", "Server AFK Timeout", "Server Available", "Server Large", "Server Joined At", "Server Channels Count", "Server Emojis Count", "Server Embed Enabled", "Server Do Not Disturb Members Count", "Server Online Members Count", "Server Offline Members Count", "Server Idle Members Count", "Server Bot Count", "Server Channels Ids List", "Server Roles Ids List", "Server Members Ids List", "", "Server Human Count", "", "Server Roles Count", "Server Text Channels Count", "Server Voice Channels Count", "Server Verified", "Server Bans List", "Server Invites List", "Server Explicit Content Filter", "Server Boosts Count", "Server Boost Tier", "Server Banner URL", "Server Features List", "Server Owner Id", "Server Vanity URL Code", "Server Widget Channel Id"];
-		return `${servers[parseInt(data.server)]} - ${info[parseInt(data.info)]}`;
+		return `${servers[parseInt(data.server, 10)]} - ${info[parseInt(data.info, 10)]}`;
 	},
 
 	//---------------------------------------------------------------------
@@ -34,9 +34,9 @@ module.exports = {
 	//---------------------------------------------------------------------
 
 	variableStorage: function(data, varType) {
-		const type = parseInt(data.storage);
+		const type = parseInt(data.storage, 10);
 		if(type !== varType) return;
-		const info = parseInt(data.info);
+		const info = parseInt(data.info, 10);
 		let dataType = "Unknown Type";
 		switch(info) {
 			case 0:
@@ -289,9 +289,9 @@ module.exports = {
 
 	action: async function(cache) {
 		const data = cache.actions[cache.index];
-		const server = parseInt(data.server);
+		const server = parseInt(data.server, 10);
 		const varName = this.evalMessage(data.varName, cache);
-		const info = parseInt(data.info);
+		const info = parseInt(data.info, 10);
 		const targetServer = this.getServer(server, varName, cache);
 		if(!targetServer) return this.callNextAction(cache);
 		const fetchMembers = async () => targetServer.memberCount !== targetServer.members.cache.size
@@ -458,7 +458,7 @@ module.exports = {
 				break;
 		}
 		if(result !== undefined) {
-			const storage = parseInt(data.storage);
+			const storage = parseInt(data.storage, 10);
 			const varName2 = this.evalMessage(data.varName2, cache);
 			this.storeValue(result, storage, varName2, cache);
 		}

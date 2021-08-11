@@ -23,7 +23,7 @@ module.exports = {
 
 	subtitle: function(data) {
 		const storage = ["", "Temp Variable", "Server Variable", "Global Variable"];
-		return `${storage[parseInt(data.storage)]} (${data.varName}) => [${data.min}, ${data.max}]`;
+		return `${storage[parseInt(data.storage, 10)]} (${data.varName}) => [${data.min}, ${data.max}]`;
 	},
 
 	//---------------------------------------------------------------------
@@ -33,7 +33,7 @@ module.exports = {
 	//---------------------------------------------------------------------
 
 	variableStorage: function(data, varType) {
-		const type = parseInt(data.storage);
+		const type = parseInt(data.storage, 10);
 		if(type !== varType) return;
 		return ([data.varName, "Number"]);
 	},
@@ -110,10 +110,10 @@ module.exports = {
 
 	action: function(cache) {
 		const data = cache.actions[cache.index];
-		const type = parseInt(data.storage);
+		const type = parseInt(data.storage, 10);
 		const varName = this.evalMessage(data.varName, cache);
-		const min = parseInt(this.evalMessage(data.min, cache));
-		const max = parseInt(this.evalMessage(data.max, cache)) + 1;
+		const min = parseInt(this.evalMessage(data.min, cache), 10);
+		const max = parseInt(this.evalMessage(data.max, cache), 10) + 1;
 		const finalVal = Math.floor(Math.random() * (max - min)) + min;
 		this.storeValue(finalVal, type, varName, cache);
 		this.callNextAction(cache);

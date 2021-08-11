@@ -23,7 +23,7 @@ module.exports = {
 
 	subtitle: function(data) {
 		const info = ["Server Id", "Server Name", "Server Name Acronym", "Server Member Count", "Server Region (Removed)", "Server Owner Id", "Server Verification Level", "Server Is Available"];
-		return `Find Server by ${info[parseInt(data.info)]}`;
+		return `Find Server by ${info[parseInt(data.info, 10)]}`;
 	},
 
 	//---------------------------------------------------------------------
@@ -33,7 +33,7 @@ module.exports = {
 	//---------------------------------------------------------------------
 
 	variableStorage: function(data, varType) {
-		const type = parseInt(data.storage);
+		const type = parseInt(data.storage, 10);
 		if(type !== varType) return;
 		return ([data.varName, "Server"]);
 	},
@@ -121,7 +121,7 @@ module.exports = {
 		const bot = this.getDBM().Bot.bot;
 		const servers = bot.guilds.cache;
 		const data = cache.actions[cache.index];
-		const info = parseInt(data.info);
+		const info = parseInt(data.info, 10);
 		const find = this.evalMessage(data.find, cache);
 		let result;
 		switch(info) {
@@ -135,7 +135,7 @@ module.exports = {
 				result = servers.find((s) => s.nameAcronym === find);
 				break;
 			case 3:
-				result = servers.find((s) => s.memberCount === parseInt(find));
+				result = servers.find((s) => s.memberCount === parseInt(find, 10));
 				break;
 			case 5:
 				result = servers.find((s) => s.ownerId === find);
@@ -150,7 +150,7 @@ module.exports = {
 				break;
 		}
 		if(result !== undefined) {
-			const storage = parseInt(data.storage);
+			const storage = parseInt(data.storage, 10);
 			const varName = this.evalMessage(data.varName, cache);
 			this.storeValue(result, storage, varName, cache);
 			this.callNextAction(cache);

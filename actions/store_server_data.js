@@ -24,7 +24,7 @@ module.exports = {
 	subtitle: function(data) {
 		const servers = ["Current Server", "Temp Variable", "Server Variable", "Global Variable"];
 		const storage = ["", "Temp Variable", "Server Variable", "Global Variable"];
-		return `${servers[parseInt(data.server)]} - ${storage[parseInt(data.storage)]} (${data.varName2})`;
+		return `${servers[parseInt(data.server, 10)]} - ${storage[parseInt(data.storage, 10)]} (${data.varName2})`;
 	},
 
 	//---------------------------------------------------------------------
@@ -34,7 +34,7 @@ module.exports = {
 	//---------------------------------------------------------------------
 
 	variableStorage: function(data, varType) {
-		const type = parseInt(data.storage);
+		const type = parseInt(data.storage, 10);
 		if(type !== varType) return;
 		return ([data.varName2, "Unknown Type"]);
 	},
@@ -127,7 +127,7 @@ module.exports = {
 
 	action: function(cache) {
 		const data = cache.actions[cache.index];
-		const type = parseInt(data.server);
+		const type = parseInt(data.server, 10);
 		const varName = this.evalMessage(data.varName, cache);
 		const server = this.getServer(type, varName, cache);
 		if(server && server.data) {
@@ -139,7 +139,7 @@ module.exports = {
 			} else {
 				result = server.data(dataName, defVal);
 			}
-			const storage = parseInt(data.storage);
+			const storage = parseInt(data.storage, 10);
 			const varName2 = this.evalMessage(data.varName2, cache);
 			this.storeValue(result, storage, varName2, cache);
 		}

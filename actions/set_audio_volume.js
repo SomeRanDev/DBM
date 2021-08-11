@@ -82,7 +82,7 @@ module.exports = {
 		const Audio = this.getDBM().Audio;
 		const server = cache.server;
 		if(server) {
-			const volume = parseInt(this.evalMessage(data.volume, cache)) / 100;
+			const volume = parseInt(this.evalMessage(data.volume, cache), 10) / 100;
 			Audio.setVolume(volume, cache);
 		}
 		this.callNextAction(cache);

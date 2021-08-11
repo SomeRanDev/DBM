@@ -23,7 +23,7 @@ module.exports = {
 
 	subtitle: function(data) {
 		const list = ["Server Members", "Server Channels", "Server Roles", "Server Emojis", "All Bot Servers", "Mentioned User Roles", "Command Author Roles", "Temp Variable", "Server Variable", "Global Variable"];
-		return `Transform ${list[parseInt(data.list)]}`;
+		return `Transform ${list[parseInt(data.list, 10)]}`;
 	},
 
 	//---------------------------------------------------------------------
@@ -33,7 +33,7 @@ module.exports = {
 	//---------------------------------------------------------------------
 
 	variableStorage: function(data, varType) {
-		const type = parseInt(data.storage);
+		const type = parseInt(data.storage, 10);
 		if(type !== varType) return;
 		return ([data.varName2, "List"]);
 	},
@@ -126,7 +126,7 @@ module.exports = {
 
 	action: function(cache) {
 		const data = cache.actions[cache.index];
-		const storage = parseInt(data.list);
+		const storage = parseInt(data.list, 10);
 		const varName = this.evalMessage(data.varName, cache);
 		const list = this.getList(storage, varName, cache);
 
@@ -161,7 +161,7 @@ module.exports = {
 
 		if(result) {
 			const varName2 = this.evalMessage(data.varName2, cache);
-			const storage2 = parseInt(data.storage);
+			const storage2 = parseInt(data.storage, 10);
 			this.storeValue(result, storage2, varName2, cache);
 		}
 

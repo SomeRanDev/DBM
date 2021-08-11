@@ -23,7 +23,7 @@ module.exports = {
 
 	subtitle: function(data) {
 		const actions = ["Stop Playing", "Pause Audio", "Resume Audio"];
-		return `${actions[parseInt(data.action)]}`;
+		return `${actions[parseInt(data.action, 10)]}`;
 	},
 
 	//---------------------------------------------------------------------
@@ -91,7 +91,7 @@ module.exports = {
 			dispatcher = Audio.dispatchers[server.id];
 		}
 		if(dispatcher) {
-			const action = parseInt(data.action);
+			const action = parseInt(data.action, 10);
 			switch(action) {
 				case 0:
 					dispatcher._forceEnd = true;

@@ -21,7 +21,7 @@ module.exports = {
 	subtitle: function(data) {
 		const message = ["Command Message", "Temp Variable", "Server Variable", "Global Variable"];
 		const info = ["Message Object", "Message Id", "Message Text", "Message Author", "Message Channel", "Message Timestamp", "Message is Pinned", "Message is TTS", "Message Attachments List", "Message Edits", "", "", "Messages Reactions Count", "Mentioned Users List", "Mentioned Users Count", "Message URL", "Message Creation Date", "Message Content Length", "Message Attachments Count", "Message Guild", "Message Type", "Message Webhook Id", "Message Embed Object"];
-		return `${message[parseInt(data.message)]} - ${info[parseInt(data.info)]}`;
+		return `${message[parseInt(data.message, 10)]} - ${info[parseInt(data.info, 10)]}`;
 	},
 
 	//---------------------------------------------------------------------
@@ -30,9 +30,9 @@ module.exports = {
 	// Stores the relevant variable info for the editor.
 	//---------------------------------------------------------------------
 	variableStorage: function(data, varType) {
-		const type = parseInt(data.storage);
+		const type = parseInt(data.storage, 10);
 		if(type !== varType) return;
-		const info = parseInt(data.info);
+		const info = parseInt(data.info, 10);
 		let dataType = "Unknown Type";
 		switch(info) {
 			case 0:
@@ -198,9 +198,9 @@ module.exports = {
 	//---------------------------------------------------------------------
 	action: function(cache) {
 		const data = cache.actions[cache.index];
-		const message = parseInt(data.message);
+		const message = parseInt(data.message, 10);
 		const varName = this.evalMessage(data.varName, cache);
-		const info = parseInt(data.info);
+		const info = parseInt(data.info, 10);
 		const msg = this.getMessage(message, varName, cache);
 		if(!msg) {
 			this.callNextAction(cache);
@@ -275,7 +275,7 @@ module.exports = {
 				break;
 		}
 		if(result !== undefined) {
-			const storage = parseInt(data.storage);
+			const storage = parseInt(data.storage, 10);
 			const varName2 = this.evalMessage(data.varName2, cache);
 			this.storeValue(result, storage, varName2, cache);
 		}

@@ -23,7 +23,7 @@ module.exports = {
 
 	subtitle: function(data) {
 		const storage = ["", "Temp Variable", "Server Variable", "Global Variable"];
-		return `${storage[parseInt(data.storage)]} (${data.varName})`;
+		return `${storage[parseInt(data.storage, 10)]} (${data.varName})`;
 	},
 
 	//---------------------------------------------------------------------
@@ -33,7 +33,7 @@ module.exports = {
 	//---------------------------------------------------------------------
 
 	variableStorage: function(data, varType) {
-		const type = parseInt(data.storage);
+		const type = parseInt(data.storage, 10);
 		if(type !== varType) return;
 		return ([data.varName, "List"]);
 	},
@@ -101,7 +101,7 @@ module.exports = {
 	action: function(cache) {
 		const data = cache.actions[cache.index];
 		const varName = this.evalMessage(data.varName, cache);
-		const storage = parseInt(data.storage);
+		const storage = parseInt(data.storage, 10);
 		this.storeValue([], storage, varName, cache);
 		this.callNextAction(cache);
 	},

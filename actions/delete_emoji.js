@@ -23,7 +23,7 @@ module.exports = {
 
 	subtitle: function(data) {
 		const inputTypes = ["Specific Emoji", "Temp Variable", "Server Variable", "Global Variable"];
-		return `${inputTypes[parseInt(data.emoji)]} (${data.varName})`;
+		return `${inputTypes[parseInt(data.emoji, 10)]} (${data.varName})`;
 	},
 
 	//---------------------------------------------------------------------
@@ -87,7 +87,7 @@ module.exports = {
 		const { glob, document } = this;
 
 		glob.onChange1 = function(event) {
-			const value = parseInt(event.value);
+			const value = parseInt(event.value, 10);
 			const varNameInput = document.getElementById("extName");
 			if(value === 0) {
 				varNameInput.innerHTML = "Emoji Name";
@@ -110,7 +110,7 @@ module.exports = {
 	action: function(cache) {
 		const data = cache.actions[cache.index];
 		const server = cache.server;
-		const type = parseInt(data.emoji);
+		const type = parseInt(data.emoji, 10);
 		const reason = this.evalMessage(data.reason, cache);
 		const varName = this.evalMessage(data.varName, cache);
 		let emoji;

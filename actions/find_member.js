@@ -23,7 +23,7 @@ module.exports = {
 
 	subtitle: function(data) {
 		const info = ["Member Id", "Member Username", "Member Display Name", "Member Color", "Member Tag"];
-		return `Find Member by ${info[parseInt(data.info)]}`;
+		return `Find Member by ${info[parseInt(data.info, 10)]}`;
 	},
 
 	//---------------------------------------------------------------------
@@ -33,7 +33,7 @@ module.exports = {
 	//---------------------------------------------------------------------
 
 	variableStorage: function(data, varType) {
-		const type = parseInt(data.storage);
+		const type = parseInt(data.storage, 10);
 		if(type !== varType) return;
 		return ([data.varName, "Server Member"]);
 	},
@@ -121,7 +121,7 @@ module.exports = {
 			return;
 		}
 		const data = cache.actions[cache.index];
-		const info = parseInt(data.info);
+		const info = parseInt(data.info, 10);
 		const find = this.evalMessage(data.find, cache);
 		if (server.memberCount !== server.members.cache.size) server.members.fetch();
 		const members = server.members.cache;
@@ -146,7 +146,7 @@ module.exports = {
 				break;
 		}
 		if(result !== undefined) {
-			const storage = parseInt(data.storage);
+			const storage = parseInt(data.storage, 10);
 			const varName = this.evalMessage(data.varName, cache);
 			this.storeValue(result, storage, varName, cache);
 			this.callNextAction(cache);

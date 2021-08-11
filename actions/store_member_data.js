@@ -24,7 +24,7 @@ module.exports = {
 	subtitle: function(data) {
 		const members = ["Mentioned User", "Command Author", "Temp Variable", "Server Variable", "Global Variable"];
 		const storage = ["", "Temp Variable", "Server Variable", "Global Variable"];
-		return `${members[parseInt(data.member)]} - ${storage[parseInt(data.storage)]} (${data.varName2})`;
+		return `${members[parseInt(data.member, 10)]} - ${storage[parseInt(data.storage, 10)]} (${data.varName2})`;
 	},
 
 	//---------------------------------------------------------------------
@@ -34,7 +34,7 @@ module.exports = {
 	//---------------------------------------------------------------------
 
 	variableStorage: function(data, varType) {
-		const type = parseInt(data.storage);
+		const type = parseInt(data.storage, 10);
 		if(type !== varType) return;
 		return ([data.varName2, "Unknown Type"]);
 	},
@@ -127,7 +127,7 @@ module.exports = {
 
 	action: function(cache) {
 		const data = cache.actions[cache.index];
-		const type = parseInt(data.member);
+		const type = parseInt(data.member, 10);
 		const varName = this.evalMessage(data.varName, cache);
 		const member = this.getMember(type, varName, cache);
 		if(member && member.data) {
@@ -139,7 +139,7 @@ module.exports = {
 			} else {
 				result = member.data(dataName, defVal);
 			}
-			const storage = parseInt(data.storage);
+			const storage = parseInt(data.storage, 10);
 			const varName2 = this.evalMessage(data.varName2, cache);
 			this.storeValue(result, storage, varName2, cache);
 		}

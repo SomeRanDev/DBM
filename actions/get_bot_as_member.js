@@ -23,7 +23,7 @@ module.exports = {
 
 	subtitle: function(data) {
 		const channels = ["Current Server", "Temp Variable", "Server Variable", "Global Variable"];
-		return `${channels[parseInt(data.server)]}${data.dataName ? " (" + data.dataName + ")" : ""}`;
+		return `${channels[parseInt(data.server, 10)]}${data.dataName ? " (" + data.dataName + ")" : ""}`;
 	},
 
 	//---------------------------------------------------------------------
@@ -33,7 +33,7 @@ module.exports = {
 	//---------------------------------------------------------------------
 
 	variableStorage: function(data, varType) {
-		const type = parseInt(data.storage);
+		const type = parseInt(data.storage, 10);
 		if(type !== varType) return;
 		return ([data.varName2, "Server Member"]);
 	},
@@ -116,12 +116,12 @@ module.exports = {
 
 	action: function(cache) {
 		const data = cache.actions[cache.index];
-		const type = parseInt(data.server);
+		const type = parseInt(data.server, 10);
 		const varName = this.evalMessage(data.varName, cache);
 		const server = this.getServer(type, varName, cache);
 		if(server && server.me) {
 			const varName2 = this.evalMessage(data.varName2, cache);
-			const storage = parseInt(data.storage);
+			const storage = parseInt(data.storage, 10);
 			this.storeValue(server.me, storage, varName2, cache);
 		}
 		this.callNextAction(cache);

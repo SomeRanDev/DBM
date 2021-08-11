@@ -24,7 +24,7 @@ module.exports = {
 	subtitle: function(data) {
 		const members = ["Mentioned User", "Command Author", "Temp Variable", "Server Variable", "Global Variable"];
 		const info = ["Member Object", "Member Id", "Member Username", "Member Display Name", "Member Color", "Member Server", "Member Last Message (Removed)", "Member Highest Role", "Member Hoist Role", "Member Color Role", "Member Is Owner?", "Member Is Muted?", "Member Is Deafened?", "Member Is Bannable?", "Member Playing Status Name", "Member Status", "Member Avatar URL", "Member Roles List", "Member Roles Amount", "Member Voice Channel", "Member Discriminator", "Member Tag", "Member Created At", "Member Created Timestamp", "Member Joined At", "Member Joined Timestamp", "Last Message Id (Removed)", "Member Permission List", "Member Flags List", "Member Client Status", "Member Custom Status"];
-		return `${members[parseInt(data.member)]} - ${info[parseInt(data.info)]}`;
+		return `${members[parseInt(data.member, 10)]} - ${info[parseInt(data.info, 10)]}`;
 	},
 
 	//---------------------------------------------------------------------
@@ -34,9 +34,9 @@ module.exports = {
 	//---------------------------------------------------------------------
 
 	variableStorage: function(data, varType) {
-		const type = parseInt(data.storage);
+		const type = parseInt(data.storage, 10);
 		if(type !== varType) return;
-		const info = parseInt(data.info);
+		const info = parseInt(data.info, 10);
 		let dataType = "Unknown Type";
 		switch(info) {
 			case 0:
@@ -229,9 +229,9 @@ module.exports = {
 
 	action: function(cache) {
 		const data = cache.actions[cache.index];
-		const member = parseInt(data.member);
+		const member = parseInt(data.member, 10);
 		const varName = this.evalMessage(data.varName, cache);
-		const info = parseInt(data.info);
+		const info = parseInt(data.info, 10);
 		const mem = this.getMember(member, varName, cache);
 		if(!mem) {
 			this.callNextAction(cache);
@@ -342,7 +342,7 @@ module.exports = {
 				break;
 		}
 		if(result !== undefined) {
-			const storage = parseInt(data.storage);
+			const storage = parseInt(data.storage, 10);
 			const varName2 = this.evalMessage(data.varName2, cache);
 			this.storeValue(result, storage, varName2, cache);
 		}

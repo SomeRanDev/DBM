@@ -23,7 +23,7 @@ module.exports = {
 
 	subtitle: function(data) {
 		const channels = ["Same Channel", "Command Author", "Mentioned User", "Mentioned Channel", "Default Channel", "Temp Variable", "Server Variable", "Global Variable"];
-		return `${channels[parseInt(data.channel)]}: "${data.message.replace(/[\n\r]+/, "")}"`;
+		return `${channels[parseInt(data.channel, 10)]}: "${data.message.replace(/[\n\r]+/, "")}"`;
 	},
 
 	//---------------------------------------------------------------------
@@ -99,7 +99,7 @@ module.exports = {
 
 	action: function(cache) {
 		const data = cache.actions[cache.index];
-		const channel = parseInt(data.channel);
+		const channel = parseInt(data.channel, 10);
 		const message = data.message;
 		if(channel === undefined || message === undefined) return;
 		const varName = this.evalMessage(data.varName, cache);

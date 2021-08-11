@@ -23,7 +23,7 @@ module.exports = {
 
 	subtitle: function(data) {
 		const channels = ["Same Channel", "Command Author", "Mentioned User", "Mentioned Channel", "Default Channel", "Temp Variable", "Server Variable", "Global Variable"];
-		return `${channels[parseInt(data.channel)]}`;
+		return `${channels[parseInt(data.channel, 10)]}`;
 	},
 
 	//---------------------------------------------------------------------
@@ -43,7 +43,7 @@ module.exports = {
 	//---------------------------------------------------------------------
 
 	variableStorage: function(data, varType) {
-		const type = parseInt(data.storage2);
+		const type = parseInt(data.storage2, 10);
 		if(type !== varType) return;
 		return ([data.varName3, "Message"]);
 	},
@@ -132,17 +132,17 @@ module.exports = {
 
 	action: function(cache) {
 		const data = cache.actions[cache.index];
-		const storage = parseInt(data.storage);
+		const storage = parseInt(data.storage, 10);
 		const varName = this.evalMessage(data.varName, cache);
 		const image = this.getVariable(storage, varName, cache);
 		if(!image) {
 			this.callNextAction(cache);
 			return;
 		}
-		const channel = parseInt(data.channel);
+		const channel = parseInt(data.channel, 10);
 		const varName2 = this.evalMessage(data.varName2, cache);
 		const varName3 = this.evalMessage(data.varName3, cache);
-		const storage2 = parseInt(data.storage2);
+		const storage2 = parseInt(data.storage2, 10);
 		const target = this.getSendTarget(channel, varName2, cache);
 		if(Array.isArray(target)) {
 			const Images = this.getDBM().Images;

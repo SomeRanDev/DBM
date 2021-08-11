@@ -23,7 +23,7 @@ module.exports = {
 
 	subtitle: function(data) {
 		const names = ["Same Channel", "Mentioned Channel", "Default Channel", "Temp Variable", "Server Variable", "Global Variable"];
-		const index = parseInt(data.storage);
+		const index = parseInt(data.storage, 10);
 		return index < 3 ? `${names[index]}` : `${names[index]} - ${data.varName}`;
 	},
 
@@ -118,11 +118,11 @@ module.exports = {
 			this.callNextAction(cache);
 			return;
 		}
-		const storage = parseInt(data.storage);
+		const storage = parseInt(data.storage, 10);
 		const varName = this.evalMessage(data.varName, cache);
 		const channel = this.getChannel(storage, varName, cache);
 		const reason = this.evalMessage(data.reason, cache);
-		const options = { [data.permission]: [true, false, null][parseInt(data.state)] };
+		const options = { [data.permission]: [true, false, null][parseInt(data.state, 10)] };
 
 		if(Array.isArray(channel)) {
 			this.callListFunc(channel.permissionOverwrites, "edit", [server.id, options, { reason, type: 0 }]).then(() => this.callNextAction(cache));

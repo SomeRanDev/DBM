@@ -109,20 +109,20 @@ module.exports = {
 		const Audio = this.getDBM().Audio;
 		const options = {};
 		if(data.seek) {
-			options.seek = parseInt(this.evalMessage(data.seek, cache));
+			options.seek = parseInt(this.evalMessage(data.seek, cache), 10);
 		}
 		if(data.volume) {
-			options.volume = parseInt(this.evalMessage(data.volume, cache)) / 100;
+			options.volume = parseInt(this.evalMessage(data.volume, cache), 10) / 100;
 		} else if(cache.server) {
 			options.volume = Audio.volumes[cache.server.id] || 0.5;
 		} else {
 			options.volume = 0.5;
 		}
 		if(data.passes) {
-			options.passes = parseInt(this.evalMessage(data.passes, cache));
+			options.passes = parseInt(this.evalMessage(data.passes, cache), 10);
 		}
 		if(data.bitrate) {
-			options.bitrate = parseInt(this.evalMessage(data.bitrate, cache));
+			options.bitrate = parseInt(this.evalMessage(data.bitrate, cache), 10);
 		} else {
 			options.bitrate = "auto";
 		}

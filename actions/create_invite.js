@@ -30,8 +30,8 @@ module.exports = {
 			"Server Variable",
 			"Global Variable"
 		];
-		const index = parseInt(data.storage);
-		return parseInt(data.storage) < 3 ? `Invite to ${names[index]}` : `Invite to ${names[index]} (${data.varName})`;
+		const index = parseInt(data.storage, 10);
+		return parseInt(data.storage, 10) < 3 ? `Invite to ${names[index]}` : `Invite to ${names[index]} (${data.varName})`;
 	},
 
 	//---------------------------------------------------------------------
@@ -41,7 +41,7 @@ module.exports = {
 	//---------------------------------------------------------------------
 
 	variableStorage: function(data, varType) {
-		const type = parseInt(data.storage);
+		const type = parseInt(data.storage, 10);
 		if(type !== varType) return;
 		return ([data.varName2, "Text"]);
 	},
@@ -149,18 +149,18 @@ module.exports = {
 
 	action: function(cache) {
 		const data = cache.actions[cache.index];
-		const storage = parseInt(data.channel);
+		const storage = parseInt(data.channel, 10);
 		const varName = this.evalMessage(data.varName, cache);
 		const channel = this.getChannel(storage, varName, cache);
 		const reason = this.evalMessage(data.reason, cache);
 		const options = {};
 		if(data.maxUses) {
-			options.maxUses = parseInt(this.evalMessage(data.maxUses, cache));
+			options.maxUses = parseInt(this.evalMessage(data.maxUses, cache), 10);
 		} else {
 			options.maxUses = 0;
 		}
 		if(data.lifetime) {
-			options.maxAge = parseInt(this.evalMessage(data.lifetime, cache));
+			options.maxAge = parseInt(this.evalMessage(data.lifetime, cache), 10);
 		} else {
 			options.maxAge = 0;
 		}
@@ -172,14 +172,14 @@ module.exports = {
 		if(Array.isArray(channel)) {
 			this.callListFunc(channel, "createInvite", [options]).then(function(invite) {
 				const varName2 = this.evalMessage(data.varName2, cache);
-				const storage2 = parseInt(data.storage);
+				const storage2 = parseInt(data.storage, 10);
 				this.storeValue(invite.url, storage2, varName2, cache);
 				this.callNextAction(cache);
 			}.bind(this));
 		} else if(channel && channel.createInvite) {
 			channel.createInvite(options).then(function(invite) {
 				const varName2 = this.evalMessage(data.varName2, cache);
-				const storage2 = parseInt(data.storage);
+				const storage2 = parseInt(data.storage, 10);
 				this.storeValue(invite.url, storage2, varName2, cache);
 				this.callNextAction(cache);
 			}.bind(this)).catch(this.displayError.bind(this, data, cache));

@@ -23,7 +23,7 @@ module.exports = {
 
 	subtitle: function(data) {
 		const names = ["Same Channel", "Mentioned Channel", "Default Channel", "Temp Variable", "Server Variable", "Global Variable"];
-		const index = parseInt(data.channel);
+		const index = parseInt(data.channel, 10);
 		return index < 3 ? `${names[index]}` : `${names[index]} (${data.varName})`;
 	},
 
@@ -126,16 +126,16 @@ module.exports = {
 
 	action: function(cache) {
 		const data = cache.actions[cache.index];
-		const storage = parseInt(data.channel);
+		const storage = parseInt(data.channel, 10);
 		const varName = this.evalMessage(data.varName, cache);
 		const channel = this.getChannel(storage, varName, cache);
 
-		const storage2 = parseInt(data.role);
+		const storage2 = parseInt(data.role, 10);
 		const varName2 = this.evalMessage(data.varName2, cache);
 		const role = this.getRole(storage2, varName2, cache);
 		const reason = this.evalMessage(data.reason, cache);
 
-		const options = { [data.permission]: [true, null, false][parseInt(data.state)] };
+		const options = { [data.permission]: [true, null, false][parseInt(data.state, 10)] };
 
 		if(role?.id) {
 			if(Array.isArray(channel)) {

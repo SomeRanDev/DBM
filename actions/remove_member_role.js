@@ -24,7 +24,7 @@ module.exports = {
 	subtitle: function(data) {
 		const roles = ["Mentioned Role", "1st Author Role", "1st Server Role", "Temp Variable", "Server Variable", "Global Variable"];
 		const channels = ["Mentioned User", "Command Author", "Temp Variable", "Server Variable", "Global Variable"];
-		return `${channels[parseInt(data.member)]} - ${roles[parseInt(data.role)]}`;
+		return `${channels[parseInt(data.member, 10)]} - ${roles[parseInt(data.role, 10)]}`;
 	},
 
 	//---------------------------------------------------------------------
@@ -110,10 +110,10 @@ module.exports = {
 
 	action: function(cache) {
 		const data = cache.actions[cache.index];
-		const storage = parseInt(data.role);
+		const storage = parseInt(data.role, 10);
 		const varName = this.evalMessage(data.varName, cache);
 		const role = this.getRole(storage, varName, cache);
-		const storage2 = parseInt(data.member);
+		const storage2 = parseInt(data.member, 10);
 		const varName2 = this.evalMessage(data.varName2, cache);
 		const member = this.getMember(storage2, varName2, cache);
 		const reason = this.evalMessage(data.reason, cache);

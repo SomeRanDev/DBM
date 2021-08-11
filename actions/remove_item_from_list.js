@@ -23,7 +23,7 @@ module.exports = {
 
 	subtitle: function(data) {
 		const storage = ["", "Temp Variable", "Server Variable", "Global Variable"];
-		return `Remove Item from ${storage[parseInt(data.storage)]} (${data.varName})`;
+		return `Remove Item from ${storage[parseInt(data.storage, 10)]} (${data.varName})`;
 	},
 
 	//---------------------------------------------------------------------
@@ -33,7 +33,7 @@ module.exports = {
 	//---------------------------------------------------------------------
 
 	variableStorage: function(data, varType) {
-		const type = parseInt(data.storage2);
+		const type = parseInt(data.storage2, 10);
 		if(type !== varType) return;
 		return ([data.varName2, "Unknown Type"]);
 	},
@@ -118,7 +118,7 @@ module.exports = {
 		const { glob, document } = this;
 
 		glob.onChange1 = function(event) {
-			const value = parseInt(event.value);
+			const value = parseInt(event.value, 10);
 			const dom = document.getElementById("positionHolder");
 			if(value < 2) {
 				dom.style.display = "none";
@@ -142,11 +142,11 @@ module.exports = {
 
 	action: function(cache) {
 		const data = cache.actions[cache.index];
-		const storage = parseInt(data.storage);
+		const storage = parseInt(data.storage, 10);
 		const varName = this.evalMessage(data.varName, cache);
 		const list = this.getVariable(storage, varName, cache);
 
-		const type = parseInt(data.removeType);
+		const type = parseInt(data.removeType, 10);
 
 		let result = null;
 		switch(type) {
@@ -157,7 +157,7 @@ module.exports = {
 				result = list.shift();
 				break;
 			case 2:
-				const position = parseInt(this.evalMessage(data.position, cache));
+				const position = parseInt(this.evalMessage(data.position, cache), 10);
 				if(position < 0) {
 					result = list.shift();
 				} else if(position >= list.length) {
@@ -171,7 +171,7 @@ module.exports = {
 
 		if(result) {
 			const varName2 = this.evalMessage(data.varName2, cache);
-			const storage2 = parseInt(data.storage2);
+			const storage2 = parseInt(data.storage2, 10);
 			this.storeValue(result, storage2, varName2, cache);
 		}
 

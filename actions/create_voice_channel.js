@@ -32,7 +32,7 @@ module.exports = {
 	//---------------------------------------------------------------------
 
 	variableStorage: function(data, varType) {
-		const type = parseInt(data.storage);
+		const type = parseInt(data.storage, 10);
 		if(type !== varType) return;
 		return ([data.varName, "Voice Channel"]);
 	},
@@ -122,14 +122,14 @@ Category Id:<br>
 		const server = cache.server;
 		if(server?.channels) {
 			const name = this.evalMessage(data.channelName, cache);
-			const storage = parseInt(data.storage);
+			const storage = parseInt(data.storage, 10);
 			const reason = this.evalMessage(data.reason, cache);
 			const channelData = { reason };
 			if(data.bitrate) {
-				channelData.bitrate = parseInt(this.evalMessage(data.bitrate, cache)) * 1000;
+				channelData.bitrate = parseInt(this.evalMessage(data.bitrate, cache), 10) * 1000;
 			}
 			if(data.userLimit) {
-				channelData.userLimit = parseInt(this.evalMessage(data.userLimit, cache));
+				channelData.userLimit = parseInt(this.evalMessage(data.userLimit, cache), 10);
 			}
 			if (data.categoryID) {
 				channelData.parent = this.evalMessage(data.categoryID, cache);

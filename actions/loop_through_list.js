@@ -23,7 +23,7 @@ module.exports = {
 
 	subtitle: function(data) {
 		const list = ["Server Members", "Server Channels", "Server Roles", "Server Emojis", "All Bot Servers", "Mentioned User Roles", "Command Author Roles", "Temp Variable", "Server Variable", "Global Variable"];
-		return `Loop ${list[parseInt(data.list)]} through Event Id "${data.source}"`;
+		return `Loop ${list[parseInt(data.list, 10)]} through Event Id "${data.source}"`;
 	},
 
 	//---------------------------------------------------------------------
@@ -97,7 +97,7 @@ module.exports = {
 
 		glob.onChange1 = function(event) {
 			this.listChange(event, "varNameContainer");
-			const id = parseInt(event.value);
+			const id = parseInt(event.value, 10);
 			let result = "";
 			switch(id) {
 				case 0:
@@ -164,7 +164,7 @@ module.exports = {
 			return;
 		}
 
-		const storage = parseInt(data.list);
+		const storage = parseInt(data.list, 10);
 		const varName = this.evalMessage(data.varName, cache);
 		const list = this.getList(storage, varName, cache);
 

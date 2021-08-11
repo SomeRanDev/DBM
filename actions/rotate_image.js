@@ -24,7 +24,7 @@ module.exports = {
 	subtitle: function(data) {
 		const storeTypes = ["", "Temp Variable", "Server Variable", "Global Variable"];
 		const mirror = ["No Mirror", "Horizontal Mirror", "Vertical Mirror", "Diagonal Mirror"];
-		return `${storeTypes[parseInt(data.storage)]} (${data.varName}) -> [${mirror[parseInt(data.mirror)]} ~ ${data.rotation}°]`;
+		return `${storeTypes[parseInt(data.storage, 10)]} (${data.varName}) -> [${mirror[parseInt(data.mirror, 10)]} ~ ${data.rotation}°]`;
 	},
 
 	//---------------------------------------------------------------------
@@ -108,14 +108,14 @@ module.exports = {
 
 	action: function(cache) {
 		const data = cache.actions[cache.index];
-		const storage = parseInt(data.storage);
+		const storage = parseInt(data.storage, 10);
 		const varName = this.evalMessage(data.varName, cache);
 		const image = this.getVariable(storage, varName, cache);
 		if(!image) {
 			this.callNextAction(cache);
 			return;
 		}
-		const mirror = parseInt(data.mirror);
+		const mirror = parseInt(data.mirror, 10);
 		switch(mirror) {
 			case 0:
 				image.mirror(false, false);
@@ -130,7 +130,7 @@ module.exports = {
 				image.mirror(true, true);
 				break;
 		}
-		const rotation = parseInt(data.rotation);
+		const rotation = parseInt(data.rotation, 10);
 		image.rotate(rotation);
 		this.callNextAction(cache);
 	},

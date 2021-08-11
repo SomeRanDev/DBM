@@ -23,7 +23,7 @@ module.exports = {
 
 	subtitle: function(data) {
 		const list = ["Server Members", "Server Channels", "Server Roles", "Server Emojis", "All Bot Servers", "Mentioned User Roles", "Command Author Roles", "Temp Variable", "Server Variable", "Global Variable"];
-		return `Get Item from ${list[parseInt(data.list)]}`;
+		return `Get Item from ${list[parseInt(data.list, 10)]}`;
 	},
 
 	//---------------------------------------------------------------------
@@ -33,9 +33,9 @@ module.exports = {
 	//---------------------------------------------------------------------
 
 	variableStorage: function(data, varType) {
-		const type = parseInt(data.storage);
+		const type = parseInt(data.storage, 10);
 		if(type !== varType) return;
-		const list = parseInt(data.list);
+		const list = parseInt(data.list, 10);
 		let dataType = "Unknown Type";
 		switch(list) {
 			case 0:
@@ -140,7 +140,7 @@ module.exports = {
 		const { glob, document } = this;
 
 		glob.onChange1 = function(event) {
-			const value = parseInt(event.value);
+			const value = parseInt(event.value, 10);
 			const dom = document.getElementById("positionHolder");
 			if(value < 3) {
 				dom.style.display = "none";
@@ -163,11 +163,11 @@ module.exports = {
 
 	action: function(cache) {
 		const data = cache.actions[cache.index];
-		const storage = parseInt(data.list);
+		const storage = parseInt(data.list, 10);
 		const varName = this.evalMessage(data.varName, cache);
 		const list = this.getList(storage, varName, cache);
 
-		const type = parseInt(data.getType);
+		const type = parseInt(data.getType, 10);
 		let result;
 		switch(type) {
 			case 0:
@@ -180,7 +180,7 @@ module.exports = {
 				result = list[Math.floor(Math.random() * list.length)];
 				break;
 			case 3:
-				const position = parseInt(this.evalMessage(data.position, cache));
+				const position = parseInt(this.evalMessage(data.position, cache), 10);
 				if(position < 0) {
 					result = list[0];
 				} else if(position >= list.length) {
@@ -193,7 +193,7 @@ module.exports = {
 
 		if(result) {
 			const varName2 = this.evalMessage(data.varName2, cache);
-			const storage2 = parseInt(data.storage);
+			const storage2 = parseInt(data.storage, 10);
 			this.storeValue(result, storage2, varName2, cache);
 		}
 

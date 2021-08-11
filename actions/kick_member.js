@@ -23,7 +23,7 @@ module.exports = {
 
 	subtitle: function(data) {
 		const members = ["Mentioned User", "Command Author", "Temp Variable", "Server Variable", "Global Variable"];
-		return `${members[parseInt(data.member)]}`;
+		return `${members[parseInt(data.member, 10)]}`;
 	},
 
 	//---------------------------------------------------------------------
@@ -97,7 +97,7 @@ module.exports = {
 
 	action: function(cache) {
 		const data = cache.actions[cache.index];
-		const type = parseInt(data.member);
+		const type = parseInt(data.member, 10);
 		const varName = this.evalMessage(data.varName, cache);
 		const member = this.getMember(type, varName, cache);
 		if(Array.isArray(member)) {

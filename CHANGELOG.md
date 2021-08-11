@@ -1,0 +1,5 @@
+- **Find Server - Server Region** has been removed
+- **Store Channel Info - Channel Last Message** has been removed
+- **Store Member Info - Member Last Message** has been removed
+- **Store Member Info - Member Last Message Id** has been removed
+- **Store Server Info - Server Region** has been removed

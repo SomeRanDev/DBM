@@ -23,7 +23,7 @@ module.exports = {
 
 	subtitle: function(data) {
 		const channels = ["Mentioned User", "Command Author", "Temp Variable", "Server Variable", "Global Variable"];
-		return `${channels[parseInt(data.member)]} (${data.dataName}) ${data.changeType === "1" ? "+=" : "="} ${data.value}`;
+		return `${channels[parseInt(data.member, 10)]} (${data.dataName}) ${data.changeType === "1" ? "+=" : "="} ${data.value}`;
 	},
 
 	//---------------------------------------------------------------------
@@ -109,7 +109,7 @@ module.exports = {
 
 	action: function(cache) {
 		const data = cache.actions[cache.index];
-		const type = parseInt(data.member);
+		const type = parseInt(data.member, 10);
 		const varName = this.evalMessage(data.varName, cache);
 		const member = this.getMember(type, varName, cache);
 		if(member && member.setData) {

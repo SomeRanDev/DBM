@@ -31,7 +31,7 @@ module.exports = {
 
 	subtitle: function(data) {
 		const results = ["Continue Actions", "Stop Action Sequence", "Jump To Action", "Jump Forward Actions"];
-		return `If True: ${results[parseInt(data.iftrue)]} ~ If False: ${results[parseInt(data.iffalse)]}`;
+		return `If True: ${results[parseInt(data.iftrue, 10)]} ~ If False: ${results[parseInt(data.iffalse, 10)]}`;
 	},
 
 	//---------------------------------------------------------------------
@@ -118,7 +118,7 @@ module.exports = {
 		const msg = cache.msg;
 		let result = false;
 		if(msg && msg.content.length > 0) {
-			const condition = parseInt(data.condition);
+			const condition = parseInt(data.condition, 10);
 			let value = 0;
 			switch(condition) {
 				case 0:
@@ -134,8 +134,8 @@ module.exports = {
 					value = msg.mentions.roles.size;
 					break;
 			}
-			const comparison = parseInt(data.comparison);
-			const value2 = parseInt(data.value);
+			const comparison = parseInt(data.comparison, 10);
+			const value2 = parseInt(data.value, 10);
 			switch(comparison) {
 				case 0:
 					result = value == value2;

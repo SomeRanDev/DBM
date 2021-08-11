@@ -108,7 +108,7 @@ module.exports = {
 	action: function(cache) {
 		const Images = this.getDBM().Images;
 		const data = cache.actions[cache.index];
-		const storage = parseInt(data.storage);
+		const storage = parseInt(data.storage, 10);
 		const varName = this.evalMessage(data.varName, cache);
 		const image = this.getVariable(storage, varName, cache);
 		if(!image) {
@@ -116,9 +116,9 @@ module.exports = {
 			return;
 		}
 		const fontName = this.evalMessage(data.font, cache);
-		const x = parseInt(this.evalMessage(data.x, cache));
-		const y = parseInt(this.evalMessage(data.y, cache));
-		const width = data.width ? parseInt(this.evalMessage(data.width, cache)) : null;
+		const x = parseInt(this.evalMessage(data.x, cache), 10);
+		const y = parseInt(this.evalMessage(data.y, cache), 10);
+		const width = data.width ? parseInt(this.evalMessage(data.width, cache), 10) : null;
 		const text = this.evalMessage(data.text, cache);
 		Images.getFont(fontName).then(function(font) {
 			if(width) {

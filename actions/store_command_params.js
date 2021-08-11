@@ -31,7 +31,7 @@ module.exports = {
 
 	subtitle: function(data) {
 		const infoSources = ["One Parameter", "Multiple Parameters", "Mentioned Member", "Mentioned Role", "Mentioned Channel"];
-		return `${infoSources[parseInt(data.info)]} #${data.infoIndex}`;
+		return `${infoSources[parseInt(data.info, 10)]} #${data.infoIndex}`;
 	},
 
 	//---------------------------------------------------------------------
@@ -41,9 +41,9 @@ module.exports = {
 	//---------------------------------------------------------------------
 
 	variableStorage: function(data, varType) {
-		const type = parseInt(data.storage);
+		const type = parseInt(data.storage, 10);
 		if(type !== varType) return;
-		const info = parseInt(data.info);
+		const info = parseInt(data.info, 10);
 		let dataType = "None";
 		switch(info) {
 			case 0:
@@ -133,7 +133,7 @@ module.exports = {
 		const { glob, document } = this;
 
 		glob.onChange1 = function(event) {
-			const value = parseInt(event.value);
+			const value = parseInt(event.value, 10);
 			const infoCountLabel = document.getElementById("infoCountLabel");
 			switch(value) {
 				case 0:
@@ -172,8 +172,8 @@ module.exports = {
 		const data = cache.actions[cache.index];
 		const msg = cache.msg;
 		if (!msg) return this.callNextAction(cache);
-		const infoType = parseInt(data.info);
-		const index = parseInt(this.evalMessage(data.infoIndex, cache));
+		const infoType = parseInt(data.info, 10);
+		const index = parseInt(this.evalMessage(data.infoIndex, cache), 10);
 		const separator = this.getDBM().Files.data.settings.separator || "\\s+";
 		let source;
 		switch(infoType) {
@@ -224,7 +224,7 @@ module.exports = {
 				break;
 		}
 		if(source) {
-			const storage = parseInt(data.storage);
+			const storage = parseInt(data.storage, 10);
 			const varName = this.evalMessage(data.varName, cache);
 			this.storeValue(source, storage, varName, cache);
 		}

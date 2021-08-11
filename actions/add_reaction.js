@@ -23,7 +23,7 @@ module.exports = {
 
 	subtitle: function(data) {
 		const names = ["Command Message", "Temp Variable", "Server Variable", "Global Variable"];
-		const index = parseInt(data.storage);
+		const index = parseInt(data.storage, 10);
 		return data.storage === "0" ? `Add Reaction to ${names[index]}` : `Add Reaction to ${names[index]} (${data.varName})`;
 	},
 
@@ -101,7 +101,7 @@ module.exports = {
 		const { glob, document } = this;
 
 		glob.onChange1 = function(event) {
-			const value = parseInt(event.value);
+			const value = parseInt(event.value, 10);
 			const varNameInput = document.getElementById("extName");
 			if(value === 0) {
 				varNameInput.innerHTML = "Emoji Name";
@@ -132,11 +132,11 @@ module.exports = {
 
 	action: function(cache) {
 		const data = cache.actions[cache.index];
-		const storage = parseInt(data.storage);
+		const storage = parseInt(data.storage, 10);
 		const varName = this.evalMessage(data.varName, cache);
 		const message = this.getMessage(storage, varName, cache);
 
-		const type = parseInt(data.emoji);
+		const type = parseInt(data.emoji, 10);
 		let emoji;
 		if(type === 4) {
 			emoji = this.evalMessage(data.varName2, cache);

@@ -23,7 +23,7 @@ module.exports = {
 
 	subtitle: function(data) {
 		const channels = ["Command Author's Voice Ch.", "Mentioned User's Voice Ch.", "Default Voice Channel", "Temp Variable", "Server Variable", "Global Variable"];
-		return `${channels[parseInt(data.channel)]}`;
+		return `${channels[parseInt(data.channel, 10)]}`;
 
 	},
 
@@ -94,7 +94,7 @@ module.exports = {
 	action: function(cache) {
 		const data = cache.actions[cache.index];
 		const Audio = this.getDBM().Audio;
-		const type = parseInt(data.channel);
+		const type = parseInt(data.channel, 10);
 		const varName = this.evalMessage(data.varName, cache);
 		const channel = this.getVoiceChannel(type, varName, cache);
 		if(channel !== undefined) {

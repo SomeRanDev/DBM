@@ -86,7 +86,7 @@ module.exports = {
 	action: function(cache) {
 		const botClient = this.getDBM().Bot.bot.user;
 		const data = cache.actions[cache.index];
-		const status = parseInt(data.status);
+		const status = parseInt(data.status, 10);
 		let targetStatus = "";
 		if(status >= 0) {
 			switch(status) {

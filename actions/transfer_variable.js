@@ -23,7 +23,7 @@ module.exports = {
 
 	subtitle: function(data) {
 		const storeTypes = ["", "Temp Variable", "Server Variable", "Global Variable"];
-		return `${storeTypes[parseInt(data.storage)]} (${data.varName}) -> ${storeTypes[parseInt(data.storage2)]} (${data.varName2})`;
+		return `${storeTypes[parseInt(data.storage, 10)]} (${data.varName}) -> ${storeTypes[parseInt(data.storage2, 10)]} (${data.varName2})`;
 	},
 
 	//---------------------------------------------------------------------
@@ -106,7 +106,7 @@ module.exports = {
 	action: function(cache) {
 		const data = cache.actions[cache.index];
 
-		const storage = parseInt(data.storage);
+		const storage = parseInt(data.storage, 10);
 		const varName = this.evalMessage(data.varName, cache);
 		const var1 = this.getVariable(storage, varName, cache);
 		if(!var1) {
@@ -114,7 +114,7 @@ module.exports = {
 			return;
 		}
 
-		const storage2 = parseInt(data.storage2);
+		const storage2 = parseInt(data.storage2, 10);
 		const varName2 = this.evalMessage(data.varName2, cache);
 		const var2 = this.getVariable(storage2, varName2, cache);
 		if(!var2) {

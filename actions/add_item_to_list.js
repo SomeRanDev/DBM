@@ -23,7 +23,7 @@ module.exports = {
 
 	subtitle: function(data) {
 		const storage = ["", "Temp Variable", "Server Variable", "Global Variable"];
-		return `Add "${data.value}" to ${storage[parseInt(data.storage)]} (${data.varName})`;
+		return `Add "${data.value}" to ${storage[parseInt(data.storage, 10)]} (${data.varName})`;
 	},
 
 	//---------------------------------------------------------------------
@@ -98,7 +98,7 @@ module.exports = {
 		const { glob, document } = this;
 
 		glob.onChange1 = function(event) {
-			const value = parseInt(event.value);
+			const value = parseInt(event.value, 10);
 			const dom = document.getElementById("positionHolder");
 			if(value < 2) {
 				dom.style.display = "none";
@@ -121,11 +121,11 @@ module.exports = {
 
 	action: function(cache) {
 		const data = cache.actions[cache.index];
-		const storage = parseInt(data.storage);
+		const storage = parseInt(data.storage, 10);
 		const varName = this.evalMessage(data.varName, cache);
 		const list = this.getVariable(storage, varName, cache);
 
-		const type = parseInt(data.addType);
+		const type = parseInt(data.addType, 10);
 		let val = this.evalMessage(data.value, cache);
 		try {
 			val = this.eval(val, cache);
@@ -141,7 +141,7 @@ module.exports = {
 				list.unshift(val);
 				break;
 			case 2:
-				const position = parseInt(this.evalMessage(data.position));
+				const position = parseInt(this.evalMessage(data.position), 10);
 				if(position < 0) {
 					list.unshift(val);
 				} else if(position >= list.length) {

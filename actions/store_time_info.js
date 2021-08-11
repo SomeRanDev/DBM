@@ -23,7 +23,7 @@ module.exports = {
 
 	subtitle: function(data) {
 		const time = ["Year", "Month", "Day of the Month", "Hour", "Minute", "Second", "Milisecond", "Month Text"];
-		return `${time[parseInt(data.type)]}`;
+		return `${time[parseInt(data.type, 10)]}`;
 	},
 
 	//---------------------------------------------------------------------
@@ -33,7 +33,7 @@ module.exports = {
 	//---------------------------------------------------------------------
 
 	variableStorage: function(data, varType) {
-		const type = parseInt(data.storage);
+		const type = parseInt(data.storage, 10);
 		if(type !== varType) return;
 		let result = "Number";
 		if(data.type === "7") {
@@ -119,7 +119,7 @@ module.exports = {
 
 	action: function(cache) {
 		const data = cache.actions[cache.index];
-		const type = parseInt(data.type);
+		const type = parseInt(data.type, 10);
 		const date = new Date();
 		let result;
 		switch(type) {
@@ -152,7 +152,7 @@ module.exports = {
 				break;
 		}
 		if(result !== undefined) {
-			const storage = parseInt(data.storage);
+			const storage = parseInt(data.storage, 10);
 			const varName = this.evalMessage(data.varName, cache);
 			this.storeValue(result, storage, varName, cache);
 		}

@@ -86,7 +86,7 @@ module.exports = {
 			queue = Audio.queue[server.id];
 		}
 		if(queue) {
-			const amount = parseInt(this.evalMessage(data.amount, cache));
+			const amount = parseInt(this.evalMessage(data.amount, cache), 10);
 			let finalItem;
 			for(let i = 0; i < amount; i++) {
 				if(queue.length > 0) {

@@ -28,7 +28,7 @@ module.exports = {
 			"Server Variable",
 			"Global Variable"
 		];
-		const index = parseInt(data.storage);
+		const index = parseInt(data.storage, 10);
 		return data.storage === "0" ? `${names[index]}` : `${names[index]} - ${data.varName}`;
 	},
 
@@ -102,7 +102,7 @@ module.exports = {
 
 	action: function(cache) {
 		const data = cache.actions[cache.index];
-		const storage = parseInt(data.storage);
+		const storage = parseInt(data.storage, 10);
 		const varName = this.evalMessage(data.varName, cache);
 		const message = this.getMessage(storage, varName, cache);
 		const reason = this.evalMessage(data.reason, cache);

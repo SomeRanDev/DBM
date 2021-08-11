@@ -32,7 +32,7 @@ module.exports = {
 	//---------------------------------------------------------------------
 
 	variableStorage: function(data, varType) {
-		const type = parseInt(data.storage2);
+		const type = parseInt(data.storage2, 10);
 		if(type !== varType) return;
 		return ([data.varName2, "Emoji"]);
 	},
@@ -107,7 +107,7 @@ module.exports = {
 		const { glob, document } = this;
 
 		glob.onChange1 = function(event) {
-			const value = parseInt(event.value);
+			const value = parseInt(event.value, 10);
 			const varNameInput = document.getElementById("varNameContainer2");
 			if(value === 0) {
 				varNameInput.style.display = "none";
@@ -132,7 +132,7 @@ module.exports = {
 		const data = cache.actions[cache.index];
 		const server = cache.server;
 		if(server?.emojis) {
-			const type = parseInt(data.storage);
+			const type = parseInt(data.storage, 10);
 			const varName = this.evalMessage(data.varName, cache);
 			const image = this.getVariable(type, varName, cache);
 			const Images = this.getDBM().Images;
@@ -140,7 +140,7 @@ module.exports = {
 				const name = this.evalMessage(data.emojiName, cache);
 				server.emojis.create(buffer, name).then(function(emoji) {
 					const varName2 = this.evalMessage(data.varName2, cache);
-					const storage = parseInt(data.storage);
+					const storage = parseInt(data.storage, 10);
 					this.storeValue(emoji, storage, varName2, cache);
 					this.callNextAction(cache);
 				}.bind(this)).catch(this.displayError.bind(this, data, cache));

@@ -32,7 +32,7 @@ module.exports = {
 	//---------------------------------------------------------------------
 
 	variableStorage: function(data, varType) {
-		const type = parseInt(data.storage);
+		const type = parseInt(data.storage, 10);
 		if(type !== varType) return;
 		return ([data.varName, "Embed Message"]);
 	},
@@ -144,7 +144,7 @@ module.exports = {
 		if(data.timestamp === "true") {
 			embed.setTimestamp();
 		}
-		const storage = parseInt(data.storage);
+		const storage = parseInt(data.storage, 10);
 		const varName = this.evalMessage(data.varName, cache);
 		this.storeValue(embed, storage, varName, cache);
 		this.callNextAction(cache);
