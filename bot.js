@@ -512,7 +512,7 @@ Actions.checkPermissions = function (msg, permissions) {
   return author.permissions.has(permissions);
 };
 
-Actions.invokeActions = function (msg, actions) {
+Actions.invokeActions = async function (msg, actions) {
   const act = actions[0];
   if (!act) return;
   const cache = {
@@ -524,7 +524,7 @@ Actions.invokeActions = function (msg, actions) {
   };
   if (this.exists(act.name)) {
     try {
-      this[act.name](cache);
+      await this[act.name](cache);
     } catch (e) {
       this.displayError(act, cache, e);
     }

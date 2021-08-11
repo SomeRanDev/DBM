@@ -122,13 +122,7 @@ module.exports = {
     let result = false;
     if (role) {
       if (Array.isArray(member)) {
-        result = member.every(function (mem) {
-          if (mem.roles) {
-            return mem.roles.cache.has(role.id);
-          } else {
-            return false;
-          }
-        });
+        result = member.every((mem) => mem?.roles?.cache.has(role.id) ?? false);
       } else if (member?.roles) {
         result = member.roles.cache.has(role.id);
       }

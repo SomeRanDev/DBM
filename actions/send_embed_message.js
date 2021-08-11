@@ -156,7 +156,7 @@ module.exports = {
           if (msg && varName3) this.storeValue(msg, storage3, varName3, cache);
           this.callNextAction(cache);
         })
-        .catch(this.displayError.bind(this, data, cache));
+        .catch((err) => this.displayError(data, cache, err));
     } else {
       this.callNextAction(cache);
     }

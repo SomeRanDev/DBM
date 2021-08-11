@@ -125,7 +125,7 @@ module.exports = {
         target
           .send(this.evalMessage(message, cache), options)
           .then(() => this.callNextAction(cache))
-          .catch(this.displayError.bind(this, data, cache));
+          .catch((err) => this.displayError(data, cache, err));
       } catch (e) {
         this.displayError(data, cache, e);
       }

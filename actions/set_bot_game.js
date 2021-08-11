@@ -92,12 +92,12 @@ module.exports = {
         botClient
           .setPresence({ activity: { name: game, type: "STREAMING", url: link } })
           .then(() => this.callNextAction(cache))
-          .catch(this.displayError.bind(this, data, cache));
+          .catch((err) => this.displayError(data, cache, err));
       } else {
         botClient
           .setPresence({ activity: { name: game, type: "PLAYING" } })
           .then(() => this.callNextAction(cache))
-          .catch(this.displayError.bind(this, data, cache));
+          .catch((err) => this.displayError(data, cache, err));
       }
     } else {
       this.callNextAction(cache);

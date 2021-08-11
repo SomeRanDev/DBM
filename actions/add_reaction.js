@@ -154,7 +154,7 @@ module.exports = {
       message
         .react(emoji)
         .then(() => this.callNextAction(cache))
-        .catch(this.displayError.bind(this, data, cache));
+        .catch((err) => this.displayError(data, cache, err));
     } else {
       this.callNextAction(cache);
     }

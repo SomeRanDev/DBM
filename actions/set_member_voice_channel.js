@@ -128,7 +128,7 @@ module.exports = {
       member.voice
         .setChannel(channel, reason)
         .then(() => this.callNextAction(cache))
-        .catch(this.displayError.bind(this, data, cache));
+        .catch((err) => this.displayError(data, cache, err));
       this.callNextAction(cache);
     }
   },

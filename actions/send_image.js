@@ -173,10 +173,10 @@ module.exports = {
                 this.storeValue(msg, storage2, varName3, cache);
                 this.callNextAction(cache);
               })
-              .catch(this.displayError.bind(this, data, cache));
+              .catch((err) => this.displayError(data, cache, err));
           }.bind(this),
         )
-        .catch(this.displayError.bind(this, data, cache));
+        .catch((err) => this.displayError(data, cache, err));
     } else if (target && target.send) {
       const Images = this.getDBM().Images;
       Images.createBuffer(image)
@@ -195,10 +195,10 @@ module.exports = {
                 this.storeValue(msg, storage2, varName3, cache);
                 this.callNextAction(cache);
               })
-              .catch(this.displayError.bind(this, data, cache));
+              .catch((err) => this.displayError(data, cache, err));
           }.bind(this),
         )
-        .catch(this.displayError.bind(this, data, cache));
+        .catch((err) => this.displayError(data, cache, err));
     } else {
       this.callNextAction(cache);
     }

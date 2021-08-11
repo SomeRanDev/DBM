@@ -128,35 +128,32 @@ module.exports = {
   // so be sure to provide checks for variable existence.
   //---------------------------------------------------------------------
 
-  action: function (cache) {
+  action: async function (cache) {
     const data = cache.actions[cache.index];
     const server = cache.server;
-    if (server?.emojis) {
-      const type = parseInt(data.storage, 10);
-      const varName = this.evalMessage(data.varName, cache);
-      const image = this.getVariable(type, varName, cache);
-      const Images = this.getDBM().Images;
-      Images.createBuffer(image)
-        .then(
-          function (buffer) {
-            const name = this.evalMessage(data.emojiName, cache);
-            server.emojis
-              .create(buffer, name)
-              .then(
-                function (emoji) {
-                  const varName2 = this.evalMessage(data.varName2, cache);
-                  const storage = parseInt(data.storage, 10);
-                  this.storeValue(emoji, storage, varName2, cache);
-                  this.callNextAction(cache);
-                }.bind(this),
-              )
-              .catch(this.displayError.bind(this, data, cache));
-          }.bind(this),
-        )
-        .catch(this.displayError.bind(this, data, cache));
-    } else {
-      this.callNextAction(cache);
+    if (!server?.emojis) return this.callNextAction(cache);
+
+    const type = parseInt(data.storage, 10);
+    const varName = this.evalMessage(data.varName, cache);
+    const image = this.getVariable(type, varName, cache);
+    const { Images } = this.getDBM();
+
+    let buffer
+    try {
+      buffer = Images.createBuffer(image)
+    } catch {
+      return this.displayError(data, cache)
     }
+
+    server.emojis
+      .create(buffer, this.evalMessage(data.emojiName, cache))
+      .then((emoji) => {
+        const varName2 = this.evalMessage(data.varName2, cache);
+        const storage = parseInt(data.storage, 10);
+        this.storeValue(emoji, storage, varName2, cache);
+        this.callNextAction(cache);
+      })
+      .catch((err) => this.displayError(data, cache, err));
   },
 
   //---------------------------------------------------------------------

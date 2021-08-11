@@ -110,7 +110,7 @@ module.exports = {
       server.bans
         .remove(member.author ?? member.id, this.evalMessage(data.reason, cache))
         .then(() => this.callNextAction(cache))
-        .catch(this.displayError.bind(this, data, cache));
+        .catch((err) => this.displayError(data, cache, err));
     } else {
       this.callNextAction(cache);
     }

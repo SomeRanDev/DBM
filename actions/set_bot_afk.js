@@ -88,7 +88,7 @@ module.exports = {
       botClient
         .setAFK(afk === 0)
         .then(() => this.callNextAction(cache))
-        .catch(this.displayError.bind(this, data, cache));
+        .catch((err) => this.displayError(data, cache, err));
     } else {
       this.callNextAction(cache);
     }

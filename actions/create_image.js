@@ -105,15 +105,13 @@ module.exports = {
     const data = cache.actions[cache.index];
     const Images = this.getDBM().Images;
     Images.getImage(this.evalMessage(data.url, cache))
-      .then(
-        function (image) {
-          const varName = this.evalMessage(data.varName, cache);
-          const storage = parseInt(data.storage, 10);
-          this.storeValue(image, storage, varName, cache);
-          this.callNextAction(cache);
-        }.bind(this),
-      )
-      .catch(this.displayError.bind(this, data, cache));
+      .then((image) => {
+        const varName = this.evalMessage(data.varName, cache);
+        const storage = parseInt(data.storage, 10);
+        this.storeValue(image, storage, varName, cache);
+        this.callNextAction(cache);
+      })
+      .catch((err) => this.displayError(data, cache, err));
   },
 
   //---------------------------------------------------------------------
