@@ -135,26 +135,23 @@ module.exports = {
     if (channel === undefined || message === undefined) return;
     const varName = this.evalMessage(data.varName, cache);
     const target = this.getSendTarget(channel, varName, cache);
+
     if (Array.isArray(target)) {
-      this.callListFunc(target, "send", [this.evalMessage(message, cache)]).then(
-        function (resultMsg) {
+      this.callListFunc(target, "send", [this.evalMessage(message, cache)]).then((resultMsg) => {
+        const varName2 = this.evalMessage(data.varName2, cache);
+        const storage = parseInt(data.storage, 10);
+        this.storeValue(resultMsg, storage, varName2, cache);
+        this.callNextAction(cache);
+      });
+    } else if (target?.send) {
+      target
+        .send(this.evalMessage(message, cache))
+        .then((resultMsg) => {
           const varName2 = this.evalMessage(data.varName2, cache);
           const storage = parseInt(data.storage, 10);
           this.storeValue(resultMsg, storage, varName2, cache);
           this.callNextAction(cache);
-        }.bind(this),
-      );
-    } else if (target && target.send) {
-      target
-        .send(this.evalMessage(message, cache))
-        .then(
-          function (resultMsg) {
-            const varName2 = this.evalMessage(data.varName2, cache);
-            const storage = parseInt(data.storage, 10);
-            this.storeValue(resultMsg, storage, varName2, cache);
-            this.callNextAction(cache);
-          }.bind(this),
-        )
+        })
         .catch((err) => this.displayError(data, cache, err));
     } else {
       this.callNextAction(cache);

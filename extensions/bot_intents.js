@@ -290,11 +290,11 @@ module.exports = {
     DBM.Bot.intents = function () {
       const intentData = DBM.Files?.data.settings?.["Bot Intents"];
       const intents = intentData?.customData?.["Bot Intents"]?.intents;
-      if (!intentData || typeof intents === "undefined") return DBM.Bot.INTENTS_NON_PRIVILEGED_INTENTS;
+      if (!intentData || typeof intents === "undefined") return DBM.Bot.NON_PRIVILEGED_INTENTS;
       if (intents === -1) {
         return DBM.Bot.ALL_INTENTS;
       } else if (intents === -2) {
-        return DBM.Bot.INTENTS_NON_PRIVILEGED_INTENTS;
+        return DBM.Bot.NON_PRIVILEGED_INTENTS;
       } else {
         return intents;
       }
