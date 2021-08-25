@@ -203,6 +203,7 @@ Bot.checkCommand = function (msg) {
     Actions.preformActions(msg, cmd);
     return true;
   }
+  return false;
 };
 
 Bot.checkTag = function (content) {
