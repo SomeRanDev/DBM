@@ -158,7 +158,7 @@ Bot.reformatCommands = function () {
         }
         case "5": {
           const name = com.name;
-          if(this.$user[name]) {
+          if (this.$user[name]) {
             console.error("User command with name \"" + name + "\" already exists!\nThis duplicate will be ignored.\n");
           } else {
             this.$user[name] = com;
@@ -168,7 +168,7 @@ Bot.reformatCommands = function () {
         }
         case "6": {
           const name = com.name;
-          if(this.$msge[name]) {
+          if (this.$msge[name]) {
             console.error("Message command with name \"" + name + "\" already exists!\nThis duplicate will be ignored.\n");
           } else {
             this.$msge[name] = com;
@@ -195,7 +195,7 @@ Bot.createApiJsonFromCommand = function (com, name) {
     case "5": { result.type = "USER"; break; }
     case "6": { result.type = "MESSAGE"; break; }
   }
-  if(com.comType === "4" && com.parameters && Array.isArray(com.parameters)) {
+  if (com.comType === "4" && com.parameters && Array.isArray(com.parameters)) {
     result.options = this.validateSlashCommandParameters(com.parameters, result.name);
   }
   return result;
@@ -237,11 +237,11 @@ Bot.validateSlashCommandParameters = function (parameters, commandName) {
     const paramsData = parameters[i];
     const name = this.validateSlashCommandName(paramsData.name);
     if (name) {
-      if(!existingNames[name]) {
+      if (!existingNames[name]) {
         existingNames[name] = true;
         paramsData.name = name;
         paramsData.description = this.validateSlashCommandDescription(paramsData.description);
-        if(paramsData.required) {
+        if (paramsData.required) {
           requireParams.push(paramsData);
         } else {
           optionalParams.push(paramsData);
@@ -413,15 +413,14 @@ Bot.checkRegExps = function (msg) {
 
 Bot.onInteraction = function (interaction) {
   const interactionName = interaction.commandName;
-  console.log(interaction.isMessageComponent());
   if (interaction.isCommand()) {
-    if(this.$slash[interactionName]) {
+    if (this.$slash[interactionName]) {
       Actions.preformActionsFromInteraction(interaction, this.$slash[interactionName]);
     }
   } else if (interaction.isContextMenu()) {
-    if(this.$user[interactionName]) {
+    if (this.$user[interactionName]) {
       Actions.preformActionsFromInteraction(interaction, this.$user[interactionName]);
-    } else if(this.$msge[interactionName]) {
+    } else if (this.$msge[interactionName]) {
       Actions.preformActionsFromInteraction(interaction, this.$msge[interactionName]);
     }
   }
