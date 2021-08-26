@@ -609,12 +609,12 @@ Actions.getSendTarget = function (type, varName, cache) {
       }
       break;
     case 2:
-      if (msg?.mentions?.users.size) {
+      if (msg?.mentions?.users?.size) {
         return msg.mentions.users.first();
       }
       break;
     case 3:
-      if (msg?.mentions?.channels.size) {
+      if (msg?.mentions?.channels?.size) {
         return msg.mentions.channels.first();
       }
       break;
@@ -643,7 +643,7 @@ Actions.getMember = function (type, varName, cache) {
   const server = cache.server;
   switch (type) {
     case 0:
-      if (msg?.mentions?.members.size) {
+      if (msg?.mentions?.members?.size) {
         return msg.mentions.members.first();
       }
       break;
@@ -719,17 +719,17 @@ Actions.getRole = function (type, varName, cache) {
   const server = cache.server;
   switch (type) {
     case 0:
-      if (msg?.mentions?.roles.size) {
+      if (msg?.mentions?.roles?.size) {
         return msg.mentions.roles.first();
       }
       break;
     case 1:
-      if (msg?.member?.roles.cache.size) {
+      if (msg?.member?.roles?.cache?.size) {
         return msg.member.roles.cache.first();
       }
       break;
     case 2:
-      if (server?.roles.cache.size) {
+      if (server?.roles?.cache?.size) {
         return server.roles.cache.first();
       }
       break;
@@ -758,7 +758,7 @@ Actions.getChannel = function (type, varName, cache) {
       }
       break;
     case 1:
-      if (msg?.mentions.channels.size) {
+      if (msg?.mentions?.channels?.size) {
         return msg.mentions.channels.first();
       }
       break;
@@ -793,7 +793,7 @@ Actions.getVoiceChannel = function (type, varName, cache) {
       }
       break;
     case 1:
-      if (msg?.mentions.members.size) {
+      if (msg?.mentions?.members?.size) {
         const member = msg.mentions.members.first();
         if (member) {
           return member.voice.channel;
@@ -847,7 +847,7 @@ Actions.getList = function (type, varName, cache) {
     case 4:
       return [...Bot.bot.guilds.cache.values()];
     case 5:
-      if (msg?.mentions.members.size) {
+      if (msg?.mentions?.members?.size) {
         return [...msg.mentions.members.first().roles.cache.values()];
       }
       break;
