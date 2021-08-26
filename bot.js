@@ -425,12 +425,14 @@ Actions.preformActions = function (msg, cmd) {
 Actions.checkConditions = function (msg, cmd) {
   const isServer = Boolean(msg.guild && msg.member);
   const restriction = parseInt(cmd.restriction, 10);
-  const permissions = cmd.permissions;
   switch (restriction) {
     case 0:
-      return isServer ? this.checkPermissions(msg, permissions) : true;
-    case 1:
-      return isServer && this.checkPermissions(msg, permissions);
+    case 1: {
+      if(isServer) {
+        return this.checkPermissions(msg, cmd.permissions) && this.checkPermissions(msg, cmd.permissions2);
+      }
+      return restriction === 0;
+    }
     case 2:
       return isServer && msg.guild.ownerId === msg.member.id;
     case 3:
@@ -506,6 +508,7 @@ Actions.generateTimeString = function (milliseconds) {
 };
 
 Actions.checkPermissions = function (msg, permissions) {
+  if (!permissions) return true;
   const author = msg.member;
   if (!author) return false;
   if (permissions === "NONE") return true;
