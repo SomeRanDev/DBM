@@ -9,9 +9,9 @@ DBM.version = "2.0.0";
 
 const DiscordJS = (DBM.DiscordJS = require("discord.js"));
 
-if (DiscordJS.version < "13.0.0") {
+if (DiscordJS.version < "13.1.0") {
   console.log(
-    'This version of Discord Bot Maker requires discord.JS v13.\nPlease use "Project > Module Manager" and "Project > Reinstall Node Modules" to update to discord.js v13.',
+    'This version of Discord Bot Maker requires discord.JS v13.1.0.\nPlease use "Project > Module Manager" and "Project > Reinstall Node Modules" to update to discord.js v13.\n',
   );
   throw new Error("Need discord.js v13 to run!!!");
 }
@@ -23,13 +23,21 @@ if (DiscordJS.version < "13.0.0") {
 
 const Bot = (DBM.Bot = {});
 
+Bot.$slash = {}; // Slash commands
+Bot.$user = {}; // User commands
+Bot.$msge = {}; // Message commands
+
 Bot.$cmds = {}; // Normal commands
 Bot.$icds = []; // Includes word commands
 Bot.$regx = []; // Regular Expression commands
 Bot.$anym = []; // Any message commands
+
+Bot.$other = {}; // Manual commands
+
 Bot.$evts = {}; // Events
 
 Bot.bot = null;
+Bot.applicationCommandData = [];
 
 Bot.PRIVILEGED_INTENTS = DiscordJS.Intents.FLAGS.GUILD_MEMBERS | DiscordJS.Intents.FLAGS.GUILD_PRESENCES;
 
@@ -102,16 +110,7 @@ Bot.reformatCommands = function () {
     const com = data[i];
     if (com) {
       switch (com.comType) {
-        case "1":
-          this.$icds.push(com);
-          break;
-        case "2":
-          this.$regx.push(com);
-          break;
-        case "3":
-          this.$anym.push(com);
-          break;
-        default:
+        case "0": {
           if (this._caseSensitive) {
             this.$cmds[com.name] = com;
             if (com._aliases) {
@@ -130,9 +129,131 @@ Bot.reformatCommands = function () {
             }
           }
           break;
+        }
+        case "1": {
+          this.$icds.push(com);
+          break;
+        }
+        case "2": {
+          this.$regx.push(com);
+          break;
+        }
+        case "3": {
+          this.$anym.push(com);
+          break;
+        }
+        case "4": {
+          const name = this.validateSlashCommandName(com.name);
+          if (name) {
+            if (this.$slash[name]) {
+              console.error("Slash command with name \"" + name + "\" already exists!\nThis duplicate will be ignored.\n");
+            } else {
+              this.$slash[name] = com;
+              this.applicationCommandData.push(this.createApiJsonFromCommand(com));
+            }
+          } else {
+            console.error("Slash command has invalid name: \"" + name + "\".\nSlash command names cannot have spaces and must only contain letters, numbers, underscores, and dashes!\nThis command will be ignored.");
+          }
+          break;
+        }
+        case "5": {
+          const name = com.name;
+          if(this.$user[name]) {
+            console.error("User command with name \"" + name + "\" already exists!\nThis duplicate will be ignored.\n");
+          } else {
+            this.$user[name] = com;
+            this.applicationCommandData.push(this.createApiJsonFromCommand(com));
+          }
+          break;
+        }
+        case "6": {
+          const name = com.name;
+          if(this.$msge[name]) {
+            console.error("Message command with name \"" + name + "\" already exists!\nThis duplicate will be ignored.\n");
+          } else {
+            this.$msge[name] = com;
+            this.applicationCommandData.push(this.createApiJsonFromCommand(com));
+          }
+          break;
+        }
+        default: {
+          this.$other[com._id] = com;
+          break;
+        }
       }
     }
   }
+};
+
+Bot.createApiJsonFromCommand = function (com, name) {
+  const result = {
+    name: name ?? com.name,
+    description: this.generateSlashCommandDescription(com),
+  };
+  switch(com.comType) {
+    case "4": { result.type = "CHAT_INPUT"; break; }
+    case "5": { result.type = "USER"; break; }
+    case "6": { result.type = "MESSAGE"; break; }
+  }
+  if(com.comType === "4" && com.parameters && Array.isArray(com.parameters)) {
+    result.options = this.validateSlashCommandParameters(com.parameters, result.name);
+  }
+  return result;
+};
+
+Bot.validateSlashCommandName = function (name) {
+  if (!name) {
+    return false;
+  }
+  if (name.length > 32) {
+    name = name.substring(0, 32);
+  }
+  if (name.match(/^[\w-]{1,32}$/)) {
+    return name.toLowerCase();
+  }
+  return false;
+};
+
+Bot.generateSlashCommandDescription = function (com) {
+  const desc = com.description;
+  if (com.comType !== "4") {
+    return "";
+  }
+  return this.validateSlashCommandDescription(desc);
+};
+
+Bot.validateSlashCommandDescription = function (desc) {
+  if (desc.length > 100) {
+    return desc.substring(0, 100);
+  }
+  return desc || "(no description)";
+};
+
+Bot.validateSlashCommandParameters = function (parameters, commandName) {
+  const requireParams = [];
+  const optionalParams = [];
+  const existingNames = {};
+  for (let i = 0; i < parameters.length; i++) {
+    const paramsData = parameters[i];
+    const name = this.validateSlashCommandName(paramsData.name);
+    if (name) {
+      if(!existingNames[name]) {
+        existingNames[name] = true;
+        paramsData.name = name;
+        paramsData.description = this.validateSlashCommandDescription(paramsData.description);
+        if(paramsData.required) {
+          requireParams.push(paramsData);
+        } else {
+          optionalParams.push(paramsData);
+        }
+      } else {
+        console.error("Slash command \"" + commandName + "\" parameter #" + (i + 1) + " (\"" + name + "\") has a name that's already being used!\nThis duplicate will be ignored.\n");
+      }
+    } else {
+      console.error("Slash command \"" + commandName + "\" parameter #" + (i + 1) + " has invalid name: \"" + name + "\".\nSlash command parameter names cannot have spaces and must only contain letters, numbers, underscores, and dashes!\nThis parameter will be ignored.\n");
+    }
+  }
+  return requireParams.concat(optionalParams);
 };
 
 Bot.reformatEvents = function () {
@@ -151,6 +272,7 @@ Bot.reformatEvents = function () {
 Bot.initEvents = function () {
   this.bot.on("ready", this.onReady.bind(this));
   this.bot.on("messageCreate", this.onMessage.bind(this));
+  this.bot.on("interactionCreate", this.onInteraction.bind(this));
   Events.registerEvents(this.bot);
 };
 
@@ -162,12 +284,23 @@ Bot.onReady = function () {
   process.send?.("BotReady");
   console.log("Bot is ready!"); // Tells editor to start!
   this.restoreVariables();
+  this.registerApplicationCommands();
   this.preformInitialization();
 };
 
 Bot.restoreVariables = function () {
   Files.restoreServerVariables();
   Files.restoreGlobalVariables();
+};
+
+Bot.registerApplicationCommands = function () {
+  this.bot.guilds.cache.forEach((key, value) => {
+    this.bot.guilds.fetch(key).then((guild) => {
+      guild?.commands?.set(this.applicationCommandData);
+    }).catch(function(e) {
+      console.error(e);
+    });
+  });
 };
 
 Bot.preformInitialization = function () {
@@ -200,7 +333,7 @@ Bot.checkCommand = function (msg) {
   }
   const cmd = this.$cmds[command];
   if (cmd) {
-    Actions.preformActions(msg, cmd);
+    Actions.preformActionsFromMessage(msg, cmd);
     return true;
   }
   return false;
@@ -226,7 +359,7 @@ Bot.onAnyMessage = function (msg) {
     const anym = this.$anym;
     for (let i = 0; i < anym.length; i++) {
       if (anym[i]) {
-        Actions.preformActions(msg, anym[i]);
+        Actions.preformActionsFromMessage(msg, anym[i]);
       }
     }
   }
@@ -240,13 +373,13 @@ Bot.checkIncludes = function (msg) {
   for (let i = 0; i < icds_len; i++) {
     if (icds[i] && icds[i].name) {
       if (text.match(new RegExp("\\b" + icds[i].name + "\\b", "i"))) {
-        Actions.preformActions(msg, icds[i]);
+        Actions.preformActionsFromMessage(msg, icds[i]);
       } else if (icds[i]._aliases) {
         const aliases = icds[i]._aliases;
         const aliases_len = aliases.length;
         for (let j = 0; j < aliases_len; j++) {
           if (text.match(new RegExp("\\b" + aliases[j] + "\\b", "i"))) {
-            Actions.preformActions(msg, icds[i]);
+            Actions.preformActionsFromMessage(msg, icds[i]);
             break;
           }
         }
@@ -263,17 +396,33 @@ Bot.checkRegExps = function (msg) {
   for (let i = 0; i < regx_len; i++) {
     if (regx[i] && regx[i].name) {
       if (text.match(new RegExp(regx[i].name, "i"))) {
-        Actions.preformActions(msg, regx[i]);
+        Actions.preformActionsFromMessage(msg, regx[i]);
       } else if (regx[i]._aliases) {
         const aliases = regx[i]._aliases;
         const aliases_len = aliases.length;
         for (let j = 0; j < aliases_len; j++) {
           if (text.match(new RegExp("\\b" + aliases[j] + "\\b", "i"))) {
-            Actions.preformActions(msg, regx[i]);
+            Actions.preformActionsFromMessage(msg, regx[i]);
             break;
           }
         }
       }
+    }
+  }
+};
+
+Bot.onInteraction = function (interaction) {
+  const interactionName = interaction.commandName;
+  console.log(interaction.isMessageComponent());
+  if (interaction.isCommand()) {
+    if(this.$slash[interactionName]) {
+      Actions.preformActionsFromInteraction(interaction, this.$slash[interactionName]);
+    }
+  } else if (interaction.isContextMenu()) {
+    if(this.$user[interactionName]) {
+      Actions.preformActionsFromInteraction(interaction, this.$user[interactionName]);
+    } else if(this.$msge[interactionName]) {
+      Actions.preformActionsFromInteraction(interaction, this.$msge[interactionName]);
     }
   }
 };
@@ -416,38 +565,44 @@ Actions.modDirectories = function () {
   return result;
 };
 
-Actions.preformActions = function (msg, cmd) {
-  if (this.checkConditions(msg, cmd) && this.checkTimeRestriction(msg, cmd)) {
+Actions.preformActionsFromMessage = function (msg, cmd) {
+  if (this.checkConditions(msg.guild, msg.member, msg.author, cmd) && this.checkTimeRestriction(msg.author, cmd)) {
     this.invokeActions(msg, cmd.actions);
   }
 };
 
-Actions.checkConditions = function (msg, cmd) {
-  const isServer = Boolean(msg.guild && msg.member);
+Actions.preformActionsFromInteraction = function (interaction, cmd) {
+  if (this.checkConditions(interaction.guild, interaction.member, interaction.user, cmd) && this.checkTimeRestriction(interaction.user, cmd)) {
+    this.invokeInteraction(interaction, cmd.actions);
+  }
+};
+
+Actions.checkConditions = function (guild, member, user, cmd) {
+  const isServer = Boolean(guild && member);
   const restriction = parseInt(cmd.restriction, 10);
   switch (restriction) {
     case 0:
     case 1: {
-      if(isServer) {
-        return this.checkPermissions(msg, cmd.permissions) && this.checkPermissions(msg, cmd.permissions2);
+      if (isServer) {
+        return this.checkPermissions(member, cmd.permissions) && this.checkPermissions(member, cmd.permissions2);
       }
       return restriction === 0;
     }
     case 2:
-      return isServer && msg.guild.ownerId === msg.member.id;
+      return isServer && guild.ownerId === member.id;
     case 3:
       return !isServer;
     case 4:
-      return Files.data.settings.ownerId && msg.author.id === Files.data.settings.ownerId;
+      return Files.data.settings.ownerId && user.id === Files.data.settings.ownerId;
     default:
       return true;
   }
 };
 
-Actions.checkTimeRestriction = function (msg, cmd) {
+Actions.checkTimeRestriction = function (user, cmd) {
   if (!cmd._timeRestriction) return true;
-  if (!msg.member) return false;
-  const mid = msg.member.id;
+  if (!user) return false;
+  const mid = user.id;
   const cid = cmd._id;
   if (!this.timeStamps[cid]) {
     this.timeStamps[cid] = [];
@@ -507,55 +662,49 @@ Actions.generateTimeString = function (milliseconds) {
   return result;
 };
 
-Actions.checkPermissions = function (msg, permissions) {
+Actions.checkPermissions = function (member, permissions) {
   if (!permissions) return true;
-  const author = msg.member;
-  if (!author) return false;
+  if (!member) return false;
   if (permissions === "NONE") return true;
-  if (msg.guild.ownerId === author.id) return true;
-  return author.permissions.has(permissions);
+  if (msg.guild.ownerId === member.id) return true;
+  return member.permissions.has(permissions);
 };
 
-Actions.invokeActions = async function (msg, actions) {
-  const act = actions[0];
-  if (!act) return;
-  const cache = {
-    actions: actions,
-    index: 0,
-    temp: {},
-    server: msg.guild,
-    msg: msg,
-  };
-  if (this.exists(act.name)) {
-    try {
-      await this[act.name](cache);
-    } catch (e) {
-      this.displayError(act, cache, e);
-    }
-  } else {
-    console.error(act.name + " does not exist!");
+Actions.invokeActions = function (msg, actions) {
+  if (actions.length > 0) {
+    const cache = {
+      actions: actions,
+      index: -1,
+      temp: {},
+      server: msg.guild,
+      msg: msg,
+    };
+    this.callNextAction(cache);
+  }
+};
+
+Actions.invokeInteraction = function (interaction, actions) {
+  if (actions.length > 0) {
+    const cache = {
+      actions: actions,
+      index: -1,
+      temp: {},
+      server: interaction.guild,
+      interaction: interaction,
+    };
     this.callNextAction(cache);
   }
 };
 
 Actions.invokeEvent = function (event, server, temp) {
   const actions = event.actions;
-  const act = actions[0];
-  if (!act) return;
-  const cache = {
-    actions: actions,
-    index: 0,
-    temp: temp,
-    server: server,
-  };
-  if (this.exists(act.name)) {
-    try {
-      this[act.name](cache);
-    } catch (e) {
-      this.displayError(act, cache, e);
-    }
-  } else {
-    console.error(act.name + " does not exist!");
+  if (actions.length > 0) {
+    const cache = {
+      actions: actions,
+      index: -1,
+      temp: temp,
+      server: server,
+    };
     this.callNextAction(cache);
   }
 };
@@ -568,6 +717,14 @@ Actions.callNextAction = function (cache) {
   if (!act) {
     if (cache.callback) {
       cache.callback();
+    }
+    if (cache.interaction) {
+      if (!cache.interaction.replied) {
+        cache.interaction.reply({
+          ephemeral: true,
+          content: "Command successfully run!",
+        });
+      }
     }
     return;
   }
@@ -596,28 +753,37 @@ Actions.displayError = function (data, cache, err) {
 
 Actions.getSendTarget = function (type, varName, cache) {
   const msg = cache.msg;
+  const interaction = cache.interaction;
   const server = cache.server;
   switch (type) {
     case 0:
-      if (msg) {
+      if (interaction) {
+        return interaction.channel;
+      } else if (msg) {
         return msg.channel;
       }
       break;
     case 1:
-      if (msg) {
+      if (interaction) {
+        return interaction.user;
+      } else if (msg) {
         return msg.author;
       }
       break;
-    case 2:
-      if (msg?.mentions?.users?.size) {
-        return msg.mentions.users.first();
+    case 2: {
+      const users = interaction?.options?.resolved?.users ?? msg?.mentions?.users;
+      if (users?.size) {
+        return users.first();
       }
       break;
-    case 3:
-      if (msg?.mentions?.channels?.size) {
-        return msg.mentions.channels.first();
+    }
+    case 3: {
+      const channels = interaction?.options?.resolved?.channels ?? msg?.mentions?.channels;
+      if (channels?.size) {
+        return channels.first();
       }
       break;
+    }
     case 4:
       if (server) {
         return server.getDefaultChannel();
@@ -640,15 +806,20 @@ Actions.getSendTarget = function (type, varName, cache) {
 
 Actions.getMember = function (type, varName, cache) {
   const msg = cache.msg;
+  const interaction = cache.interaction;
   const server = cache.server;
   switch (type) {
-    case 0:
-      if (msg?.mentions?.members?.size) {
-        return msg.mentions.members.first();
+    case 0: {
+      const members = interaction?.options?.resolved?.members ?? msg?.mentions?.members;
+      if (members?.size) {
+        return members.first();
       }
       break;
+    }
     case 1:
-      if (msg) {
+      if (interaction) {
+        return interaction.member ?? interaction.user;
+      } else if (msg) {
         return msg.member ?? msg.author;
       }
       break;
@@ -716,18 +887,23 @@ Actions.getServer = function (type, varName, cache) {
 
 Actions.getRole = function (type, varName, cache) {
   const msg = cache.msg;
+  const interaction = cache.interaction;
   const server = cache.server;
   switch (type) {
-    case 0:
-      if (msg?.mentions?.roles?.size) {
-        return msg.mentions.roles.first();
+    case 0: {
+      const roles = interaction?.options?.resolved?.roles ?? msg?.mentions?.roles;
+      if (roles?.size) {
+        return roles.first();
       }
       break;
-    case 1:
-      if (msg?.member?.roles?.cache?.size) {
+    }
+    case 1: {
+      const member = interaction?.member ?? msg?.member;
+      if (member?.roles?.cache?.size) {
         return msg.member.roles.cache.first();
       }
       break;
+    }
     case 2:
       if (server?.roles?.cache?.size) {
         return server.roles.cache.first();
@@ -750,18 +926,23 @@ Actions.getRole = function (type, varName, cache) {
 
 Actions.getChannel = function (type, varName, cache) {
   const msg = cache.msg;
+  const interaction = cache.interaction;
   const server = cache.server;
   switch (type) {
     case 0:
-      if (msg) {
+      if (interaction) {
+        return interaction.channel;
+      } else if (msg) {
         return msg.channel;
       }
       break;
-    case 1:
-      if (msg?.mentions?.channels?.size) {
-        return msg.mentions.channels.first();
+    case 1: {
+      const channels = interaction?.options?.resolved?.channels ?? msg?.mentions?.channels;
+      if (channels?.size) {
+        return channels.first();
       }
       break;
+    }
     case 2:
       if (server) {
         return server.getDefaultChannel();
@@ -784,22 +965,26 @@ Actions.getChannel = function (type, varName, cache) {
 
 Actions.getVoiceChannel = function (type, varName, cache) {
   const msg = cache.msg;
+  const interaction = cache.interaction;
   const server = cache.server;
-
   switch (type) {
-    case 0:
-      if (msg?.member) {
-        return msg.member.voice.channel;
+    case 0: {
+      const member = interaction?.member ?? msg?.member;
+      if (member) {
+        return member.voice?.channel;
       }
       break;
-    case 1:
-      if (msg?.mentions?.members?.size) {
-        const member = msg.mentions.members.first();
+    }
+    case 1: {
+      const members = interaction?.options?.resolved?.members ?? msg?.mentions?.members;
+      if (members?.size) {
+        const member = members.first();
         if (member) {
-          return member.voice.channel;
+          return member.voice?.channel;
         }
       }
       break;
+    }
     case 2:
       if (server) {
         return server.getDefaultVoiceChannel();
@@ -822,6 +1007,7 @@ Actions.getVoiceChannel = function (type, varName, cache) {
 
 Actions.getList = function (type, varName, cache) {
   const msg = cache.msg;
+  const interaction = cache.interaction;
   const server = cache.server;
   switch (type) {
     case 0:
@@ -846,16 +1032,20 @@ Actions.getList = function (type, varName, cache) {
       break;
     case 4:
       return [...Bot.bot.guilds.cache.values()];
-    case 5:
-      if (msg?.mentions?.members?.size) {
-        return [...msg.mentions.members.first().roles.cache.values()];
+    case 5: {
+      const members = interaction?.options?.resolved?.members ?? msg?.mentions?.members;
+      if (members?.size) {
+        return [...members.first().roles.cache.values()];
       }
       break;
-    case 6:
-      if (msg?.member) {
-        return [...msg.member.roles.cache.values()];
+    }
+    case 6: {
+      const member = interaction?.member ?? msg?.member;
+      if (member) {
+        return [...member.roles.cache.values()];
       }
       break;
+    }
     case 7:
       return cache.temp[varName];
     case 8:
