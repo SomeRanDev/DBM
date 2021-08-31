@@ -21,7 +21,7 @@ module.exports = {
   // This function generates the subtitle displayed next to the name.
   //---------------------------------------------------------------------
 
-  subtitle: function (data) {
+  subtitle: function (data, presets) {
     const info = ["Channel Id", "Channel Name", "Channel Topic", "Channel Position", "Channel Category Id"];
     return `Find Channel by ${info[parseInt(data.info, 10)]}`;
   },

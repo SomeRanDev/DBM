@@ -21,7 +21,7 @@ module.exports = {
   // This function generates the subtitle displayed next to the name.
   //---------------------------------------------------------------------
 
-  subtitle: function (data) {
+  subtitle: function (data, presets) {
     const time = ["Year", "Month", "Day of the Month", "Hour", "Minute", "Second", "Milisecond", "Month Text"];
     return `${time[parseInt(data.type, 10)]}`;
   },

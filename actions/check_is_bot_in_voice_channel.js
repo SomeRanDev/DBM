@@ -21,9 +21,8 @@ module.exports = {
   // This function generates the subtitle displayed next to the name.
   //---------------------------------------------------------------------
 
-  subtitle: function (data) {
-    const results = ["Continue Actions", "Stop Action Sequence", "Jump To Action", "Jump Forward Actions"];
-    return `If True: ${results[parseInt(data.iftrue, 10)]} ~ If False: ${results[parseInt(data.iffalse, 10)]}`;
+  subtitle: function (data, presets) {
+    return `${presets.getConditionsText(data.iftrue, data.iffalse)}`;
   },
 
   //---------------------------------------------------------------------
@@ -53,10 +52,7 @@ module.exports = {
   //---------------------------------------------------------------------
 
   html: function (isEvent, data) {
-    return `
-<div>
-	${data.conditions[0]}
-</div>`;
+    return `<conditional-input></conditional-input>`;
   },
 
   //---------------------------------------------------------------------
@@ -67,12 +63,7 @@ module.exports = {
   // functions for the DOM elements.
   //---------------------------------------------------------------------
 
-  init: function () {
-    const { glob, document } = this;
-
-    glob.onChangeTrue(document.getElementById("iftrue"));
-    glob.onChangeFalse(document.getElementById("iffalse"));
-  },
+  init: function () {},
 
   //---------------------------------------------------------------------
   // Action Bot Function

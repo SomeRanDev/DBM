@@ -21,7 +21,7 @@ module.exports = {
   // This function generates the subtitle displayed next to the name.
   //---------------------------------------------------------------------
 
-  subtitle: function (data) {
+  subtitle: function (data, presets) {
     const inputTypes = ["Specific Emoji", "Temp Variable", "Server Variable", "Global Variable"];
     return `${inputTypes[parseInt(data.emoji, 10)]} (${data.varName})`;
   },

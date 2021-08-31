@@ -21,7 +21,7 @@ module.exports = {
   // This function generates the subtitle displayed next to the name.
   //---------------------------------------------------------------------
 
-  subtitle: function (data) {
+  subtitle: function (data, presets) {
     const info = ["Member Id", "Member Username", "Member Display Name", "Member Color", "Member Tag"];
     return `Find Member by ${info[parseInt(data.info, 10)]}`;
   },

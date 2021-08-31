@@ -21,7 +21,7 @@ module.exports = {
   // This function generates the subtitle displayed next to the name.
   //---------------------------------------------------------------------
 
-  subtitle: function (data) {
+  subtitle: function (data, presets) {
     const verifications = ["None", "Low", "Medium", "(╯°□°）╯︵ ┻━┻", "┻━┻彡 ヽ(ಠДಠ)ノ彡┻━┻﻿"];
     return `${presets.getServerText(data.server, data.varName)} - ${verifications[parseInt(data.verification, 10)]}`;
   },

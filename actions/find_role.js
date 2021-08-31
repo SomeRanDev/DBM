@@ -21,7 +21,7 @@ module.exports = {
   // This function generates the subtitle displayed next to the name.
   //---------------------------------------------------------------------
 
-  subtitle: function (data) {
+  subtitle: function (data, presets) {
     const info = ["Role Id", "Role Name", "Role Color", "Role Position"];
     return `Find Role by ${info[parseInt(data.info, 10)]}`;
   },

@@ -21,7 +21,7 @@ module.exports = {
   // This function generates the subtitle displayed next to the name.
   //---------------------------------------------------------------------
 
-  subtitle: function (data) {
+  subtitle: function (data, presets) {
     const actions = ["Stop Playing", "Pause Audio", "Resume Audio"];
     return `${actions[parseInt(data.action, 10)]}`;
   },

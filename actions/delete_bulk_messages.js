@@ -22,7 +22,7 @@ module.exports = {
   //---------------------------------------------------------------------
 
   subtitle: function (data, presets) {
-    return `Delete ${data.count} messages from ${presets.getChannelText(data.channel, data.varName)] || "Nothing"}`;
+    return `Delete ${data.count} messages from ${presets.getChannelText(data.channel, data.varName)}`;
   },
 
   //---------------------------------------------------------------------

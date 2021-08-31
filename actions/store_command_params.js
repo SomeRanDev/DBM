@@ -29,7 +29,7 @@ module.exports = {
   // This function generates the subtitle displayed next to the name.
   //---------------------------------------------------------------------
 
-  subtitle: function (data) {
+  subtitle: function (data, presets) {
     const infoSources = [
       "One Parameter",
       "Multiple Parameters",

@@ -21,7 +21,7 @@ module.exports = {
   // This function generates the subtitle displayed next to the name.
   //---------------------------------------------------------------------
 
-  subtitle: function (data) {
+  subtitle: function (data, presets) {
     const info = ["Emoji Id", "Emoji Name"];
     return `Find Emoji by ${info[parseInt(data.info, 10)]}`;
   },

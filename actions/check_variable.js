@@ -21,9 +21,8 @@ module.exports = {
   // This function generates the subtitle displayed next to the name.
   //---------------------------------------------------------------------
 
-  subtitle: function (data) {
-    const results = ["Continue Actions", "Stop Action Sequence", "Jump To Action", "Jump Forward Actions"];
-    return `If True: ${results[parseInt(data.iftrue, 10)]} ~ If False: ${results[parseInt(data.iffalse, 10)]}`;
+  subtitle: function (data, presets) {
+    return `${presets.getConditionsText(data.iftrue, data.iffalse)}`;
   },
 
   //---------------------------------------------------------------------
@@ -61,7 +60,7 @@ module.exports = {
 <div style="padding-top: 8px;">
 	<div style="float: left; width: 45%;">
 		<span class="dbminputlabel">Comparison Type</span><br>
-		<select id="comparison" class="round" onchange="glob.onChange1(this)">
+		<select id="comparison" class="round" onchange="glob.onComparisonChanged(this)">
 			<option value="0">Exists</option>
 			<option value="1" selected>Equals</option>
 			<option value="2">Equals Exactly</option>
@@ -79,9 +78,7 @@ module.exports = {
 
 <br><br><br>
 
-<div style="padding-top: 8px;">
-	${data.conditions[0]}
-</div>`;
+<conditional-input style="padding-top: 8px;"></conditional-input>`;
   },
 
   //---------------------------------------------------------------------
@@ -95,7 +92,7 @@ module.exports = {
   init: function () {
     const { glob, document } = this;
 
-    glob.onChange1 = function (event) {
+    glob.onComparisonChanged = function (event) {
       if (event.value === "0") {
         document.getElementById("directValue").style.display = "none";
       } else {
@@ -103,8 +100,7 @@ module.exports = {
       }
     };
 
-    glob.onChangeTrue(document.getElementById("iftrue"));
-    glob.onChangeFalse(document.getElementById("iffalse"));
+    glob.onComparisonChanged(document.getElementById("comparison"));
   },
 
   //---------------------------------------------------------------------
