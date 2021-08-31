@@ -54,7 +54,7 @@ module.exports = {
   html: function (isEvent, data) {
     return `
 <div style="float: left; width: 80%;">
-	AFK Status:<br>
+	<span class="dbminputlabel">AFK Status</span><br>
 	<select id="afk" class="round">
 		<option value="0" selected>AFK</option>
 		<option value="1">Not AFK</option>

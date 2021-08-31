@@ -21,17 +21,8 @@ module.exports = {
   // This function generates the subtitle displayed next to the name.
   //---------------------------------------------------------------------
 
-  subtitle: function (data) {
-    const roles = [
-      "Mentioned Role",
-      "1st Author Role",
-      "1st Server Role",
-      "Temp Variable",
-      "Server Variable",
-      "Global Variable",
-    ];
-    const channels = ["Mentioned User", "Command Author", "Temp Variable", "Server Variable", "Global Variable"];
-    return `${channels[parseInt(data.member, 10)]} - ${roles[parseInt(data.role, 10)]}`;
+  subtitle: function (data, presets) {
+    return `${presets.getMemberText(data.member, data.varName2)} - ${presets.getRoleText(data.role, data.varName)}`;
   },
 
   //---------------------------------------------------------------------
@@ -62,32 +53,16 @@ module.exports = {
 
   html: function (isEvent, data) {
     return `
-<div>
-	<div style="float: left; width: 35%;">
-		Source Role:<br>
-		<select id="role" class="round" onchange="glob.roleChange(this, 'varNameContainer')">
-			${data.roles[isEvent ? 1 : 0]}
-		</select>
-	</div>
-	<div id="varNameContainer" style="display: none; float: right; width: 60%;">
-		Variable Name:<br>
-		<input id="varName" class="round" type="text" list="variableList"><br>
-	</div>
-</div><br><br><br>
+<role-input dropdownLabel="Source Role" selectId="role" variableContainerId="varNameContainer" variableInputId="varName"></role-input>
+
+<br><br><br>
+
+<member-input isEvent=${isEvent} style="padding-top: 8px;" dropdownLabel="Member" selectId="member" variableContainerId="varNameContainer2" variableInputId="varName2"></member-input>
+
+<br><br><br>
+
 <div style="padding-top: 8px;">
-	<div style="float: left; width: 35%;">
-		Member:<br>
-		<select id="member" class="round" onchange="glob.memberChange(this, 'varNameContainer2')">
-			${data.members[isEvent ? 1 : 0]}
-		</select>
-	</div>
-	<div id="varNameContainer2" style="display: none; float: right; width: 60%;">
-		Variable Name:<br>
-		<input id="varName2" class="round" type="text"><br>
-	</div>
-</div><br><br><br>
-<div>
-  Reason:
+  <span class="dbminputlabel">Reason</span>
   <input id="reason" placeholder="Optional" class="round" type="text">
 </div>`;
   },
@@ -100,12 +75,7 @@ module.exports = {
   // functions for the DOM elements.
   //---------------------------------------------------------------------
 
-  init: function () {
-    const { glob, document } = this;
-
-    glob.roleChange(document.getElementById("role"), "varNameContainer");
-    glob.memberChange(document.getElementById("member"), "varNameContainer2");
-  },
+  init: function () {},
 
   //---------------------------------------------------------------------
   // Action Bot Function

@@ -54,20 +54,12 @@ module.exports = {
 
   html: function (isEvent, data) {
     return `
-<div>
-	<div style="float: left; width: 35%;">
-		Variable:<br>
-		<select id="storage" class="round" onchange="glob.refreshVariableList(this)">
-			${data.variables[1]}
-		</select>
-	</div>
-	<div id="varNameContainer" style="float: right; width: 60%;">
-		Variable Name:<br>
-		<input id="varName" class="round" type="text" list="variableList">
-	</div>
-</div><br><br><br>
+<retrieve-from-variable dropdownLabel="Variable" selectId="storage" variableContainerId="varNameContainer" variableInputId="varName"></retrieve-from-variable>
+
+<br><br><br>
+
 <div style="padding-top: 8px; width: 80%;">
-		Variable Type to Check:<br>
+		<span class="dbminputlabel">Variable Type to Check</span><br>
 		<select id="comparison" class="round">
 			<option value="0" selected>Number</option>
 			<option value="1">String</option>
@@ -80,7 +72,10 @@ module.exports = {
 			<option value="8">Server</option>
 			<option value="9">Emoji</option>
 		</select>
-</div><br>
+</div>
+
+<br>
+
 <div>
 	${data.conditions[0]}
 </div>`;
@@ -97,7 +92,6 @@ module.exports = {
   init: function () {
     const { glob, document } = this;
 
-    glob.refreshVariableList(document.getElementById("storage"));
     glob.onChangeTrue(document.getElementById("iftrue"));
     glob.onChangeFalse(document.getElementById("iffalse"));
   },

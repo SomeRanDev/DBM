@@ -21,9 +21,9 @@ module.exports = {
   // This function generates the subtitle displayed next to the name.
   //---------------------------------------------------------------------
 
-  subtitle: function (data) {
-    const channels = ["Mentioned User", "Command Author", "Temp Variable", "Server Variable", "Global Variable"];
-    return `${channels[parseInt(data.member, 10)]} (${data.dataName}) ${data.changeType === "1" ? "+=" : "="} ${
+  subtitle: function (data, presets) {
+    const members = presets.members;
+    return `${presets.getMemberText(data.member, data.varName)} (${data.dataName}) ${data.changeType === "1" ? "+=" : "="} ${
       data.value
     }`;
   },
@@ -56,33 +56,28 @@ module.exports = {
 
   html: function (isEvent, data) {
     return `
-<div>
-	<div style="float: left; width: 35%;">
-		Member:<br>
-		<select id="member" class="round" onchange="glob.memberChange(this, 'varNameContainer')">
-			${data.members[isEvent ? 1 : 0]}
-		</select>
-	</div>
-	<div id="varNameContainer" style="display: none; float: right; width: 60%;">
-		Variable Name:<br>
-		<input id="varName" class="round" type="text" list="variableList">
-	</div>
-</div><br><br><br>
+<member-input dropdownLabel="Member" selectId="member" variableContainerId="varNameContainer" variableInputId="varName"></member-input>
+
+<br><br><br>
+
 <div style="padding-top: 8px;">
 	<div style="float: left; width: 50%;">
-		Data Name:<br>
+		<span class="dbminputlabel">Data Name</span><br>
 		<input id="dataName" class="round" type="text">
 	</div>
 	<div style="float: left; width: 45%;">
-		Control Type:<br>
+		<span class="dbminputlabel">Control Type</span><br>
 		<select id="changeType" class="round">
 			<option value="0" selected>Set Value</option>
 			<option value="1">Add Value</option>
 		</select>
 	</div>
-</div><br><br><br>
+</div>
+
+<br><br><br>
+
 <div style="padding-top: 8px;">
-	Value:<br>
+	<span class="dbminputlabel">Value</span><br>
 	<input id="value" class="round" type="text" name="is-eval"><br>
 </div>`;
   },
@@ -95,11 +90,7 @@ module.exports = {
   // functions for the DOM elements.
   //---------------------------------------------------------------------
 
-  init: function () {
-    const { glob, document } = this;
-
-    glob.memberChange(document.getElementById("member"), "varNameContainer");
-  },
+  init: function () {},
 
   //---------------------------------------------------------------------
   // Action Bot Function

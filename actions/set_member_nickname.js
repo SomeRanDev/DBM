@@ -21,9 +21,8 @@ module.exports = {
   // This function generates the subtitle displayed next to the name.
   //---------------------------------------------------------------------
 
-  subtitle: function (data) {
-    const channels = ["Mentioned User", "Command Author", "Temp Variable", "Server Variable", "Global Variable"];
-    return `${channels[parseInt(data.member, 10)]} - ${data.nickname}`;
+  subtitle: function (data, presets) {
+    return `${presets.getMemberText(data.member, data.varName)} - ${data.nickname}`;
   },
 
   //---------------------------------------------------------------------
@@ -54,25 +53,17 @@ module.exports = {
 
   html: function (isEvent, data) {
     return `
-<div>
-	<div style="float: left; width: 35%;">
-		Source Member:<br>
-		<select id="member" class="round" onchange="glob.memberChange(this, 'varNameContainer')">
-			${data.members[isEvent ? 1 : 0]}
-		</select>
-	</div>
-	<div id="varNameContainer" style="display: none; float: right; width: 60%;">
-		Variable Name:<br>
-		<input id="varName" class="round" type="text" list="variableList"><br>
-	</div>
-</div>
+<member-input isEvent=${isEvent} dropdownLabel="Source Member" selectId="member" variableContainerId="varNameContainer" variableInputId="varName"></member-input>
+
 <br><br><br>
+
 <div style="padding-top: 8px;">
-	New Nickname:<br>
+	<span class="dbminputlabel">New Nickname</span><br>
 	<input id="nickname" class="round" type="text"><br>
 </div>
+
 <div>
-  Reason:
+  <span class="dbminputlabel">Reason</span>
   <input id="reason" placeholder="Optional" class="round" type="text">
 </div>`;
   },
@@ -85,11 +76,7 @@ module.exports = {
   // functions for the DOM elements.
   //---------------------------------------------------------------------
 
-  init: function () {
-    const { glob, document } = this;
-
-    glob.memberChange(document.getElementById("member"), "varNameContainer");
-  },
+  init: function () {},
 
   //---------------------------------------------------------------------
   // Action Bot Function

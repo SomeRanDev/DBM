@@ -72,7 +72,7 @@ module.exports = {
     return `
 <div>
 	<div style="padding-top: 8px; width: 70%;">
-		Time Info:<br>
+		<span class="dbminputlabel">Time Info</span><br>
 		<select id="type" class="round">
 			<option value="0" selected>Year</option>
 			<option value="1">Month (Number)</option>
@@ -84,19 +84,11 @@ module.exports = {
 			<option value="6">Milisecond</option>
 		</select>
 	</div>
-</div><br>
-<div>
-	<div style="float: left; width: 35%;">
-		Store In:<br>
-		<select id="storage" class="round">
-			${data.variables[1]}
-		</select>
-	</div>
-	<div id="varNameContainer" style="float: right; width: 60%;">
-		Variable Name:<br>
-		<input id="varName" class="round" type="text"><br>
-	</div>
-</div>`;
+</div>
+
+<br>
+
+<store-in-variable dropdownLabel="Store In" selectId="storage" variableContainerId="varNameContainer" variableInputId="varName"></store-in-variable>`;
   },
 
   //---------------------------------------------------------------------

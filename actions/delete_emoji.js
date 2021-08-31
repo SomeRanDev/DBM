@@ -56,7 +56,7 @@ module.exports = {
     return `
 <div>
 	<div style="float: left; width: 35%;">
-		Source Emoji:<br>
+		<span class="dbminputlabel">Source Emoji</span><br>
 		<select id="emoji" class="round" onchange="glob.onChange1(this)">
 			<option value="0" selected>Specific Emoji</option>
 			<option value="1">Temp Variable</option>
@@ -65,12 +65,15 @@ module.exports = {
 		</select>
 	</div>
 	<div id="varNameContainer" style="float: right; width: 60%;">
-		<span id="extName">Emoji Name</span>:<br>
+		<span class="dbminputlabel" id="extName">Emoji Name</span>:<br>
 		<input id="varName" class="round" type="text" list="variableList"><br>
 	</div>
-</div><br><br><br>
+</div>
+
+<br><br><br>
+
 <div>
-  Reason:
+  <span class="dbminputlabel">Reason</span>
   <input id="reason" placeholder="Optional" class="round" type="text">
 </div>`;
   },

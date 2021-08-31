@@ -54,24 +54,19 @@ module.exports = {
 
   html: function (isEvent, data) {
     return `
-<div>
-	<div style="float: left; width: 35%;">
-		Source Member:<br>
-		<select id="member" class="round" onchange="glob.memberChange(this, 'varNameContainer')">
-			${data.members[isEvent ? 1 : 0]}
-		</select>
-	</div>
-	<div id="varNameContainer" style="display: none; float: right; width: 60%;">
-		Variable Name:<br>
-		<input id="varName" class="round" type="text" list="variableList"><br>
-	</div>
-</div><br><br><br>
+<member-input isEvent=${isEvent} dropdownLabel="Source Member" selectId="member" variableContainerId="varNameContainer" variableInputId="varName"></member-input>
+
+<br><br><br>
+
 <div style="padding-top: 8px; width: 80%;">
-	Permission:<br>
+	<span class="dbminputlabel">Permission</span><br>
 	<select id="permission" class="round">
 		${data.permissions[2]}
 	</select>
-</div><br>
+</div>
+
+<br>
+
 <div>
 	${data.conditions[0]}
 </div>`;
@@ -88,7 +83,6 @@ module.exports = {
   init: function () {
     const { glob, document } = this;
 
-    glob.memberChange(document.getElementById("member"), "varNameContainer");
     glob.onChangeTrue(document.getElementById("iftrue"));
     glob.onChangeFalse(document.getElementById("iffalse"));
   },

@@ -23,7 +23,7 @@ module.exports = {
 
   subtitle: function (data) {
     const verifications = ["None", "Low", "Medium", "(╯°□°）╯︵ ┻━┻", "┻━┻彡 ヽ(ಠДಠ)ノ彡┻━┻﻿"];
-    return `${verifications[parseInt(data.verification, 10)]}`;
+    return `${presets.getServerText(data.server, data.varName)} - ${verifications[parseInt(data.verification, 10)]}`;
   },
 
   //---------------------------------------------------------------------
@@ -54,20 +54,12 @@ module.exports = {
 
   html: function (isEvent, data) {
     return `
-<div>
-	<div style="float: left; width: 35%;">
-		Server:<br>
-		<select id="server" class="round" onchange="glob.serverChange(this, 'varNameContainer')">
-			${data.servers[isEvent ? 1 : 0]}
-		</select>
-	</div>
-	<div id="varNameContainer" style="display: none; float: right; width: 60%;">
-		Variable Name:<br>
-		<input id="varName" class="round" type="text" list="variableList">
-	</div>
-</div><br><br><br>
+<server-input dropdownLabel="Server" selectId="server" variableContainerId="varNameContainer" variableInputId="varName"></server-input>
+
+<br><br><br>
+
 <div style="padding-top: 8px; width: 90%;">
-	Verification Level:<br>
+	<span class="dbminputlabel">Verification Level</span><br>
 	<select id="verification" class="round">
 		<option value="0">None</option>
 		<option value="1">Low</option>
@@ -75,9 +67,12 @@ module.exports = {
 		<option value="3">(╯°□°）╯︵ ┻━┻</option>
 		<option value="4">┻━┻彡 ヽ(ಠДಠ)ノ彡┻━┻﻿</option>
 	</select>
-</div><br>
+</div>
+
+<br>
+
 <div>
-  Reason:
+  <span class="dbminputlabel">Reason</span>
   <input id="reason" placeholder="Optional" class="round" type="text">
 </div>`;
   },
@@ -90,11 +85,7 @@ module.exports = {
   // functions for the DOM elements.
   //---------------------------------------------------------------------
 
-  init: function () {
-    const { glob, document } = this;
-
-    glob.serverChange(document.getElementById("server"), "varNameContainer");
-  },
+  init: function () {},
 
   //---------------------------------------------------------------------
   // Action Bot Function

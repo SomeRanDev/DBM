@@ -55,7 +55,7 @@ module.exports = {
   html: function (isEvent, data) {
     return `
 <div style="float: left; width: 70%;">
-	Status:<br>
+	<span class="dbminputlabel">Status</span><br>
 	<select id="status" class="round">
 		<option value="0">Online</option>
 		<option value="1">Idle</option>

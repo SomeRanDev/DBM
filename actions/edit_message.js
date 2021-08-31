@@ -21,10 +21,8 @@ module.exports = {
   // This function generates the subtitle displayed next to the name.
   //---------------------------------------------------------------------
 
-  subtitle: function (data) {
-    const names = ["Command Message", "Temp Variable", "Server Variable", "Global Variable"];
-    const index = parseInt(data.storage, 10);
-    return data.storage === "0" ? `${names[index]}` : `${names[index]} (${data.varName})`;
+  subtitle: function (data, presets) {
+    return `${presets.getMessageText(data.storage, data.varName)}`;
   },
 
   //---------------------------------------------------------------------
@@ -60,21 +58,16 @@ module.exports = {
 		<u>Note:</u><br>
 		Bots are only able to edit their own messages.
 	</p>
-</div><br>
-<div>
-	<div style="float: left; width: 35%;">
-		Source Message:<br>
-		<select id="storage" class="round" onchange="glob.messageChange(this, 'varNameContainer')">
-			${data.messages[isEvent ? 1 : 0]}
-		</select>
-	</div>
-	<div id="varNameContainer" style="display: none; float: right; width: 60%;">
-		Variable Name:<br>
-		<input id="varName" class="round" type="text" list="variableList"><br>
-	</div>
-</div><br><br><br>
+</div>
+
+<br>
+
+<message-input dropdownLabel="Source Message" selectId="storage" variableContainerId="varNameContainer" variableInputId="varName"></message-input>
+
+<br><br><br>
+
 <div style="padding-top: 8px;">
-	Edited Message Content:<br>
+	<span class="dbminputlabel">Edited Message Content</span><br>
 	<textarea id="message" rows="9" style="width: 99%; font-family: monospace; white-space: nowrap; resize: none;"></textarea>
 </div>`;
   },
@@ -87,11 +80,7 @@ module.exports = {
   // functions for the DOM elements.
   //---------------------------------------------------------------------
 
-  init: function () {
-    const { glob, document } = this;
-
-    glob.messageChange(document.getElementById("storage"), "varNameContainer");
-  },
+  init: function () {},
 
   //---------------------------------------------------------------------
   // Action Bot Function

@@ -21,16 +21,8 @@ module.exports = {
   // This function generates the subtitle displayed next to the name.
   //---------------------------------------------------------------------
 
-  subtitle: function (data) {
-    const channels = [
-      "Same Channel",
-      "Mentioned Channel",
-      "1st Server Channel",
-      "Temp Variable",
-      "Server Variable",
-      "Global Variable",
-    ];
-    return `Delete ${data.count} messages from ${channels[parseInt(data.channel, 10)] || "Nothing"}`;
+  subtitle: function (data, presets) {
+    return `Delete ${data.count} messages from ${presets.getChannelText(data.channel, data.varName)] || "Nothing"}`;
   },
 
   //---------------------------------------------------------------------
@@ -61,25 +53,17 @@ module.exports = {
 
   html: function (isEvent, data) {
     return `
-<div>
-	<div style="float: left; width: 35%;">
-		Source Channel:<br>
-		<select id="channel" class="round" onchange="glob.channelChange(this, 'varNameContainer')">
-			${data.channels[isEvent ? 1 : 0]}
-		</select>
-	</div>
-	<div id="varNameContainer" style="display: none; float: right; width: 60%;">
-		Variable Name:<br>
-		<input id="varName" class="round" type="text" list="variableList"><br>
-	</div>
-</div><br><br><br>
+<channel-input dropdownLabel="Source Channel" selectId="channel" variableContainerId="varNameContainer" variableInputId="varName"></channel-input>
+
+<br><br><br>
+
 <div style="padding-top: 8px;">
-	Amount to Delete:<br>
+	<span class="dbminputlabel">Amount to Delete</span><br>
 	<input id="count" class="round" type="text" style="width: 90%;"><br>
 </div>
 <div>
 	<div style="float: left; width: 35%;">
-		Delete Condition:<br>
+		<span class="dbminputlabel">Delete Condition</span><br>
 		<select id="condition" class="round" onchange="glob.onChange2(this)">
 			<option value="0" selected>None</option>
 			<option value="1">Has Author</option>
@@ -87,7 +71,7 @@ module.exports = {
 		</select>
 	</div>
 	<div id="varNameContainer2" style="display: none; float: right; width: 60%;">
-		Code:<br>
+		<span class="dbminputlabel">Code</span><br>
 		<input id="custom" class="round" type="text"><br>
 	</div>
 </div>`;
@@ -114,7 +98,6 @@ module.exports = {
       }
     };
 
-    glob.channelChange(document.getElementById("channel"), "varNameContainer");
     glob.onChange2(document.getElementById("condition"));
   },
 

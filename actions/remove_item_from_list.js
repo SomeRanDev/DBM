@@ -21,8 +21,8 @@ module.exports = {
   // This function generates the subtitle displayed next to the name.
   //---------------------------------------------------------------------
 
-  subtitle: function (data) {
-    const storage = ["", "Temp Variable", "Server Variable", "Global Variable"];
+  subtitle: function (data, presets) {
+    const storage = presets.variables;
     return `Remove Item from ${storage[parseInt(data.storage, 10)]} (${data.varName})`;
   },
 
@@ -66,21 +66,13 @@ module.exports = {
 
   html: function (isEvent, data) {
     return `
-<div>
-	<div style="float: left; width: 35%;">
-		Source List:<br>
-		<select id="storage" class="round" onchange="glob.refreshVariableList(this)">
-			${data.variables[1]}
-		</select>
-	</div>
-	<div id="varNameContainer" style="float: right; width: 60%;">
-		Variable Name:<br>
-		<input id="varName" class="round varSearcher" type="text" list="variableList">
-	</div>
-</div><br><br><br>
+<retrieve-from-variable dropdownLabel="Source List" selectId="storage" variableContainerId="varNameContainer" variableInputId="varName"></retrieve-from-variable>
+
+<br><br><br>
+
 <div style="padding-top: 8px;">
 	<div style="float: left; width: 45%;">
-		Remove Type:<br>
+		<span class="dbminputlabel">Remove Type</span><br>
 		<select id="removeType" class="round" onchange="glob.onChange1(this)">
 			<option value="0" selected>Remove from End</option>
 			<option value="1">Remove from Front</option>
@@ -88,22 +80,11 @@ module.exports = {
 		</select>
 	</div>
 	<div id="positionHolder" style="float: right; width: 50%; display: none;">
-		Position:<br>
+		<span class="dbminputlabel">Position</span><br>
 		<input id="position" class="round" type="text">
 	</div>
 </div><br><br><br>
-<div style="padding-top: 8px;">
-	<div style="float: left; width: 35%;">
-		Store In:<br>
-		<select id="storage2" class="round" onchange="glob.variableChange(this, 'varNameContainer2')">
-			${data.variables[0]}
-		</select>
-	</div>
-	<div id="varNameContainer2" style="display: none; float: right; width: 60%;">
-		Variable Name:<br>
-		<input id="varName2" class="round" type="text">
-	</div>
-</div>`;
+<store-in-variable allowNone style="padding-top: 8px;" selectId="storage2" variableInputId="varName2" variableContainerId="varNameContainer2"></store-in-variable>`;
   },
 
   //---------------------------------------------------------------------
@@ -127,9 +108,7 @@ module.exports = {
       }
     };
 
-    glob.refreshVariableList(document.getElementById("storage"));
     glob.onChange1(document.getElementById("removeType"));
-    glob.variableChange(document.getElementById("storage2"), "varNameContainer2");
   },
 
   //---------------------------------------------------------------------

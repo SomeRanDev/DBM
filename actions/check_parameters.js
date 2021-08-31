@@ -64,7 +64,7 @@ module.exports = {
     return `
 <div>
 	<div style="float: left; width: 45%;">
-		Condition:<br>
+		<span class="dbminputlabel">Condition</span><br>
 		<select id="condition" class="round">
 			<option value="0" selected>Number of Parameters is...</option>
 			<option value="1">Number of Member Mentions are...</option>
@@ -73,7 +73,7 @@ module.exports = {
 		</select>
 	</div>
 	<div style="padding-left: 5%; float: left; width: 25%;">
-		Comparison:<br>
+		<span class="dbminputlabel">Comparison</span><br>
 		<select id="comparison" class="round">
 			<option value="0" selected>=</option>
 			<option value="1">\<</option>
@@ -81,10 +81,13 @@ module.exports = {
 		</select>
 	</div>
 	<div style="padding-left: 5%; float: left; width: 25%;">
-		Number:<br>
+		<span class="dbminputlabel">Number</span><br>
 		<input id="value" class="round" type="text">
 	</div>
-</div><br><br><br>
+</div>
+
+<br><br><br>
+
 <div style="padding-top: 8px;">
 	${data.conditions[0]}
 </div>`;

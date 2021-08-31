@@ -21,17 +21,8 @@ module.exports = {
   // This function generates the subtitle displayed next to the name.
   //---------------------------------------------------------------------
 
-  subtitle: function (data) {
-    const channels = [
-      "Same Channel",
-      "Command Author",
-      "Mentioned User",
-      "Mentioned Channel",
-      "Default Channel",
-      "Temp Variable",
-      "Server Variable",
-      "Global Variable",
-    ];
+  subtitle: function (data, presets) {
+    const channels = presets.sendTargets;
     return `${channels[parseInt(data.channel, 10)]}: "${data.message.replace(/[\n\r]+/, "")}"`;
   },
 
@@ -63,23 +54,17 @@ module.exports = {
 
   html: function (isEvent, data) {
     return `
-<div style="float: left; width: 35%;">
-	Send To:<br>
-	<select id="channel" class="round" onchange="glob.sendTargetChange(this, 'varNameContainer')">
-		${data.sendTargets[isEvent ? 1 : 0]}
-	</select>
-</div>
-<div id="varNameContainer" style="display: none; float: right; width: 60%;">
-	Variable Name:<br>
-	<input id="varName" class="round" type="text" list="variableList"><br>
-</div>
+<send-target-input isEvent=${isEvent} dropdownLabel="Send To" selectId="channel" variableContainerId="varNameContainer" variableInputId="varName"></send-target-input>
+
 <br><br><br>
+
 <div style="padding-top: 8px;">
-	Local File URL:<br>
+	<span class="dbminputlabel">Local File URL</span><br>
 	<input id="file" class="round" type="text" value="resources/"><br>
 </div>
+
 <div>
-	Message:<br>
+	<span class="dbminputlabel">Message</span><br>
 	<textarea id="message" rows="8" placeholder="Insert message here..." style="width: 99%; font-family: monospace; white-space: nowrap; resize: none;"></textarea>
 </div>`;
   },
@@ -92,11 +77,7 @@ module.exports = {
   // functions for the DOM elements.
   //---------------------------------------------------------------------
 
-  init: function () {
-    const { glob, document } = this;
-
-    glob.sendTargetChange(document.getElementById("channel"), "varNameContainer");
-  },
+  init: function () {},
 
   //---------------------------------------------------------------------
   // Action Bot Function

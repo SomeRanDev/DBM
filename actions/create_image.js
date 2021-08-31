@@ -66,21 +66,11 @@ module.exports = {
   html: function (isEvent, data) {
     return `
 <div>
-	Local/Web URL:<br>
+	<span class="dbminputlabel">Local/Web URL</span><br>
 	<input id="url" class="round" type="text" value="resources/"><br>
 </div>
-<div>
-	<div style="float: left; width: 35%;">
-		Store In:<br>
-		<select id="storage" class="round">
-			${data.variables[1]}
-		</select>
-	</div>
-	<div id="varNameContainer" style="float: right; width: 60%;">
-		Variable Name:<br>
-		<input id="varName" class="round" type="text"><br>
-	</div>
-</div>`;
+
+<store-in-variable dropdownLabel="Store In" selectId="storage" variableContainerId="varNameContainer" variableInputId="varName"></store-in-variable>`;
   },
 
   //---------------------------------------------------------------------

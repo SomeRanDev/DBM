@@ -21,8 +21,7 @@ module.exports = {
   // This function generates the subtitle displayed next to the name.
   //---------------------------------------------------------------------
 
-  subtitle: function (data) {
-    const servers = ["Current Server", "Temp Variable", "Server Variable", "Global Variable"];
+  subtitle: function (data, presets) {
     const info = [
       "Server Object",
       "Server Id",
@@ -76,7 +75,7 @@ module.exports = {
       "Server Vanity URL Code",
       "Server Widget Channel Id",
     ];
-    return `${servers[parseInt(data.server, 10)]} - ${info[parseInt(data.info, 10)]}`;
+    return `${presets.getServerText(data.server, data.varName)} - ${info[parseInt(data.info, 10)]}`;
   },
 
   //---------------------------------------------------------------------
@@ -235,21 +234,13 @@ module.exports = {
 
   html: function (isEvent, data) {
     return `
-<div>
-	<div style="float: left; width: 35%;">
-		Source Server:<br>
-		<select id="server" class="round" onchange="glob.serverChange(this, 'varNameContainer')">
-			${data.servers[isEvent ? 1 : 0]}
-		</select>
-	</div>
-	<div id="varNameContainer" style="display: none; float: right; width: 60%;">
-		Variable Name:<br>
-		<input id="varName" class="round" type="text" list="variableList"><br>
-	</div>
-</div><br><br><br>
+<server-input dropdownLabel="Source Server" selectId="server" variableContainerId="varNameContainer" variableInputId="varName"></server-input>
+
+<br><br><br>
+
 <div>
 	<div style="padding-top: 8px; width: 70%;">
-		Source Info:<br>
+		<span class="dbminputlabel">Source Info</span><br>
 		<select id="info" class="round">
       <option value="0">Server Object</options>
       <option value="1">Server Id</options>
@@ -302,19 +293,11 @@ module.exports = {
       <option value="50">Server Widget Channel Id</options>
 		</select>
 	</div>
-</div><br>
-<div>
-	<div style="float: left; width: 35%;">
-		Store In:<br>
-		<select id="storage" class="round">
-			${data.variables[1]}
-		</select>
-	</div>
-	<div id="varNameContainer2" style="float: right; width: 60%;">
-		Variable Name:<br>
-		<input id="varName2" class="round" type="text"><br>
-	</div>
-</div>`;
+</div>
+
+<br>
+
+<store-in-variable dropdownLabel="Store In" selectId="storage" variableContainerId="varNameContainer2" variableInputId="varName2"></store-in-variable>`;
   },
 
   //---------------------------------------------------------------------
@@ -325,11 +308,7 @@ module.exports = {
   // functions for the DOM elements.
   //---------------------------------------------------------------------
 
-  init: function () {
-    const { glob, document } = this;
-
-    glob.serverChange(document.getElementById("server"), "varNameContainer");
-  },
+  init: function () {},
 
   //---------------------------------------------------------------------
   // Action Bot Function

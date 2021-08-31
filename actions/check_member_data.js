@@ -54,25 +54,17 @@ module.exports = {
 
   html: function (isEvent, data) {
     return `
-<div>
-	<div style="float: left; width: 35%;">
-		Member:<br>
-		<select id="member" class="round" onchange="glob.memberChange(this, 'varNameContainer')">
-			${data.members[isEvent ? 1 : 0]}
-		</select>
-	</div>
-	<div id="varNameContainer" style="display: none; float: right; width: 60%;">
-		Variable Name:<br>
-		<input id="varName" class="round" type="text" list="variableList">
-	</div>
-</div><br><br><br>
+<member-input dropdownLabel="Member" selectId="member" variableContainerId="varNameContainer" variableInputId="varName"></member-input>
+
+<br><br><br>
+
 <div style="padding-top: 8px;">
 	<div style="float: left; width: 50%;">
-		Data Name:<br>
+		<span class="dbminputlabel">Data Name</span><br>
 		<input id="dataName" class="round" type="text">
 	</div>
 	<div style="float: left; width: 45%;">
-		Comparison Type:<br>
+		<span class="dbminputlabel">Comparison Type</span><br>
 		<select id="comparison" class="round">
 			<option value="0">Exists</option>
 			<option value="1" selected>Equals</option>
@@ -83,11 +75,15 @@ module.exports = {
 			<option value="6">Matches Regex</option>
 		</select>
 	</div>
-</div><br><br><br>
+</div>
+
+<br><br><br>
+
 <div style="padding-top: 8px;">
-	Value to Compare to:<br>
+	<span class="dbminputlabel">Value to Compare to</span><br>
 	<input id="value" class="round" type="text" name="is-eval">
 </div>
+
 <div style="padding-top: 16px;">
 	${data.conditions[0]}
 </div>`;
@@ -104,7 +100,6 @@ module.exports = {
   init: function () {
     const { glob, document } = this;
 
-    glob.memberChange(document.getElementById("member"), "varNameContainer");
     glob.onChangeTrue(document.getElementById("iftrue"));
     glob.onChangeFalse(document.getElementById("iffalse"));
   },

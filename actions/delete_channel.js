@@ -21,17 +21,8 @@ module.exports = {
   // This function generates the subtitle displayed next to the name.
   //---------------------------------------------------------------------
 
-  subtitle: function (data) {
-    const names = [
-      "Same Channel",
-      "Mentioned Channel",
-      "1st Server Channel",
-      "Temp Variable",
-      "Server Variable",
-      "Global Variable",
-    ];
-    const index = parseInt(data.storage, 10);
-    return parseInt(data.storage, 10) < 3 ? `${names[index]}` : `${names[index]} - ${data.varName}`;
+  subtitle: function (data, presets) {
+    return `${presets.getChannelText(data.storage, data.varName)}`;
   },
 
   //---------------------------------------------------------------------
@@ -62,20 +53,12 @@ module.exports = {
 
   html: function (isEvent, data) {
     return `
-<div>
-	<div style="float: left; width: 35%;">
-		Source Channel:<br>
-		<select id="storage" class="round" onchange="glob.channelChange(this, 'varNameContainer')">
-			${data.channels[isEvent ? 1 : 0]}
-		</select>
-	</div>
-	<div id="varNameContainer" style="display: none; float: right; width: 60%;">
-		Variable Name:<br>
-		<input id="varName" class="round" type="text" list="variableList"><br>
-	</div>
-</div><br><br><br>
-<div>
-  Reason:
+<channel-input dropdownLabel="Source Channel" selectId="storage" variableContainerId="varNameContainer" variableInputId="varName"></channel-input>
+
+<br><br><br>
+
+<div style="padding-top: 8px;">
+  <span class="dbminputlabel">Reason</span>
   <input id="reason" placeholder="Optional" class="round" type="text">
 </div>`;
   },
@@ -88,11 +71,7 @@ module.exports = {
   // functions for the DOM elements.
   //---------------------------------------------------------------------
 
-  init: function () {
-    const { glob, document } = this;
-
-    glob.channelChange(document.getElementById("storage"), "varNameContainer");
-  },
+  init: function () {},
 
   //---------------------------------------------------------------------
   // Action Bot Function

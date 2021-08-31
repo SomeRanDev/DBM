@@ -21,18 +21,8 @@ module.exports = {
   // This function generates the subtitle displayed next to the name.
   //---------------------------------------------------------------------
 
-  subtitle: function (data) {
-    const channels = [
-      "Same Channel",
-      "Command Author",
-      "Mentioned User",
-      "Mentioned Channel",
-      "Default Channel",
-      "Temp Variable",
-      "Server Variable",
-      "Global Variable",
-    ];
-    return `${channels[parseInt(data.channel, 10)]}: ${data.varName}`;
+  subtitle: function (data, presets) {
+    return `${presets.getSendTargetText(data.channel, data.varName2)}: ${data.varName}`;
   },
 
   //---------------------------------------------------------------------
@@ -75,38 +65,15 @@ module.exports = {
 
   html: function (isEvent, data) {
     return `
-<div>
-	<div style="float: left; width: 35%;">
-		Source Embed Object:<br>
-		<select id="storage" class="round" onchange="glob.refreshVariableList(this)">
-			${data.variables[1]}
-		</select>
-	</div>
-	<div id="varNameContainer" style="float: right; width: 60%;">
-		Variable Name:<br>
-		<input id="varName" class="round" type="text" list="variableList"><br>
-	</div>
-</div><br><br><br>
-<div style="padding-top: 8px; float: left; width: 35%;">
-	Send To:<br>
-	<select id="channel" class="round" onchange="glob.sendTargetChange(this, 'varNameContainer2')">
-		${data.sendTargets[isEvent ? 1 : 0]}
-	</select>
-</div>
-<div id="varNameContainer2" style="display: none; float: right; width: 60%;">
-	Variable Name:<br>
-	<input id="varName2" class="round" type="text"><br>
-</div><br><br><br><br>
-<div style="float: left; width: 35%;">
-  Store Message Object in:<br>
-    <select id="storage3" class="round" onchange="glob.variableChange(this, 'varNameContainer3')">
-      ${data.variables[0]}
-    </select>
-</div>
-<div id="varNameContainer3" style="display: none; float: right; width: 60%;">
-  Storage Variable Name:<br>
-  <input id="varName3" class="round" type="text">
-</div>`;
+<retrieve-from-variable dropdownLabel="Source Embed Object" selectId="storage" variableContainerId="varNameContainer" variableInputId="varName"></retrieve-from-variable>
+
+<br><br><br>
+
+<send-target-input isEvent=${isEvent} dropdownLabel="Send To" selectId="channel" variableContainerId="varNameContainer2" variableInputId="varName2"></send-target-input>
+
+<br><br><br><br>
+
+<store-in-variable allowNone selectId="storage3" variableInputId="varName3" variableContainerId="varNameContainer3"></store-in-variable>`;
   },
 
   //---------------------------------------------------------------------
@@ -117,13 +84,7 @@ module.exports = {
   // functions for the DOM elements.
   //---------------------------------------------------------------------
 
-  init: function () {
-    const { glob, document } = this;
-
-    glob.refreshVariableList(document.getElementById("storage"));
-    glob.sendTargetChange(document.getElementById("channel"), "varNameContainer2");
-    glob.variableChange(document.getElementById("storage3"), "varNameContainer3");
-  },
+  init: function () {},
 
   //---------------------------------------------------------------------
   // Action Bot Function

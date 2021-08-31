@@ -21,18 +21,8 @@ module.exports = {
   // This function generates the subtitle displayed next to the name.
   //---------------------------------------------------------------------
 
-  subtitle: function (data) {
-    const channels = [
-      "Same Channel",
-      "Command Author",
-      "Mentioned User",
-      "Mentioned Channel",
-      "Default Channel",
-      "Temp Variable",
-      "Server Variable",
-      "Global Variable",
-    ];
-    return `${channels[parseInt(data.channel, 10)]}: "${data.message.replace(/[\n\r]+/, "")}"`;
+  subtitle: function (data, presets) {
+    return `${presets.getSendTargetText(data.channel, data.varName)}: "${data.message.replace(/[\n\r]+/, "")}"`;
   },
 
   //---------------------------------------------------------------------
@@ -75,34 +65,18 @@ module.exports = {
 
   html: function (isEvent, data) {
     return `
-<div>
-	<div style="float: left; width: 35%;">
-		Send To:<br>
-		<select id="channel" class="round" onchange="glob.sendTargetChange(this, 'varNameContainer')">
-			${data.sendTargets[isEvent ? 1 : 0]}
-		</select>
-	</div>
-	<div id="varNameContainer" style="display: none; float: right; width: 60%;">
-		Variable Name:<br>
-		<input id="varName" class="round" type="text" list="variableList"><br>
-	</div>
-</div><br><br><br>
+<send-target-input isEvent=${isEvent} dropdownLabel="Send To" selectId="channel" variableContainerId="varNameContainer" variableInputId="varName"></send-target-input>
+
+<br><br><br>
+
 <div style="padding-top: 8px;">
-	Message:<br>
+	<span class="dbminputlabel">Message</span><br>
 	<textarea id="message" rows="9" placeholder="Insert message here..." style="width: 99%; font-family: monospace; white-space: nowrap; resize: none;"></textarea>
-</div><br>
-<div>
-	<div style="float: left; width: 35%;">
-		Store In:<br>
-		<select id="storage" class="round" onchange="glob.variableChange(this, 'varNameContainer2')">
-			${data.variables[0]}
-		</select>
-	</div>
-	<div id="varNameContainer2" style="display: none; float: right; width: 60%;">
-		Variable Name:<br>
-		<input id="varName2" class="round" type="text">
-	</div>
-</div>`;
+</div>
+
+<br>
+
+<store-in-variable allowNone selectId="storage" variableInputId="varName2" variableContainerId="varNameContainer2"></store-in-variable>`;
   },
 
   //---------------------------------------------------------------------
@@ -113,12 +87,7 @@ module.exports = {
   // functions for the DOM elements.
   //---------------------------------------------------------------------
 
-  init: function () {
-    const { glob, document } = this;
-
-    glob.sendTargetChange(document.getElementById("channel"), "varNameContainer");
-    glob.variableChange(document.getElementById("storage"), "varNameContainer2");
-  },
+  init: function () {},
 
   //---------------------------------------------------------------------
   // Action Bot Function

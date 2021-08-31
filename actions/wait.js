@@ -56,7 +56,7 @@ module.exports = {
     return `
 <div>
 	<div style="float: left; width: 45%;">
-		Measurement:<br>
+		<span class="dbminputlabel">Measurement</span><br>
 		<select id="measurement" class="round">
 			<option value="0">Milliseconds</option>
 			<option value="1" selected>Seconds</option>
@@ -65,7 +65,7 @@ module.exports = {
 		</select>
 	</div>
 	<div style="float: right; width: 50%;">
-		Amount:<br>
+		<span class="dbminputlabel">Amount</span><br>
 		<input id="time" class="round" type="text">
 	</div>
 </div>`;

@@ -53,24 +53,14 @@ module.exports = {
 
   html: function (isEvent, data) {
     return `
-<div>
-	<div style="float: left; width: 35%;">
-		Source Embed Object:<br>
-		<select id="storage" class="round" onchange="glob.refreshVariableList(this)">
-			${data.variables[1]}
-		</select>
-	</div>
-	<div id="varNameContainer" style="float: right; width: 60%;">
-		Variable Name:<br>
-		<input id="varName" class="round" type="text" list="variableList"><br>
-	</div>
-</div><br><br><br>
+<retrieve-from-variable dropdownLabel="Source Embed Object" selectId="storage" variableContainerId="varNameContainer" variableInputId="varName"></retrieve-from-variable><br><br><br>
+
 <div style="padding-top: 8px;">
-	Footer:<br>
+	<span class="dbminputlabel">Footer</span><br>
 	<textarea id="message" rows="3" placeholder="Insert footer here..." style="width: 99%; font-family: monospace; white-space: nowrap; resize: none;"></textarea>
 </div><br>
 <div style="float: left; width: 99%;">
-	Footer Icon URL:<br>
+	<span class="dbminputlabel">Footer Icon URL</span><br>
 	<input id="footerIcon" class="round" type="text" placeholder="Leave blank for none!"><br>
 </div>`;
   },
@@ -83,11 +73,7 @@ module.exports = {
   // functions for the DOM elements.
   //---------------------------------------------------------------------
 
-  init: function () {
-    const { glob, document } = this;
-
-    glob.refreshVariableList(document.getElementById("storage"));
-  },
+  init: function () {},
 
   //---------------------------------------------------------------------
   // Action Bot Function

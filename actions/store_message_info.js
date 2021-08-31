@@ -18,8 +18,7 @@ module.exports = {
   //
   // This function generates the subtitle displayed next to the name.
   //---------------------------------------------------------------------
-  subtitle: function (data) {
-    const message = ["Command Message", "Temp Variable", "Server Variable", "Global Variable"];
+  subtitle: function (data, presets) {
     const info = [
       "Message Object",
       "Message Id",
@@ -45,7 +44,7 @@ module.exports = {
       "Message Webhook Id",
       "Message Embed Object",
     ];
-    return `${message[parseInt(data.message, 10)]} - ${info[parseInt(data.info, 10)]}`;
+    return `${presets.getMessageText(data.message, data.varName)} - ${info[parseInt(data.info, 10)]}`;
   },
 
   //---------------------------------------------------------------------
@@ -146,21 +145,13 @@ module.exports = {
   //---------------------------------------------------------------------
   html: function (isEvent, data) {
     return `
-<div>
-	<div style="float: left; width: 35%;">
-		Source Message:<br>
-		<select id="message" class="round" onchange="glob.messageChange(this, 'varNameContainer')">
-			${data.messages[isEvent ? 1 : 0]}
-		</select>
-	</div>
-	<div id="varNameContainer" style="display: none; float: right; width: 60%;">
-		Variable Name:<br>
-		<input id="varName" class="round" type="text" list="variableList"><br>
-	</div>
-</div><br><br><br>
+<message-input dropdownLabel="Source Message" selectId="message" variableContainerId="varNameContainer" variableInputId="varName"></message-input>
+
+<br><br><br>
+
 <div>
 	<div style="padding-top: 8px; width: 70%;">
-		Source Info:<br>
+		<span class="dbminputlabel">Source Info</span><br>
 		<select id="info" class="round">
 			<option value="0" selected>Message Object</option>
 			<option value="1">Message Id</option>
@@ -185,19 +176,11 @@ module.exports = {
 			<option value="22">Message Embed Object</option>
 		</select>
 	</div>
-</div><br>
-<div>
-	<div style="float: left; width: 35%;">
-		Store In:<br>
-		<select id="storage" class="round">
-			${data.variables[1]}
-		</select>
-	</div>
-	<div id="varNameContainer2" style="float: right; width: 60%;">
-		Variable Name:<br>
-		<input id="varName2" class="round" type="text"><br>
-	</div>
-</div>`;
+</div>
+
+<br>
+
+<store-in-variable dropdownLabel="Store In" selectId="storage" variableContainerId="varNameContainer2" variableInputId="varName2"></store-in-variable>`;
   },
 
   //---------------------------------------------------------------------
@@ -207,11 +190,7 @@ module.exports = {
   // is also run. This helps add modifications or setup reactionary
   // functions for the DOM elements.
   //---------------------------------------------------------------------
-  init: function () {
-    const { glob, document } = this;
-
-    glob.messageChange(document.getElementById("message"), "varNameContainer");
-  },
+  init: function () {},
 
   //---------------------------------------------------------------------
   // Action Bot Function

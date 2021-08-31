@@ -21,16 +21,8 @@ module.exports = {
   // This function generates the subtitle displayed next to the name.
   //---------------------------------------------------------------------
 
-  subtitle: function (data) {
-    const channels = [
-      "Command Author's Voice Ch.",
-      "Mentioned User's Voice Ch.",
-      "Default Voice Channel",
-      "Temp Variable",
-      "Server Variable",
-      "Global Variable",
-    ];
-    return `${channels[parseInt(data.channel, 10)]}`;
+  subtitle: function (data, presets) {
+    return `${presets.getVoiceChannelText(data.channel, data.varName)}`;
   },
 
   //---------------------------------------------------------------------
@@ -60,19 +52,7 @@ module.exports = {
   //---------------------------------------------------------------------
 
   html: function (isEvent, data) {
-    return `
-<div>
-	<div style="float: left; width: 45%;">
-		Voice Channel:<br>
-		<select id="channel" class="round" onchange="glob.voiceChannelChange(this, 'varNameContainer')">
-			${data.voiceChannels[isEvent ? 1 : 0]}
-		</select>
-	</div>
-	<div id="varNameContainer" style="display: none; float: right; width: 50%;">
-		Variable Name:<br>
-		<input id="varName" class="round" type="text" list="variableList">
-	</div>
-</div>`;
+    return `<voice-channel-input dropdownLabel="Voice Channel" selectId="channel" variableContainerId="varNameContainer" variableInputId="varName" selectWidth="45%" variableInputWidth="50%"></voice-channel-input>`;
   },
 
   //---------------------------------------------------------------------
@@ -83,11 +63,7 @@ module.exports = {
   // functions for the DOM elements.
   //---------------------------------------------------------------------
 
-  init: function () {
-    const { glob, document } = this;
-
-    glob.voiceChannelChange(document.getElementById("channel"), "varNameContainer");
-  },
+  init: function () {},
 
   //---------------------------------------------------------------------
   // Action Bot Function

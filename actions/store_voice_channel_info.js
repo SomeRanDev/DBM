@@ -21,15 +21,7 @@ module.exports = {
   // This function generates the subtitle displayed next to the name.
   //---------------------------------------------------------------------
 
-  subtitle: function (data) {
-    const channels = [
-      "Command Author's Voice Ch.",
-      "Mentioned User's Voice Ch.",
-      "Default Voice Channel",
-      "Temp Variable",
-      "Server Variable",
-      "Global Variable",
-    ];
+  subtitle: function (data, presets) {
     const info = [
       "Voice Channel Object",
       "Voice Channel Id",
@@ -38,7 +30,7 @@ module.exports = {
       "Voice Channel User Limit",
       "Voice Channel Bitrate",
     ];
-    return `${channels[parseInt(data.channel, 10)]} - ${info[parseInt(data.info, 10)]}`;
+    return `${presets.getVoiceChannelText(data.channel, data.varName)} - ${info[parseInt(data.info, 10)]}`;
   },
 
   //---------------------------------------------------------------------
@@ -99,21 +91,13 @@ module.exports = {
 
   html: function (isEvent, data) {
     return `
+<voice-channel-input dropdownLabel="Source Channel" selectId="channel" variableContainerId="varNameContainer" variableInputId="varName" selectWidth="45%" variableInputWidth="50%"></voice-channel-input>
+
+<br><br><br>
+
 <div>
-	<div style="float: left; width: 35%;">
-		Source Channel:<br>
-		<select id="channel" class="round" onchange="glob.voiceChannelChange(this, 'varNameContainer')">
-			${data.voiceChannels[isEvent ? 1 : 0]}
-		</select>
-	</div>
-	<div id="varNameContainer" style="display: none; float: right; width: 60%;">
-		Variable Name:<br>
-		<input id="varName" class="round" type="text" list="variableList"><br>
-	</div>
-</div><br><br><br>
-<div>
-	<div style="padding-top: 8px; width: 70%;">
-		Source Info:<br>
+	<div style="padding-top: 8px; width: 90%;">
+		<span class="dbminputlabel">Source Info</span><br>
 		<select id="info" class="round">
 			<option value="0" selected>Voice Channel Object</option>
 			<option value="1">Voice Channel Id</option>
@@ -123,19 +107,11 @@ module.exports = {
 			<option value="5">Voice Channel Bitrate</option>
 		</select>
 	</div>
-</div><br>
-<div>
-	<div style="float: left; width: 35%;">
-		Store In:<br>
-		<select id="storage" class="round">
-			${data.variables[1]}
-		</select>
-	</div>
-	<div id="varNameContainer2" style="float: right; width: 60%;">
-		Variable Name:<br>
-		<input id="varName2" class="round" type="text"><br>
-	</div>
-</div>`;
+</div>
+
+<br>
+
+<store-in-variable dropdownLabel="Store In" selectId="storage" variableContainerId="varNameContainer2" variableInputId="varName2"></store-in-variable>`;
   },
 
   //---------------------------------------------------------------------
@@ -146,11 +122,7 @@ module.exports = {
   // functions for the DOM elements.
   //---------------------------------------------------------------------
 
-  init: function () {
-    const { glob, document } = this;
-
-    glob.voiceChannelChange(document.getElementById("channel"), "varNameContainer");
-  },
+  init: function () {},
 
   //---------------------------------------------------------------------
   // Action Bot Function

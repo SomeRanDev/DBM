@@ -53,33 +53,28 @@ module.exports = {
 
   html: function (isEvent, data) {
     return `
-<div>
-	<div style="float: left; width: 35%;">
-		Source Embed Object:<br>
-		<select id="storage" class="round" onchange="glob.refreshVariableList(this)">
-			${data.variables[1]}
-		</select>
-	</div>
-	<div id="varNameContainer" style="float: right; width: 60%;">
-		Variable Name:<br>
-		<input id="varName" class="round varSearcher" type="text" list="variableList"><br>
-	</div>
-</div><br><br><br>
+<retrieve-from-variable dropdownLabel="Source Embed Object" selectId="storage" variableContainerId="varNameContainer" variableInputId="varName"></retrieve-from-variable>
+
+<br><br><br>
+
 <div style="padding-top: 8px;">
 	<div style="float: left; width: 50%;">
-		Field Name:<br>
+		<span class="dbminputlabel">Field Name</span><br>
 		<input id="fieldName" class="round" type="text">
 	</div>
 	<div style="float: left; width: 50%;">
-		Display Inline:<br>
+		<span class="dbminputlabel">Display Inline</span><br>
 		<select id="inline" class="round">
 			<option value="0">Yes</option>
 			<option value="1" selected>No</option>
 		</select>
 	</div>
-</div><br><br><br>
+</div>
+
+<br><br><br>
+
 <div style="padding-top: 8px;">
-	Field Description:<br>
+	<span class="dbminputlabel">Field Description</span><br>
 	<textarea id="message" rows="8" placeholder="Insert message here..." style="width: 99%; font-family: monospace; white-space: nowrap; resize: none;"></textarea>
 </div>`;
   },
@@ -92,11 +87,7 @@ module.exports = {
   // functions for the DOM elements.
   //---------------------------------------------------------------------
 
-  init: function () {
-    const { glob, document } = this;
-
-    glob.refreshVariableList(document.getElementById("storage"));
-  },
+  init: function () {},
 
   //---------------------------------------------------------------------
   // Action Bot Function

@@ -54,8 +54,9 @@ module.exports = {
   html: function (isEvent, data) {
     return `
 <p>Changing usernames in Discord is heavily rate limited, with only 2 requests every hour. Use this sparingly!</p>
+
 <div style="width: 90%;">
-	Username:<br>
+	<span class="dbminputlabel">Username</span><br>
 	<input id="username" class="round" type="text">
 </div>`;
   },

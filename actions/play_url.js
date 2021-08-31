@@ -62,23 +62,26 @@ module.exports = {
   html: function (isEvent, data) {
     return `
 <div>
-	Web URL:<br>
+	<span class="dbminputlabel">Web URL</span><br>
 	<input id="url" class="round" type="text" value="http://"><br>
 </div>
 <div style="float: left; width: 50%;">
-	Seek Position:<br>
+	<span class="dbminputlabel">Seek Position</span><br>
 	<input id="seek" class="round" type="text" value="0"><br>
-	Passes:<br>
+	<span class="dbminputlabel">Passes</span><br>
 	<input id="passes" class="round" type="text" value="1">
 </div>
 <div style="float: right; width: 50%;">
-	Volume (0 = min; 100 = max):<br>
+	<span class="dbminputlabel">Volume (0 = min; 100 = max)</span><br>
 	<input id="volume" class="round" type="text" placeholder="Leave blank for automatic..."><br>
-	Bitrate:<br>
+	<span class="dbminputlabel">Bitrate</span><br>
 	<input id="bitrate" class="round" type="text" placeholder="Leave blank for automatic...">
-</div><br><br><br><br><br><br><br>
+</div>
+
+<br><br><br><br><br><br><br>
+
 <div>
-	Play Type:<br>
+	<span class="dbminputlabel">Play Type</span><br>
 	<select id="type" class="round" style="width: 90%;">
 		<option value="0" selected>Add to Queue</option>
 		<option value="1">Play Immediately</option>

@@ -21,9 +21,8 @@ module.exports = {
   // This function generates the subtitle displayed next to the name.
   //---------------------------------------------------------------------
 
-  subtitle: function (data) {
-    const channels = ["Mentioned User", "Command Author", "Temp Variable", "Server Variable", "Global Variable"];
-    return `${channels[parseInt(data.member, 10)]} - ${data.deafen === "0" ? "Deafen" : "Undeafen"}`;
+  subtitle: function (data, presets) {
+    return `${presets.getMemberText(data.member, data.varName)} - ${data.deafen === "0" ? "Deafen" : "Undeafen"}`;
   },
 
   //---------------------------------------------------------------------
@@ -54,28 +53,22 @@ module.exports = {
 
   html: function (isEvent, data) {
     return `
-<div>
-	<div style="float: left; width: 35%;">
-		Source Member:<br>
-		<select id="member" class="round" onchange="glob.memberChange(this, 'varNameContainer')">
-			${data.members[isEvent ? 1 : 0]}
-		</select>
-	</div>
-	<div id="varNameContainer" style="display: none; float: right; width: 60%;">
-		Variable Name:<br>
-		<input id="varName" class="round" type="text" list="variableList"><br>
-	</div>
-</div>
+<member-input isEvent=${isEvent} dropdownLabel="Source Member" selectId="member" variableContainerId="varNameContainer" variableInputId="varName"></member-input>
+
 <br><br><br>
+
 <div style="padding-top: 8px;">
-	Deafen Status:<br>
+	<span class="dbminputlabel">Deafen Status</span><br>
 	<select id="deafen" class="round" style="width: 50%;">
 		<option value="0" selected>Deafen</option>
 		<option value="1">Undeafen</option>
 	</select>
-</div><br>
+</div>
+
+<br>
+
 <div>
-  Reason:
+  <span class="dbminputlabel">Reason</span>
   <input id="reason" placeholder="Optional" class="round" type="text">
 </div>`;
   },
@@ -88,11 +81,7 @@ module.exports = {
   // functions for the DOM elements.
   //---------------------------------------------------------------------
 
-  init: function () {
-    const { glob, document } = this;
-
-    glob.memberChange(document.getElementById("member"), "varNameContainer");
-  },
+  init: function () {},
 
   //---------------------------------------------------------------------
   // Action Bot Function

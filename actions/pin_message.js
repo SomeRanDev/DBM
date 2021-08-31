@@ -21,10 +21,8 @@ module.exports = {
   // This function generates the subtitle displayed next to the name.
   //---------------------------------------------------------------------
 
-  subtitle: function (data) {
-    const names = ["Command Message", "Temp Variable", "Server Variable", "Global Variable"];
-    const index = parseInt(data.storage, 10);
-    return data.storage === "0" ? `Pin ${names[index]}` : `Pin ${names[index]} (${data.varName})`;
+  subtitle: function (data, presets) {
+    return `Pin ${presets.getMessageText(data.storage, data.varName)}`;
   },
 
   //---------------------------------------------------------------------
@@ -54,19 +52,7 @@ module.exports = {
   //---------------------------------------------------------------------
 
   html: function (isEvent, data) {
-    return `
-<div>
-	<div style="float: left; width: 35%;">
-		Source Message:<br>
-		<select id="storage" class="round" onchange="glob.messageChange(this, 'varNameContainer')">
-			${data.messages[isEvent ? 1 : 0]}
-		</select>
-	</div>
-	<div id="varNameContainer" style="display: none; float: right; width: 60%;">
-		Variable Name:<br>
-		<input id="varName" class="round" type="text" list="variableList"><br>
-	</div>
-</div>`;
+    return `<message-input dropdownLabel="Source Message" selectId="storage" variableContainerId="varNameContainer" variableInputId="varName"></message-input>`;
   },
 
   //---------------------------------------------------------------------
@@ -77,11 +63,7 @@ module.exports = {
   // functions for the DOM elements.
   //---------------------------------------------------------------------
 
-  init: function () {
-    const { glob, document } = this;
-
-    glob.messageChange(document.getElementById("storage"), "varNameContainer");
-  },
+  init: function () {},
 
   //---------------------------------------------------------------------
   // Action Bot Function

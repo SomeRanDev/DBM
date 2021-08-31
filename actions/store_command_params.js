@@ -99,8 +99,8 @@ module.exports = {
     return `
 <div>
 	<div style="float: left; width: 35%;">
-		Source Info:<br>
-		<select id="info" class="round" onchange="glob.onChange1(this)">
+		<span class="dbminputlabel">Source Info</span><br>
+		<select id="info" class="round" onchange="glob.onSourceInfoChanged(this)">
 			<option value="0" selected>One Parameter</option>
 			<option value="1">Multiple Parameters</option>
 			<option value="2">Mentioned Member</option>
@@ -109,22 +109,14 @@ module.exports = {
 		</select>
 	</div>
 	<div style="float: right; width: 60%;">
-		<div id="infoCountLabel">Parameter Number:</div>
+		<span class="dbminputlabel" id="infoCountLabel">Parameter Number:</span>
 		<input id="infoIndex" class="round" type="text" value="1"><br>
 	</div>
-</div><br><br><br><br>
-<div>
-	<div style="float: left; width: 35%;">
-		Store In:<br>
-		<select id="storage" class="round">
-			${data.variables[1]}
-		</select>
-	</div>
-	<div id="varNameContainer" style="float: right; width: 60%;">
-		Variable Name:<br>
-		<input id="varName" class="round" type="text"><br>
-	</div>
-</div>`;
+</div>
+
+<br><br><br><br>
+
+<store-in-variable dropdownLabel="Store In" selectId="storage" variableContainerId="varNameContainer" variableInputId="varName"></store-in-variable>`;
   },
 
   //---------------------------------------------------------------------
@@ -138,24 +130,24 @@ module.exports = {
   init: function () {
     const { glob, document } = this;
 
-    glob.onChange1 = function (event) {
+    glob.onSourceInfoChanged = function (event) {
       const value = parseInt(event.value, 10);
       const infoCountLabel = document.getElementById("infoCountLabel");
       switch (value) {
         case 0:
-          infoCountLabel.innerHTML = "Parameter Number:";
+          infoCountLabel.innerHTML = "Parameter Number";
           break;
         case 1:
-          infoCountLabel.innerHTML = "Starting From Parameter Number:";
+          infoCountLabel.innerHTML = "Starting From Parameter Number";
           break;
         case 2:
-          infoCountLabel.innerHTML = "Member Mention Number:";
+          infoCountLabel.innerHTML = "Member Mention Number";
           break;
         case 3:
-          infoCountLabel.innerHTML = "Role Mention Number:";
+          infoCountLabel.innerHTML = "Role Mention Number";
           break;
         case 4:
-          infoCountLabel.innerHTML = "Channel Mention Number:";
+          infoCountLabel.innerHTML = "Channel Mention Number";
           break;
         default:
           infoCountLabel.innerHTML = "";
@@ -163,7 +155,7 @@ module.exports = {
       }
     };
 
-    glob.onChange1(document.getElementById("info"));
+    glob.onSourceInfoChanged(document.getElementById("info"));
   },
 
   //---------------------------------------------------------------------

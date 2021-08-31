@@ -21,9 +21,9 @@ module.exports = {
   // This function generates the subtitle displayed next to the name.
   //---------------------------------------------------------------------
 
-  subtitle: function (data) {
-    const storeTypes = ["", "Temp Variable", "Server Variable", "Global Variable"];
-    return `${storeTypes[parseInt(data.storage, 10)]} (${data.varName2})`;
+  subtitle: function (data, presets) {
+    const storeTypes = presets.variables;
+    return `${presets.getServerText(data.server, data.varName)} - ${storeTypes[parseInt(data.storage, 10)]} (${data.varName2})`;
   },
 
   //---------------------------------------------------------------------
@@ -54,33 +54,16 @@ module.exports = {
 
   html: function (isEvent, data) {
     return `
-<div>
-	<div style="float: left; width: 35%;">
-		Server:<br>
-		<select id="server" class="round" onchange="glob.serverChange(this, 'varNameContainer')">
-			${data.servers[isEvent ? 1 : 0]}
-		</select>
-	</div>
-	<div id="varNameContainer" style="display: none; float: right; width: 60%;">
-		Variable Name:<br>
-		<input id="varName" class="round" type="text" list="variableList">
-	</div>
-</div><br><br><br>
-<div style="padding-top: 8px;">
-	<div style="float: left; width: 35%;">
-		Source Image:<br>
-		<select id="storage" class="round">
-			${data.variables[1]}
-		</select>
-	</div>
-	<div id="varNameContainer2" style="float: right; width: 60%;">
-		Variable Name:<br>
-		<input id="varName2" class="round" type="text"><br>
-	</div>
-</div>
+<server-input dropdownLabel="Server" selectId="server" variableContainerId="varNameContainer" variableInputId="varName"></server-input>
+
 <br><br><br>
-<div>
-  Reason:
+
+<store-in-variable style="padding-top: 8px;" dropdownLabel="Source Image" selectId="storage" variableContainerId="varNameContainer2" variableInputId="varName2"></store-in-variable>
+
+<br><br><br>
+
+<div style="padding-top: 8px;">
+  <span class="dbminputlabel">Reason</span>
   <input id="reason" placeholder="Optional" class="round" type="text">
 </div>`;
   },
@@ -93,11 +76,7 @@ module.exports = {
   // functions for the DOM elements.
   //---------------------------------------------------------------------
 
-  init: function () {
-    const { glob, document } = this;
-
-    glob.serverChange(document.getElementById("server"), "varNameContainer");
-  },
+  init: function () {},
 
   //---------------------------------------------------------------------
   // Action Bot Function

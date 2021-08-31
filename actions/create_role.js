@@ -65,42 +65,40 @@ module.exports = {
 
   html: function (isEvent, data) {
     return `
-Name:<br>
-<input id="roleName" class="round" type="text"><br>
+<span class="dbminputlabel">Name</span><br>
+<input id="roleName" class="round" type="text">
+
+<br>
+
 <div style="float: left; width: 50%;">
-	Display Separate from Online Users:<br>
+	<span class="dbminputlabel">Display Separate from Online Users</span><br>
 	<select id="hoist" class="round" style="width: 90%;">
 		<option value="true">Yes</option>
 		<option value="false" selected>No</option>
 	</select><br>
-	Mentionable:<br>
+	<span class="dbminputlabel">Mentionable</span><br>
 	<select id="mentionable" class="round" style="width: 90%;">
 		<option value="true" selected>Yes</option>
 		<option value="false">No</option>
 	</select><br>
 </div>
 <div style="float: right; width: 50%;">
-	Color:<br>
+	<span class="dbminputlabel">Color</span><br>
 	<input id="color" class="round" type="text" placeholder="Leave blank for default!"><br>
-	Position:<br>
+	<span class="dbminputlabel">Position</span><br>
 	<input id="position" class="round" type="text" placeholder="Leave blank for default!" style="width: 90%;"><br>
-</div><br>
+</div>
+
+<br>
+
 <div>
-  Reason:
+  <span class="dbminputlabel">Reason</span>
   <input id="reason" placeholder="Optional" class="round" type="text">
-</div><br>
-<div>
-	<div style="float: left; width: 35%;">
-		Store In:<br>
-		<select id="storage" class="round" onchange="glob.variableChange(this, 'varNameContainer')">
-			${data.variables[0]}
-		</select>
-	</div>
-	<div id="varNameContainer" style="display: none; float: right; width: 60%;">
-		Variable Name:<br>
-		<input id="varName" class="round" type="text"><br>
-	</div>
-</div>`;
+</div>
+
+<br>
+
+<store-in-variable allowNone selectId="storage" variableInputId="varName" variableContainerId="varNameContainer"></store-in-variable>`;
   },
 
   //---------------------------------------------------------------------
@@ -111,11 +109,7 @@ Name:<br>
   // functions for the DOM elements.
   //---------------------------------------------------------------------
 
-  init: function () {
-    const { glob, document } = this;
-
-    glob.variableChange(document.getElementById("storage"), "varNameContainer");
-  },
+  init: function () {},
 
   //---------------------------------------------------------------------
   // Action Bot Function

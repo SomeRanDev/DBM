@@ -21,19 +21,8 @@ module.exports = {
   // This function generates the subtitle displayed next to the name.
   //---------------------------------------------------------------------
 
-  subtitle: function (data) {
-    const list = [
-      "Server Members",
-      "Server Channels",
-      "Server Roles",
-      "Server Emojis",
-      "All Bot Servers",
-      "Mentioned User Roles",
-      "Command Author Roles",
-      "Temp Variable",
-      "Server Variable",
-      "Global Variable",
-    ];
+  subtitle: function (data, presets) {
+    const list = presets.list;
     return `Loop ${list[parseInt(data.list, 10)]} through Event Id "${data.source}"`;
   },
 
@@ -67,27 +56,33 @@ module.exports = {
     return `
 <div>
 	<div style="float: left; width: 35%;">
-		Source List:<br>
+		<span class="dbminputlabel">Source List</span><br>
 		<select id="list" class="round" onchange="glob.onChange1(this)">
 			${data.lists[isEvent ? 1 : 0]}
 		</select>
 	</div>
 	<div id="varNameContainer" style="float: right; width: 60%;">
-		Variable Name:<br>
+		<span class="dbminputlabel">Variable Name</span><br>
 		<input id="varName" class="round" type="text" list="variableList"><br>
 	</div>
-</div><br><br><br><br>
+</div>
+
+<br><br><br><br>
+
 <div style="width: 95%;">
-	Temp Variable Name (stores <span id="tempName">member</span> throughout loops):<br>
+	<span class="dbminputlabel">Temp Variable Name (stores <span id="tempName">member</span> throughout loops)</span><br>
 	<input id="tempVarName" class="round" type="text">
 </div><br>
 <div style="width: 85%;">
-	Event:<br>
+	<span class="dbminputlabel">Event</span><br>
 	<select id="source" class="round">
 	</select>
-</div><br>
+</div>
+
+<br>
+
 <div style="width: 85%;">
-	Call Type:<br>
+	<span class="dbminputlabel">Call Type</span><br>
 	<select id="type" class="round">
 		<option value="true" selected>Synchronous</option>
 		<option value="false">Asynchronous</option>

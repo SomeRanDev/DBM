@@ -21,8 +21,8 @@ module.exports = {
   // This function generates the subtitle displayed next to the name.
   //---------------------------------------------------------------------
 
-  subtitle: function (data) {
-    const storeTypes = ["", "Temp Variable", "Server Variable", "Global Variable"];
+  subtitle: function (data, presets) {
+    const storeTypes = presets.variables;
     return `${storeTypes[parseInt(data.storage, 10)]} (${data.varName}) -> ${
       storeTypes[parseInt(data.storage2, 10)]
     } (${data.varName2})`;
@@ -56,30 +56,11 @@ module.exports = {
 
   html: function (isEvent, data) {
     return `
-  <div>
-    <div style="float: left; width: 35%;">
-      Transfer Value From:<br>
-      <select id="storage" class="round" onchange="glob.variableChange(this, 'varNameContainer')">
-        ${data.variables[1]}
-      </select>
-    </div>
-    <div id="varNameContainer" style="float: right; width: 60%;">
-      Variable Name:<br>
-      <input id="varName" class="round" type="text" list="variableList"><br>
-    </div>
-  </div><br><br><br>
-  <div style="padding-top: 8px;">
-    <div style="float: left; width: 35%;">
-      Transfer Value To:<br>
-      <select id="storage2" name="second-list" class="round" onchange="glob.variableChange(this, 'varNameContainer2')">
-        ${data.variables[1]}
-      </select>
-    </div>
-    <div id="varNameContainer2" style="float: right; width: 60%;">
-      Variable Name:<br>
-      <input id="varName2" class="round" type="text" list="variableList2"><br>
-    </div>
-  </div>`;
+<retrieve-from-variable dropdownLabel="Transfer Value From" selectId="storage" variableContainerId="varNameContainer" variableInputId="varName"></retrieve-from-variable>
+
+<br><br><br>
+
+<retrieve-from-variable style="padding-top: 8px;" dropdownLabel="Transfer Value To" selectId="storage2" variableContainerId="varNameContainer2" variableInputId="varName2"></retrieve-from-variable>`;
   },
 
   //---------------------------------------------------------------------
@@ -90,12 +71,7 @@ module.exports = {
   // functions for the DOM elements.
   //---------------------------------------------------------------------
 
-  init: function () {
-    const { glob, document } = this;
-
-    glob.variableChange(document.getElementById("storage"), "varNameContainer");
-    glob.variableChange(document.getElementById("storage2"), "varNameContainer2");
-  },
+  init: function () {},
 
   //---------------------------------------------------------------------
   // Action Bot Function

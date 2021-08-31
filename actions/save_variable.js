@@ -77,11 +77,7 @@ module.exports = {
   // functions for the DOM elements.
   //---------------------------------------------------------------------
 
-  init: function () {
-    const { glob, document } = this;
-
-    glob.refreshVariableList(document.getElementById("storage"));
-  },
+  init: function () {},
 
   //---------------------------------------------------------------------
   // Action Bot Function

@@ -21,9 +21,8 @@ module.exports = {
   // This function generates the subtitle displayed next to the name.
   //---------------------------------------------------------------------
 
-  subtitle: function (data) {
-    const channels = ["Current Server", "Temp Variable", "Server Variable", "Global Variable"];
-    return `${channels[parseInt(data.server, 10)]} (${data.dataName}) ${data.changeType === "1" ? "+=" : "="} ${
+  subtitle: function (data, presets) {
+    return `${presets.getServerText(data.server, data.varName)} (${data.dataName}) ${data.changeType === "1" ? "+=" : "="} ${
       data.value
     }`;
   },
@@ -56,33 +55,28 @@ module.exports = {
 
   html: function (isEvent, data) {
     return `
-<div>
-	<div style="float: left; width: 35%;">
-		Server:<br>
-		<select id="server" class="round" onchange="glob.serverChange(this, 'varNameContainer')">
-			${data.servers[isEvent ? 1 : 0]}
-		</select>
-	</div>
-	<div id="varNameContainer" style="display: none; float: right; width: 60%;">
-		Variable Name:<br>
-		<input id="varName" class="round" type="text" list="variableList">
-	</div>
-</div><br><br><br>
+<server-input dropdownLabel="Server" selectId="server" variableContainerId="varNameContainer" variableInputId="varName"></server-input>
+
+<br><br><br>
+
 <div style="padding-top: 8px;">
 	<div style="float: left; width: 50%;">
-		Data Name:<br>
+		<span class="dbminputlabel">Data Name</span><br>
 		<input id="dataName" class="round" type="text">
 	</div>
 	<div style="float: left; width: 45%;">
-		Control Type:<br>
+		<span class="dbminputlabel">Control Type</span><br>
 		<select id="changeType" class="round">
 			<option value="0" selected>Set Value</option>
 			<option value="1">Add Value</option>
 		</select>
 	</div>
-</div><br><br><br>
+</div>
+
+<br><br><br>
+
 <div style="padding-top: 8px;">
-	Value:<br>
+	<span class="dbminputlabel">Value</span><br>
 	<input id="value" class="round" type="text" name="is-eval"><br>
 </div>`;
   },
@@ -95,11 +89,7 @@ module.exports = {
   // functions for the DOM elements.
   //---------------------------------------------------------------------
 
-  init: function () {
-    const { glob, document } = this;
-
-    glob.serverChange(document.getElementById("server"), "varNameContainer");
-  },
+  init: function () {},
 
   //---------------------------------------------------------------------
   // Action Bot Function

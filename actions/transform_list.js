@@ -21,19 +21,8 @@ module.exports = {
   // This function generates the subtitle displayed next to the name.
   //---------------------------------------------------------------------
 
-  subtitle: function (data) {
-    const list = [
-      "Server Members",
-      "Server Channels",
-      "Server Roles",
-      "Server Emojis",
-      "All Bot Servers",
-      "Mentioned User Roles",
-      "Command Author Roles",
-      "Temp Variable",
-      "Server Variable",
-      "Global Variable",
-    ];
+  subtitle: function (data, presets) {
+    const list = presets.list;
     return `Transform ${list[parseInt(data.list, 10)]}`;
   },
 
@@ -88,29 +77,24 @@ module.exports = {
 		Variable Name:<br>
 		<input id="varName" class="round" type="text" list="variableList">
 	</div>
-</div><br><br><br><br>
+</div>
+
+<br><br><br><br>
+
 <div style="display: table; width: 100%;">
 	<div style="display: table-cell;">
-		Transform Eval:
+		<span class="dbminputlabel">Transform Eval</span>
 		<input id="transform" class="round" type="text" name="is-eval" value="item">
 	</div>
 	<div style="display: table-cell;">
-		Null Value:
+		<span class="dbminputlabel">Null Value</span>
 		<input id="null" class="round" type="text" name="is-eval">
 	</div>
-</div><br>
-<div style="padding-top: 8px;">
-	<div style="float: left; width: 35%;">
-		Store In:<br>
-		<select id="storage" class="round">
-			${data.variables[1]}
-		</select>
-	</div>
-	<div id="varNameContainer2" style="float: right; width: 60%;">
-		Variable Name:<br>
-		<input id="varName2" class="round" type="text">
-	</div>
-</div>`;
+</div>
+
+<br>
+
+<store-in-variable style="padding-top: 8px;" dropdownLabel="Store In" selectId="storage" variableContainerId="varNameContainer2" variableInputId="varName2"></store-in-variable>`;
   },
 
   //---------------------------------------------------------------------

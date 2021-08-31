@@ -21,8 +21,8 @@ module.exports = {
   // This function generates the subtitle displayed next to the name.
   //---------------------------------------------------------------------
 
-  subtitle: function (data) {
-    const storage = ["", "Temp Variable", "Server Variable", "Global Variable"];
+  subtitle: function (data, presets) {
+    const storage = presets.variables;
     return `${storage[parseInt(data.storage, 10)]} (${data.varName}) => [${data.min}, ${data.max}]`;
   },
 
@@ -67,27 +67,19 @@ module.exports = {
   html: function (isEvent, data) {
     return `
 <div>
-	<div style="float: left; width: 45%;">
-		Minimum Range:<br>
+	<div style="float: left; width: 50%; margin: 0; padding: 0;">
+		<span class="dbminputlabel">Minimum Range</span><br>
 		<input id="min" class="round" type="text"><br>
 	</div>
-	<div style="padding-left: 5%; float: left; width: 50%;">
-		Maximum Range:<br>
+	<div style="float: left; width: 50%; margin: 0; padding: 0;">
+		<span class="dbminputlabel">Maximum Range</span><br>
 		<input id="max" class="round" type="text"><br>
 	</div>
-</div><br><br><br>
-<div style="padding-top: 8px;">
-	<div style="float: left; width: 35%;">
-		Store In:<br>
-		<select id="storage" class="round">
-			${data.variables[1]}
-		</select>
-	</div>
-	<div id="varNameContainer" style="float: right; width: 60%;">
-		Variable Name:<br>
-		<input id="varName" class="round" type="text">
-	</div>
-</div>`;
+</div>
+
+<br><br><br>
+
+<store-in-variable style="padding-top: 8px;" dropdownLabel="Store In" selectId="storage" variableContainerId="varNameContainer" variableInputId="varName" selectWidth="45%" variableInputWidth="50%"></store-in-variable>`;
   },
 
   //---------------------------------------------------------------------

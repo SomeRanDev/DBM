@@ -21,8 +21,8 @@ module.exports = {
   // This function generates the subtitle displayed next to the name.
   //---------------------------------------------------------------------
 
-  subtitle: function (data) {
-    const storeTypes = ["", "Temp Variable", "Server Variable", "Global Variable"];
+  subtitle: function (data, presets) {
+    const storeTypes = presets.variables;
     const effect = [
       "Greyscale",
       "Invert",
@@ -64,21 +64,13 @@ module.exports = {
 
   html: function (isEvent, data) {
     return `
-<div>
-	<div style="float: left; width: 45%;">
-		Base Image:<br>
-		<select id="storage" class="round" onchange="glob.refreshVariableList(this)">
-			${data.variables[1]}
-		</select>
-	</div>
-	<div id="varNameContainer" style="float: right; width: 50%;">
-		Variable Name:<br>
-		<input id="varName" class="round" type="text" list="variableList"><br>
-	</div>
-</div><br><br><br>
+<retrieve-from-variable dropdownLabel="Base Image" selectId="storage" variableContainerId="varNameContainer" variableInputId="varName" selectWidth="45%" variableInputWidth="50%"></retrieve-from-variable>
+
+<br><br><br>
+
 <div style="padding-top: 8px;">
 	<div style="float: left; width: 90%;">
-		Effect:<br>
+		<span class="dbminputlabel">Effect</span><br>
 		<select id="effect" class="round">
 			<option value="0" selected>Greyscale</option>
 			<option value="1">Invert</option>
@@ -101,11 +93,7 @@ module.exports = {
   // functions for the DOM elements.
   //---------------------------------------------------------------------
 
-  init: function () {
-    const { glob, document } = this;
-
-    glob.refreshVariableList(document.getElementById("storage"));
-  },
+  init: function () {},
 
   //---------------------------------------------------------------------
   // Action Bot Function

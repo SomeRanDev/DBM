@@ -65,34 +65,33 @@ module.exports = {
 
   html: function (isEvent, data) {
     return `
-Name:<br>
-<input id="channelName" class="round" type="text"><br>
-Category Id:<br>
-<input id= "categoryID" class="round" type="text" placeholder="Leave blank for default!" style="width: 95%"><br>
+<span class="dbminputlabel">Name</span><br>
+<input id="channelName" class="round" type="text">
+
+<br>
+
+<span class="dbminputlabel">Category Id</span><br>
+<input id= "categoryID" class="round" type="text" placeholder="Leave blank for default!" style="width: 95%">
+
+<br>
+
 <div style="float: left; width: 50%;">
-	Bitrate:<br>
+	<span class="dbminputlabel">Bitrate</span><br>
 	<input id="bitrate" class="round" type="text" placeholder="Leave blank for default!" style="width: 90%;"><br>
 </div>
 <div style="float: right; width: 50%;">
-	User Limit:<br>
+	<span class="dbminputlabel">User Limit</span><br>
 	<input id="userLimit" class="round" type="text" placeholder="Leave blank for default!" style="width: 90%;"><br>
 </div>
+
 <div>
-  Reason:
+  <span class="dbminputlabel">Reason</span>
   <input id="reason" placeholder="Optional" class="round" type="text">
-</div><br>
-<div>
-	<div style="float: left; width: 35%;">
-		Store In:<br>
-		<select id="storage" class="round" onchange="glob.variableChange(this, 'varNameContainer')">
-			${data.variables[0]}
-		</select>
-	</div>
-	<div id="varNameContainer" style="display: none; float: right; width: 60%;">
-		Variable Name:<br>
-		<input id="varName" class="round" type="text"><br>
-	</div>
-</div>`;
+</div>
+
+<br>
+
+<store-in-variable allowNone selectId="storage" variableInputId="varName" variableContainerId="varNameContainer"></store-in-variable>`;
   },
 
   //---------------------------------------------------------------------
@@ -103,11 +102,7 @@ Category Id:<br>
   // functions for the DOM elements.
   //---------------------------------------------------------------------
 
-  init: function () {
-    const { glob, document } = this;
-
-    glob.variableChange(document.getElementById("storage"), "varNameContainer");
-  },
+  init: function () {},
 
   //---------------------------------------------------------------------
   // Action Bot Function

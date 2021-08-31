@@ -21,8 +21,8 @@ module.exports = {
   // This function generates the subtitle displayed next to the name.
   //---------------------------------------------------------------------
 
-  subtitle: function (data) {
-    const storage = ["", "Temp Variable", "Server Variable", "Global Variable"];
+  subtitle: function (data, presets) {
+    const storage = presets.variables;
     return `Add "${data.value}" to ${storage[parseInt(data.storage, 10)]} (${data.varName})`;
   },
 
@@ -54,21 +54,13 @@ module.exports = {
 
   html: function (isEvent, data) {
     return `
-<div>
-	<div style="float: left; width: 35%;">
-		Source List:<br>
-		<select id="storage" class="round" onchange="glob.refreshVariableList(this)">
-			${data.variables[1]}
-		</select>
-	</div>
-	<div id="varNameContainer" style="float: right; width: 60%;">
-		Variable Name:<br>
-		<input id="varName" class="round varSearcher" type="text" list="variableList">
-	</div>
-</div><br><br><br>
+<retrieve-from-variable dropdownLabel="Source List" selectId="storage" variableContainerId="varNameContainer" variableInputId="varName"></retrieve-from-variable>
+
+<br><br><br>
+
 <div style="padding-top: 8px;">
 	<div style="float: left; width: 45%;">
-		Add Type:<br>
+		<span class="dbminputlabel">Add Type</span><br>
 		<select id="addType" class="round" onchange="glob.onChange1(this)">
 			<option value="0" selected>Add to End</option>
 			<option value="1">Add to Front</option>
@@ -76,12 +68,15 @@ module.exports = {
 		</select>
 	</div>
 	<div id="positionHolder" style="float: right; width: 50%; display: none;">
-		Position:<br>
+		<span class="dbminputlabel">Position</span><br>
 		<input id="position" class="round" type="text"><br>
 	</div>
-</div><br><br><br>
+</div>
+
+<br><br><br>
+
 <div style="padding-top: 8px;">
-	Value:<br>
+	<span class="dbminputlabel">Value</span><br>
 	<input id="value" class="round" type="text" name="is-eval">
 </div>`;
   },
@@ -107,7 +102,6 @@ module.exports = {
       }
     };
 
-    glob.refreshVariableList(document.getElementById("storage"));
     glob.onChange1(document.getElementById("addType"));
   },
 

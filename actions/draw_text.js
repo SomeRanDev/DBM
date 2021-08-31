@@ -53,32 +53,27 @@ module.exports = {
 
   html: function (isEvent, data) {
     return `
-<div>
-	<div style="float: left; width: 35%;">
-		Source Image:<br>
-		<select id="storage" class="round" onchange="glob.refreshVariableList(this)">
-			${data.variables[1]}
-		</select>
-	</div>
-	<div id="varNameContainer" style="float: right; width: 60%;">
-		Variable Name:<br>
-		<input id="varName" class="round" type="text" list="variableList"><br>
-	</div>
-</div><br><br><br>
+<retrieve-from-variable dropdownLabel="Source Image" selectId="storage" variableContainerId="varNameContainer" variableInputId="varName" selectWidth="45%" variableInputWidth="50%"></retrieve-from-variable>
+
+<br><br><br><br>
+
 <div style="float: left; width: 50%;">
-	Local Font URL (.fnt):<br>
+	<span class="dbminputlabel">Local Font URL (.fnt)</span><br>
 	<input id="font" class="round" type="text" value="fonts/Asimov.fnt"><br>
-	X Position:<br>
+	<span class="dbminputlabel">X Position</span><br>
 	<input id="x" class="round" type="text" value="0"><br>
 </div>
 <div style="float: right; width: 50%;">
-	Max Width:<br>
+	<span class="dbminputlabel">Max Width</span><br>
 	<input id="width" class="round" type="text" placeholder="Leave blank for none!"><br>
-	Y Position:<br>
+	<span class="dbminputlabel">Y Position</span><br>
 	<input id="y" class="round" type="text" value="0"><br>
-</div><br><br><br>
+</div>
+
+<br><br><br>
+
 <div>
-	Text:<br>
+	<span class="dbminputlabel">Text</span><br>
 	<textarea id="text" rows="5" placeholder="Insert text here..." style="width: 99%; white-space: nowrap; resize: none;"></textarea>
 </div>`;
   },
@@ -91,11 +86,7 @@ module.exports = {
   // functions for the DOM elements.
   //---------------------------------------------------------------------
 
-  init: function () {
-    const { glob, document } = this;
-
-    glob.refreshVariableList(document.getElementById("storage"));
-  },
+  init: function () {},
 
   //---------------------------------------------------------------------
   // Action Bot Function

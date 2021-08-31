@@ -21,9 +21,9 @@ module.exports = {
   // This function generates the subtitle displayed next to the name.
   //---------------------------------------------------------------------
 
-  subtitle: function (data) {
-    const servers = ["Current Server", "Temp Variable", "Server Variable", "Global Variable"];
-    return `${servers[parseInt(data.server, 10)]}`;
+  subtitle: function (data, presets) {
+    const servers = presets.servers;
+    return `${presets.getServerText(data.server, data.varName)}`;
   },
 
   //---------------------------------------------------------------------
@@ -53,19 +53,7 @@ module.exports = {
   //---------------------------------------------------------------------
 
   html: function (isEvent, data) {
-    return `
-<div>
-	<div style="float: left; width: 35%;">
-		Change Server To:<br>
-		<select id="server" class="round" onchange="glob.serverChange(this, 'varNameContainer')">
-			${data.servers[isEvent ? 1 : 0]}
-		</select>
-	</div>
-	<div id="varNameContainer" style="display: none; float: right; width: 60%;">
-		Variable Name:<br>
-		<input id="varName" class="round" type="text" list="variableList">
-	</div>
-</div>`;
+    return `<server-input dropdownLabel="Change Server To" selectId="server" variableContainerId="varNameContainer" variableInputId="varName"></server-input>`;
   },
 
   //---------------------------------------------------------------------
@@ -76,11 +64,7 @@ module.exports = {
   // functions for the DOM elements.
   //---------------------------------------------------------------------
 
-  init: function () {
-    const { glob, document } = this;
-
-    glob.serverChange(document.getElementById("server"), "varNameContainer");
-  },
+  init: function () {},
 
   //---------------------------------------------------------------------
   // Action Bot Function

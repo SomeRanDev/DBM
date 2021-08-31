@@ -77,7 +77,7 @@ module.exports = {
     return `
 <div>
 	<div style="float: left; width: 40%;">
-		Source Field:<br>
+		<span class="dbminputlabel">Source Field</span><br>
 		<select id="info" class="round">
 			<option value="0" selected>Server Id</option>
 			<option value="1">Server Name</option>
@@ -90,22 +90,14 @@ module.exports = {
 		</select>
 	</div>
 	<div style="float: right; width: 55%;">
-		Search Value:<br>
+		<span class="dbminputlabel">Search Value</span><br>
 		<input id="find" class="round" type="text">
 	</div>
-</div><br><br><br>
-<div style="padding-top: 8px;">
-	<div style="float: left; width: 35%;">
-		Store In:<br>
-		<select id="storage" class="round">
-			${data.variables[1]}
-		</select>
-	</div>
-	<div id="varNameContainer" style="float: right; width: 60%;">
-		Variable Name:<br>
-		<input id="varName" class="round" type="text">
-	</div>
-</div>`;
+</div>
+
+<br><br><br>
+
+<store-in-variable style="padding-top: 8px;" dropdownLabel="Store In" selectId="storage" variableContainerId="varNameContainer" variableInputId="varName" selectWidth="40%" variableInputWidth="55%"></store-in-variable>`;
   },
 
   //---------------------------------------------------------------------

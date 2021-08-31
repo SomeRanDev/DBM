@@ -66,33 +66,17 @@ module.exports = {
   html: function (isEvent, data) {
     return `
 <div style="width: 90%;">
-	Emoji Name:<br>
+	<span class="dbminputlabel">Emoji Name</span><br>
 	<input id="emojiName" class="round" type="text">
-</div><br>
-<div>
-	<div style="float: left; width: 35%;">
-		Source Image:<br>
-		<select id="storage" class="round" onchange="glob.refreshVariableList(this)">
-			${data.variables[1]}
-		</select>
-	</div>
-	<div id="varNameContainer" style="float: right; width: 60%;">
-		Variable Name:<br>
-		<input id="varName" class="round" type="text" list="variableList">
-	</div>
-</div><br><br><br>
-<div style="padding-top: 8px;">
-	<div style="float: left; width: 35%;">
-		Store In:<br>
-		<select id="storage2" class="round" onchange="glob.onChange1(this)">
-			${data.variables[0]}
-		</select>
-	</div>
-	<div id="varNameContainer2" style="display: none; float: right; width: 60%;">
-		Variable Name:<br>
-		<input id="varName2" class="round" type="text">
-	</div>
-</div>`;
+</div>
+
+<br>
+
+<retrieve-from-variable dropdownLabel="Source Image" selectId="storage" variableContainerId="varNameContainer" variableInputId="varName"></retrieve-from-variable>
+
+<br><br><br>
+
+<store-in-variable allowNone style="padding-top: 8px;" selectId="storage2" variableInputId="varName2" variableContainerId="varNameContainer2"></store-in-variable>`;
   },
 
   //---------------------------------------------------------------------
@@ -103,22 +87,7 @@ module.exports = {
   // functions for the DOM elements.
   //---------------------------------------------------------------------
 
-  init: function () {
-    const { glob, document } = this;
-
-    glob.onChange1 = function (event) {
-      const value = parseInt(event.value, 10);
-      const varNameInput = document.getElementById("varNameContainer2");
-      if (value === 0) {
-        varNameInput.style.display = "none";
-      } else {
-        varNameInput.style.display = null;
-      }
-    };
-
-    glob.refreshVariableList(document.getElementById("storage"));
-    glob.onChange1(document.getElementById("storage2"));
-  },
+  init: function () {},
 
   //---------------------------------------------------------------------
   // Action Bot Function

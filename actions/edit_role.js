@@ -21,16 +21,8 @@ module.exports = {
   // This function generates the subtitle displayed next to the name.
   //---------------------------------------------------------------------
 
-  subtitle: function (data) {
-    const roles = [
-      "Mentioned Role",
-      "1st Author Role",
-      "1st Server Role",
-      "Temp Variable",
-      "Server Variable",
-      "Global Variable",
-    ];
-    return `${roles[parseInt(data.storage, 10)]}`;
+  subtitle: function (data, presets) {
+    return `${presets.getRoleText(data.storage, data.varName)}`;
   },
 
   //---------------------------------------------------------------------
@@ -61,44 +53,43 @@ module.exports = {
 
   html: function (isEvent, data) {
     return `
-<div>
-	<div style="float: left; width: 35%;">
-		Source Role:<br>
-		<select id="storage" class="round" onchange="glob.roleChange(this, 'varNameContainer')">
-			${data.roles[isEvent ? 1 : 0]}
-		</select>
-	</div>
-	<div id="varNameContainer" style="display: none; float: right; width: 60%;">
-		Variable Name:<br>
-		<input id="varName" class="round" type="text" list="variableList"><br>
-	</div>
-</div><br><br><br>
+<role-input dropdownLabel="Source Role" selectId="storage" variableContainerId="varNameContainer" variableInputId="varName"></role-input>
+
+<br><br><br>
+
 <div style="padding-top: 8px;">
-	Name:<br>
+	<span class="dbminputlabel">Name</span><br>
 	<input id="roleName" placeholder="Leave blank to not edit!" class="round" type="text">
-</div><br>
+</div>
+
+<br>
+
 <div style="float: left; width: 50%;">
-	Display Separate from Online Users:<br>
+	<span class="dbminputlabel">Display Separate from Online Users</span><br>
 	<select id="hoist" class="round" style="width: 90%;">
 		<option value="none" selected>Don't Edit</option>
 		<option value="true">Yes</option>
 		<option value="false">No</option>
 	</select><br>
-	Mentionable:<br>
+	<span class="dbminputlabel">Mentionable</span><br>
 	<select id="mentionable" class="round" style="width: 90%;">
 		<option value="none" selected>Don't Edit</option>
 		<option value="true">Yes</option>
 		<option value="false">No</option>
 	</select><br>
 </div>
+
 <div style="float: right; width: 50%;">
-	Color:<br>
+	<span class="dbminputlabel">Color</span><br>
 	<input id="color" class="round" type="text" placeholder="Leave blank to not edit!"><br>
-	Position:<br>
+	<span class="dbminputlabel">Position</span><br>
 	<input id="position" class="round" type="text" placeholder="Leave blank to not edit!" style="width: 90%;"><br>
-</div><br><br><br>
+</div>
+
+<br><br><br>
+
 <div>
-  Reason:
+  <span class="dbminputlabel">Reason</span>
   <input id="reason" placeholder="Optional" class="round" type="text">
 </div>`;
   },
@@ -111,11 +102,7 @@ module.exports = {
   // functions for the DOM elements.
   //---------------------------------------------------------------------
 
-  init: function () {
-    const { glob, document } = this;
-
-    glob.roleChange(document.getElementById("storage"), "varNameContainer");
-  },
+  init: function () {},
 
   //---------------------------------------------------------------------
   // Action Bot Function

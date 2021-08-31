@@ -21,8 +21,8 @@ module.exports = {
   // This function generates the subtitle displayed next to the name.
   //---------------------------------------------------------------------
 
-  subtitle: function (data) {
-    const storeTypes = ["", "Temp Variable", "Server Variable", "Global Variable"];
+  subtitle: function (data, presets) {
+    const storeTypes = presets.variables;
     return `${storeTypes[parseInt(data.storage2, 10)]} (${data.varName2}) -> ${
       storeTypes[parseInt(data.storage, 10)]
     } (${data.varName})`;
@@ -56,42 +56,29 @@ module.exports = {
 
   html: function (isEvent, data) {
     return `
-<div>
-	<div style="float: left; width: 45%;">
-		Source Image:<br>
-		<select id="storage" class="round" onchange="glob.refreshVariableList(this)">
-			${data.variables[1]}
-		</select>
-	</div>
-	<div id="varNameContainer" style="float: right; width: 50%;">
-		Variable Name:<br>
-		<input id="varName" class="round" type="text" list="variableList"><br>
-	</div>
-</div><br><br><br>
-<div style="padding-top: 8px;">
-	<div style="float: left; width: 45%;">
-		Image that is Drawn:<br>
-		<select id="storage2" class="round">
-			${data.variables[1]}
-		</select>
-	</div>
-	<div id="varNameContainer2" style="float: right; width: 50%;">
-		Variable Name:<br>
-		<input id="varName2" class="round" type="text"><br>
-	</div>
-</div><br><br><br>
+<retrieve-from-variable dropdownLabel="Source Image" selectId="storage" variableContainerId="varNameContainer" variableInputId="varName" selectWidth="45%" variableInputWidth="50%"></retrieve-from-variable>
+
+<br><br><br><br>
+
+<retrieve-from-variable dropdownLabel="Image that is Drawn" selectId="storage2" variableContainerId="varNameContainer2" variableInputId="varName2" selectWidth="45%" variableInputWidth="50%"></retrieve-from-variable>
+
+<br><br><br>
+
 <div style="padding-top: 8px;">
 	<div style="float: left; width: 50%;">
-		X Position:<br>
+		<span class="dbminputlabel">X Position</span><br>
 		<input id="x" class="round" type="text" value="0"><br>
 	</div>
 	<div style="float: right; width: 50%;">
-		Y Position:<br>
+		<span class="dbminputlabel">Y Position</span><br>
 		<input id="y" class="round" type="text" value="0"><br>
 	</div>
-</div><br><br><br>
+</div>
+
+<br><br><br>
+
 <div style="padding-top: 8px; width: 45%">
-	Draw Effect:<br>
+	<span class="dbminputlabel">Draw Effect</span><br>
 	<select id="mask" class="round">
 		<option value="0" selected>Overlay</option>
 		<option value="1">Replace</option>
@@ -108,11 +95,7 @@ module.exports = {
   // functions for the DOM elements.
   //---------------------------------------------------------------------
 
-  init: function () {
-    const { glob, document } = this;
-
-    glob.refreshVariableList(document.getElementById("storage"));
-  },
+  init: function () {},
 
   //---------------------------------------------------------------------
   // Action Bot Function

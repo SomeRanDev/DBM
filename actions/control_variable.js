@@ -21,8 +21,8 @@ module.exports = {
   // This function generates the subtitle displayed next to the name.
   //---------------------------------------------------------------------
 
-  subtitle: function (data) {
-    const storage = ["", "Temp Variable", "Server Variable", "Global Variable"];
+  subtitle: function (data, presets) {
+    const storage = presets.variables;
     return `${storage[parseInt(data.storage, 10)]} (${data.varName}) ${data.changeType === "1" ? "+=" : "="} ${
       data.value
     }`;
@@ -68,28 +68,20 @@ module.exports = {
 
   html: function (isEvent, data) {
     return `
-<div>
-	<div style="float: left; width: 35%;">
-		Store In:<br>
-		<select id="storage" class="round">
-			${data.variables[1]}
-		</select>
-	</div>
-	<div id="varNameContainer" style="float: right; width: 60%;">
-		Variable Name:<br>
-		<input id="varName" class="round" type="text">
-	</div>
-</div><br><br><br>
+<store-in-variable dropdownLabel="Store In" selectId="storage" variableContainerId="varNameContainer" variableInputId="varName"></store-in-variable>
+
+<br><br><br>
+
 <div style="padding-top: 8px;">
-	<div style="float: left; width: 45%;">
-		Control Type:<br>
+	<div style="float: left; width: 35%;">
+		<span class="dbminputlabel">Control Type</span><br>
 		<select id="changeType" class="round">
 			<option value="0" selected>Set Value</option>
 			<option value="1">Add Value</option>
 		</select>
 	</div>
-	<div style="float: right; width: 50%;">
-		Value:<br>
+	<div style="float: right; width: 60%;">
+		<span class="dbminputlabel">Value</span><br>
 		<input id="value" class="round" type="text" name="is-eval"><br>
 	</div>
 </div>`;

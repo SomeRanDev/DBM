@@ -21,19 +21,8 @@ module.exports = {
   // This function generates the subtitle displayed next to the name.
   //---------------------------------------------------------------------
 
-  subtitle: function (data) {
-    const list = [
-      "Server Members",
-      "Server Channels",
-      "Server Roles",
-      "Server Emojis",
-      "All Bot Servers",
-      "Mentioned User Roles",
-      "Command Author Roles",
-      "Temp Variable",
-      "Server Variable",
-      "Global Variable",
-    ];
+  subtitle: function (data, presets) {
+    const list = presets.list;
     return `Convert ${list[parseInt(data.list, 10)]} to Text`;
   },
 
@@ -88,33 +77,28 @@ module.exports = {
 		Variable Name:<br>
 		<input id="varName" class="round" type="text" list="variableList"><br>
 	</div>
-</div><br><br><br>
-<div style="padding-top: 8px; display: table;">
+</div>
+
+<br><br><br><br>
+
+<div style="display: table;">
 	<div style="display: table-cell;">
-		Start Characters:<br>
+		<span class="dbminputlabel">Start Characters</span><br>
 		<input id="start" class="round" type="text">
 	</div>
 	<div style="display: table-cell;">
-		Middle Characters:<br>
+		<span class="dbminputlabel">Middle Characters</span><br>
 		<input id="middle" class="round" type="text">
 	</div>
 	<div style="display: table-cell;">
-		End Characters:<br>
+		<span class="dbminputlabel">End Characters</span><br>
 		<input id="end" class="round" type="text" value="\\n">
 	</div>
-</div><br>
-<div>
-	<div style="float: left; width: 35%;">
-		Store In:<br>
-		<select id="storage" class="round">
-			${data.variables[1]}
-		</select>
-	</div>
-	<div id="varNameContainer2" style="float: right; width: 60%;">
-		Variable Name:<br>
-		<input id="varName2" class="round" type="text">
-	</div>
-</div>`;
+</div>
+
+<br>
+
+<store-in-variable style="padding-top: 8px;" dropdownLabel="Store In" selectId="storage" variableContainerId="varNameContainer2" variableInputId="varName2"></store-in-variable>`;
   },
 
   //---------------------------------------------------------------------

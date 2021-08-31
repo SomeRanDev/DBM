@@ -54,15 +54,18 @@ module.exports = {
   html: function (isEvent, data) {
     return `
 <div style="width: 85%;">
-	Event:<br>
+	<span class="dbminputlabel">Event</span><br>
 	<select id="source" class="round">
 	</select>
-</div><br>
+</div>
+
+<br>
+
 <div style="width: 85%;">
-	Call Type:<br>
+	<span class="dbminputlabel">Call Type</span><br>
 	<select id="type" class="round">
-		<option value="true" selected>Synchronous</option>
-		<option value="false">Asynchronous</option>
+		<option value="true" selected>Wait for Completion</option>
+		<option value="false">Process Simultaneously</option>
 	</select>
 </div>`;
   },

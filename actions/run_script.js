@@ -67,36 +67,31 @@ module.exports = {
     return `
 <div>
 	<div style="float: left; width: 45%;">
-		End Behavior:<br>
+		<span class="dbminputlabel">End Behavior</span><br>
 		<select id="behavior" class="round">
 			<option value="0" selected>Call Next Action Automatically</option>
 			<option value="1">Do Not Call Next Action</option>
 		</select>
 	</div>
 	<div style="padding-left: 5%; float: left; width: 55%;">
-		Interpretation Style:<br>
+		<span class="dbminputlabel">Interpretation Style</span><br>
 		<select id="interpretation" class="round">
 			<option value="0" selected>Evaluate Text First</option>
 			<option value="1">Evaluate Text Directly</option>
 		</select>
 	</div>
-</div><br><br><br>
+</div>
+
+<br><br><br>
+
 <div style="padding-top: 8px;">
-	Custom Code:<br>
+	<span class="dbminputlabel">Custom Code</span><br>
 	<textarea id="code" rows="9" name="is-eval" style="width: 99%; white-space: nowrap; resize: none;"></textarea>
-</div><br>
-<div>
-	<div style="float: left; width: 35%;">
-		Store In:<br>
-		<select id="storage" class="round" onchange="glob.variableChange(this, 'varNameContainer')">
-			${data.variables[0]}
-		</select>
-	</div>
-	<div id="varNameContainer" style="display: none; float: right; width: 60%;">
-		Variable Name:<br>
-		<input id="varName" class="round" type="text">
-	</div>
-</div>`;
+</div>
+
+<br>
+
+<store-in-variable allowNone selectId="storage" variableInputId="varName" variableContainerId="varNameContainer"></store-in-variable>`;
   },
 
   //---------------------------------------------------------------------
@@ -107,11 +102,7 @@ module.exports = {
   // functions for the DOM elements.
   //---------------------------------------------------------------------
 
-  init: function () {
-    const { glob, document } = this;
-
-    glob.variableChange(document.getElementById("storage"), "varNameContainer");
-  },
+  init: function () {},
 
   //---------------------------------------------------------------------
   // Action Bot Function

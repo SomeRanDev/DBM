@@ -21,8 +21,8 @@ module.exports = {
   // This function generates the subtitle displayed next to the name.
   //---------------------------------------------------------------------
 
-  subtitle: function (data) {
-    const storeTypes = ["", "Temp Variable", "Server Variable", "Global Variable"];
+  subtitle: function (data, presets) {
+    const storeTypes = presets.variables;
     return `${storeTypes[parseInt(data.storage, 10)]} (${data.varName}) -> [${data.width}, ${data.height}]`;
   },
 
@@ -54,25 +54,17 @@ module.exports = {
 
   html: function (isEvent, data) {
     return `
-<div>
-	<div style="float: left; width: 45%;">
-		Source Image:<br>
-		<select id="storage" class="round" onchange="glob.refreshVariableList(this)">
-			${data.variables[1]}
-		</select>
-	</div>
-	<div id="varNameContainer" style="float: right; width: 50%;">
-		Variable Name:<br>
-		<input id="varName" class="round" type="text" list="variableList"><br>
-	</div>
-</div><br><br><br>
+<retrieve-from-variable dropdownLabel="Source Image" selectId="storage" variableContainerId="varNameContainer" variableInputId="varName" selectWidth="45%" variableInputWidth="50%"></retrieve-from-variable>
+
+<br><br><br>
+
 <div style="padding-top: 8px;">
 	<div style="float: left; width: 50%;">
-		New Width (direct size or percent):<br>
+		<span class="dbminputlabel">New Width (direct size or percent)</span><br>
 		<input id="width" class="round" type="text" value="100%"><br>
 	</div>
 	<div style="float: right; width: 50%;">
-		New Height (direct size or percent):<br>
+		<span class="dbminputlabel">New Height (direct size or percent)</span><br>
 		<input id="height" class="round" type="text" value="100%"><br>
 	</div>
 </div>`;
@@ -86,11 +78,7 @@ module.exports = {
   // functions for the DOM elements.
   //---------------------------------------------------------------------
 
-  init: function () {
-    const { glob, document } = this;
-
-    glob.refreshVariableList(document.getElementById("storage"));
-  },
+  init: function () {},
 
   //---------------------------------------------------------------------
   // Action Bot Function

@@ -21,15 +21,7 @@ module.exports = {
   // This function generates the subtitle displayed next to the name.
   //---------------------------------------------------------------------
 
-  subtitle: function (data) {
-    const roles = [
-      "Mentioned Role",
-      "1st Author Role",
-      "1st Server Role",
-      "Temp Variable",
-      "Server Variable",
-      "Global Variable",
-    ];
+  subtitle: function (data, presets) {
     const info = [
       "Role Object",
       "Role Id",
@@ -45,7 +37,7 @@ module.exports = {
       "Role Permissions",
       "Role Members Amount",
     ];
-    return `${roles[parseInt(data.role, 10)]} - ${info[parseInt(data.info, 10)]}`;
+    return `${presets.getRoleText(data.role, data.varName)} - ${info[parseInt(data.info, 10)]}`;
   },
 
   //---------------------------------------------------------------------
@@ -125,21 +117,13 @@ module.exports = {
 
   html: function (isEvent, data) {
     return `
+<role-input dropdownLabel="Source Role" selectId="role" variableContainerId="varNameContainer" variableInputId="varName"></role-input>
+
+<br><br><br>
+
 <div>
-	<div style="float: left; width: 35%;">
-		Source Role:<br>
-		<select id="role" class="round" onchange="glob.roleChange(this, 'varNameContainer')">
-			${data.roles[isEvent ? 1 : 0]}
-		</select>
-	</div>
-	<div id="varNameContainer" style="display: none; float: right; width: 60%;">
-		Variable Name:<br>
-		<input id="varName" class="round" type="text" list="variableList"><br>
-	</div>
-</div><br><br><br>
-<div>
-	<div style="padding-top: 8px; width: 70%;">
-		Source Info:<br>
+	<div style="padding-top: 8px; width: 90%;">
+		<span class="dbminputlabel">Source Info</span><br>
 		<select id="info" class="round">
 			<option value="0" selected>Role Object</option>
 			<option value="1">Role Id</option>
@@ -156,19 +140,11 @@ module.exports = {
       <option value="12">Role Members Amount</option>
 		</select>
 	</div>
-</div><br>
-<div>
-	<div style="float: left; width: 35%;">
-		Store In:<br>
-		<select id="storage" class="round">
-			${data.variables[1]}
-		</select>
-	</div>
-	<div id="varNameContainer2" style="float: right; width: 60%;">
-		Variable Name:<br>
-		<input id="varName2" class="round" type="text"><br>
-	</div>
-</div>`;
+</div>
+
+<br>
+
+<store-in-variable dropdownLabel="Store In" selectId="storage" variableContainerId="varNameContainer2" variableInputId="varName2"></store-in-variable>`;
   },
 
   //---------------------------------------------------------------------
@@ -179,11 +155,7 @@ module.exports = {
   // functions for the DOM elements.
   //---------------------------------------------------------------------
 
-  init: function () {
-    const { glob, document } = this;
-
-    glob.roleChange(document.getElementById("role"), "varNameContainer");
-  },
+  init: function () {},
 
   //---------------------------------------------------------------------
   // Action Bot Function

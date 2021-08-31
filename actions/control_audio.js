@@ -55,7 +55,7 @@ module.exports = {
   html: function (isEvent, data) {
     return `
 <div style="float: left; width: 80%;">
-	Audio Action:<br>
+	<span class="dbminputlabel">Audio Action</span><br>
 	<select id="action" class="round">
 		<option value="0" selected>Stop Playing</option>
 		<option value="1">Pause Audio</option>

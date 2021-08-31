@@ -54,7 +54,7 @@ module.exports = {
   html: function (isEvent, data) {
     return `
 <div style="float: left; width: 80%;">
-	Amount to Skip:<br>
+	<span class="dbminputlabel">Amount to Skip</span><br>
 	<input id="amount" class="round" value="1">
 </div>`;
   },

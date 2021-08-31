@@ -21,15 +21,7 @@ module.exports = {
   // This function generates the subtitle displayed next to the name.
   //---------------------------------------------------------------------
 
-  subtitle: function (data) {
-    const channels = [
-      "Same Channel",
-      "Mentioned Channel",
-      "1st Server Channel",
-      "Temp Variable",
-      "Server Variable",
-      "Global Variable",
-    ];
+  subtitle: function (data, presets) {
     const info = [
       "Channel Object",
       "Channel Id",
@@ -45,7 +37,7 @@ module.exports = {
       "Channel Created At",
       "Channel Created At Timestamp",
     ];
-    return `${channels[parseInt(data.channel, 10)]} - ${info[parseInt(data.info, 10)]}`;
+    return `${presets.getChannelText(data.channel, data.varName)} - ${info[parseInt(data.info, 10)]}`;
   },
 
   //---------------------------------------------------------------------
@@ -119,21 +111,13 @@ module.exports = {
 
   html: function (isEvent, data) {
     return `
-<div>
-	<div style="float: left; width: 35%;">
-		Source Channel:<br>
-		<select id="channel" class="round" onchange="glob.channelChange(this, 'varNameContainer')">
-			${data.channels[isEvent ? 1 : 0]}
-		</select>
-	</div>
-	<div id="varNameContainer" style="display: none; float: right; width: 60%;">
-		Variable Name:<br>
-		<input id="varName" class="round" type="text" list="variableList"><br>
-	</div>
-</div><br><br><br>
+<channel-input dropdownLabel="Source Channel" selectId="channel" variableContainerId="varNameContainer" variableInputId="varName"></channel-input>
+
+<br><br><br>
+
 <div>
 	<div style="padding-top: 8px; width: 70%;">
-		Source Info:<br>
+		<span class="dbminputlabel">Source Info</span><br>
 		<select id="info" class="round">
 			<option value="0" selected>Channel Object</option>
 			<option value="1">Channel Id</option>
@@ -149,19 +133,11 @@ module.exports = {
 			<option value="10">Channel Category Id</option>
 		</select>
 	</div>
-</div><br>
-<div>
-	<div style="float: left; width: 35%;">
-		Store In:<br>
-		<select id="storage" class="round">
-			${data.variables[1]}
-		</select>
-	</div>
-	<div id="varNameContainer2" style="float: right; width: 60%;">
-		Variable Name:<br>
-		<input id="varName2" class="round" type="text"><br>
-	</div>
-</div>`;
+</div>
+
+<br>
+
+<store-in-variable dropdownLabel="Store In" selectId="storage" variableContainerId="varNameContainer2" variableInputId="varName2"></store-in-variable>`;
   },
 
   //---------------------------------------------------------------------
@@ -172,11 +148,7 @@ module.exports = {
   // functions for the DOM elements.
   //---------------------------------------------------------------------
 
-  init: function () {
-    const { glob, document } = this;
-
-    glob.channelChange(document.getElementById("channel"), "varNameContainer");
-  },
+  init: function () {},
 
   //---------------------------------------------------------------------
   // Action Bot Function

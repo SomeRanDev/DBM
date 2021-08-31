@@ -21,10 +21,9 @@ module.exports = {
   // This function generates the subtitle displayed next to the name.
   //---------------------------------------------------------------------
 
-  subtitle: function (data) {
-    const servers = ["Current Server", "Temp Variable", "Server Variable", "Global Variable"];
-    const storage = ["", "Temp Variable", "Server Variable", "Global Variable"];
-    return `${servers[parseInt(data.server, 10)]} - ${storage[parseInt(data.storage, 10)]} (${data.varName2})`;
+  subtitle: function (data, presets) {
+    const storage = preset.variables;
+    return `${presets.getServerText(data.server, data.varName)} - ${storage[parseInt(data.storage, 10)]} (${data.varName2})`;
   },
 
   //---------------------------------------------------------------------
@@ -67,40 +66,24 @@ module.exports = {
 
   html: function (isEvent, data) {
     return `
-<div>
-	<div style="float: left; width: 35%;">
-		Server:<br>
-		<select id="server" class="round" onchange="glob.serverChange(this, 'varNameContainer')">
-			${data.servers[isEvent ? 1 : 0]}
-		</select>
-	</div>
-	<div id="varNameContainer" style="display: none; float: right; width: 60%;">
-		Variable Name:<br>
-		<input id="varName" class="round" type="text" list="variableList">
-	</div>
-</div><br><br><br>
+<server-input dropdownLabel="Server" selectId="server" variableContainerId="varNameContainer" variableInputId="varName"></server-input>
+
+<br><br><br>
+
 <div style="padding-top: 8px;">
 	<div style="float: left; width: 40%;">
-		Data Name:<br>
+		<span class="dbminputlabel">Data Name</span><br>
 		<input id="dataName" class="round" type="text">
 	</div>
 	<div style="float: left; width: 60%;">
-		Default Value (if data doesn't exist):<br>
+		<span class="dbminputlabel">Default Value (if data doesn't exist)</span><br>
 		<input id="defaultVal" class="round" type="text" value="0">
 	</div>
-</div><br><br><br>
-<div style="padding-top: 8px;">
-	<div style="float: left; width: 35%;">
-		Store In:<br>
-		<select id="storage" class="round">
-			${data.variables[1]}
-		</select>
-	</div>
-	<div id="varNameContainer2" style="float: right; width: 60%;">
-		Variable Name:<br>
-		<input id="varName2" class="round" type="text"><br>
-	</div>
-</div>`;
+</div>
+
+<br><br><br>
+
+<store-in-variable style="padding-top: 8px;" dropdownLabel="Store In" selectId="storage" variableContainerId="varNameContainer2" variableInputId="varName2"></store-in-variable>`;
   },
 
   //---------------------------------------------------------------------
@@ -111,11 +94,7 @@ module.exports = {
   // functions for the DOM elements.
   //---------------------------------------------------------------------
 
-  init: function () {
-    const { glob, document } = this;
-
-    glob.serverChange(document.getElementById("server"), "varNameContainer");
-  },
+  init: function () {},
 
   //---------------------------------------------------------------------
   // Action Bot Function

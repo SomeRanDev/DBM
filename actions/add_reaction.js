@@ -21,12 +21,8 @@ module.exports = {
   // This function generates the subtitle displayed next to the name.
   //---------------------------------------------------------------------
 
-  subtitle: function (data) {
-    const names = ["Command Message", "Temp Variable", "Server Variable", "Global Variable"];
-    const index = parseInt(data.storage, 10);
-    return data.storage === "0"
-      ? `Add Reaction to ${names[index]}`
-      : `Add Reaction to ${names[index]} (${data.varName})`;
+  subtitle: function (data, presets) {
+    return `Add Reaction to ${presets.getMessageText(data.storage, data.varName)}`;
   },
 
   //---------------------------------------------------------------------
@@ -57,21 +53,13 @@ module.exports = {
 
   html: function (isEvent, data) {
     return `
-<div>
-	<div style="float: left; width: 35%;">
-		Source Message:<br>
-		<select id="storage" class="round" onchange="glob.messageChange(this, 'varNameContainer')">
-			${data.messages[isEvent ? 1 : 0]}
-		</select>
-	</div>
-	<div id="varNameContainer" style="display: none; float: right; width: 60%;">
-		Variable Name:<br>
-		<input id="varName" class="round" type="text" list="variableList"><br>
-	</div>
-</div><br><br><br>
+<message-input dropdownLabel="Source Message" selectId="storage" variableContainerId="varNameContainer" variableInputId="varName"></message-input>
+
+<br><br><br>
+
 <div style="padding-top: 8px;">
 	<div style="float: left; width: 35%;">
-		Source Emoji:<br>
+		<span class="dbminputlabel">Source Emoji</span><br>
 		<select id="emoji" name="second-list" class="round" onchange="glob.onChange1(this)">
 			<option value="4" selected>Direct Emoji</option>
 			<option value="0">Custom Emoji</option>
@@ -81,11 +69,11 @@ module.exports = {
 		</select>
 	</div>
 	<div id="varNameContainer2" style="float: right; width: 60%;">
-		<span id="extName">Emoji  (right-click -> Insert Emoji)</span>:<br>
+		<span id="extName">Emoji (right-click -> Insert Emoji)</span>:<br>
 		<input id="varName2" class="round" type="text">
 	</div>
 	<div id="varNameContainer3" style="float: right; width: 60%; display: none;">
-		Variable Name:<br>
+		<span class="dbminputlabel">Variable Name</span><br>
 		<input id="varName3" class="round" type="text" list="variableList2">
 	</div>
 </div>`;
@@ -121,7 +109,6 @@ module.exports = {
     };
 
     glob.onChange1(document.getElementById("emoji"));
-    glob.messageChange(document.getElementById("storage"), "varNameContainer");
   },
 
   //---------------------------------------------------------------------

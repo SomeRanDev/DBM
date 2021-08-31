@@ -66,40 +66,31 @@ module.exports = {
   html: function (isEvent, data) {
     return `
 <div style="float: left; width: 50%;">
-	Title:<br>
+	<span class="dbminputlabel">Title</span><br>
 	<input id="title" class="round" type="text"><br>
-	Author:<br>
+	<span class="dbminputlabel">Author</span><br>
 	<input id="author" class="round" type="text" placeholder="Leave blank to disallow author!"><br>
-	Color:<br>
+	<span class="dbminputlabel">Color</span><br>
 	<input id="color" class="round" type="text" placeholder="Leave blank for default!"><br>
-	Use Timestamp:<br>
+	<span class="dbminputlabel">Use Timestamp</span><br>
 	<select id="timestamp" class="round" style="width: 90%;">
 		<option value="true">Yes</option>
 		<option value="false" selected>No</option>
 	</select><br>
 </div>
+
 <div style="float: right; width: 50%;">
-	URL:<br>
+	<span class="dbminputlabel">URL</span><br>
 	<input id="url" class="round" type="text" placeholder="Leave blank for none!"><br>
-	Author Icon URL:<br>
+	<span class="dbminputlabel">Author Icon URL</span><br>
 	<input id="authorIcon" class="round" type="text" placeholder="Leave blank for none!"><br>
-	Image URL:<br>
+	<span class="dbminputlabel">Image URL</span><br>
 	<input id="imageUrl" class="round" type="text" placeholder="Leave blank for none!"><br>
-	Thumbnail URL:<br>
+	<span class="dbminputlabel">Thumbnail URL</span><br>
 	<input id="thumbUrl" class="round" type="text" placeholder="Leave blank for none!"><br>
 </div>
-<div>
-	<div style="float: left; width: 35%;">
-		Store In:<br>
-		<select id="storage" class="round">
-			${data.variables[1]}
-		</select>
-	</div>
-	<div id="varNameContainer" style="float: right; width: 60%;">
-		Variable Name:<br>
-		<input id="varName" class="round" type="text"><br>
-	</div>
-</div>`;
+
+<store-in-variable dropdownLabel="Store In" selectId="storage" variableContainerId="varNameContainer" variableInputId="varName"></store-in-variable>`;
   },
 
   //---------------------------------------------------------------------
