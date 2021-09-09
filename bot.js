@@ -1667,6 +1667,11 @@ try {
   Audio.ytdl = require("ytdl-core");
 } catch {}
 
+Audio.voice = null;
+try {
+  Audio.voice = require("@discordjs/voice");
+} catch {}
+
 Audio.queue = [];
 Audio.volumes = [];
 Audio.connections = [];
