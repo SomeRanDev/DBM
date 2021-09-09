@@ -58,7 +58,7 @@ module.exports = {
 	<p>
 		<u>Note:</u><br>
 		Discord Splash Screens are only available to Discord Partners or for servers with boost level 1 or higher.<br>
-		For more information, check out <a href="#" onclick="require('child_process').execSync('start https://discord.com/partners')">this</a> or <a href="#" onclick="require('child_process').execSync('start https://support.discord.com/hc/en-us/articles/360028038352')"">this</a>.
+		For more information, check out <a href="#" onclick="require('node:child_process').execSync('start https://discord.com/partners')">this</a> or <a href="#" onclick="require('node:child_process').execSync('start https://support.discord.com/hc/en-us/articles/360028038352')"">this</a>.
 	</p>
 </div>
 

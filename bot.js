@@ -450,7 +450,7 @@ Actions.exists = function (action) {
 };
 
 Actions.getLocalFile = function (url) {
-  return require("path").join(process.cwd(), url);
+  return require("node:path").join(process.cwd(), url);
 };
 
 Actions.getDBM = function () {
@@ -529,13 +529,13 @@ Actions.evalMessage = function (content, cache) {
 };
 
 Actions.initMods = function () {
-  const fs = require("fs");
+  const fs = require("node:fs");
   this.modDirectories().forEach(
     function (dir) {
       fs.readdirSync(dir).forEach(
         function (file) {
           if (file.match(/\.js/i)) {
-            const action = require(require("path").join(dir, file));
+            const action = require(require("node:path").join(dir, file));
             if (action.action) {
               this[action.name] = action.action;
             }
@@ -1371,7 +1371,7 @@ const Files = (DBM.Files = {});
 
 Files.data = {};
 Files.writers = {};
-Files.crypto = require("crypto");
+Files.crypto = require("node:crypto");
 Files.dataFiles = [
   "commands.json",
   "events.json",
@@ -1383,7 +1383,7 @@ Files.dataFiles = [
 ];
 
 Files.startBot = function () {
-  const path = require("path");
+  const path = require("node:path");
   Actions.actionsLocation = path.join(__dirname, "actions");
   Actions.eventsLocation = path.join(__dirname, "events");
   Actions.extensionsLocation = path.join(__dirname, "extensions");
@@ -1399,12 +1399,12 @@ Files.startBot = function () {
 };
 
 Files.verifyDirectory = function (dir) {
-  return typeof dir === "string" && require("fs").existsSync(dir);
+  return typeof dir === "string" && require("node:fs").existsSync(dir);
 };
 
 Files.readData = function (callback) {
-  const fs = require("fs");
-  const path = require("path");
+  const fs = require("node:fs");
+  const path = require("node:path");
   let max = this.dataFiles.length;
   let cur = 0;
   for (let i = 0; i < max; i++) {
@@ -1432,7 +1432,7 @@ Files.readData = function (callback) {
 };
 
 Files.saveData = function (file, callback) {
-  const path = require("path");
+  const path = require("node:path");
   const data = this.data[file];
   if (!this.writers[file]) {
     const fstorm = require("fstorm");
