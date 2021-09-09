@@ -146,20 +146,26 @@ Bot.reformatCommands = function () {
           const name = this.validateSlashCommandName(com.name);
           if (name) {
             if (this.$slash[name]) {
-              console.error("Slash command with name \"" + name + "\" already exists!\nThis duplicate will be ignored.\n");
+              console.error(
+                'Slash command with name "' + name + '" already exists!\nThis duplicate will be ignored.\n',
+              );
             } else {
               this.$slash[name] = com;
               this.applicationCommandData.push(this.createApiJsonFromCommand(com));
             }
           } else {
-            console.error("Slash command has invalid name: \"" + name + "\".\nSlash command names cannot have spaces and must only contain letters, numbers, underscores, and dashes!\nThis command will be ignored.");
+            console.error(
+              'Slash command has invalid name: "' +
+                name +
+                '".\nSlash command names cannot have spaces and must only contain letters, numbers, underscores, and dashes!\nThis command will be ignored.',
+            );
           }
           break;
         }
         case "5": {
           const name = com.name;
           if (this.$user[name]) {
-            console.error("User command with name \"" + name + "\" already exists!\nThis duplicate will be ignored.\n");
+            console.error('User command with name "' + name + '" already exists!\nThis duplicate will be ignored.\n');
           } else {
             this.$user[name] = com;
             this.applicationCommandData.push(this.createApiJsonFromCommand(com));
@@ -169,7 +175,9 @@ Bot.reformatCommands = function () {
         case "6": {
           const name = com.name;
           if (this.$msge[name]) {
-            console.error("Message command with name \"" + name + "\" already exists!\nThis duplicate will be ignored.\n");
+            console.error(
+              'Message command with name "' + name + '" already exists!\nThis duplicate will be ignored.\n',
+            );
           } else {
             this.$msge[name] = com;
             this.applicationCommandData.push(this.createApiJsonFromCommand(com));
@@ -190,10 +198,19 @@ Bot.createApiJsonFromCommand = function (com, name) {
     name: name ?? com.name,
     description: this.generateSlashCommandDescription(com),
   };
-  switch(com.comType) {
-    case "4": { result.type = "CHAT_INPUT"; break; }
-    case "5": { result.type = "USER"; break; }
-    case "6": { result.type = "MESSAGE"; break; }
+  switch (com.comType) {
+    case "4": {
+      result.type = "CHAT_INPUT";
+      break;
+    }
+    case "5": {
+      result.type = "USER";
+      break;
+    }
+    case "6": {
+      result.type = "MESSAGE";
+      break;
+    }
   }
   if (com.comType === "4" && com.parameters && Array.isArray(com.parameters)) {
     result.options = this.validateSlashCommandParameters(com.parameters, result.name);
@@ -247,10 +264,26 @@ Bot.validateSlashCommandParameters = function (parameters, commandName) {
           optionalParams.push(paramsData);
         }
       } else {
-        console.error("Slash command \"" + commandName + "\" parameter #" + (i + 1) + " (\"" + name + "\") has a name that's already being used!\nThis duplicate will be ignored.\n");
+        console.error(
+          'Slash command "' +
+            commandName +
+            '" parameter #' +
+            (i + 1) +
+            ' ("' +
+            name +
+            "\") has a name that's already being used!\nThis duplicate will be ignored.\n",
+        );
       }
     } else {
-      console.error("Slash command \"" + commandName + "\" parameter #" + (i + 1) + " has invalid name: \"" + name + "\".\nSlash command parameter names cannot have spaces and must only contain letters, numbers, underscores, and dashes!\nThis parameter will be ignored.\n");
+      console.error(
+        'Slash command "' +
+          commandName +
+          '" parameter #' +
+          (i + 1) +
+          ' has invalid name: "' +
+          name +
+          '".\nSlash command parameter names cannot have spaces and must only contain letters, numbers, underscores, and dashes!\nThis parameter will be ignored.\n',
+      );
     }
   }
   return requireParams.concat(optionalParams);
@@ -295,11 +328,14 @@ Bot.restoreVariables = function () {
 
 Bot.registerApplicationCommands = function () {
   this.bot.guilds.cache.forEach((key, value) => {
-    this.bot.guilds.fetch(key).then((guild) => {
-      guild?.commands?.set(this.applicationCommandData);
-    }).catch(function(e) {
-      console.error(e);
-    });
+    this.bot.guilds
+      .fetch(key)
+      .then((guild) => {
+        guild?.commands?.set(this.applicationCommandData);
+      })
+      .catch(function (e) {
+        console.error(e);
+      });
   });
 };
 
@@ -571,7 +607,10 @@ Actions.preformActionsFromMessage = function (msg, cmd) {
 };
 
 Actions.preformActionsFromInteraction = function (interaction, cmd) {
-  if (this.checkConditions(interaction.guild, interaction.member, interaction.user, cmd) && this.checkTimeRestriction(interaction.user, cmd)) {
+  if (
+    this.checkConditions(interaction.guild, interaction.member, interaction.user, cmd) &&
+    this.checkTimeRestriction(interaction.user, cmd)
+  ) {
     this.invokeInteraction(interaction, cmd.actions);
   }
 };
@@ -1698,23 +1737,22 @@ Audio.setVolume = function (volume, cache) {
   }
 };
 
-Audio.connectToVoice = function (voiceChannel) {
-  const promise = voiceChannel.join();
-  promise
-    .then(
-      function (connection) {
-        this.connections[voiceChannel.guild.id] = connection;
-        connection.on(
-          "disconnect",
-          function () {
-            this.connections[voiceChannel.guild.id] = null;
-            this.volumes[voiceChannel.guild.id] = null;
-          }.bind(this),
-        );
-      }.bind(this),
-    )
-    .catch(console.error);
-  return promise;
+/** @param {import('discord.js').VoiceChannel} voiceChannel */
+Audio.connectToVoice = async function (voiceChannel) {
+  const connection = this.voice.joinVoiceChannel({
+    adapterCreator: voiceChannel.guild.voiceAdapterCreator,
+    channelId: voiceChannel.id,
+    guildId: voiceChannel.guild.id,
+  });
+
+  try {
+    await entersState(connection, this.voice.VoiceConnectionStatus.Ready, 30e3);
+    this.connections[voiceChannel.guild.id] = connection;
+    return connection;
+  } catch (error) {
+    connection.destroy();
+    throw error;
+  }
 };
 
 Audio.addToQueue = function (item, cache) {
