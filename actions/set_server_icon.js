@@ -23,7 +23,9 @@ module.exports = {
 
   subtitle: function (data, presets) {
     const storeTypes = presets.variables;
-    return `${presets.getServerText(data.server, data.varName)} - ${storeTypes[parseInt(data.storage, 10)]} (${data.varName2})`;
+    return `${presets.getServerText(data.server, data.varName)} - ${storeTypes[parseInt(data.storage, 10)]} (${
+      data.varName2
+    })`;
   },
 
   //---------------------------------------------------------------------

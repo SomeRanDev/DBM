@@ -23,7 +23,9 @@ module.exports = {
 
   subtitle: function (data, presets) {
     const storage = preset.variables;
-    return `${presets.getMemberText(data.member, data.varName)} - ${storage[parseInt(data.storage, 10)]} (${data.varName2})`;
+    return `${presets.getMemberText(data.member, data.varName)} - ${storage[parseInt(data.storage, 10)]} (${
+      data.varName2
+    })`;
   },
 
   //---------------------------------------------------------------------

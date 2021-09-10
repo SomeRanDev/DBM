@@ -22,9 +22,9 @@ module.exports = {
   //---------------------------------------------------------------------
 
   subtitle: function (data, presets) {
-    return `${presets.getServerText(data.server, data.varName)} (${data.dataName}) ${data.changeType === "1" ? "+=" : "="} ${
-      data.value
-    }`;
+    return `${presets.getServerText(data.server, data.varName)} (${data.dataName}) ${
+      data.changeType === "1" ? "+=" : "="
+    } ${data.value}`;
   },
 
   //---------------------------------------------------------------------

@@ -23,9 +23,9 @@ module.exports = {
 
   subtitle: function (data, presets) {
     const members = presets.members;
-    return `${presets.getMemberText(data.member, data.varName)} (${data.dataName}) ${data.changeType === "1" ? "+=" : "="} ${
-      data.value
-    }`;
+    return `${presets.getMemberText(data.member, data.varName)} (${data.dataName}) ${
+      data.changeType === "1" ? "+=" : "="
+    } ${data.value}`;
   },
 
   //---------------------------------------------------------------------

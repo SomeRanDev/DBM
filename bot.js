@@ -31,14 +31,14 @@ const MsgType = {
   DUPLICATE_USER_COMMAND: 5,
   DUPLICATE_MESSAGE_COMMAND: 6,
   DUPLICATE_SLASH_PARAMETER: 7,
-  INVALID_SLASH_PARAMETER_NAME: 8
+  INVALID_SLASH_PARAMETER_NAME: 8,
 };
 
-function PrintError (type) {
-  const format = require('util').format;
+function PrintError(type) {
+  const format = require("util").format;
   const error = console.error;
 
-  switch(type) {
+  switch (type) {
     case MsgType.MISSING_ACTION: {
       error(format("%s does not exist!", arguments[1]));
       break;
@@ -48,43 +48,70 @@ function PrintError (type) {
       break;
     }
     case MsgType.MISSING_ACTIONS: {
-      error(format("Please copy the \"Actions\" folder from the Discord Bot Maker directory to this bot\'s directory: \n%s", arguments[1]));
+      error(
+        format(
+          'Please copy the "Actions" folder from the Discord Bot Maker directory to this bot\'s directory: \n%s',
+          arguments[1],
+        ),
+      );
       break;
     }
     case MsgType.DUPLICATE_SLASH_COMMAND: {
-      error(format("Slash command with name \"%s\" already exists!\nThis duplicate will be ignored.\n", arguments[1]));
+      error(format('Slash command with name "%s" already exists!\nThis duplicate will be ignored.\n', arguments[1]));
       break;
     }
     case MsgType.INVALID_SLASH_NAME: {
-      error(format("Slash command has invalid name: \"%s\".\nSlash command names cannot have spaces and must only contain letters, numbers, underscores, and dashes!\nThis command will be ignored.", arguments[1]));
+      error(
+        format(
+          'Slash command has invalid name: "%s".\nSlash command names cannot have spaces and must only contain letters, numbers, underscores, and dashes!\nThis command will be ignored.',
+          arguments[1],
+        ),
+      );
       break;
     }
     case MsgType.DUPLICATE_USER_COMMAND: {
-      error(format("User command with name \"%s\" already exists!\nThis duplicate will be ignored.\n", arguments[1]));
+      error(format('User command with name "%s" already exists!\nThis duplicate will be ignored.\n', arguments[1]));
       break;
     }
     case MsgType.DUPLICATE_MESSAGE_COMMAND: {
-      error(format("Message command with name \"%s\" already exists!\nThis duplicate will be ignored.\n", arguments[1]));
+      error(format('Message command with name "%s" already exists!\nThis duplicate will be ignored.\n', arguments[1]));
       break;
     }
     case MsgType.DUPLICATE_SLASH_PARAMETER: {
-      error(format("Slash command \"%s\" parameter #%d (\"%s\") has a name that's already being used!\nThis duplicate will be ignored.\n", arguments[1], arguments[2], arguments[3]));
+      error(
+        format(
+          'Slash command "%s" parameter #%d ("%s") has a name that\'s already being used!\nThis duplicate will be ignored.\n',
+          arguments[1],
+          arguments[2],
+          arguments[3],
+        ),
+      );
       break;
     }
     case MsgType.INVALID_SLASH_PARAMETER_NAME: {
-      error(format("Slash command \"%s\" parameter #%d has invalid name: \"%s\".\nSlash command parameter names cannot have spaces and must only contain letters, numbers, underscores, and dashes!\nThis parameter will be ignored.\n", arguments[1], arguments[2], arguments[3]));
+      error(
+        format(
+          'Slash command "%s" parameter #%d has invalid name: "%s".\nSlash command parameter names cannot have spaces and must only contain letters, numbers, underscores, and dashes!\nThis parameter will be ignored.\n',
+          arguments[1],
+          arguments[2],
+          arguments[3],
+        ),
+      );
       break;
     }
     case MsgType.INVALID_SLASH_COMMAND_SERVER_ID: {
-      error(format("Invalid Server ID \"%s\" listed in \"Slash Command Options -> Server IDs for Slash Commands\"!\n"), arguments[1]);
+      error(
+        format('Invalid Server ID "%s" listed in "Slash Command Options -> Server IDs for Slash Commands"!\n'),
+        arguments[1],
+      );
       break;
     }
   }
-};
+}
 
-function GetActionErrorText (type, name, index) {
-  return require('util').format("Error with the %s \"%s\", Action #%d", type, name, index);
-};
+function GetActionErrorText(type, name, index) {
+  return require("util").format('Error with the %s "%s", Action #%d', type, name, index);
+}
 
 //#endregion
 
@@ -262,10 +289,19 @@ Bot.createApiJsonFromCommand = function (com, name) {
     name: name ?? com.name,
     description: this.generateSlashCommandDescription(com),
   };
-  switch(com.comType) {
-    case "4": { result.type = "CHAT_INPUT"; break; }
-    case "5": { result.type = "USER"; break; }
-    case "6": { result.type = "MESSAGE"; break; }
+  switch (com.comType) {
+    case "4": {
+      result.type = "CHAT_INPUT";
+      break;
+    }
+    case "5": {
+      result.type = "USER";
+      break;
+    }
+    case "6": {
+      result.type = "MESSAGE";
+      break;
+    }
   }
   if (com.comType === "4" && com.parameters && Array.isArray(com.parameters)) {
     result.options = this.validateSlashCommandParameters(com.parameters, result.name);
@@ -372,16 +408,16 @@ Bot.restoreVariables = function () {
 Bot.registerApplicationCommands = function () {
   let slashType = Files.data.settings.slashType ?? "auto";
 
-  if(slashType === "auto") {
+  if (slashType === "auto") {
     const serverCount = this.bot.guilds.cache.size;
-    if(serverCount <= 15) {
+    if (serverCount <= 15) {
       slashType = "all";
     } else {
       slashType = "global";
     }
   }
 
-  switch(slashType) {
+  switch (slashType) {
     case "all": {
       this.setAllServerCommands(this.applicationCommandData);
       this.setGlobalCommands([]);
@@ -407,21 +443,27 @@ Bot.setGlobalCommands = function (commands) {
 
 Bot.setAllServerCommands = function (commands) {
   this.bot.guilds.cache.forEach((key, value) => {
-    this.bot.guilds.fetch(key).then((guild) => {
-      guild?.commands?.set(commands);
-    }).catch(function(e) {
-      console.error(e);
-    });
+    this.bot.guilds
+      .fetch(key)
+      .then((guild) => {
+        guild?.commands?.set(commands);
+      })
+      .catch(function (e) {
+        console.error(e);
+      });
   });
 };
 
 Bot.setCertainServerCommands = function (commands, serverIdList) {
-  for(let i = 0; i < serverIdList.length; i++) {
-    this.bot.guilds.fetch(serverIdList[i]).then((guild) => {
-      guild?.commands?.set(commands);
-    }).catch(function(e) {
-      PrintError(MsgType.INVALID_SLASH_COMMAND_SERVER_ID, serverIdList[i]);
-    });
+  for (let i = 0; i < serverIdList.length; i++) {
+    this.bot.guilds
+      .fetch(serverIdList[i])
+      .then((guild) => {
+        guild?.commands?.set(commands);
+      })
+      .catch(function (e) {
+        PrintError(MsgType.INVALID_SLASH_COMMAND_SERVER_ID, serverIdList[i]);
+      });
   }
 };
 
@@ -693,7 +735,10 @@ Actions.preformActionsFromMessage = function (msg, cmd) {
 };
 
 Actions.preformActionsFromInteraction = function (interaction, cmd) {
-  if (this.checkConditions(interaction.guild, interaction.member, interaction.user, cmd) && this.checkTimeRestriction(interaction.user, cmd)) {
+  if (
+    this.checkConditions(interaction.guild, interaction.member, interaction.user, cmd) &&
+    this.checkTimeRestriction(interaction.user, cmd)
+  ) {
     this.invokeInteraction(interaction, cmd.actions);
   }
 };
@@ -1451,7 +1496,7 @@ const Images = (DBM.Images = {});
 
 Images.JIMP = null;
 try {
-  Images.JIMP = require('jimp');
+  Images.JIMP = require("jimp");
 } catch {}
 
 Images.getImage = function (url) {
@@ -1798,9 +1843,9 @@ try {
   Audio.voice = require("@discordjs/voice");
 } catch {}
 
-Audio.rawYtdl = null
+Audio.rawYtdl = null;
 try {
-  Audio.rawYtdl = require('youtube-dl-exec').raw;
+  Audio.rawYtdl = require("youtube-dl-exec").raw;
 } catch {}
 
 Audio.queue = [];
@@ -1919,15 +1964,15 @@ Audio.createYouTubeAudioResource = function (url, metadata) {
     const child = this.rawYtdl(
       url,
       {
-        o: '-',
-        q: '',
-        f: 'bestaudio[ext=webm+acodec=opus+asr=48000]/bestaudio',
-        r: '100K',
+        o: "-",
+        q: "",
+        f: "bestaudio[ext=webm+acodec=opus+asr=48000]/bestaudio",
+        r: "100K",
       },
-      { stdio: ['ignore', 'pipe', 'ignore'] },
+      { stdio: ["ignore", "pipe", "ignore"] },
     );
     if (!child.stdout) {
-      reject(new Error('No stdout'));
+      reject(new Error("No stdout"));
       return;
     }
     const stream = child.stdout;
@@ -1937,17 +1982,20 @@ Audio.createYouTubeAudioResource = function (url, metadata) {
       reject(error);
     };
     child
-      .once('spawn', () => {
-        this.voice.demuxProbe(stream)
+      .once("spawn", () => {
+        this.voice
+          .demuxProbe(stream)
           .then((probe) => resolve(this.voice.createAudioResource(probe.stream, { metadata, inputType: probe.type })))
           .catch(onError);
       })
       .catch(onError);
   });
-}
+};
 
 Audio.playFile = function (url, options, id) {
-  const resource = this.voice.createAudioResource(Actions.getLocalFile(url), { inputType: this.voice.StreamType.Arbitrary });
+  const resource = this.voice.createAudioResource(Actions.getLocalFile(url), {
+    inputType: this.voice.StreamType.Arbitrary,
+  });
   this.players[id].play(resource);
   return true;
 };

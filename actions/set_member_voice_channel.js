@@ -22,7 +22,10 @@ module.exports = {
   //---------------------------------------------------------------------
 
   subtitle: function (data, presets) {
-    return `${presets.getMemberText(data.member, data.varName)} - ${presets.getVoiceChannelText(data.channel, data.varName2)}`;
+    return `${presets.getMemberText(data.member, data.varName)} - ${presets.getVoiceChannelText(
+      data.channel,
+      data.varName2,
+    )}`;
   },
 
   //---------------------------------------------------------------------

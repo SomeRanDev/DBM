@@ -107,11 +107,11 @@ module.exports = {
     const image = this.getVariable(type, varName, cache);
     const { Images } = this.getDBM();
 
-    let buffer
+    let buffer;
     try {
-      buffer = Images.createBuffer(image)
+      buffer = Images.createBuffer(image);
     } catch {
-      return this.displayError(data, cache)
+      return this.displayError(data, cache);
     }
 
     server.emojis
