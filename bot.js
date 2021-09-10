@@ -35,8 +35,8 @@ const MsgType = {
 };
 
 function PrintError(type) {
-  const format = require("util").format;
-  const error = console.error;
+  const { format } = require("node:util");
+  const { error } = console;
 
   switch (type) {
     case MsgType.MISSING_ACTION: {
@@ -110,7 +110,7 @@ function PrintError(type) {
 }
 
 function GetActionErrorText(type, name, index) {
-  return require("util").format('Error with the %s "%s", Action #%d', type, name, index);
+  return require("node:util").format('Error with the %s "%s", Action #%d', type, name, index);
 }
 
 //#endregion
