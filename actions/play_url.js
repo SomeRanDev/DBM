@@ -134,7 +134,7 @@ module.exports = {
       const info = ["url", options, url];
       if (data.type === "0") {
         Audio.addToQueue(info, cache);
-      } else if (cache.server && cache.server.id !== undefined) {
+      } else if (cache.server?.id) {
         Audio.playItem(info, cache.server.id);
       }
     }

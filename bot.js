@@ -1447,22 +1447,25 @@ Events.onError = function (text, text2, cache) {
 // Contains functions for image management.
 //---------------------------------------------------------------------
 
-const JIMP = require("jimp");
-
 const Images = (DBM.Images = {});
+
+Images.JIMP = null;
+try {
+  Images.JIMP = require('jimp');
+} catch {}
 
 Images.getImage = function (url) {
   if (!url.startsWith("http")) url = Actions.getLocalFile(url);
-  return JIMP.read(url);
+  return this.JIMP.read(url);
 };
 
 Images.getFont = function (url) {
-  return JIMP.loadFont(Actions.getLocalFile(url));
+  return this.JIMP.loadFont(Actions.getLocalFile(url));
 };
 
 Images.createBuffer = function (image) {
   return new Promise(function (resolve, reject) {
-    image.getBuffer(JIMP.MIME_PNG, function (err, buffer) {
+    image.getBuffer(this.JIMP.MIME_PNG, function (err, buffer) {
       if (err) {
         reject(err);
       } else {
@@ -1795,23 +1798,29 @@ try {
   Audio.voice = require("@discordjs/voice");
 } catch {}
 
+Audio.rawYtdl = null
+try {
+  Audio.rawYtdl = require('youtube-dl-exec').raw;
+} catch {}
+
 Audio.queue = [];
 Audio.volumes = [];
 Audio.connections = [];
-Audio.dispatchers = [];
+Audio.players = [];
 
 Audio.isConnected = function (cache) {
   if (!cache.server) return false;
   const id = cache.server.id;
-  return this.connections[id];
+  return this.connections[id]?.state.status === this.voice.VoiceConnectionStatus.Ready;
 };
 
 Audio.isPlaying = function (cache) {
   if (!cache.server) return false;
   const id = cache.server.id;
-  return this.dispatchers[id];
+  return this.players[id]?.state.status === this.voice.AudioPlayerStatus.Playing;
 };
 
+// broken
 Audio.setVolume = function (volume, cache) {
   if (!cache.server) return;
   const id = cache.server.id;
@@ -1828,21 +1837,23 @@ Audio.connectToVoice = async function (voiceChannel) {
     channelId: voiceChannel.id,
     guildId: voiceChannel.guild.id,
   });
-
   try {
-    await entersState(connection, this.voice.VoiceConnectionStatus.Ready, 30e3);
+    await this.voice.entersState(connection, this.voice.VoiceConnectionStatus.Ready, 30e3);
+    const audioPlayer = this.voice.createAudioPlayer();
     this.connections[voiceChannel.guild.id] = connection;
+    this.players[voiceChannel.guildId] = audioPlayer;
+    connection.subscribe(audioPlayer);
     return connection;
   } catch (error) {
+    console.error(error);
     connection.destroy();
-    throw error;
   }
 };
 
 Audio.addToQueue = function (item, cache) {
   if (!cache.server) return;
   const id = cache.server.id;
-  if (!this.queue[id]) this.queue[id] = [];
+  this.queue[id] ??= [];
   this.queue[id].push(item);
   this.playNext(id);
 };
@@ -1855,23 +1866,24 @@ Audio.clearQueue = function (cache) {
 
 Audio.playNext = function (id, forceSkip) {
   if (!this.connections[id]) return;
-  if (!this.dispatchers[id] || !!forceSkip) {
-    if (!this.queue[id]) this.queue[id] = [];
-    if (this.queue[id] && this.queue[id].length > 0) {
-      const item = this.queue[id].shift();
-      this.playItem(item, id);
-    } else {
-      this.connections[id].disconnect();
-    }
+  // if (!!forceSkip) {
+  this.queue[id] ??= [];
+  if (this.queue[id].length > 0) {
+    const item = this.queue[id].shift();
+    this.playItem(item, id);
+  } else {
+    this.connections[id].disconnect();
   }
+  // }
 };
 
 Audio.playItem = function (item, id) {
   if (!this.connections[id]) return;
-  if (this.dispatchers[id]) {
-    this.dispatchers[id]._forceEnd = true;
-    this.dispatchers[id].destroy();
-  }
+
+  // if (this.players[id]) {
+  //   this.players[id]._forceEnd = true;
+  //   this.players[id].stop();
+  // }
 
   const type = item[0];
   let setupDispatcher = false;
@@ -1887,40 +1899,78 @@ Audio.playItem = function (item, id) {
       break;
   }
 
-  if (setupDispatcher && !this.dispatchers[id]._eventSetup) {
-    this.dispatchers[id].on(
-      "finish",
-      function () {
-        const isForced = this.dispatchers[id]._forceEnd;
-        this.dispatchers[id] = null;
-        if (!isForced) {
-          this.playNext(id);
-        }
-      }.bind(this),
-    );
-    this.dispatchers[id]._eventSetup = true;
-  }
+  // if (setupDispatcher && !this.dispatchers[id]._eventSetup) {
+  //   this.dispatchers[id].on(
+  //     "finish",
+  //     function () {
+  //       const isForced = this.dispatchers[id]._forceEnd;
+  //       this.dispatchers[id] = null;
+  //       if (!isForced) {
+  //         this.playNext(id);
+  //       }
+  //     }.bind(this),
+  //   );
+  //   this.dispatchers[id]._eventSetup = true;
+  // }
 };
 
+Audio.createYouTubeAudioResource = function (url, metadata) {
+  return new Promise((resolve, reject) => {
+    const child = this.rawYtdl(
+      url,
+      {
+        o: '-',
+        q: '',
+        f: 'bestaudio[ext=webm+acodec=opus+asr=48000]/bestaudio',
+        r: '100K',
+      },
+      { stdio: ['ignore', 'pipe', 'ignore'] },
+    );
+    if (!child.stdout) {
+      reject(new Error('No stdout'));
+      return;
+    }
+    const stream = child.stdout;
+    const onError = (error) => {
+      if (!child.killed) child.kill();
+      stream.resume();
+      reject(error);
+    };
+    child
+      .once('spawn', () => {
+        this.voice.demuxProbe(stream)
+          .then((probe) => resolve(this.voice.createAudioResource(probe.stream, { metadata, inputType: probe.type })))
+          .catch(onError);
+      })
+      .catch(onError);
+  });
+}
+
 Audio.playFile = function (url, options, id) {
-  this.dispatchers[id] = this.connections[id].play(Actions.getLocalFile(url), options);
+  const resource = this.voice.createAudioResource(Actions.getLocalFile(url), { inputType: this.voice.StreamType.Arbitrary });
+  this.players[id].play(resource);
   return true;
 };
 
 Audio.playUrl = function (url, options, id) {
-  this.dispatchers[id] = this.connections[id].play(url, options);
+  const resource = this.voice.createAudioResource(url, { inputType: this.voice.StreamType.Arbitrary });
+  this.players[id].play(resource);
   return true;
 };
 
-Audio.playYt = function (url, options, id) {
+Audio.playYt = async function (url, options, id) {
   if (!this.ytdl) return false;
-  const stream = this.ytdl(url, {
-    quality: "highestaudio",
-    filter: "audioonly",
-    highWaterMark: 26214400, // 25mb
-  });
-  options.highWaterMark = 1;
-  this.dispatchers[id] = this.connections[id].play(stream, options);
+
+  const resource = await this.createYouTubeAudioResource(url, options);
+  this.players[id].play(resource);
+
+  // const stream = this.ytdl(url, {
+  //   quality: "highestaudio",
+  //   filter: "audioonly",
+  //   highWaterMark: 26214400, // 25mb
+  // });
+  // options.highWaterMark = 1;
+  // this.dispatchers[id] = this.connections[id].play(stream, options);
   return true;
 };
 
