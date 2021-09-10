@@ -17,6 +17,78 @@ if (DiscordJS.version < "13.1.0") {
 }
 
 //---------------------------------------------------------------------
+//#region Output Messages
+// Gathered all the output messages in single place for easier translation.
+//---------------------------------------------------------------------
+
+const MsgType = {
+  MISSING_ACTION: 0,
+  DATA_PARSING_ERROR: 1,
+  MISSING_ACTIONS: 2,
+
+  DUPLICATE_SLASH_COMMAND: 3,
+  INVALID_SLASH_NAME: 4,
+  DUPLICATE_USER_COMMAND: 5,
+  DUPLICATE_MESSAGE_COMMAND: 6,
+  DUPLICATE_SLASH_PARAMETER: 7,
+  INVALID_SLASH_PARAMETER_NAME: 8
+};
+
+function PrintError (type) {
+  const format = require('util').format;
+  const error = console.error;
+
+  switch(type) {
+    case MsgType.MISSING_ACTION: {
+      error(format("%s does not exist!", arguments[1]));
+      break;
+    }
+    case MsgType.DATA_PARSING_ERROR: {
+      error(format("There was issue parsing %s!", arguments[1]));
+      break;
+    }
+    case MsgType.MISSING_ACTIONS: {
+      error(format("Please copy the \"Actions\" folder from the Discord Bot Maker directory to this bot\'s directory: \n%s", arguments[1]));
+      break;
+    }
+    case MsgType.DUPLICATE_SLASH_COMMAND: {
+      error(format("Slash command with name \"%s\" already exists!\nThis duplicate will be ignored.\n", arguments[1]));
+      break;
+    }
+    case MsgType.INVALID_SLASH_NAME: {
+      error(format("Slash command has invalid name: \"%s\".\nSlash command names cannot have spaces and must only contain letters, numbers, underscores, and dashes!\nThis command will be ignored.", arguments[1]));
+      break;
+    }
+    case MsgType.DUPLICATE_USER_COMMAND: {
+      error(format("User command with name \"%s\" already exists!\nThis duplicate will be ignored.\n", arguments[1]));
+      break;
+    }
+    case MsgType.DUPLICATE_MESSAGE_COMMAND: {
+      error(format("Message command with name \"%s\" already exists!\nThis duplicate will be ignored.\n", arguments[1]));
+      break;
+    }
+    case MsgType.DUPLICATE_SLASH_PARAMETER: {
+      error(format("Slash command \"%s\" parameter #%d (\"%s\") has a name that's already being used!\nThis duplicate will be ignored.\n", arguments[1], arguments[2], arguments[3]));
+      break;
+    }
+    case MsgType.INVALID_SLASH_PARAMETER_NAME: {
+      error(format("Slash command \"%s\" parameter #%d has invalid name: \"%s\".\nSlash command parameter names cannot have spaces and must only contain letters, numbers, underscores, and dashes!\nThis parameter will be ignored.\n", arguments[1], arguments[2], arguments[3]));
+      break;
+    }
+    case MsgType.INVALID_SLASH_COMMAND_SERVER_ID: {
+      error(format("Invalid Server ID \"%s\" listed in \"Slash Command Options -> Server IDs for Slash Commands\"!\n"), arguments[1]);
+      break;
+    }
+  }
+};
+
+function GetActionErrorText (type, name, index) {
+  return require('util').format("Error with the %s \"%s\", Action #%d", type, name, index);
+};
+
+//#endregion
+
+//---------------------------------------------------------------------
 //#region Bot
 // Contains functions for controlling the bot.
 //---------------------------------------------------------------------
@@ -146,41 +218,33 @@ Bot.reformatCommands = function () {
           const name = this.validateSlashCommandName(com.name);
           if (name) {
             if (this.$slash[name]) {
-              console.error(
-                'Slash command with name "' + name + '" already exists!\nThis duplicate will be ignored.\n',
-              );
+              PrintError(MsgType.DUPLICATE_SLASH_COMMAND, name);
             } else {
               this.$slash[name] = com;
-              this.applicationCommandData.push(this.createApiJsonFromCommand(com));
+              this.applicationCommandData.push(this.createApiJsonFromCommand(com, name));
             }
           } else {
-            console.error(
-              'Slash command has invalid name: "' +
-                name +
-                '".\nSlash command names cannot have spaces and must only contain letters, numbers, underscores, and dashes!\nThis command will be ignored.',
-            );
+            PrintError(MsgType.INVALID_SLASH_NAME, com.name);
           }
           break;
         }
         case "5": {
           const name = com.name;
           if (this.$user[name]) {
-            console.error('User command with name "' + name + '" already exists!\nThis duplicate will be ignored.\n');
+            PrintError(MsgType.DUPLICATE_USER_COMMAND, name);
           } else {
             this.$user[name] = com;
-            this.applicationCommandData.push(this.createApiJsonFromCommand(com));
+            this.applicationCommandData.push(this.createApiJsonFromCommand(com, name));
           }
           break;
         }
         case "6": {
           const name = com.name;
           if (this.$msge[name]) {
-            console.error(
-              'Message command with name "' + name + '" already exists!\nThis duplicate will be ignored.\n',
-            );
+            PrintError(MsgType.DUPLICATE_MESSAGE_COMMAND, name);
           } else {
             this.$msge[name] = com;
-            this.applicationCommandData.push(this.createApiJsonFromCommand(com));
+            this.applicationCommandData.push(this.createApiJsonFromCommand(com, name));
           }
           break;
         }
@@ -198,19 +262,10 @@ Bot.createApiJsonFromCommand = function (com, name) {
     name: name ?? com.name,
     description: this.generateSlashCommandDescription(com),
   };
-  switch (com.comType) {
-    case "4": {
-      result.type = "CHAT_INPUT";
-      break;
-    }
-    case "5": {
-      result.type = "USER";
-      break;
-    }
-    case "6": {
-      result.type = "MESSAGE";
-      break;
-    }
+  switch(com.comType) {
+    case "4": { result.type = "CHAT_INPUT"; break; }
+    case "5": { result.type = "USER"; break; }
+    case "6": { result.type = "MESSAGE"; break; }
   }
   if (com.comType === "4" && com.parameters && Array.isArray(com.parameters)) {
     result.options = this.validateSlashCommandParameters(com.parameters, result.name);
@@ -240,10 +295,14 @@ Bot.generateSlashCommandDescription = function (com) {
 };
 
 Bot.validateSlashCommandDescription = function (desc) {
-  if (desc.length > 100) {
+  if (desc?.length > 100) {
     return desc.substring(0, 100);
   }
-  return desc || "(no description)";
+  return desc || this.getNoDescriptionText();
+};
+
+Bot.getNoDescriptionText = function () {
+  return Files.data.settings.noDescriptionText ?? "(no description)";
 };
 
 Bot.validateSlashCommandParameters = function (parameters, commandName) {
@@ -264,26 +323,10 @@ Bot.validateSlashCommandParameters = function (parameters, commandName) {
           optionalParams.push(paramsData);
         }
       } else {
-        console.error(
-          'Slash command "' +
-            commandName +
-            '" parameter #' +
-            (i + 1) +
-            ' ("' +
-            name +
-            "\") has a name that's already being used!\nThis duplicate will be ignored.\n",
-        );
+        PrintError(MsgType.DUPLICATE_SLASH_PARAMETER, commandName, i + 1, name);
       }
     } else {
-      console.error(
-        'Slash command "' +
-          commandName +
-          '" parameter #' +
-          (i + 1) +
-          ' has invalid name: "' +
-          name +
-          '".\nSlash command parameter names cannot have spaces and must only contain letters, numbers, underscores, and dashes!\nThis parameter will be ignored.\n',
-      );
+      PrintError(MsgType.INVALID_SLASH_PARAMETER_NAME, commandName, i + 1, paramsData.name);
     }
   }
   return requireParams.concat(optionalParams);
@@ -327,16 +370,59 @@ Bot.restoreVariables = function () {
 };
 
 Bot.registerApplicationCommands = function () {
+  let slashType = Files.data.settings.slashType ?? "auto";
+
+  if(slashType === "auto") {
+    const serverCount = this.bot.guilds.cache.size;
+    if(serverCount <= 15) {
+      slashType = "all";
+    } else {
+      slashType = "global";
+    }
+  }
+
+  switch(slashType) {
+    case "all": {
+      this.setAllServerCommands(this.applicationCommandData);
+      this.setGlobalCommands([]);
+      break;
+    }
+    case "global": {
+      this.setAllServerCommands([]);
+      this.setGlobalCommands(this.applicationCommandData);
+      break;
+    }
+    case "manual": {
+      const serverList = Files.data.settings.slashServers.split(/[\n\r]+/);
+      this.setCertainServerCommands(this.applicationCommandData, serverList);
+      this.setGlobalCommands([]);
+      break;
+    }
+  }
+};
+
+Bot.setGlobalCommands = function (commands) {
+  this.bot.application?.commands?.set?.(commands);
+};
+
+Bot.setAllServerCommands = function (commands) {
   this.bot.guilds.cache.forEach((key, value) => {
-    this.bot.guilds
-      .fetch(key)
-      .then((guild) => {
-        guild?.commands?.set(this.applicationCommandData);
-      })
-      .catch(function (e) {
-        console.error(e);
-      });
+    this.bot.guilds.fetch(key).then((guild) => {
+      guild?.commands?.set(commands);
+    }).catch(function(e) {
+      console.error(e);
+    });
   });
+};
+
+Bot.setCertainServerCommands = function (commands, serverIdList) {
+  for(let i = 0; i < serverIdList.length; i++) {
+    this.bot.guilds.fetch(serverIdList[i]).then((guild) => {
+      guild?.commands?.set(commands);
+    }).catch(function(e) {
+      PrintError(MsgType.INVALID_SLASH_COMMAND_SERVER_ID, serverIdList[i]);
+    });
+  }
 };
 
 Bot.preformInitialization = function () {
@@ -486,7 +572,7 @@ Actions.exists = function (action) {
 };
 
 Actions.getLocalFile = function (url) {
-  return require("node:path").join(process.cwd(), url);
+  return require("path").join(process.cwd(), url);
 };
 
 Actions.getDBM = function () {
@@ -503,7 +589,7 @@ Actions.callListFunc = function (list, funcName, args) {
         return;
       }
       const item = list[curr++];
-      if (typeof item?.funcName === "function") {
+      if (typeof item?.[funcName] === "function") {
         item[funcName].apply(item, args).then(callItem).catch(callItem);
       } else {
         callItem();
@@ -565,13 +651,13 @@ Actions.evalMessage = function (content, cache) {
 };
 
 Actions.initMods = function () {
-  const fs = require("node:fs");
+  const fs = require("fs");
   this.modDirectories().forEach(
     function (dir) {
       fs.readdirSync(dir).forEach(
         function (file) {
           if (file.match(/\.js/i)) {
-            const action = require(require("node:path").join(dir, file));
+            const action = require(require("path").join(dir, file));
             if (action.action) {
               this[action.name] = action.action;
             }
@@ -607,10 +693,7 @@ Actions.preformActionsFromMessage = function (msg, cmd) {
 };
 
 Actions.preformActionsFromInteraction = function (interaction, cmd) {
-  if (
-    this.checkConditions(interaction.guild, interaction.member, interaction.user, cmd) &&
-    this.checkTimeRestriction(interaction.user, cmd)
-  ) {
+  if (this.checkConditions(interaction.guild, interaction.member, interaction.user, cmd) && this.checkTimeRestriction(interaction.user, cmd)) {
     this.invokeInteraction(interaction, cmd.actions);
   }
 };
@@ -704,7 +787,7 @@ Actions.checkPermissions = function (member, permissions) {
   if (!permissions) return true;
   if (!member) return false;
   if (permissions === "NONE") return true;
-  if (msg.guild.ownerId === member.id) return true;
+  if (member?.guild?.ownerId === member.id) return true;
   return member.permissions.has(permissions);
 };
 
@@ -760,7 +843,7 @@ Actions.callNextAction = function (cache) {
       if (!cache.interaction.replied) {
         cache.interaction.reply({
           ephemeral: true,
-          content: "Command successfully run!",
+          content: this.getDefaultResponseText(),
         });
       }
     }
@@ -773,14 +856,18 @@ Actions.callNextAction = function (cache) {
       this.displayError(act, cache, e);
     }
   } else {
-    console.error(act.name + " does not exist!");
+    PrintError(MsgType.MISSING_ACTION, act.name);
     this.callNextAction(cache);
   }
 };
 
+Actions.getDefaultResponseText = function () {
+  return Files.data.settings.autoResponseText ?? "Command successfully run!";
+};
+
 Actions.getErrorString = function (data, cache) {
   const type = "permissions" in data || "restriction" in data || !("event-type" in data) ? "command" : "event";
-  return `Error with the ${type} "${data.name}", Action #${cache.index + 1}`;
+  return GetActionErrorText(type, data.name, cache.index + 1);
 };
 
 Actions.displayError = function (data, cache, err) {
@@ -1410,7 +1497,7 @@ const Files = (DBM.Files = {});
 
 Files.data = {};
 Files.writers = {};
-Files.crypto = require("node:crypto");
+Files.crypto = require("crypto");
 Files.dataFiles = [
   "commands.json",
   "events.json",
@@ -1422,7 +1509,7 @@ Files.dataFiles = [
 ];
 
 Files.startBot = function () {
-  const path = require("node:path");
+  const path = require("path");
   Actions.actionsLocation = path.join(__dirname, "actions");
   Actions.eventsLocation = path.join(__dirname, "events");
   Actions.extensionsLocation = path.join(__dirname, "extensions");
@@ -1430,20 +1517,17 @@ Files.startBot = function () {
     Actions.initMods();
     this.readData(Bot.init.bind(Bot));
   } else {
-    console.error(
-      'Please copy the "Actions" folder from the Discord Bot Maker directory to this bot\'s directory: \n' +
-        Actions.actionsLocation,
-    );
+    PrintError(MsgType.MISSING_ACTIONS, Actions.actionsLocation);
   }
 };
 
 Files.verifyDirectory = function (dir) {
-  return typeof dir === "string" && require("node:fs").existsSync(dir);
+  return typeof dir === "string" && require("fs").existsSync(dir);
 };
 
 Files.readData = function (callback) {
-  const fs = require("node:fs");
-  const path = require("node:path");
+  const fs = require("fs");
+  const path = require("path");
   let max = this.dataFiles.length;
   let cur = 0;
   for (let i = 0; i < max; i++) {
@@ -1458,7 +1542,7 @@ Files.readData = function (callback) {
           if (typeof content !== "string" && content.toString) content = content.toString();
           data = JSON.parse(this.decrypt(content));
         } catch (e) {
-          console.error(`There was issue parsing ${this.dataFiles[i]}!`);
+          PrintError(MsgType.DATA_PARSING_ERROR, this.dataFiles[i]);
           return;
         }
         this.data[filename] = data;
@@ -1471,7 +1555,7 @@ Files.readData = function (callback) {
 };
 
 Files.saveData = function (file, callback) {
-  const path = require("node:path");
+  const path = require("path");
   const data = this.data[file];
   if (!this.writers[file]) {
     const fstorm = require("fstorm");
@@ -1706,11 +1790,6 @@ try {
   Audio.ytdl = require("ytdl-core");
 } catch {}
 
-Audio.voice = null;
-try {
-  Audio.voice = require("@discordjs/voice");
-} catch {}
-
 Audio.queue = [];
 Audio.volumes = [];
 Audio.connections = [];
@@ -1737,22 +1816,23 @@ Audio.setVolume = function (volume, cache) {
   }
 };
 
-/** @param {import('discord.js').VoiceChannel} voiceChannel */
-Audio.connectToVoice = async function (voiceChannel) {
-  const connection = this.voice.joinVoiceChannel({
-    adapterCreator: voiceChannel.guild.voiceAdapterCreator,
-    channelId: voiceChannel.id,
-    guildId: voiceChannel.guild.id,
-  });
-
-  try {
-    await entersState(connection, this.voice.VoiceConnectionStatus.Ready, 30e3);
-    this.connections[voiceChannel.guild.id] = connection;
-    return connection;
-  } catch (error) {
-    connection.destroy();
-    throw error;
-  }
+Audio.connectToVoice = function (voiceChannel) {
+  const promise = voiceChannel.join();
+  promise
+    .then(
+      function (connection) {
+        this.connections[voiceChannel.guild.id] = connection;
+        connection.on(
+          "disconnect",
+          function () {
+            this.connections[voiceChannel.guild.id] = null;
+            this.volumes[voiceChannel.guild.id] = null;
+          }.bind(this),
+        );
+      }.bind(this),
+    )
+    .catch(console.error);
+  return promise;
 };
 
 Audio.addToQueue = function (item, cache) {
