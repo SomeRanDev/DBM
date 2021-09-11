@@ -921,6 +921,50 @@ Actions.displayError = function (data, cache, err) {
   Events.onError(dbm, err.stack ?? err, cache);
 };
 
+Actions.getTargetFromVariableOrParameter = function (varType, varName, cache) {
+  switch(varType) {
+    case 0:
+      return cache.temp[varName];
+    case 1:
+      const server = cache.server;
+      if (server && this.server[server.id]) {
+        return this.server[server.id][varName];
+      }
+      break;
+    case 2:
+      return this.global[varName];
+    case 3:
+      const interaction = cache.interaction;
+      if (interaction?.options?.get) {
+        const option = interaction.options.get(varName);
+        switch(option.type) {
+          case "STRING":
+          case "INTEGER":
+          case "BOOLEAN":
+          case "NUMBER": {
+            return option.value;
+          }
+          case "USER": {
+            return option.member ?? option.user;
+          }
+          case "CHANNEL": {
+            return option.channel;
+          }
+          case "ROLE": {
+            return option.role;
+          }
+          case "MENTIONABLE": {
+            return option.member ?? option.channel ?? option.role ?? option.user;
+          }
+        }
+      }
+      break;
+    default:
+      break;
+  }
+  return false;
+};
+
 Actions.getSendTarget = function (type, varName, cache) {
   const msg = cache.msg;
   const interaction = cache.interaction;
@@ -959,19 +1003,9 @@ Actions.getSendTarget = function (type, varName, cache) {
         return server.getDefaultChannel();
       }
       break;
-    case 5:
-      return cache.temp[varName];
-    case 6:
-      if (server && this.server[server.id]) {
-        return this.server[server.id][varName];
-      }
-      break;
-    case 7:
-      return this.global[varName];
     default:
-      break;
+      return this.getTargetFromVariableOrParameter(type - 5, varName, cache);
   }
-  return false;
 };
 
 Actions.getMember = function (type, varName, cache) {
@@ -993,19 +1027,9 @@ Actions.getMember = function (type, varName, cache) {
         return msg.member ?? msg.author;
       }
       break;
-    case 2:
-      return cache.temp[varName];
-    case 3:
-      if (server && this.server[server.id]) {
-        return this.server[server.id][varName];
-      }
-      break;
-    case 4:
-      return this.global[varName];
     default:
-      break;
+      return this.getTargetFromVariableOrParameter(type - 2, varName, cache);
   }
-  return false;
 };
 
 Actions.getMessage = function (type, varName, cache) {
@@ -1017,19 +1041,9 @@ Actions.getMessage = function (type, varName, cache) {
         return msg;
       }
       break;
-    case 1:
-      return cache.temp[varName];
-    case 2:
-      if (server && this.server[server.id]) {
-        return this.server[server.id][varName];
-      }
-      break;
-    case 3:
-      return this.global[varName];
     default:
-      break;
+      return this.getTargetFromVariableOrParameter(type - 1, varName, cache);
   }
-  return false;
 };
 
 Actions.getServer = function (type, varName, cache) {
@@ -1040,19 +1054,9 @@ Actions.getServer = function (type, varName, cache) {
         return server;
       }
       break;
-    case 1:
-      return cache.temp[varName];
-    case 2:
-      if (server && this.server[server.id]) {
-        return this.server[server.id][varName];
-      }
-      break;
-    case 3:
-      return this.global[varName];
     default:
-      break;
+      return this.getTargetFromVariableOrParameter(type - 1, varName, cache);
   }
-  return false;
 };
 
 Actions.getRole = function (type, varName, cache) {
@@ -1079,19 +1083,9 @@ Actions.getRole = function (type, varName, cache) {
         return server.roles.cache.first();
       }
       break;
-    case 3:
-      return cache.temp[varName];
-    case 4:
-      if (server && this.server[server.id]) {
-        return this.server[server.id][varName];
-      }
-      break;
-    case 5:
-      return this.global[varName];
     default:
-      break;
+      return this.getTargetFromVariableOrParameter(type - 3, varName, cache);
   }
-  return false;
 };
 
 Actions.getChannel = function (type, varName, cache) {
@@ -1118,19 +1112,9 @@ Actions.getChannel = function (type, varName, cache) {
         return server.getDefaultChannel();
       }
       break;
-    case 3:
-      return cache.temp[varName];
-    case 4:
-      if (server && this.server[server.id]) {
-        return this.server[server.id][varName];
-      }
-      break;
-    case 5:
-      return this.global[varName];
     default:
-      break;
+      return this.getTargetFromVariableOrParameter(type - 3, varName, cache);
   }
-  return false;
 };
 
 Actions.getVoiceChannel = function (type, varName, cache) {
@@ -1160,19 +1144,9 @@ Actions.getVoiceChannel = function (type, varName, cache) {
         return server.getDefaultVoiceChannel();
       }
       break;
-    case 3:
-      return cache.temp[varName];
-    case 4:
-      if (server && this.server[server.id]) {
-        return this.server[server.id][varName];
-      }
-      break;
-    case 5:
-      return this.global[varName];
     default:
-      break;
+      return this.getTargetFromVariableOrParameter(type - 3, varName, cache);
   }
-  return false;
 };
 
 Actions.getList = function (type, varName, cache) {
@@ -1216,19 +1190,9 @@ Actions.getList = function (type, varName, cache) {
       }
       break;
     }
-    case 7:
-      return cache.temp[varName];
-    case 8:
-      if (server && this.server[server.id]) {
-        return this.server[server.id][varName];
-      }
-      break;
-    case 9:
-      return this.global[varName];
     default:
-      break;
+      return this.getTargetFromVariableOrParameter(type - 7, varName, cache);
   }
-  return false;
 };
 
 Actions.getVariable = function (type, varName, cache) {
