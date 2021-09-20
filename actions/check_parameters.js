@@ -29,7 +29,7 @@ module.exports = {
   // This function generates the subtitle displayed next to the name.
   //---------------------------------------------------------------------
 
-  subtitle: function (data, presets) {
+  subtitle(data, presets) {
     return `${presets.getConditionsText(data.iftrue, data.iffalse)}`;
   },
 
@@ -59,7 +59,7 @@ module.exports = {
   //                messages, servers, variables
   //---------------------------------------------------------------------
 
-  html: function (isEvent, data) {
+  html(isEvent, data) {
     return `
 <div>
 	<div style="float: left; width: 45%;">
@@ -98,7 +98,7 @@ module.exports = {
   // functions for the DOM elements.
   //---------------------------------------------------------------------
 
-  init: function () {},
+  init() {},
 
   //---------------------------------------------------------------------
   // Action Bot Function
@@ -108,7 +108,7 @@ module.exports = {
   // so be sure to provide checks for variable existence.
   //---------------------------------------------------------------------
 
-  action: function (cache) {
+  action(cache) {
     const data = cache.actions[cache.index];
     const msg = cache.msg;
     let result = false;
@@ -155,5 +155,5 @@ module.exports = {
   // functions you wish to overwrite.
   //---------------------------------------------------------------------
 
-  mod: function () {},
+  mod() {},
 };

@@ -21,7 +21,7 @@ module.exports = {
   // This function generates the subtitle displayed next to the name.
   //---------------------------------------------------------------------
 
-  subtitle: function (data, presets) {
+  subtitle(data, presets) {
     const list = presets.list;
     return `Get Item from ${list[parseInt(data.list, 10)]}`;
   },
@@ -32,7 +32,7 @@ module.exports = {
   // Stores the relevant variable info for the editor.
   //---------------------------------------------------------------------
 
-  variableStorage: function (data, varType) {
+  variableStorage(data, varType) {
     const type = parseInt(data.storage, 10);
     if (type !== varType) return;
     const list = parseInt(data.list, 10);
@@ -85,7 +85,7 @@ module.exports = {
   //                messages, servers, variables
   //---------------------------------------------------------------------
 
-  html: function (isEvent, data) {
+  html(isEvent, data) {
     return `
 <div>
 	<div style="float: left; width: 35%;">
@@ -131,7 +131,7 @@ module.exports = {
   // functions for the DOM elements.
   //---------------------------------------------------------------------
 
-  init: function () {
+  init() {
     const { glob, document } = this;
 
     glob.onChange1 = function (event) {
@@ -156,7 +156,7 @@ module.exports = {
   // so be sure to provide checks for variable existence.
   //---------------------------------------------------------------------
 
-  action: function (cache) {
+  action(cache) {
     const data = cache.actions[cache.index];
     const storage = parseInt(data.list, 10);
     const varName = this.evalMessage(data.varName, cache);
@@ -204,5 +204,5 @@ module.exports = {
   // functions you wish to overwrite.
   //---------------------------------------------------------------------
 
-  mod: function () {},
+  mod() {},
 };

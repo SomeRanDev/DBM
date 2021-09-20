@@ -21,7 +21,7 @@ module.exports = {
   // This function generates the subtitle displayed next to the name.
   //---------------------------------------------------------------------
 
-  subtitle: function (data, presets) {
+  subtitle(data, presets) {
     const storage = ["", "", "Server Variable", "Global Variable"];
     return `${storage[parseInt(data.storage, 10)]} (${data.varName})`;
   },
@@ -52,7 +52,7 @@ module.exports = {
   //                messages, servers, variables
   //---------------------------------------------------------------------
 
-  html: function (isEvent, data) {
+  html(isEvent, data) {
     return `
 <div>
 	<div style="float: left; width: 35%;">
@@ -77,7 +77,7 @@ module.exports = {
   // functions for the DOM elements.
   //---------------------------------------------------------------------
 
-  init: function () {},
+  init() {},
 
   //---------------------------------------------------------------------
   // Action Bot Function
@@ -87,7 +87,7 @@ module.exports = {
   // so be sure to provide checks for variable existence.
   //---------------------------------------------------------------------
 
-  action: function (cache) {
+  action(cache) {
     const data = cache.actions[cache.index];
     const Files = this.getDBM().Files;
     const type = parseInt(data.storage, 10);
@@ -110,5 +110,5 @@ module.exports = {
   // functions you wish to overwrite.
   //---------------------------------------------------------------------
 
-  mod: function () {},
+  mod() {},
 };

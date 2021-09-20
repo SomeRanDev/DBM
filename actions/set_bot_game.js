@@ -21,7 +21,7 @@ module.exports = {
   // This function generates the subtitle displayed next to the name.
   //---------------------------------------------------------------------
 
-  subtitle: function (data, presets) {
+  subtitle(data, presets) {
     return `${data.gameName}${data.gameLink ? " [" + data.gameLink + "]" : ""}`;
   },
 
@@ -51,7 +51,7 @@ module.exports = {
   //                messages, servers, variables
   //---------------------------------------------------------------------
 
-  html: function (isEvent, data) {
+  html(isEvent, data) {
     return `
 <div style="width: 90%;">
 	<span class="dbminputlabel">Game Name</span><br>
@@ -72,7 +72,7 @@ module.exports = {
   // functions for the DOM elements.
   //---------------------------------------------------------------------
 
-  init: function () {},
+  init() {},
 
   //---------------------------------------------------------------------
   // Action Bot Function
@@ -82,7 +82,7 @@ module.exports = {
   // so be sure to provide checks for variable existence.
   //---------------------------------------------------------------------
 
-  action: function (cache) {
+  action(cache) {
     const botClient = this.getDBM().Bot.bot.user;
     const data = cache.actions[cache.index];
     const game = this.evalMessage(data.gameName, cache);
@@ -113,5 +113,5 @@ module.exports = {
   // functions you wish to overwrite.
   //---------------------------------------------------------------------
 
-  mod: function () {},
+  mod() {},
 };

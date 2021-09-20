@@ -21,7 +21,7 @@ module.exports = {
   // This function generates the subtitle displayed next to the name.
   //---------------------------------------------------------------------
 
-  subtitle: function (data, presets) {
+  subtitle(data, presets) {
     return `${presets.getVoiceChannelText(data.channel, data.varName)}`;
   },
 
@@ -51,7 +51,7 @@ module.exports = {
   //                messages, servers, variables
   //---------------------------------------------------------------------
 
-  html: function (isEvent, data) {
+  html(isEvent, data) {
     return `<voice-channel-input dropdownLabel="Voice Channel" selectId="channel" variableContainerId="varNameContainer" variableInputId="varName" selectWidth="45%" variableInputWidth="50%"></voice-channel-input>`;
   },
 
@@ -63,7 +63,7 @@ module.exports = {
   // functions for the DOM elements.
   //---------------------------------------------------------------------
 
-  init: function () {},
+  init() {},
 
   //---------------------------------------------------------------------
   // Action Bot Function
@@ -73,7 +73,7 @@ module.exports = {
   // so be sure to provide checks for variable existence.
   //---------------------------------------------------------------------
 
-  action: function (cache) {
+  action(cache) {
     const data = cache.actions[cache.index];
     const Audio = this.getDBM().Audio;
     const type = parseInt(data.channel, 10);
@@ -104,5 +104,5 @@ module.exports = {
   // functions you wish to overwrite.
   //---------------------------------------------------------------------
 
-  mod: function () {},
+  mod() {},
 };

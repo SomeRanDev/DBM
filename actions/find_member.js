@@ -21,7 +21,7 @@ module.exports = {
   // This function generates the subtitle displayed next to the name.
   //---------------------------------------------------------------------
 
-  subtitle: function (data, presets) {
+  subtitle(data, presets) {
     const info = ["Member Id", "Member Username", "Member Display Name", "Member Color", "Member Tag"];
     return `Find Member by ${info[parseInt(data.info, 10)]}`;
   },
@@ -32,7 +32,7 @@ module.exports = {
   // Stores the relevant variable info for the editor.
   //---------------------------------------------------------------------
 
-  variableStorage: function (data, varType) {
+  variableStorage(data, varType) {
     const type = parseInt(data.storage, 10);
     if (type !== varType) return;
     return [data.varName, "Server Member"];
@@ -64,7 +64,7 @@ module.exports = {
   //                messages, servers, variables
   //---------------------------------------------------------------------
 
-  html: function (isEvent, data) {
+  html(isEvent, data) {
     return `
 <div>
 	<div style="float: left; width: 40%;">
@@ -96,7 +96,7 @@ module.exports = {
   // functions for the DOM elements.
   //---------------------------------------------------------------------
 
-  init: function () {},
+  init() {},
 
   //---------------------------------------------------------------------
   // Action Bot Function
@@ -106,7 +106,7 @@ module.exports = {
   // so be sure to provide checks for variable existence.
   //---------------------------------------------------------------------
 
-  action: function (cache) {
+  action(cache) {
     const server = cache.server;
     if (!server || !server.members) {
       this.callNextAction(cache);
@@ -156,5 +156,5 @@ module.exports = {
   // functions you wish to overwrite.
   //---------------------------------------------------------------------
 
-  mod: function () {},
+  mod() {},
 };

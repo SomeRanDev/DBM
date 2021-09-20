@@ -21,7 +21,7 @@ module.exports = {
   // This function generates the subtitle displayed next to the name.
   //---------------------------------------------------------------------
 
-  subtitle: function (data, presets) {
+  subtitle(data, presets) {
     return `Loop Servers through Event Id "${data.source}"`;
   },
 
@@ -51,7 +51,7 @@ module.exports = {
   //                messages, servers, variables
   //---------------------------------------------------------------------
 
-  html: function (isEvent, data) {
+  html(isEvent, data) {
     return `
 <div style="width: 85%;">
 	<span class="dbminputlabel">Event</span><br>
@@ -78,7 +78,7 @@ module.exports = {
   // functions for the DOM elements.
   //---------------------------------------------------------------------
 
-  init: function () {
+  init() {
     const { glob, document } = this;
 
     const $evts = glob.$evts;
@@ -99,7 +99,7 @@ module.exports = {
   // so be sure to provide checks for variable existence.
   //---------------------------------------------------------------------
 
-  action: function (cache) {
+  action(cache) {
     const data = cache.actions[cache.index];
     const Files = this.getDBM().Files;
     const bot = this.getDBM().Bot.bot;
@@ -127,7 +127,7 @@ module.exports = {
           return;
         }
         const cache2 = {
-          actions: actions,
+          actions,
           index: 0,
           temp: cache.temp,
           server: servers[i],
@@ -154,5 +154,5 @@ module.exports = {
   // functions you wish to overwrite.
   //---------------------------------------------------------------------
 
-  mod: function () {},
+  mod() {},
 };

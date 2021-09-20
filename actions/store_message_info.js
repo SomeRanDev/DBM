@@ -18,7 +18,7 @@ module.exports = {
   //
   // This function generates the subtitle displayed next to the name.
   //---------------------------------------------------------------------
-  subtitle: function (data, presets) {
+  subtitle(data, presets) {
     const info = [
       "Message Object",
       "Message Id",
@@ -52,7 +52,7 @@ module.exports = {
   //
   // Stores the relevant variable info for the editor.
   //---------------------------------------------------------------------
-  variableStorage: function (data, varType) {
+  variableStorage(data, varType) {
     const type = parseInt(data.storage, 10);
     if (type !== varType) return;
     const info = parseInt(data.info, 10);
@@ -143,7 +143,7 @@ module.exports = {
   // The names are: sendTargets, members, roles, channels,
   //                messages, servers, variables
   //---------------------------------------------------------------------
-  html: function (isEvent, data) {
+  html(isEvent, data) {
     return `
 <message-input dropdownLabel="Source Message" selectId="message" variableContainerId="varNameContainer" variableInputId="varName"></message-input>
 
@@ -190,7 +190,7 @@ module.exports = {
   // is also run. This helps add modifications or setup reactionary
   // functions for the DOM elements.
   //---------------------------------------------------------------------
-  init: function () {},
+  init() {},
 
   //---------------------------------------------------------------------
   // Action Bot Function
@@ -199,7 +199,7 @@ module.exports = {
   // Keep in mind event calls won't have access to the "msg" parameter,
   // so be sure to provide checks for variable existence.
   //---------------------------------------------------------------------
-  action: function (cache) {
+  action(cache) {
     const data = cache.actions[cache.index];
     const message = parseInt(data.message, 10);
     const varName = this.evalMessage(data.varName, cache);
@@ -293,5 +293,5 @@ module.exports = {
   // In order to reduce conflicts between mods, be sure to alias
   // functions you wish to overwrite.
   //---------------------------------------------------------------------
-  mod: function () {},
+  mod() {},
 };

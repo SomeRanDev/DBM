@@ -839,11 +839,11 @@ Actions.checkPermissions = function (member, permissions) {
 Actions.invokeActions = function (msg, actions) {
   if (actions.length > 0) {
     const cache = {
-      actions: actions,
+      actions,
       index: -1,
       temp: {},
       server: msg.guild,
-      msg: msg,
+      msg,
     };
     this.callNextAction(cache);
   }
@@ -852,11 +852,11 @@ Actions.invokeActions = function (msg, actions) {
 Actions.invokeInteraction = function (interaction, actions) {
   if (actions.length > 0) {
     const cache = {
-      actions: actions,
+      actions,
       index: -1,
       temp: {},
       server: interaction.guild,
-      interaction: interaction,
+      interaction,
     };
     this.callNextAction(cache);
   }
@@ -866,10 +866,10 @@ Actions.invokeEvent = function (event, server, temp) {
   const actions = event.actions;
   if (actions.length > 0) {
     const cache = {
-      actions: actions,
+      actions,
       index: -1,
-      temp: temp,
-      server: server,
+      temp,
+      server,
     };
     this.callNextAction(cache);
   }
@@ -2058,13 +2058,13 @@ Audio.playYt = async function (url, options, id) {
 //---------------------------------------------------------------------
 
 Reflect.defineProperty(DiscordJS.GuildMember.prototype, "unban", {
-  value: function (server, reason) {
+  value(server, reason) {
     return server.bans.remove(this.id, reason);
   },
 });
 
 Reflect.defineProperty(DiscordJS.GuildMember.prototype, "data", {
-  value: function (name, defaultValue) {
+  value(name, defaultValue) {
     const id = this.id;
     const data = Files.data.players;
     if (data[id] === undefined) {
@@ -2082,7 +2082,7 @@ Reflect.defineProperty(DiscordJS.GuildMember.prototype, "data", {
 });
 
 Reflect.defineProperty(DiscordJS.GuildMember.prototype, "setData", {
-  value: function (name, value) {
+  value(name, value) {
     const id = this.id;
     const data = Files.data.players;
     if (data[id] === undefined) {
@@ -2094,7 +2094,7 @@ Reflect.defineProperty(DiscordJS.GuildMember.prototype, "setData", {
 });
 
 Reflect.defineProperty(DiscordJS.GuildMember.prototype, "addData", {
-  value: function (name, value) {
+  value(name, value) {
     const id = this.id;
     const data = Files.data.players;
     if (data[id] === undefined) {
@@ -2109,7 +2109,7 @@ Reflect.defineProperty(DiscordJS.GuildMember.prototype, "addData", {
 });
 
 Reflect.defineProperty(DiscordJS.GuildMember.prototype, "convertToString", {
-  value: function () {
+  value() {
     return `mem-${this.id}_s-${this.guild.id}`;
   },
 });
@@ -2119,7 +2119,7 @@ Reflect.defineProperty(DiscordJS.GuildMember.prototype, "convertToString", {
 //---------------------------------------------------------------------
 
 Reflect.defineProperty(DiscordJS.User.prototype, "data", {
-  value: function (name, defaultValue) {
+  value(name, defaultValue) {
     const id = this.id;
     const data = Files.data.players;
     if (data[id] === undefined) {
@@ -2137,7 +2137,7 @@ Reflect.defineProperty(DiscordJS.User.prototype, "data", {
 });
 
 Reflect.defineProperty(DiscordJS.User.prototype, "setData", {
-  value: function (name, value) {
+  value(name, value) {
     const id = this.id;
     const data = Files.data.players;
     if (data[id] === undefined) {
@@ -2149,7 +2149,7 @@ Reflect.defineProperty(DiscordJS.User.prototype, "setData", {
 });
 
 Reflect.defineProperty(DiscordJS.User.prototype, "addData", {
-  value: function (name, value) {
+  value(name, value) {
     const id = this.id;
     const data = Files.data.players;
     if (data[id] === undefined) {
@@ -2164,7 +2164,7 @@ Reflect.defineProperty(DiscordJS.User.prototype, "addData", {
 });
 
 Reflect.defineProperty(DiscordJS.User.prototype, "convertToString", {
-  value: function () {
+  value() {
     return `usr-${this.id}`;
   },
 });
@@ -2174,7 +2174,7 @@ Reflect.defineProperty(DiscordJS.User.prototype, "convertToString", {
 //---------------------------------------------------------------------
 
 Reflect.defineProperty(DiscordJS.Guild.prototype, "getDefaultChannel", {
-  value: function () {
+  value() {
     let channel = this.channels.resolve(this.id);
     if (!channel) {
       [...this.channels.cache.values()].forEach((c) => {
@@ -2194,7 +2194,7 @@ Reflect.defineProperty(DiscordJS.Guild.prototype, "getDefaultChannel", {
 });
 
 Reflect.defineProperty(DiscordJS.Guild.prototype, "getDefaultVoiceChannel", {
-  value: function () {
+  value() {
     let channel = this.channels.resolve(this.id);
     if (!channel) {
       [...this.channels.cache.values()].forEach((c) => {
@@ -2213,7 +2213,7 @@ Reflect.defineProperty(DiscordJS.Guild.prototype, "getDefaultVoiceChannel", {
 });
 
 Reflect.defineProperty(DiscordJS.Guild.prototype, "data", {
-  value: function (name, defaultValue) {
+  value(name, defaultValue) {
     const id = this.id;
     const data = Files.data.servers;
     if (data[id] === undefined) {
@@ -2231,7 +2231,7 @@ Reflect.defineProperty(DiscordJS.Guild.prototype, "data", {
 });
 
 Reflect.defineProperty(DiscordJS.Guild.prototype, "setData", {
-  value: function (name, value) {
+  value(name, value) {
     const id = this.id;
     const data = Files.data.servers;
     if (data[id] === undefined) {
@@ -2243,7 +2243,7 @@ Reflect.defineProperty(DiscordJS.Guild.prototype, "setData", {
 });
 
 Reflect.defineProperty(DiscordJS.Guild.prototype, "addData", {
-  value: function (name, value) {
+  value(name, value) {
     const id = this.id;
     const data = Files.data.servers;
     if (data[id] === undefined) {
@@ -2258,7 +2258,7 @@ Reflect.defineProperty(DiscordJS.Guild.prototype, "addData", {
 });
 
 Reflect.defineProperty(DiscordJS.Guild.prototype, "convertToString", {
-  value: function () {
+  value() {
     return `s-${this.id}`;
   },
 });
@@ -2268,7 +2268,7 @@ Reflect.defineProperty(DiscordJS.Guild.prototype, "convertToString", {
 //---------------------------------------------------------------------
 
 Reflect.defineProperty(DiscordJS.Message.prototype, "convertToString", {
-  value: function () {
+  value() {
     return `msg-${this.id}_c-${this.channel.id}`;
   },
 });
@@ -2278,7 +2278,7 @@ Reflect.defineProperty(DiscordJS.Message.prototype, "convertToString", {
 //---------------------------------------------------------------------
 
 Reflect.defineProperty(DiscordJS.TextChannel.prototype, "convertToString", {
-  value: function () {
+  value() {
     return `tc-${this.id}`;
   },
 });
@@ -2288,7 +2288,7 @@ Reflect.defineProperty(DiscordJS.TextChannel.prototype, "convertToString", {
 //---------------------------------------------------------------------
 
 Reflect.defineProperty(DiscordJS.VoiceChannel.prototype, "convertToString", {
-  value: function () {
+  value() {
     return `vc-${this.id}`;
   },
 });
@@ -2298,7 +2298,7 @@ Reflect.defineProperty(DiscordJS.VoiceChannel.prototype, "convertToString", {
 //---------------------------------------------------------------------
 
 Reflect.defineProperty(DiscordJS.Role.prototype, "convertToString", {
-  value: function () {
+  value() {
     return `r-${this.id}_s-${this.guild.id}`;
   },
 });
@@ -2308,7 +2308,7 @@ Reflect.defineProperty(DiscordJS.Role.prototype, "convertToString", {
 //---------------------------------------------------------------------
 
 Reflect.defineProperty(DiscordJS.GuildEmoji.prototype, "convertToString", {
-  value: function () {
+  value() {
     return `e-${this.id}`;
   },
 });
