@@ -1997,7 +1997,7 @@ Audio.connectToVoice = function (voiceChannel) {
         adapterCreator: voiceChannel.guild.voiceAdapterCreator,
         channelId: voiceChannel.id,
         guildId: voiceChannel.guildId,
-        setDeaf: true,
+        setDeaf: Files.data.settings.autoDeafen ? Files.data.settings.autoDeafen === "true" : true,
       }),
     ),
   );
