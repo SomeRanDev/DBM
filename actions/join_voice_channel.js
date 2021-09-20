@@ -80,7 +80,8 @@ module.exports = {
     const varName = this.evalMessage(data.varName, cache);
     const channel = this.getVoiceChannel(type, varName, cache);
     if (channel !== undefined) {
-      Audio.connectToVoice(channel).then(() => this.callNextAction(cache));
+      Audio.connectToVoice(channel);
+      this.callNextAction(cache);
     } else {
       this.callNextAction(cache);
     }

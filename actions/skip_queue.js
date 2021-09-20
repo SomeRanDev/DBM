@@ -81,22 +81,10 @@ module.exports = {
     const data = cache.actions[cache.index];
     const Audio = this.getDBM().Audio;
     const server = cache.server;
-    let queue;
-    if (server) {
-      queue = Audio.queue[server.id];
-    }
-    if (queue) {
-      const amount = parseInt(this.evalMessage(data.amount, cache), 10);
-      let finalItem;
-      for (let i = 0; i < amount; i++) {
-        if (queue.length > 0) {
-          finalItem = queue.shift();
-        }
-      }
-      if (finalItem) {
-        Audio.playItem(finalItem, server.id);
-      }
-    }
+    const subscription = Audio.subscriptions.get(server.id);
+    if (!subscription) return this.callNextAction(cache);
+    const amount = parseInt(this.evalMessage(data.amount, cache), 10);
+    for (let i = 0; i < amount; i++) subscription.audioPlayer.stop();
     this.callNextAction(cache);
   },
 
