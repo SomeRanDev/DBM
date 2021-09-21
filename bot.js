@@ -505,11 +505,11 @@ Bot.checkCommand = function (msg) {
 
 Bot.escapeRegExp = function (text) {
   return text.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&");
-}
+};
 
 Bot.checkTag = function (content) {
-  const allowPrefixSpace = Files.data.settings.allowPrefixSpace === "true"
-  this.tagRegex ??= new RegExp(`${this.escapeRegExp(Files.data.settings.tag)}${allowPrefixSpace ? "\\s*" : ""}`);
+  const allowPrefixSpace = Files.data.settings.allowPrefixSpace === "true";
+  this.tagRegex ??= new RegExp(`^${this.escapeRegExp(Files.data.settings.tag)}${allowPrefixSpace ? "\\s*" : ""}`);
   const separator = Files.data.settings.separator || "\\s+";
   content = content.split(new RegExp(separator))[0];
   if (content.test(this.tagRegex)) {
@@ -613,8 +613,8 @@ Actions.global = {};
 
 Actions.timeStamps = [];
 
-const ActionsCache = Actions.ActionsCache = class ActionsCache {
-  constructor (actions, server, options = {}) {
+const ActionsCache = (Actions.ActionsCache = class ActionsCache {
+  constructor(actions, server, options = {}) {
     this.actions = actions;
     this.server = server;
     this.index = options.index ?? -1;
@@ -624,13 +624,13 @@ const ActionsCache = Actions.ActionsCache = class ActionsCache {
     this.isSubCache = options.isSubCache ?? false;
   }
 
-  onCompleted () {
+  onCompleted() {
     if (!this.isSubCache) {
       this.onMainCacheCompleted();
     }
   }
 
-  onMainCacheCompleted () {
+  onMainCacheCompleted() {
     if (this.interaction) {
       if (!this.interaction.replied) {
         this.interaction.reply({
@@ -641,7 +641,7 @@ const ActionsCache = Actions.ActionsCache = class ActionsCache {
     }
   }
 
-  static extend (other, actions) {
+  static extend(other, actions) {
     return new ActionsCache(actions, other.server, {
       isSubCache: true,
       temp: other.temp,
@@ -649,7 +649,7 @@ const ActionsCache = Actions.ActionsCache = class ActionsCache {
       interaction: other.interaction,
     });
   }
-};
+});
 
 Actions.exists = function (action) {
   if (!action) return false;
@@ -1319,9 +1319,13 @@ Actions.executeResults = function (result, data, cache) {
 };
 
 Actions.executeSubActionsThenNextAction = function (actions, cache) {
-  return this.executeSubActions(actions, cache, function () {
-    this.callNextAction(cache);
-  }.bind(this));
+  return this.executeSubActions(
+    actions,
+    cache,
+    function () {
+      this.callNextAction(cache);
+    }.bind(this),
+  );
 };
 
 Actions.executeSubActions = function (actions, cache, callback = null) {
