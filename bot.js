@@ -204,12 +204,14 @@ Bot.reformatData = function () {
 Bot.reformatCommands = function () {
   const data = Files.data.commands;
   if (!data) return;
+  this._hasTextCommands = false;
   this._caseSensitive = Files.data.settings.case === "true";
   for (let i = 0; i < data.length; i++) {
     const com = data[i];
     if (com) {
       switch (com.comType) {
         case "0": {
+          this._hasTextCommands = true;
           if (this._caseSensitive) {
             this.$cmds[com.name] = com;
             if (com._aliases) {
@@ -490,6 +492,7 @@ Bot.onMessage = function (msg) {
 };
 
 Bot.checkCommand = function (msg) {
+  if(!this._hasTextCommands) return false;
   let command = this.checkTag(msg.content);
   if (!command) return false;
   if (!this._caseSensitive) {
@@ -507,13 +510,25 @@ Bot.escapeRegExp = function (text) {
   return text.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&");
 };
 
+Bot.generateTagRegex = function (tag, allowPrefixSpace) {
+  return new RegExp(`^${this.escapeRegExp(tag)}${allowPrefixSpace ? "\\s*" : ""}`);
+}
+
 Bot.checkTag = function (content) {
+  const tag = Files.data.settings.tag;
   const allowPrefixSpace = Files.data.settings.allowPrefixSpace === "true";
-  this.tagRegex ??= new RegExp(`^${this.escapeRegExp(Files.data.settings.tag)}${allowPrefixSpace ? "\\s*" : ""}`);
+  this.tagRegex ??= this.generateTagRegex(tag, allowPrefixSpace);
   const separator = Files.data.settings.separator || "\\s+";
-  content = content.split(new RegExp(separator))[0];
-  if (this.tagRegex.test(content)) {
-    return content.replace(this.tagRegex, "");
+  if (content.startsWith(tag)) {
+    if (allowPrefixSpace) {
+      if (this.tagRegex.test(content)) {
+        content = content.replace(this.tagRegex, "");
+        return content.split(new RegExp(separator))[0];
+      }
+    } else {
+      content = content.split(new RegExp(separator))[0];
+      return content.substring(tag.length);
+    }
   }
   return null;
 };
