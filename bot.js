@@ -608,6 +608,44 @@ Actions.global = {};
 
 Actions.timeStamps = [];
 
+const ActionsCache = Actions.ActionsCache = class ActionsCache {
+  constructor (actions, server, options = {}) {
+    this.actions = actions;
+    this.server = server;
+    this.index = options.index ?? -1;
+    this.temp = options.temp ?? {};
+    this.msg = options.msg ?? null;
+    this.interaction = options.interaction ?? null;
+    this.isSubCache = options.isSubCache ?? false;
+  }
+
+  onCompleted () {
+    if (!this.isSubCache) {
+      this.onMainCacheCompleted();
+    }
+  }
+
+  onMainCacheCompleted () {
+    if (this.interaction) {
+      if (!this.interaction.replied) {
+        this.interaction.reply({
+          ephemeral: true,
+          content: Actions.getDefaultResponseText(),
+        });
+      }
+    }
+  }
+
+  static extend (other, actions) {
+    return new ActionsCache(actions, other.server, {
+      isSubCache: true,
+      temp: other.temp,
+      msg: other.msg,
+      interaction: other.interaction,
+    });
+  }
+};
+
 Actions.exists = function (action) {
   if (!action) return false;
   return typeof this[action] === "function";
@@ -838,26 +876,18 @@ Actions.checkPermissions = function (member, permissions) {
 
 Actions.invokeActions = function (msg, actions) {
   if (actions.length > 0) {
-    const cache = {
-      actions,
-      index: -1,
-      temp: {},
-      server: msg.guild,
-      msg,
-    };
+    const cache = new ActionsCache(actions, msg.guild, {
+      msg: msg,
+    });
     this.callNextAction(cache);
   }
 };
 
 Actions.invokeInteraction = function (interaction, actions) {
   if (actions.length > 0) {
-    const cache = {
-      actions,
-      index: -1,
-      temp: {},
-      server: interaction.guild,
-      interaction,
-    };
+    const cache = new ActionsCache(actions, interaction.guild, {
+      interaction: interaction,
+    });
     this.callNextAction(cache);
   }
 };
@@ -865,12 +895,7 @@ Actions.invokeInteraction = function (interaction, actions) {
 Actions.invokeEvent = function (event, server, temp) {
   const actions = event.actions;
   if (actions.length > 0) {
-    const cache = {
-      actions,
-      index: -1,
-      temp,
-      server,
-    };
+    const cache = new ActionsCache(actions, server);
     this.callNextAction(cache);
   }
 };
@@ -884,13 +909,8 @@ Actions.callNextAction = function (cache) {
     if (cache.callback) {
       cache.callback();
     }
-    if (cache.interaction) {
-      if (!cache.interaction.replied) {
-        cache.interaction.reply({
-          ephemeral: true,
-          content: this.getDefaultResponseText(),
-        });
-      }
+    if (cache.onCompleted) {
+      cache.onCompleted();
     }
     return;
   }
@@ -917,7 +937,7 @@ Actions.getErrorString = function (data, cache) {
 
 Actions.displayError = function (data, cache, err) {
   const dbm = this.getErrorString(data, cache);
-  console.error(dbm + ":\n" + err);
+  console.error(dbm + ":\n" + (err.stack ?? err));
   Events.onError(dbm, err.stack ?? err, cache);
 };
 
@@ -1256,6 +1276,9 @@ Actions.executeResults = function (result, data, cache) {
           this.callNextAction(cache);
         }
         break;
+      case 99:
+        this.executeSubActionsThenNextAction(data.iftrueActions, cache);
+        break;
       default:
         break;
     }
@@ -1281,10 +1304,36 @@ Actions.executeResults = function (result, data, cache) {
           this.callNextAction(cache);
         }
         break;
+      case 99:
+        this.executeSubActionsThenNextAction(data.iffalseActions, cache);
+        break;
       default:
         break;
     }
   }
+};
+
+Actions.executeSubActionsThenNextAction = function (actions, cache) {
+  return this.executeSubActions(actions, cache, function () {
+    this.callNextAction(cache);
+  }.bind(this));
+};
+
+Actions.executeSubActions = function (actions, cache, callback = null) {
+  if (!actions) {
+    if (callback) callback();
+    return false;
+  }
+  const newCache = this.generateSubCache(cache, actions);
+  newCache.callback = function () {
+    if (callback) callback();
+  }.bind(this);
+  this.callNextAction(newCache);
+  return true;
+};
+
+Actions.generateSubCache = function (cache, actions) {
+  return ActionsCache.extend(cache, actions);
 };
 
 //#endregion
