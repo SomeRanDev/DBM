@@ -503,12 +503,17 @@ Bot.checkCommand = function (msg) {
   return false;
 };
 
+Bot.escapeRegExp = function (text) {
+  return text.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&");
+}
+
 Bot.checkTag = function (content) {
-  const tag = Files.data.settings.tag;
+  const allowPrefixSpace = Files.data.settings.allowPrefixSpace === "true"
+  this.tagRegex ??= new RegExp(`${this.escapeRegExp(Files.data.settings.tag)}${allowPrefixSpace ? "\\s*" : ""}`);
   const separator = Files.data.settings.separator || "\\s+";
   content = content.split(new RegExp(separator))[0];
-  if (content.startsWith(tag)) {
-    return content.substring(tag.length);
+  if (content.test(this.tagRegex)) {
+    return content.replace(this.tagRegex, "");
   }
   return null;
 };
