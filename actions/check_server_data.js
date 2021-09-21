@@ -22,7 +22,7 @@ module.exports = {
   //---------------------------------------------------------------------
 
   subtitle(data, presets) {
-    return `${presets.getConditionsText(data.iftrue, data.iffalse)}`;
+    return `${presets.getConditionsText(data)}`;
   },
 
   //---------------------------------------------------------------------
@@ -33,7 +33,7 @@ module.exports = {
   // are also the names of the fields stored in the action's JSON data.
   //---------------------------------------------------------------------
 
-  fields: ["server", "varName", "dataName", "comparison", "value", "iftrue", "iftrueVal", "iffalse", "iffalseVal"],
+  fields: ["server", "varName", "dataName", "comparison", "value", "branch"],
 
   //---------------------------------------------------------------------
   // Command HTML
@@ -83,7 +83,24 @@ module.exports = {
 	<input id="value" class="round" type="text" name="is-eval">
 </div>
 
-<conditional-input style="padding-top: 16px;"></conditional-input>`;
+<conditional-input id="branch" style="padding-top: 16px;"></conditional-input>`;
+  },
+
+  //---------------------------------------------------------------------
+  // Action Editor Pre-Init Code
+  //
+  // Before the fields from existing data in this action are applied
+  // to the user interface, this function is called if it exists.
+  // The existing data is provided, and a modified version can be 
+  // returned. The returned version will be used if provided.
+  // This is to help provide compatibility with older versions of the action.
+  //
+  // The "formatters" argument contains built-in functions for formatting
+  // the data required for official DBM action compatibility.
+  //---------------------------------------------------------------------
+
+  preInit(data, formatters) {
+    return formatters.compatibility_2_0_0_iftruefalse_to_branch(data);
   },
 
   //---------------------------------------------------------------------
@@ -143,7 +160,7 @@ module.exports = {
           break;
       }
     }
-    this.executeResults(result, data, cache);
+    this.executeResults(result, data?.branch ?? data, cache);
   },
 
   //---------------------------------------------------------------------

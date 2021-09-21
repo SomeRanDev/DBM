@@ -22,7 +22,7 @@ module.exports = {
   //---------------------------------------------------------------------
 
   subtitle(data, presets) {
-    return `${presets.getConditionsText(data.iftrue, data.iffalse)}`;
+    return `${presets.getConditionsText(data)}`;
   },
 
   //---------------------------------------------------------------------
@@ -33,7 +33,7 @@ module.exports = {
   // are also the names of the fields stored in the action's JSON data.
   //---------------------------------------------------------------------
 
-  fields: ["storage", "varName", "comparison", "value", "iftrue", "iftrueVal", "iffalse", "iffalseVal"],
+  fields: ["storage", "varName", "comparison", "value", "branch"],
 
   //---------------------------------------------------------------------
   // Command HTML
@@ -58,7 +58,7 @@ module.exports = {
 <br><br><br>
 
 <div style="padding-top: 8px;">
-	<div style="float: left; width: 45%;">
+	<div style="float: left; width: 35%;">
 		<span class="dbminputlabel">Comparison Type</span><br>
 		<select id="comparison" class="round" onchange="glob.onComparisonChanged(this)">
 			<option value="0">Exists</option>
@@ -70,7 +70,7 @@ module.exports = {
 			<option value="6">Matches Regex</option>
 		</select>
 	</div>
-	<div style="float: right; width: 50%;" id="directValue">
+	<div style="float: right; width: 60%;" id="directValue">
 		<span class="dbminputlabel">Value to Compare to</span><br>
 		<input id="value" class="round" type="text" name="is-eval">
 	</div>
@@ -78,7 +78,24 @@ module.exports = {
 
 <br><br><br>
 
-<conditional-input style="padding-top: 8px;"></conditional-input>`;
+<conditional-input id="branch" style="padding-top: 8px;"></conditional-input>`;
+  },
+
+  //---------------------------------------------------------------------
+  // Action Editor Pre-Init Code
+  //
+  // Before the fields from existing data in this action are applied
+  // to the user interface, this function is called if it exists.
+  // The existing data is provided, and a modified version can be 
+  // returned. The returned version will be used if provided.
+  // This is to help provide compatibility with older versions of the action.
+  //
+  // The "formatters" argument contains built-in functions for formatting
+  // the data required for official DBM action compatibility.
+  //---------------------------------------------------------------------
+
+  preInit(data, formatters) {
+    return formatters.compatibility_2_0_0_iftruefalse_to_branch(data);
   },
 
   //---------------------------------------------------------------------
@@ -149,7 +166,7 @@ module.exports = {
           break;
       }
     }
-    this.executeResults(result, data, cache);
+    this.executeResults(result, data?.branch ?? data, cache);
   },
 
   //---------------------------------------------------------------------
