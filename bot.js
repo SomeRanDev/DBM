@@ -512,7 +512,7 @@ Bot.checkTag = function (content) {
   this.tagRegex ??= new RegExp(`^${this.escapeRegExp(Files.data.settings.tag)}${allowPrefixSpace ? "\\s*" : ""}`);
   const separator = Files.data.settings.separator || "\\s+";
   content = content.split(new RegExp(separator))[0];
-  if (content.test(this.tagRegex)) {
+  if (this.tagRegex.test(content)) {
     return content.replace(this.tagRegex, "");
   }
   return null;
