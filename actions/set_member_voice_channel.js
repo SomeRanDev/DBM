@@ -56,7 +56,7 @@ module.exports = {
 
   html(isEvent, data) {
     return `
-<member-input isEvent=${isEvent} style="padding-top: 8px;" dropdownLabel="Source Member" selectId="member" variableContainerId="varNameContainer" variableInputId="varName" selectWidth="45%" variableInputWidth="50%"></member-input>
+<member-input style="padding-top: 8px;" dropdownLabel="Source Member" selectId="member" variableContainerId="varNameContainer" variableInputId="varName" selectWidth="45%" variableInputWidth="50%"></member-input>
 
 <br><br><br>
 

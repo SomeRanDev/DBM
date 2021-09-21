@@ -65,7 +65,7 @@ module.exports = {
 
   html(isEvent, data) {
     return `
-<send-target-input isEvent=${isEvent} selectId="channel" variableInputId="varName"></send-target-input>
+<send-target-input selectId="channel" variableInputId="varName"></send-target-input>
 
 <br><br><br>
 

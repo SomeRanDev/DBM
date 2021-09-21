@@ -69,7 +69,7 @@ module.exports = {
 
 <br><br><br>
 
-<send-target-input isEvent=${isEvent} dropdownLabel="Send To" selectId="channel" variableContainerId="varNameContainer2" variableInputId="varName2"></send-target-input>
+<send-target-input dropdownLabel="Send To" selectId="channel" variableContainerId="varNameContainer2" variableInputId="varName2"></send-target-input>
 
 <br><br><br><br>
 

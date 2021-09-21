@@ -57,7 +57,7 @@ module.exports = {
 
 <br><br><br>
 
-<member-input isEvent=${isEvent} style="padding-top: 8px;" dropdownLabel="Member" selectId="member" variableContainerId="varNameContainer2" variableInputId="varName2"></member-input>
+<member-input style="padding-top: 8px;" dropdownLabel="Member" selectId="member" variableContainerId="varNameContainer2" variableInputId="varName2"></member-input>
 
 <br><br><br>
 
