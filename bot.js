@@ -691,6 +691,15 @@ Actions.getActionVariable = function (name, defaultValue) {
   return this[name];
 };
 
+Actions.getSlashParameter = function (interaction, name, defaultValue) {
+  if(!interaction) return defaultValue ?? null;
+  const result = this.getParamterFromInteraction(interaction, name);
+  if(result !== null) {
+    return result;
+  }
+  return defaultValue !== undefined ? defaultValue : result;
+};
+
 Actions.eval = function (content, cache) {
   if (!content) return false;
   const DBM = this.getDBM();
@@ -700,6 +709,7 @@ Actions.eval = function (content, cache) {
     serverVars = this.getActionVariable.bind(this.server[cache.server.id]);
   }
   const globalVars = this.getActionVariable.bind(this.global);
+  const slashParams = this.getSlashParameter.bind(this, cache.interaction);
   const msg = cache.msg;
   const server = cache.server;
   const client = DBM.Bot.bot;
@@ -946,6 +956,33 @@ Actions.displayError = function (data, cache, err) {
   Events.onError(dbm, err.stack ?? err, cache);
 };
 
+Actions.getParamterFromInteraction = function (interaction, name) {
+  if (interaction?.options?.get) {
+    const option = interaction.options.get(name);
+    switch (option.type) {
+      case "STRING":
+      case "INTEGER":
+      case "BOOLEAN":
+      case "NUMBER": {
+        return option.value;
+      }
+      case "USER": {
+        return option.member ?? option.user;
+      }
+      case "CHANNEL": {
+        return option.channel;
+      }
+      case "ROLE": {
+        return option.role;
+      }
+      case "MENTIONABLE": {
+        return option.member ?? option.channel ?? option.role ?? option.user;
+      }
+    }
+  }
+  return null;
+};
+
 Actions.getTargetFromVariableOrParameter = function (varType, varName, cache) {
   switch (varType) {
     case 0:
@@ -960,28 +997,9 @@ Actions.getTargetFromVariableOrParameter = function (varType, varName, cache) {
       return this.global[varName];
     case 3:
       const interaction = cache.interaction;
-      if (interaction?.options?.get) {
-        const option = interaction.options.get(varName);
-        switch (option.type) {
-          case "STRING":
-          case "INTEGER":
-          case "BOOLEAN":
-          case "NUMBER": {
-            return option.value;
-          }
-          case "USER": {
-            return option.member ?? option.user;
-          }
-          case "CHANNEL": {
-            return option.channel;
-          }
-          case "ROLE": {
-            return option.role;
-          }
-          case "MENTIONABLE": {
-            return option.member ?? option.channel ?? option.role ?? option.user;
-          }
-        }
+      const result = this.getParamterFromInteraction(interaction, varName);
+      if(result !== null) {
+        return result;
       }
       break;
     default:
