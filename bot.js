@@ -209,6 +209,7 @@ Bot.reformatCommands = function () {
   for (let i = 0; i < data.length; i++) {
     const com = data[i];
     if (com) {
+      this.prepareActions(com.actions);
       switch (com.comType) {
         case "0": {
           this._hasTextCommands = true;
@@ -376,9 +377,21 @@ Bot.reformatEvents = function () {
   for (let i = 0; i < data.length; i++) {
     const com = data[i];
     if (com) {
+      this.prepareActions(com.actions);
       const type = com["event-type"];
       if (!this.$evts[type]) this.$evts[type] = [];
       this.$evts[type].push(com);
+    }
+  }
+};
+
+Bot.prepareActions = function (actions) {
+  if (actions) {
+    for (let i = 0; i < actions.length; i++) {
+      const action = actions[i];
+      if (action?.name && Actions.modInitReferences[action.name]) {
+        Actions.modInitReferences[action.name].call(this, action);
+      }
     }
   }
 };
@@ -492,7 +505,7 @@ Bot.onMessage = function (msg) {
 };
 
 Bot.checkCommand = function (msg) {
-  if(!this._hasTextCommands) return false;
+  if (!this._hasTextCommands) return false;
   let command = this.checkTag(msg.content);
   if (!command) return false;
   if (!this._caseSensitive) {
@@ -707,9 +720,9 @@ Actions.getActionVariable = function (name, defaultValue) {
 };
 
 Actions.getSlashParameter = function (interaction, name, defaultValue) {
-  if(!interaction) return defaultValue ?? null;
+  if (!interaction) return defaultValue ?? null;
   const result = this.getParamterFromInteraction(interaction, name);
-  if(result !== null) {
+  if (result !== null) {
     return result;
   }
   return defaultValue !== undefined ? defaultValue : result;
@@ -761,6 +774,7 @@ Actions.evalMessage = function (content, cache) {
 };
 
 Actions.initMods = function () {
+  this.modInitReferences = {};
   const fs = require("node:fs");
   this.modDirectories().forEach(
     function (dir) {
@@ -770,6 +784,9 @@ Actions.initMods = function () {
             const action = require(require("node:path").join(dir, file));
             if (action.action) {
               this[action.name] = action.action;
+            }
+            if (action.modInit) {
+              this.modInitReferences[action.name] = action.modInit;
             }
             if (action.mod) {
               try {
@@ -1013,7 +1030,7 @@ Actions.getTargetFromVariableOrParameter = function (varType, varName, cache) {
     case 3:
       const interaction = cache.interaction;
       const result = this.getParamterFromInteraction(interaction, varName);
-      if(result !== null) {
+      if (result !== null) {
         return result;
       }
       break;

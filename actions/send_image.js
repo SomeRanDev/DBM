@@ -75,7 +75,7 @@ module.exports = {
 
 <div style="padding-top: 8px;">
 	<span class="dbminputlabel">Message</span><br>
-	<textarea id="message" rows="8" placeholder="Insert message here..." style="width: 99%; font-family: monospace; white-space: nowrap; resize: none;"></textarea>
+	<textarea id="message" class="dbm_monospace" rows="8" placeholder="Insert message here..." style="white-space: nowrap; resize: none;"></textarea>
 </div>
 
 <br>

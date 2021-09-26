@@ -86,7 +86,7 @@ module.exports = {
 
 <div style="padding-top: 8px;">
 	<span class="dbminputlabel">Custom Code</span><br>
-	<textarea id="code" rows="9" name="is-eval" style="width: 99%; white-space: nowrap; resize: none;"></textarea>
+	<textarea id="code" rows="9" name="is-eval" style="white-space: nowrap; resize: none;"></textarea>
 </div>
 
 <br>

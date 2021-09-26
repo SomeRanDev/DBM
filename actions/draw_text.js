@@ -74,7 +74,7 @@ module.exports = {
 
 <div>
 	<span class="dbminputlabel">Text</span><br>
-	<textarea id="text" rows="5" placeholder="Insert text here..." style="width: 99%; white-space: nowrap; resize: none;"></textarea>
+	<textarea id="text" rows="5" placeholder="Insert text here..." style="white-space: nowrap; resize: none;"></textarea>
 </div>`;
   },
 

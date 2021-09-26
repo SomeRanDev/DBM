@@ -57,7 +57,7 @@ module.exports = {
 
 <div style="padding-top: 8px;">
 	<span class="dbminputlabel">Footer</span><br>
-	<textarea id="message" rows="3" placeholder="Insert footer here..." style="width: 99%; font-family: monospace; white-space: nowrap; resize: none;"></textarea>
+	<textarea id="message" class="dbm_monospace" rows="3" placeholder="Insert footer here..." style="white-space: nowrap; resize: none;"></textarea>
 </div><br>
 <div style="float: left; width: 99%;">
 	<span class="dbminputlabel">Footer Icon URL</span><br>
