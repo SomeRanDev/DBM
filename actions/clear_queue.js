@@ -74,10 +74,11 @@ module.exports = {
   //---------------------------------------------------------------------
 
   action(cache) {
-    const Audio = this.getDBM().Audio;
+    const { Audio } = this.getDBM();
     const server = cache.server;
     if (server) {
-      Audio.queue[server.id] = [];
+      const subscription = Audio.subscriptions.get(server.id);
+      if (subscription) subscription.queue = [];
     }
     this.callNextAction(cache);
   },

@@ -69,7 +69,7 @@ module.exports = {
   //
   // Before the fields from existing data in this action are applied
   // to the user interface, this function is called if it exists.
-  // The existing data is provided, and a modified version can be 
+  // The existing data is provided, and a modified version can be
   // returned. The returned version will be used if provided.
   // This is to help provide compatibility with older versions of the action.
   //
