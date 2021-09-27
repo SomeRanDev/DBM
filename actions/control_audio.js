@@ -84,26 +84,21 @@ module.exports = {
 
   action(cache) {
     const data = cache.actions[cache.index];
-    const Audio = this.getDBM().Audio;
+    const { Audio } = this.getDBM();
     const server = cache.server;
-    let dispatcher;
-    if (server) {
-      dispatcher = Audio.dispatchers[server.id];
-    }
-    if (dispatcher) {
-      const action = parseInt(data.action, 10);
-      switch (action) {
-        case 0:
-          dispatcher._forceEnd = true;
-          dispatcher.end();
-          break;
-        case 1:
-          dispatcher.pause();
-          break;
-        case 2:
-          dispatcher.resume();
-          break;
-      }
+    const subscription = server && Audio.subscriptions.get(server.id);
+    if (!subscription) return this.callNextAction(cache);
+    const action = parseInt(data.action, 10);
+    switch (action) {
+      case 0:
+        subscription.stop();
+        break;
+      case 1:
+        subscription.audioPlayer.pause();
+        break;
+      case 2:
+        subscription.audioPlayer.unpause();
+        break;
     }
     this.callNextAction(cache);
   },

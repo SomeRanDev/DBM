@@ -1945,8 +1945,7 @@ Audio.Subscription = class {
           try {
             // Probably moved voice channel
             await Audio.voice.entersState(this.voiceConnection, Audio.voice.VoiceConnectionStatus.Connecting, 5_000);
-          } catch (err) {
-            console.err('1: ', err);
+          } catch {
             // Probably removed from voice channel
             this.voiceConnection.destroy();
           }
@@ -1966,8 +1965,7 @@ Audio.Subscription = class {
         this.readyLock = true;
         try {
           await Audio.voice.entersState(this.voiceConnection, Audio.voice.VoiceConnectionStatus.Ready, 20_000);
-        } catch (err) {
-          console.error('2: ', err)
+        } catch {
           if (this.voiceConnection.state.status !== Audio.voice.VoiceConnectionStatus.Destroyed)
             this.voiceConnection.destroy();
         } finally {
@@ -1990,8 +1988,9 @@ Audio.Subscription = class {
     voiceConnection.subscribe(this.audioPlayer);
   }
 
-  enqueue(track) {
-    this.queue.push(track);
+  enqueue(track, beginning = false) {
+    if (beginning) this.queue.unshift(track);
+    else this.queue.push(track);
     void this.processQueue();
   }
 
@@ -2016,8 +2015,7 @@ Audio.Subscription = class {
       const resource = await nextTrack.createAudioResource();
       this.audioPlayer.play(resource);
       this.queueLock = false;
-    } catch (error) {
-      console.error('3: ', error)
+    } catch {
       this.queueLock = false;
       return this.processQueue();
     }
@@ -2054,7 +2052,7 @@ Audio.Track = class {
       const stream = child.stdout;
       const onError = (error) => {
         if (!child.killed) child.kill();
-        console.error('demux: ', error);
+        console.error("demux: ", error);
         stream.resume();
         reject(error);
       };
@@ -2123,6 +2121,14 @@ Audio.connectToVoice = function (voiceChannel) {
   );
 };
 
+/** @param {import('discord.js').Snowflake} guildId */
+Audio.disconnectFromVoice = function (guildId) {
+  const subscription = this.subscriptions.get(guildId);
+  if (!subscription) return;
+  subscription.voiceConnection.destroy();
+  this.subscriptions.delete(guildId);
+};
+
 // broken
 Audio.setVolume = function (volume, cache) {
   if (!cache.server) return;
@@ -2133,20 +2139,17 @@ Audio.setVolume = function (volume, cache) {
   }
 };
 
-Audio.addToQueue = function ([type, options, url], cache) {
+Audio.addToQueue = async function ([type, options, url], cache) {
   if (!cache.server) return;
   const id = cache.server.id;
-  switch (type) {
-    case "file":
-      this.playFile(url, options, id);
-      break;
-    case "url":
-      this.playUrl(url, options, id);
-      break;
-    case "yt":
-      this.playYt(url, options, id);
-      break;
-  }
+  this.subscriptions.get(id)?.enqueue(await this.getTrack(url, type));
+};
+
+Audio.playItem = async function ([type, options, url], guildId) {
+  const subscription = this.subscriptions.get(guildId);
+  if (!subscription) return;
+  subscription.enqueue(await this.getTrack(url, type), true);
+  subscription.audioPlayer.stop(true);
 };
 
 Audio.clearQueue = function (cache) {
@@ -2155,16 +2158,15 @@ Audio.clearQueue = function (cache) {
   if (this.subscriptions.has(id)) this.subscriptions.get(id).queue = [];
 };
 
-Audio.playFile = function (url, options, id) {
-  this.subscriptions.get(id)?.enqueue(new this.BasicTrack({ url: Actions.getLocalFile(url) }));
-};
-
-Audio.playUrl = function (url, options, id) {
-  this.subscriptions.get(id)?.enqueue(new this.BasicTrack({ url }));
-};
-
-Audio.playYt = async function (url, options, id) {
-  this.subscriptions.get(id)?.enqueue(await this.Track.from(url));
+Audio.getTrack = function (url, type) {
+  switch (type) {
+    case "file":
+      return new this.BasicTrack({ url: Actions.getLocalFile(url) });
+    case "url":
+      return new this.BasicTrack({ url });
+    case "yt":
+      return this.Track.from(url);
+  }
 };
 
 //#endregion
