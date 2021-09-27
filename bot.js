@@ -525,7 +525,7 @@ Bot.escapeRegExp = function (text) {
 
 Bot.generateTagRegex = function (tag, allowPrefixSpace) {
   return new RegExp(`^${this.escapeRegExp(tag)}${allowPrefixSpace ? "\\s*" : ""}`);
-}
+};
 
 Bot.checkTag = function (content) {
   const tag = Files.data.settings.tag;
@@ -721,7 +721,7 @@ Actions.getActionVariable = function (name, defaultValue) {
 
 Actions.getSlashParameter = function (interaction, name, defaultValue) {
   if (!interaction) return defaultValue ?? null;
-  const result = this.getParamterFromInteraction(interaction, name);
+  const result = this.getParameterFromInteraction(interaction, name);
   if (result !== null) {
     return result;
   }
@@ -988,10 +988,10 @@ Actions.displayError = function (data, cache, err) {
   Events.onError(dbm, err.stack ?? err, cache);
 };
 
-Actions.getParamterFromInteraction = function (interaction, name) {
+Actions.getParameterFromInteraction = function (interaction, name) {
   if (interaction?.options?.get) {
     const option = interaction.options.get(name);
-    switch (option.type) {
+    switch (option?.type) {
       case "STRING":
       case "INTEGER":
       case "BOOLEAN":
@@ -1029,7 +1029,7 @@ Actions.getTargetFromVariableOrParameter = function (varType, varName, cache) {
       return this.global[varName];
     case 3:
       const interaction = cache.interaction;
-      const result = this.getParamterFromInteraction(interaction, varName);
+      const result = this.getParameterFromInteraction(interaction, varName);
       if (result !== null) {
         return result;
       }
@@ -1312,10 +1312,11 @@ Actions.executeResults = function (result, data, cache) {
   if (result) {
     const type = parseInt(data.iftrue, 10);
     switch (type) {
-      case 0:
+      case 0: {
         this.callNextAction(cache);
         break;
-      case 2:
+      }
+      case 2: {
         const val = parseInt(this.evalMessage(data.iftrueVal, cache), 10);
         const index = Math.max(val - 1, 0);
         if (cache.actions[index]) {
@@ -1323,27 +1324,31 @@ Actions.executeResults = function (result, data, cache) {
           this.callNextAction(cache);
         }
         break;
-      case 3:
-        const amnt = parseInt(this.evalMessage(data.iftrueVal, cache), 10);
-        const index2 = cache.index + amnt + 1;
+      }
+      case 3: {
+        const amount = parseInt(this.evalMessage(data.iftrueVal, cache), 10);
+        const index2 = cache.index + amount + 1;
         if (cache.actions[index2]) {
           cache.index = index2 - 1;
           this.callNextAction(cache);
         }
         break;
-      case 99:
+      }
+      case 99: {
         this.executeSubActionsThenNextAction(data.iftrueActions, cache);
         break;
+      }
       default:
         break;
     }
   } else {
     const type = parseInt(data.iffalse, 10);
     switch (type) {
-      case 0:
+      case 0: {
         this.callNextAction(cache);
         break;
-      case 2:
+      }
+      case 2: {
         const val = parseInt(this.evalMessage(data.iffalseVal, cache), 10);
         const index = Math.max(val - 1, 0);
         if (cache.actions[index]) {
@@ -1351,17 +1356,20 @@ Actions.executeResults = function (result, data, cache) {
           this.callNextAction(cache);
         }
         break;
-      case 3:
-        const amnt = parseInt(this.evalMessage(data.iffalseVal, cache), 10);
-        const index2 = cache.index + amnt + 1;
+      }
+      case 3: {
+        const amount = parseInt(this.evalMessage(data.iffalseVal, cache), 10);
+        const index2 = cache.index + amount + 1;
         if (cache.actions[index2]) {
           cache.index = index2 - 1;
           this.callNextAction(cache);
         }
         break;
-      case 99:
+      }
+      case 99: {
         this.executeSubActionsThenNextAction(data.iffalseActions, cache);
         break;
+      }
       default:
         break;
     }
@@ -1702,9 +1710,9 @@ Files.initEncryption = function () {
 Files.encrypt = function (text) {
   if (this.password.length === 0) return text;
   const cipher = this.crypto.createCipher("aes-128-ofb", this.password);
-  let crypted = cipher.update(text, "utf8", "hex");
-  crypted += cipher.final("hex");
-  return crypted;
+  let encrypted = cipher.update(text, "utf8", "hex");
+  encrypted += cipher.final("hex");
+  return encrypted;
 };
 
 Files.decrypt = function (text) {
@@ -1937,7 +1945,8 @@ Audio.Subscription = class {
           try {
             // Probably moved voice channel
             await Audio.voice.entersState(this.voiceConnection, Audio.voice.VoiceConnectionStatus.Connecting, 5_000);
-          } catch {
+          } catch (err) {
+            console.err('1: ', err);
             // Probably removed from voice channel
             this.voiceConnection.destroy();
           }
@@ -1957,7 +1966,8 @@ Audio.Subscription = class {
         this.readyLock = true;
         try {
           await Audio.voice.entersState(this.voiceConnection, Audio.voice.VoiceConnectionStatus.Ready, 20_000);
-        } catch {
+        } catch (err) {
+          console.error('2: ', err)
           if (this.voiceConnection.state.status !== Audio.voice.VoiceConnectionStatus.Destroyed)
             this.voiceConnection.destroy();
         } finally {
@@ -2007,6 +2017,7 @@ Audio.Subscription = class {
       this.audioPlayer.play(resource);
       this.queueLock = false;
     } catch (error) {
+      console.error('3: ', error)
       this.queueLock = false;
       return this.processQueue();
     }
@@ -2043,6 +2054,7 @@ Audio.Track = class {
       const stream = child.stdout;
       const onError = (error) => {
         if (!child.killed) child.kill();
+        console.error('demux: ', error);
         stream.resume();
         reject(error);
       };
