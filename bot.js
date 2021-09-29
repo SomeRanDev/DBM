@@ -32,6 +32,9 @@ const MsgType = {
   DUPLICATE_MESSAGE_COMMAND: 6,
   DUPLICATE_SLASH_PARAMETER: 7,
   INVALID_SLASH_PARAMETER_NAME: 8,
+  INVALID_SLASH_COMMAND_SERVER_ID: 9,
+  DUPLICATE_BUTTON_ID: 10,
+  DUPLICATE_SELECT_ID: 11
 };
 
 function PrintError(type) {
@@ -106,6 +109,14 @@ function PrintError(type) {
       );
       break;
     }
+    case MsgType.DUPLICATE_BUTTON_ID: {
+      error(format('Button interaction with unique id "%s" already exists!\nThis duplicate will be ignored.\n', arguments[1]));
+      break;
+    }
+    case MsgType.DUPLICATE_SELECT_ID: {
+      error(format('Select menu interaction with unique id "%s" already exists!\nThis duplicate will be ignored.\n', arguments[1]));
+      break;
+    }
   }
 }
 
@@ -125,6 +136,9 @@ const Bot = (DBM.Bot = {});
 Bot.$slash = {}; // Slash commands
 Bot.$user = {}; // User commands
 Bot.$msge = {}; // Message commands
+
+Bot.$button = {}; // Button interactions
+Bot.$select = {}; // Select interactions
 
 Bot.$cmds = {}; // Normal commands
 Bot.$icds = []; // Includes word commands
@@ -396,6 +410,26 @@ Bot.prepareActions = function (actions) {
   }
 };
 
+Bot.registerButtonInteraction = function (interactionId, data) {
+  if(interactionId) {
+    if(!this.$button[interactionId]) {
+      this.$button[interactionId] = data;
+    } else {
+      PrintError(MsgType.DUPLICATE_BUTTON_ID, interactionId);
+    }
+  }
+};
+
+Bot.registerSelectMenuInteraction = function (interactionId, data) {
+  if(interactionId) {
+    if(!this.$select[interactionId]) {
+      this.$select[interactionId] = data;
+    } else {
+      PrintError(MsgType.DUPLICATE_SELECT_ID, interactionId);
+    }
+  }
+};
+
 Bot.initEvents = function () {
   this.bot.on("ready", this.onReady.bind(this));
   this.bot.on("messageCreate", this.onMessage.bind(this));
@@ -609,17 +643,44 @@ Bot.checkRegExps = function (msg) {
 };
 
 Bot.onInteraction = function (interaction) {
-  const interactionName = interaction.commandName;
   if (interaction.isCommand()) {
-    if (this.$slash[interactionName]) {
-      Actions.preformActionsFromInteraction(interaction, this.$slash[interactionName]);
-    }
+    this.onSlashCommandInteraction(interaction);
   } else if (interaction.isContextMenu()) {
-    if (this.$user[interactionName]) {
-      Actions.preformActionsFromInteraction(interaction, this.$user[interactionName]);
-    } else if (this.$msge[interactionName]) {
-      Actions.preformActionsFromInteraction(interaction, this.$msge[interactionName]);
-    }
+    this.onContextMenuInteraction(interaction);
+  } else if (interaction.isButton()) {
+    this.onButtonInteraction(interaction);
+  } else if (interaction.isSelectMenu()) {
+    this.onSelectMenuInteraction(interaction);
+  }
+};
+
+Bot.onSlashCommandInteraction = function (interaction) {
+  const interactionName = interaction.commandName;
+  if (this.$slash[interactionName]) {
+    Actions.preformActionsFromInteraction(interaction, this.$slash[interactionName]);
+  }
+};
+
+Bot.onContextMenuInteraction = function (interaction) {
+  const interactionName = interaction.commandName;
+  if (this.$user[interactionName]) {
+    Actions.preformActionsFromInteraction(interaction, this.$user[interactionName]);
+  } else if (this.$msge[interactionName]) {
+    Actions.preformActionsFromInteraction(interaction, this.$msge[interactionName]);
+  }
+};
+
+Bot.onButtonInteraction = function (interaction) {
+  const interactionId = interaction.customId;
+  if (this.$button[interactionId]) {
+    Actions.preformActionsFromInteraction(interaction, this.$button[interactionId]);
+  }
+};
+
+Bot.onSelectMenuInteraction = function (interaction) {
+  const interactionId = interaction.customId;
+  if (this.$select[interactionId]) {
+    Actions.preformActionsFromSelectInteraction(interaction, this.$select[interactionId]);
   }
 };
 
@@ -667,6 +728,10 @@ const ActionsCache = (Actions.ActionsCache = class ActionsCache {
         });
       }
     }
+  }
+
+  getUser() {
+    return this.interaction?.user ?? this.msg?.author;
   }
 
   static extend(other, actions) {
@@ -819,14 +884,23 @@ Actions.preformActionsFromMessage = function (msg, cmd) {
   }
 };
 
-Actions.preformActionsFromInteraction = function (interaction, cmd) {
+Actions.preformActionsFromInteraction = function (interaction, cmd, initialTempVars = null) {
   if (
     this.checkConditions(interaction.guild, interaction.member, interaction.user, cmd) &&
     this.checkTimeRestriction(interaction.user, cmd)
   ) {
-    this.invokeInteraction(interaction, cmd.actions);
+    this.invokeInteraction(interaction, cmd.actions, initialTempVars);
   }
 };
+
+Actions.preformActionsFromSelectInteraction = function (interaction, select, initialTempVars = null) {
+  const tempVars = initialTempVars ?? {};
+  if (typeof select.tempVarName === "string") {
+    const values = interaction.values;
+    tempVars[select.tempVarName] = !values || values.length === 0 ? 0 : (values.length === 1 ? values[0] : values);
+  }
+  this.preformActionsFromInteraction(interaction, select, tempVars);
+}
 
 Actions.checkConditions = function (guild, member, user, cmd) {
   const isServer = Boolean(guild && member);
@@ -930,10 +1004,11 @@ Actions.invokeActions = function (msg, actions) {
   }
 };
 
-Actions.invokeInteraction = function (interaction, actions) {
+Actions.invokeInteraction = function (interaction, actions, initialTempVars) {
   if (actions.length > 0) {
     const cache = new ActionsCache(actions, interaction.guild, {
       interaction: interaction,
+      temp: initialTempVars ? { ...initialTempVars } : {}
     });
     this.callNextAction(cache);
   }
@@ -1401,6 +1476,92 @@ Actions.executeSubActions = function (actions, cache, callback = null) {
 
 Actions.generateSubCache = function (cache, actions) {
   return ActionsCache.extend(cache, actions);
+};
+
+Actions.generateButton = function (button) {
+  const style = button.url ? "LINK" : button.type;
+  const buttonData = {
+    type: "BUTTON",
+    label: button.name,
+    style: style
+  };
+  if (button.url) {
+    buttonData.url = button.url;
+  } else {
+    buttonData.customId = button.id;
+  }
+  if (button.emoji) {
+    buttonData.emoji = button.emoji;
+  }
+  return buttonData;
+};
+
+Actions.generateSelectMenu = function (select) {
+  const selectData = {
+    type: "SELECT_MENU",
+    customId: select.id,
+    placeholder: select.placeholder,
+    minValues: parseInt(select.min) || 1,
+    maxValues: parseInt(select.max) || 1,
+    options: select.options.map((option, index) => {
+      option.label ||= "No Label";
+      option.value ||= index.toString();
+      return option;
+    }),
+  };
+  return selectData;
+};
+
+Actions.addButtonToActionRowArray = function (array, rowText, buttonData, cache) {
+  let row = 0;
+  if(!rowText) {
+    if(array.length !== 0) {
+      row = array.length - 1;
+      if(array[row].length >= 5) {
+        row++;
+      }
+    }
+  } else {
+    row = parseInt(rowText) - 1;
+  }
+  if (row >= 0 && row < 5) {
+    while (array.length <= (row + 1)) {
+      array.push([]);
+    }
+    if (array[row].length >= 5) {
+      this.displayError(data, cache, "Action row #" + row + " exceeded the maximum of 5 buttons!");
+    } else {
+      array[row].push(buttonData);
+    }
+  } else {
+    this.displayError(cache.actions[cache.index], cache, "Invalid action row: \"" + rowText + "\".");
+  }
+};
+
+Actions.addSelectToActionRowArray = function (array, rowText, selectData, cache) {
+  let row = 0;
+  if(!rowText) {
+    if(array.length !== 0) {
+      row = array.length - 1;
+      if(array[row].length >= 5) {
+        row++;
+      }
+    }
+  } else {
+    row = parseInt(rowText) - 1;
+  }
+  if (row >= 0 && row < 5) {
+    while (array.length <= (row + 1)) {
+      array.push([]);
+    }
+    if (array[row].length >= 1) {
+      this.displayError(cache.actions[cache.index], cache, "Action row #" + row + " cannot have a select menu when there are any buttons on it!");
+    } else {
+      array[row].push(selectData);
+    }
+  } else {
+    this.displayError(cache.actions[cache.index], cache, "Invalid action row: \"" + rowText + "\".");
+  }
 };
 
 //#endregion
