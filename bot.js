@@ -647,10 +647,14 @@ Bot.onInteraction = function (interaction) {
     this.onSlashCommandInteraction(interaction);
   } else if (interaction.isContextMenu()) {
     this.onContextMenuInteraction(interaction);
-  } else if (interaction.isButton()) {
-    this.onButtonInteraction(interaction);
-  } else if (interaction.isSelectMenu()) {
-    this.onSelectMenuInteraction(interaction);
+  } else {
+    if (!Actions.checkTemporaryInteractionResponses(interaction)) {
+      if (interaction.isButton()) {
+        this.onButtonInteraction(interaction);
+      } else if (interaction.isSelectMenu()) {
+        this.onSelectMenuInteraction(interaction);
+      }
+    }
   }
 };
 
@@ -674,6 +678,11 @@ Bot.onButtonInteraction = function (interaction) {
   const interactionId = interaction.customId;
   if (this.$button[interactionId]) {
     Actions.preformActionsFromInteraction(interaction, this.$button[interactionId]);
+  } else {
+    const response = Actions.getInvalidButtonResponseText();
+    if (response) {
+      interaction.reply({ content: response, ephemeral: true });
+    }
   }
 };
 
@@ -681,6 +690,11 @@ Bot.onSelectMenuInteraction = function (interaction) {
   const interactionId = interaction.customId;
   if (this.$select[interactionId]) {
     Actions.preformActionsFromSelectInteraction(interaction, this.$select[interactionId]);
+  } else {
+    const response = Actions.getInvalidSelectResponseText();
+    if (response) {
+      interaction.reply({ content: response, ephemeral: true });
+    }
   }
 };
 
@@ -1048,8 +1062,24 @@ Actions.callNextAction = function (cache) {
   }
 };
 
+Actions.getInvalidButtonResponseText = function () {
+  return Files.data.settings.invalidButtonText ?? "Button response no longer valid.";
+};
+
+Actions.getInvalidSelectResponseText = function () {
+  return Files.data.settings.invalidSelectText ?? "Select menu response no longer valid.";
+};
+
 Actions.getDefaultResponseText = function () {
   return Files.data.settings.autoResponseText ?? "Command successfully run!";
+};
+
+Actions.getInvalidPermissionsResponse = function () {
+  return Files.data.settings.invalidPermissionsText ?? "Invalid permissions!";
+};
+
+Actions.getInvalidCooldownResponse = function () {
+  return Files.data.settings.invalidCooldownText ?? "Must wait %1 before using this action.";
 };
 
 Actions.getErrorString = function (data, cache) {
@@ -1562,6 +1592,56 @@ Actions.addSelectToActionRowArray = function (array, rowText, selectData, cache)
   } else {
     this.displayError(cache.actions[cache.index], cache, "Invalid action row: \"" + rowText + "\".");
   }
+};
+
+Actions.checkTemporaryInteractionResponses = function (interaction) {
+  const customId = interaction.customId;
+  if(this._temporaryInteractions?.[customId]) {
+    const interactions = this._temporaryInteractions[customId];
+    const callbacks = [];
+    for(let i = 0; i < interactions.length; i++) {
+      const interData = interactions[i];
+      const usersMatch = !interData.userId || interData.userId === interaction.user.id;
+      if(interData.message === interaction.message.id && usersMatch) {
+        interData.callback?.(interaction);
+        return true;
+      }
+    }
+  }
+  return false;
+};
+
+Actions.registerTemporaryInteraction = function (message, time, customId, userId) {
+  if(!this._temporaryInteractionIdMax) this._temporaryInteractionIdMax = 0;
+  if(!this._temporaryInteractions) this._temporaryInteractions = {};
+  if(!this._temporaryInteractions[customId]) this._temporaryInteractions[customId] = [];
+  return new Promise(function(resolve, reject) {
+    const uniqueId = (this._temporaryInteractionIdMax++);
+    let removed = false;
+
+    const removeInteraction = () => {
+      if(!removed) removed = true;
+      else return;
+      const interactions = this._temporaryInteractions[customId];
+      if(interactions) {
+        let i = 0;
+        for(; i < interactions.length; i++) {
+          if(interactions[i].uniqueId === uniqueId) {
+            break;
+          }
+        }
+        if(i < interactions.length) interactions.splice(i, 1);
+      }
+    };
+
+    const callback = (interaction) => {
+      resolve(interaction);
+      removeInteraction();
+    };
+    
+    this._temporaryInteractions[customId].push({ message, userId, callback, uniqueId });
+    if(time > 0) { require("node:timers").setTimeout(removeInteraction, time).unref(); }
+  }.bind(this));
 };
 
 //#endregion

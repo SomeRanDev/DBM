@@ -401,10 +401,7 @@ module.exports = {
 
         for (let i = 0; i < awaitResponses.length; i++) {
           const response = awaitResponses[i];
-          resultMsg.awaitMessageComponent({
-            time: response.time,
-            filter: (interaction) => interaction.customId === response.id && (!response.user || response.user === interaction.user.id),
-          }).then((interaction) => {
+          this.registerTemporaryInteraction(resultMsg.id, response.time, response.id, response.user).then((interaction) => {
             if (response.data) {
               if (response.type === "BUTTON") {
                 this.preformActionsFromInteraction(interaction, response.data, cache.temp);
