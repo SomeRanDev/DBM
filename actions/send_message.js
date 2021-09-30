@@ -45,7 +45,19 @@ module.exports = {
   // are also the names of the fields stored in the action's JSON data.
   //---------------------------------------------------------------------
 
-  fields: ["channel", "varName", "message", "buttons", "selectMenus", "reply", "ephemeral", "tts", "file", "storage", "varName2"],
+  fields: [
+    "channel",
+    "varName",
+    "message",
+    "buttons",
+    "selectMenus",
+    "reply",
+    "ephemeral",
+    "tts",
+    "file",
+    "storage",
+    "varName2",
+  ],
 
   //---------------------------------------------------------------------
   // Command HTML
@@ -296,16 +308,16 @@ module.exports = {
 
   onSave(data, helpers) {
     // generate unique ids if not provided by user since they are important
-    if(Array.isArray(data?.buttons)) {
-      for(let i = 0; i < data.buttons.length; i++) {
-        if(!data.buttons[i].id) {
+    if (Array.isArray(data?.buttons)) {
+      for (let i = 0; i < data.buttons.length; i++) {
+        if (!data.buttons[i].id) {
           data.buttons[i].id = "msg-button-" + helpers.generateUUID().substring(0, 7);
         }
       }
     }
-    if(Array.isArray(data?.selectMenus)) {
-      for(let i = 0; i < data.selectMenus.length; i++) {
-        if(!data.selectMenus[i].id) {
+    if (Array.isArray(data?.selectMenus)) {
+      for (let i = 0; i < data.selectMenus.length; i++) {
+        if (!data.selectMenus[i].id) {
           data.selectMenus[i].id = "msg-select-" + helpers.generateUUID().substring(0, 7);
         }
       }
@@ -330,7 +342,7 @@ module.exports = {
     const target = this.getSendTarget(channel, varName, cache);
 
     const messageOptions = {
-      content: this.evalMessage(message, cache)
+      content: this.evalMessage(message, cache),
     };
 
     let componentsArr = [];
@@ -347,7 +359,7 @@ module.exports = {
         if (button.mode !== "PERSISTENT") {
           awaitResponses.push({
             type: "BUTTON",
-            time: button.time ? (parseInt(button.time) || defaultTime) : defaultTime,
+            time: button.time ? parseInt(button.time) || defaultTime : defaultTime,
             id: button.id,
             user: button.mode === "PERSONAL" ? cache.getUser()?.id : null,
             data: button,
@@ -366,7 +378,7 @@ module.exports = {
         if (select.mode !== "PERSISTENT") {
           awaitResponses.push({
             type: "SELECT",
-            time: select.time ? (parseInt(select.time) || defaultTime) : defaultTime,
+            time: select.time ? parseInt(select.time) || defaultTime : defaultTime,
             id: select.id,
             user: select.mode === "PERSONAL" ? cache.getUser()?.id : null,
             data: select,
@@ -376,12 +388,14 @@ module.exports = {
     }
 
     if (componentsArr.length > 0) {
-      messageOptions.components = componentsArr.filter((comps) => comps.length > 0).map(function(comps) {
-        return {
-          type: "ACTION_ROW",
-          components: comps
-        };
-      });
+      messageOptions.components = componentsArr
+        .filter((comps) => comps.length > 0)
+        .map(function (comps) {
+          return {
+            type: "ACTION_ROW",
+            components: comps,
+          };
+        });
     }
 
     if (data.tts) {
@@ -401,33 +415,38 @@ module.exports = {
 
         for (let i = 0; i < awaitResponses.length; i++) {
           const response = awaitResponses[i];
-          this.registerTemporaryInteraction(resultMsg.id, response.time, response.id, response.user).then((interaction) => {
-            if (response.data) {
-              if (response.type === "BUTTON") {
-                this.preformActionsFromInteraction(interaction, response.data, cache.temp);
-              } else {
-                this.preformActionsFromSelectInteraction(interaction, response.data, cache.temp);
+          this.registerTemporaryInteraction(resultMsg.id, response.time, response.id, response.user)
+            .then((interaction) => {
+              if (response.data) {
+                if (response.type === "BUTTON") {
+                  this.preformActionsFromInteraction(interaction, response.data, cache.temp);
+                } else {
+                  this.preformActionsFromSelectInteraction(interaction, response.data, cache.temp);
+                }
               }
-            }
-          }).catch((err) => this.displayError(data, cache, err));
+            })
+            .catch((err) => this.displayError(data, cache, err));
         }
       }
     };
 
-    const canReply = cache?.interaction?.replied === false && target.id.length > 0 && target.id === cache?.interaction?.channel?.id;
+    const canReply =
+      cache?.interaction?.replied === false && target.id.length > 0 && target.id === cache?.interaction?.channel?.id;
 
     if (Array.isArray(target)) {
       this.callListFunc(target, "send", [messageOptions]).then(onComplete);
     } else if (data.reply === true && canReply) {
       messageOptions.fetchReply = true;
-      if(data.ephemeral === true) {
+      if (data.ephemeral === true) {
         messageOptions.ephemeral = true;
       }
-      cache.interaction.reply(messageOptions)
+      cache.interaction
+        .reply(messageOptions)
         .then(onComplete)
         .catch((err) => this.displayError(data, cache, err));
     } else if (target?.send) {
-      target.send(messageOptions)
+      target
+        .send(messageOptions)
         .then(onComplete)
         .catch((err) => this.displayError(data, cache, err));
     } else {

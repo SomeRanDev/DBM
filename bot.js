@@ -34,7 +34,7 @@ const MsgType = {
   INVALID_SLASH_PARAMETER_NAME: 8,
   INVALID_SLASH_COMMAND_SERVER_ID: 9,
   DUPLICATE_BUTTON_ID: 10,
-  DUPLICATE_SELECT_ID: 11
+  DUPLICATE_SELECT_ID: 11,
 };
 
 function PrintError(type) {
@@ -110,19 +110,29 @@ function PrintError(type) {
       break;
     }
     case MsgType.DUPLICATE_BUTTON_ID: {
-      error(format('Button interaction with unique id "%s" already exists!\nThis duplicate will be ignored.\n', arguments[1]));
+      error(
+        format(
+          'Button interaction with unique id "%s" already exists!\nThis duplicate will be ignored.\n',
+          arguments[1],
+        ),
+      );
       break;
     }
     case MsgType.DUPLICATE_SELECT_ID: {
-      error(format('Select menu interaction with unique id "%s" already exists!\nThis duplicate will be ignored.\n', arguments[1]));
+      error(
+        format(
+          'Select menu interaction with unique id "%s" already exists!\nThis duplicate will be ignored.\n',
+          arguments[1],
+        ),
+      );
       break;
     }
   }
-};
+}
 
 function GetActionErrorText(type, name, index) {
   return require("node:util").format('Error with the %s "%s", Action #%d', type, name, index);
-};
+}
 
 //#endregion
 
@@ -411,8 +421,8 @@ Bot.prepareActions = function (actions) {
 };
 
 Bot.registerButtonInteraction = function (interactionId, data) {
-  if(interactionId) {
-    if(!this.$button[interactionId]) {
+  if (interactionId) {
+    if (!this.$button[interactionId]) {
       this.$button[interactionId] = data;
     } else {
       PrintError(MsgType.DUPLICATE_BUTTON_ID, interactionId);
@@ -421,8 +431,8 @@ Bot.registerButtonInteraction = function (interactionId, data) {
 };
 
 Bot.registerSelectMenuInteraction = function (interactionId, data) {
-  if(interactionId) {
-    if(!this.$select[interactionId]) {
+  if (interactionId) {
+    if (!this.$select[interactionId]) {
       this.$select[interactionId] = data;
     } else {
       PrintError(MsgType.DUPLICATE_SELECT_ID, interactionId);
@@ -919,7 +929,7 @@ Actions.preformActionsFromSelectInteraction = function (interaction, select, ini
   const tempVars = initialTempVars ?? {};
   if (typeof select.tempVarName === "string") {
     const values = interaction.values;
-    tempVars[select.tempVarName] = !values || values.length === 0 ? 0 : (values.length === 1 ? values[0] : values);
+    tempVars[select.tempVarName] = !values || values.length === 0 ? 0 : values.length === 1 ? values[0] : values;
   }
   this.preformActionsFromInteraction(interaction, select, tempVars);
 };
@@ -1033,7 +1043,7 @@ Actions.invokeInteraction = function (interaction, actions, initialTempVars) {
   if (actions.length > 0) {
     const cache = new ActionsCache(actions, interaction.guild, {
       interaction: interaction,
-      temp: initialTempVars ? { ...initialTempVars } : {}
+      temp: initialTempVars ? { ...initialTempVars } : {},
     });
     this.callNextAction(cache);
   }
@@ -1524,7 +1534,7 @@ Actions.generateButton = function (button) {
   const buttonData = {
     type: "BUTTON",
     label: button.name,
-    style: style
+    style: style,
   };
   if (button.url) {
     buttonData.url = button.url;
@@ -1555,10 +1565,10 @@ Actions.generateSelectMenu = function (select) {
 
 Actions.addButtonToActionRowArray = function (array, rowText, buttonData, cache) {
   let row = 0;
-  if(!rowText) {
-    if(array.length !== 0) {
+  if (!rowText) {
+    if (array.length !== 0) {
       row = array.length - 1;
-      if(array[row].length >= 5) {
+      if (array[row].length >= 5) {
         row++;
       }
     }
@@ -1566,7 +1576,7 @@ Actions.addButtonToActionRowArray = function (array, rowText, buttonData, cache)
     row = parseInt(rowText) - 1;
   }
   if (row >= 0 && row < 5) {
-    while (array.length <= (row + 1)) {
+    while (array.length <= row + 1) {
       array.push([]);
     }
     if (array[row].length >= 5) {
@@ -1575,16 +1585,16 @@ Actions.addButtonToActionRowArray = function (array, rowText, buttonData, cache)
       array[row].push(buttonData);
     }
   } else {
-    this.displayError(cache.actions[cache.index], cache, "Invalid action row: \"" + rowText + "\".");
+    this.displayError(cache.actions[cache.index], cache, 'Invalid action row: "' + rowText + '".');
   }
 };
 
 Actions.addSelectToActionRowArray = function (array, rowText, selectData, cache) {
   let row = 0;
-  if(!rowText) {
-    if(array.length !== 0) {
+  if (!rowText) {
+    if (array.length !== 0) {
       row = array.length - 1;
-      if(array[row].length >= 5) {
+      if (array[row].length >= 5) {
         row++;
       }
     }
@@ -1592,28 +1602,32 @@ Actions.addSelectToActionRowArray = function (array, rowText, selectData, cache)
     row = parseInt(rowText) - 1;
   }
   if (row >= 0 && row < 5) {
-    while (array.length <= (row + 1)) {
+    while (array.length <= row + 1) {
       array.push([]);
     }
     if (array[row].length >= 1) {
-      this.displayError(cache.actions[cache.index], cache, "Action row #" + row + " cannot have a select menu when there are any buttons on it!");
+      this.displayError(
+        cache.actions[cache.index],
+        cache,
+        "Action row #" + row + " cannot have a select menu when there are any buttons on it!",
+      );
     } else {
       array[row].push(selectData);
     }
   } else {
-    this.displayError(cache.actions[cache.index], cache, "Invalid action row: \"" + rowText + "\".");
+    this.displayError(cache.actions[cache.index], cache, 'Invalid action row: "' + rowText + '".');
   }
 };
 
 Actions.checkTemporaryInteractionResponses = function (interaction) {
   const customId = interaction.customId;
-  if(this._temporaryInteractions?.[customId]) {
+  if (this._temporaryInteractions?.[customId]) {
     const interactions = this._temporaryInteractions[customId];
     const callbacks = [];
-    for(let i = 0; i < interactions.length; i++) {
+    for (let i = 0; i < interactions.length; i++) {
       const interData = interactions[i];
       const usersMatch = !interData.userId || interData.userId === interaction.user.id;
-      if(interData.message === interaction.message.id && usersMatch) {
+      if (interData.message === interaction.message.id && usersMatch) {
         interData.callback?.(interaction);
         return true;
       }
@@ -1623,36 +1637,40 @@ Actions.checkTemporaryInteractionResponses = function (interaction) {
 };
 
 Actions.registerTemporaryInteraction = function (message, time, customId, userId) {
-  if(!this._temporaryInteractionIdMax) this._temporaryInteractionIdMax = 0;
-  if(!this._temporaryInteractions) this._temporaryInteractions = {};
-  if(!this._temporaryInteractions[customId]) this._temporaryInteractions[customId] = [];
-  return new Promise(function(resolve, reject) {
-    const uniqueId = (this._temporaryInteractionIdMax++);
-    let removed = false;
+  if (!this._temporaryInteractionIdMax) this._temporaryInteractionIdMax = 0;
+  if (!this._temporaryInteractions) this._temporaryInteractions = {};
+  if (!this._temporaryInteractions[customId]) this._temporaryInteractions[customId] = [];
+  return new Promise(
+    function (resolve, reject) {
+      const uniqueId = this._temporaryInteractionIdMax++;
+      let removed = false;
 
-    const removeInteraction = () => {
-      if(!removed) removed = true;
-      else return;
-      const interactions = this._temporaryInteractions[customId];
-      if(interactions) {
-        let i = 0;
-        for(; i < interactions.length; i++) {
-          if(interactions[i].uniqueId === uniqueId) {
-            break;
+      const removeInteraction = () => {
+        if (!removed) removed = true;
+        else return;
+        const interactions = this._temporaryInteractions[customId];
+        if (interactions) {
+          let i = 0;
+          for (; i < interactions.length; i++) {
+            if (interactions[i].uniqueId === uniqueId) {
+              break;
+            }
           }
+          if (i < interactions.length) interactions.splice(i, 1);
         }
-        if(i < interactions.length) interactions.splice(i, 1);
-      }
-    };
+      };
 
-    const callback = (interaction) => {
-      resolve(interaction);
-      removeInteraction();
-    };
-    
-    this._temporaryInteractions[customId].push({ message, userId, callback, uniqueId });
-    if(time > 0) { require("node:timers").setTimeout(removeInteraction, time).unref(); }
-  }.bind(this));
+      const callback = (interaction) => {
+        resolve(interaction);
+        removeInteraction();
+      };
+
+      this._temporaryInteractions[customId].push({ message, userId, callback, uniqueId });
+      if (time > 0) {
+        require("node:timers").setTimeout(removeInteraction, time).unref();
+      }
+    }.bind(this),
+  );
 };
 
 //#endregion
@@ -2253,13 +2271,22 @@ Audio.Subscription = class {
   }
 
   async processQueue() {
-    if (
-      this.queueLock ||
-      this.audioPlayer.state.status !== Audio.voice.AudioPlayerStatus.Idle ||
-      this.queue.length === 0
-    ) {
+    if (this.queueLock || this.audioPlayer.state.status !== Audio.voice.AudioPlayerStatus.Idle) {
       return;
     }
+
+    if (this.queue.length === 0) {
+      const leaveVoiceTimeout = Files.data.settings.leaveVoiceTimeout ?? "0";
+      let seconds = parseInt(leaveVoiceTimeout, 10);
+
+      if (isNaN(seconds) || seconds < 0) seconds = 0;
+      if (leaveVoiceTimeout === "" || !isFinite(seconds)) return;
+
+      require("node:timers").setTimeout(() => {
+        Audio.disconnectFromVoice(this.voiceConnection.joinConfig.guildId);
+      }, seconds * 1e3);
+    }
+
     this.queueLock = true;
 
     const nextTrack = this.queue.shift();
