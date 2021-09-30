@@ -118,11 +118,11 @@ function PrintError(type) {
       break;
     }
   }
-}
+};
 
 function GetActionErrorText(type, name, index) {
   return require("node:util").format('Error with the %s "%s", Action #%d', type, name, index);
-}
+};
 
 //#endregion
 
@@ -899,11 +899,19 @@ Actions.preformActionsFromMessage = function (msg, cmd) {
 };
 
 Actions.preformActionsFromInteraction = function (interaction, cmd, initialTempVars = null) {
-  if (
-    this.checkConditions(interaction.guild, interaction.member, interaction.user, cmd) &&
-    this.checkTimeRestriction(interaction.user, cmd)
-  ) {
-    this.invokeInteraction(interaction, cmd.actions, initialTempVars);
+  const invalidPermissions = this.getInvalidPermissionsResponse();
+  const invalidCooldown = this.getInvalidCooldownResponse();
+  if (this.checkConditions(interaction.guild, interaction.member, interaction.user, cmd)) {
+    const timeRestriction = this.checkTimeRestriction(interaction.user, cmd, true);
+    if (timeRestriction === true) {
+      this.invokeInteraction(interaction, cmd.actions, initialTempVars);
+    } else if (invalidCooldown) {
+      const { format } = require("node:util");
+      const content = typeof timeRestriction === "string" ? format(invalidCooldown, timeRestriction) : invalidCooldown;
+      interaction.reply({ content: content, ephemeral: true });
+    }
+  } else if (invalidPermissions) {
+    interaction.reply({ content: invalidPermissions, ephemeral: true });
   }
 };
 
@@ -914,7 +922,7 @@ Actions.preformActionsFromSelectInteraction = function (interaction, select, ini
     tempVars[select.tempVarName] = !values || values.length === 0 ? 0 : (values.length === 1 ? values[0] : values);
   }
   this.preformActionsFromInteraction(interaction, select, tempVars);
-}
+};
 
 Actions.checkConditions = function (guild, member, user, cmd) {
   const isServer = Boolean(guild && member);
@@ -938,7 +946,7 @@ Actions.checkConditions = function (guild, member, user, cmd) {
   }
 };
 
-Actions.checkTimeRestriction = function (user, cmd) {
+Actions.checkTimeRestriction = function (user, cmd, returnTimeString = false) {
   if (!cmd._timeRestriction) return true;
   if (!user) return false;
   const mid = user.id;
@@ -958,9 +966,12 @@ Actions.checkTimeRestriction = function (user, cmd) {
       return true;
     } else {
       const remaining = cmd._timeRestriction - Math.floor(diff / 1000);
-      Events.callEvents("38", 1, 3, 2, false, "", msg.member, this.generateTimeString(remaining));
+      const timeString = this.generateTimeString(remaining);
+      Events.callEvents("38", 1, 3, 2, false, "", cmd?.msg?.member, timeString);
+      return returnTimeString ? timeString : false;
     }
   }
+  return false;
 };
 
 Actions.generateTimeString = function (milliseconds) {
@@ -1079,7 +1090,7 @@ Actions.getInvalidPermissionsResponse = function () {
 };
 
 Actions.getInvalidCooldownResponse = function () {
-  return Files.data.settings.invalidCooldownText ?? "Must wait %1 before using this action.";
+  return Files.data.settings.invalidCooldownText ?? "Must wait %s before using this action.";
 };
 
 Actions.getErrorString = function (data, cache) {
