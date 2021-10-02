@@ -1052,7 +1052,9 @@ Actions.invokeInteraction = function (interaction, actions, initialTempVars) {
 Actions.invokeEvent = function (event, server, temp) {
   const actions = event.actions;
   if (actions.length > 0) {
-    const cache = new ActionsCache(actions, server);
+    const cache = new ActionsCache(actions, server, {
+      temp: { ...temp }
+    });
     this.callNextAction(cache);
   }
 };
@@ -1684,48 +1686,60 @@ const Events = (DBM.Events = {});
 
 let $evts = null;
 
-Events.data = [
-  [],
-  [],
-  [],
-  [],
-  ["guildCreate", 0, 0, 1],
-  ["guildDelete", 0, 0, 1],
-  ["guildMemberAdd", 1, 0, 2],
-  ["guildMemberRemove", 1, 0, 2],
-  ["channelCreate", 1, 0, 2, true, "arg1.type !== 'GUILD_TEXT'"],
-  ["channelDelete", 1, 0, 2, true, "arg1.type !== 'GUILD_TEXT'"],
-  ["roleCreate", 1, 0, 2],
-  ["roleDelete", 1, 0, 2],
-  ["guildBanAdd", 3, 0, 1],
-  ["guildBanRemove", 3, 0, 1],
-  ["channelCreate", 1, 0, 2, true, "arg1.type !== 'GUILD_VOICE'"],
-  ["channelDelete", 1, 0, 2, true, "arg1.type !== 'GUILD_VOICE'"],
-  ["emojiCreate", 1, 0, 2],
-  ["emojiDelete", 1, 0, 2],
-  ["messageDelete", 1, 0, 2, true],
-  ["guildUpdate", 1, 3, 3],
-  ["guildMemberUpdate", 1, 3, 4],
-  ["presenceUpdate", 1, 3, 4],
-  ["voiceStateUpdate", 1, 3, 4],
-  ["channelUpdate", 1, 3, 4, true],
-  ["channelPinsUpdate", 1, 0, 2, true],
-  ["roleUpdate", 1, 3, 4],
-  ["messageUpdate", 1, 3, 4, true, "!arg2.content"],
-  ["emojiUpdate", 1, 3, 4],
-  [],
-  [],
-  ["messageReactionRemoveAll", 1, 0, 2, true],
-  ["guildMemberAvailable", 1, 0, 2],
-  ["guildMembersChunk", 1, 0, 3],
-  ["guildMemberSpeaking", 1, 3, 2],
-  [],
-  [],
-  ["guildUnavailable", 1, 0, 1],
-  ["inviteCreate", 1, 0, 2],
-  ["inviteDelete", 1, 0, 2],
-  ["webhookUpdate", 1, 0, 1],
-];
+Events.generateData = function() {
+  return [
+    [],
+    [],
+    [],
+    [],
+    ["guildCreate", 0, 0, 1],
+    ["guildDelete", 0, 0, 1],
+    ["guildMemberAdd", 1, 0, 2],
+    ["guildMemberRemove", 1, 0, 2],
+    ["channelCreate", 1, 0, 2, true, (arg1) => arg1.type === 'GUILD_TEXT'],
+    ["channelDelete", 1, 0, 2, true, (arg1) => arg1.type === 'GUILD_TEXT'],
+    ["roleCreate", 1, 0, 2],
+    ["roleDelete", 1, 0, 2],
+    ["guildBanAdd", 3, 0, 1],
+    ["guildBanRemove", 3, 0, 1],
+    ["channelCreate", 1, 0, 2, true, (arg1) => arg1.type === 'GUILD_VOICE'],
+    ["channelDelete", 1, 0, 2, true, (arg1) => arg1.type === 'GUILD_VOICE'],
+    ["emojiCreate", 1, 0, 2],
+    ["emojiDelete", 1, 0, 2],
+    ["messageDelete", 1, 0, 2, true],
+    ["guildUpdate", 1, 3, 3],
+    ["guildMemberUpdate", 1, 3, 4],
+    ["presenceUpdate", 1, 3, 4],
+    ["voiceStateUpdate", 1, 3, 4],
+    ["channelUpdate", 1, 3, 4, true],
+    ["channelPinsUpdate", 1, 0, 2, true],
+    ["roleUpdate", 1, 3, 4],
+    ["messageUpdate", 1, 3, 4, true, (arg1, arg2) => !!arg2.content],
+    ["emojiUpdate", 1, 3, 4],
+    [],
+    [],
+    ["messageReactionRemoveAll", 1, 0, 2, true],
+    ["guildMemberAvailable", 1, 0, 2],
+    ["guildMembersChunk", 1, 0, 3],
+    ["guildMemberSpeaking", 1, 3, 2],
+    [],
+    [],
+    ["guildUnavailable", 1, 0, 1],
+    ["inviteCreate", 1, 0, 2],
+    ["inviteDelete", 1, 0, 2],
+    ["channelCreate", 1, 0, 2, true, (arg1) => arg1.type !== 'GUILD_TEXT' && arg1.type !== 'GUILD_VOICE'],
+    ["channelDelete", 1, 0, 2, true, (arg1) => arg1.type !== 'GUILD_TEXT' && arg1.type !== 'GUILD_VOICE'],
+    ["stickerCreate", 1, 0, 2, true],
+    ["stickerDelete", 1, 0, 2, true],
+    ["threadCreate", 1, 0, 2, true],
+    ["threadDelete", 1, 0, 2, true],
+    ["stickerUpdate", 1, 3, 4, true],
+    ["threadUpdate", 1, 3, 4, true],
+    ["threadMemberUpdate", 1, 3, 100, true],
+  ];
+};
+
+Events.data = Events.generateData();
 
 Events.registerEvents = function (bot) {
   $evts = Bot.$evts;
@@ -1742,7 +1756,7 @@ Events.registerEvents = function (bot) {
 
 Events.callEvents = function (id, temp1, temp2, server, mustServe, condition, arg1, arg2) {
   if (mustServe && ((temp1 > 0 && !arg1.guild) || (temp2 > 0 && !arg2.guild))) return;
-  if (condition && eval(condition)) return;
+  if (condition && !condition(arg1, arg2)) return;
   const events = $evts[id];
   if (!events) return;
   for (let i = 0; i < events.length; i++) {
@@ -1764,6 +1778,8 @@ Events.getObject = function (id, arg1, arg2) {
       return arg2;
     case 4:
       return arg2.guild;
+    case 100:
+      return arg1.guildMember.guild;
   }
 };
 
