@@ -746,10 +746,15 @@ const ActionsCache = (Actions.ActionsCache = class ActionsCache {
   onMainCacheCompleted() {
     if (this.interaction) {
       if (!this.interaction.replied) {
-        this.interaction.reply({
+        const replyData = {
           ephemeral: true,
           content: Actions.getDefaultResponseText(),
-        });
+        };
+        if(this.interaction.deferred) {
+          this.interaction.editReply(replyData);
+        } else {
+          this.interaction.reply(replyData);
+        }
       }
     }
   }
@@ -817,7 +822,7 @@ Actions.getSlashParameter = function (interaction, name, defaultValue) {
   return defaultValue !== undefined ? defaultValue : result;
 };
 
-Actions.eval = function (content, cache) {
+Actions.eval = function (content, cache, throwError = true) {
   if (!content) return false;
   const DBM = this.getDBM();
   const tempVars = this.getActionVariable.bind(cache.temp);
@@ -851,7 +856,7 @@ Actions.eval = function (content, cache) {
   try {
     return eval(content);
   } catch (e) {
-    console.error(e);
+    if(throwError) console.error(e);
     return false;
   }
 };
@@ -860,6 +865,18 @@ Actions.evalMessage = function (content, cache) {
   if (!content) return "";
   if (!content.match(/\$\{.*\}/im)) return content;
   return this.eval("`" + content.replace(/`/g, "\\`") + "`", cache);
+};
+
+Actions.evalIfPossible = function (content, cache) {
+  if(!this.__cachedText) this.__cachedText = {};
+  if(content in this.__cachedText) return content;
+  let result = this.eval(content, cache, false);
+  if (result === false) result = this.evalMessage(content, cache);
+  if (result === false) {
+    this.__cachedText[content] = true;
+    result = content;
+  }
+  return result;
 };
 
 Actions.initMods = function () {
@@ -1399,21 +1416,7 @@ Actions.getList = function (type, varName, cache) {
 };
 
 Actions.getVariable = function (type, varName, cache) {
-  const server = cache.server;
-  switch (type) {
-    case 1:
-      return cache.temp[varName];
-    case 2:
-      if (server && this.server[server.id]) {
-        return this.server[server.id][varName];
-      }
-      break;
-    case 3:
-      return this.global[varName];
-    default:
-      break;
-  }
-  return false;
+  return this.getTargetFromVariableOrParameter(type - 1, varName, cache);
 };
 
 Actions.storeValue = function (value, type, varName, cache) {

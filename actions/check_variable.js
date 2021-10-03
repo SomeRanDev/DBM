@@ -53,7 +53,7 @@ module.exports = {
 
   html(isEvent, data) {
     return `
-<retrieve-from-variable dropdownLabel="Variable" selectId="storage" variableContainerId="varNameContainer" variableInputId="varName"></retrieve-from-variable>
+<retrieve-from-variable allowSlashParams dropdownLabel="Variable" selectId="storage" variableContainerId="varNameContainer" variableInputId="varName"></retrieve-from-variable>
 
 <br><br><br>
 
@@ -137,9 +137,8 @@ module.exports = {
     if (variable) {
       const val1 = variable;
       const compare = parseInt(data.comparison, 10);
-      let val2 = this.evalMessage(data.value, cache);
-      if (compare !== 6) val2 = this.eval(val2, cache);
-      if (val2 === false) val2 = this.evalMessage(data.value, cache);
+      let val2 = branch.value;
+      if (compare !== 6) val2 = this.evalIfPossible(val2, cache);
       switch (compare) {
         case 0:
           result = val1 !== undefined;

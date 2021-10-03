@@ -440,8 +440,13 @@ module.exports = {
       if (data.ephemeral === true) {
         messageOptions.ephemeral = true;
       }
-      cache.interaction
-        .reply(messageOptions)
+      let promise = null;
+      if(cache.interaction.deferred) {
+        promise = cache.interaction.editReply(messageOptions);
+      } else {
+        promise = cache.interaction.reply(messageOptions);
+      }
+      promise
         .then(onComplete)
         .catch((err) => this.displayError(data, cache, err));
     } else if (target?.send) {

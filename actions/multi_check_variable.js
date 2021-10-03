@@ -5,7 +5,7 @@ module.exports = {
   // This is the name of the action displayed in the editor.
   //---------------------------------------------------------------------
 
-  name: "Check Variable Type",
+  name: "Multi-Check Variable",
 
   //---------------------------------------------------------------------
   // Action Section
@@ -22,7 +22,7 @@ module.exports = {
   //---------------------------------------------------------------------
 
   subtitle(data, presets) {
-    return `${presets.getConditionsText(data)}`;
+    return `Check ${presets.getVariableText(data.storage, data.varName)} with ${data.branches.length} Branches`;
   },
 
   //---------------------------------------------------------------------
@@ -33,7 +33,7 @@ module.exports = {
   // are also the names of the fields stored in the action's JSON data.
   //---------------------------------------------------------------------
 
-  fields: ["storage", "varName", "comparison", "branch"],
+  fields: ["storage", "varName", "branches"],
 
   //---------------------------------------------------------------------
   // Command HTML
@@ -55,44 +55,33 @@ module.exports = {
     return `
 <retrieve-from-variable allowSlashParams dropdownLabel="Variable" selectId="storage" variableContainerId="varNameContainer" variableInputId="varName"></retrieve-from-variable>
 
-<br><br><br>
+<br><br><br><br>
 
-<div style="padding-top: 8px; width: 80%;">
-		<span class="dbminputlabel">Variable Type to Check</span><br>
-		<select id="comparison" class="round">
-			<option value="0" selected>Number</option>
-			<option value="1">String</option>
-			<option value="2">Image</option>
-			<option value="3">Member</option>
-			<option value="4">Message</option>
-			<option value="5">Text Channel</option>
-			<option value="6">Voice Channel</option>
-			<option value="7">Role</option>
-			<option value="8">Server</option>
-			<option value="9">Emoji</option>
-		</select>
-</div>
+<dialog-list id="branches" fields='["comparison", "value", "actions"]' dialogResizable dialogTitle="Check Variable Info" dialogWidth="600" dialogHeight="400" listLabel="Comparisons and Actions" listStyle="height: calc(100vh - 280px);" itemName="Condition" itemHeight="28px;" itemTextFunction="glob.formatItem(data)" itemStyle="line-height: 28px;">
+  <div style="padding: 16px;">
+    <div style="float: left; width: 35%;">
+      <span class="dbminputlabel">Comparison Type</span><br>
+      <select id="comparison" class="round" onchange="glob.onComparisonChanged(this)">
+        <option value="0">Exists</option>
+        <option value="1" selected>Equals</option>
+        <option value="2">Equals Exactly</option>
+        <option value="3">Less Than</option>
+        <option value="4">Greater Than</option>
+        <option value="5">Includes</option>
+        <option value="6">Matches Regex</option>
+      </select>
+    </div>
+    <div style="float: right; width: 60%;">
+      <span class="dbminputlabel">Value to Compare to</span><br>
+      <input id="value" class="round" type="text" name="is-eval">
+    </div>
 
-<br>
+    <br><br><br><br>
 
-<conditional-input id="branch"></conditional-input>`;
-  },
+    <action-list-input id="actions" height="calc(100vh - 220px)"></action-list-input>
 
-  //---------------------------------------------------------------------
-  // Action Editor Pre-Init Code
-  //
-  // Before the fields from existing data in this action are applied
-  // to the user interface, this function is called if it exists.
-  // The existing data is provided, and a modified version can be
-  // returned. The returned version will be used if provided.
-  // This is to help provide compatibility with older versions of the action.
-  //
-  // The "formatters" argument contains built-in functions for formatting
-  // the data required for official DBM action compatibility.
-  //---------------------------------------------------------------------
-
-  preInit(data, formatters) {
-    return formatters.compatibility_2_0_0_iftruefalse_to_branch(data);
+  </div>
+</dialog-list>`;
   },
 
   //---------------------------------------------------------------------
@@ -103,7 +92,25 @@ module.exports = {
   // functions for the DOM elements.
   //---------------------------------------------------------------------
 
-  init() {},
+  init() {
+    const { glob } = this;
+
+    glob.formatItem = function(data) {
+      let result = "<div style=\"display: inline-block; width: 200px; padding-left: 8px;\">VAR ";
+      const comp = data.comparison;
+      switch(comp) {
+        case "0": result += "Exists"; break;
+        case "1": result += "= " + data.value; break;
+        case "2": result += "= " + data.value; break;
+        case "3": result += "< " + data.value; break;
+        case "4": result += "> " + data.value; break;
+        case "5": result += "Includes " + data.value; break;
+        case "6": result += "Matches Regex " + data.value; break;
+      }
+      result += "</div><span>Call " + data.actions.length + " Actions</span>";
+      return result;
+    };
+  },
 
   //---------------------------------------------------------------------
   // Action Bot Function
@@ -120,45 +127,47 @@ module.exports = {
     const variable = this.getVariable(type, varName, cache);
     let result = false;
     if (variable) {
-      const DiscordJS = this.getDBM().DiscordJS;
-      const compare = parseInt(data.comparison, 10);
-      switch (compare) {
-        case 0:
-          result = typeof variable === "number";
+      const val1 = variable;
+      const branches = data.branches;
+      for(let i = 0; i < branches.length; i++) {
+        const branch = branches[i];
+        const compare = parseInt(branch.comparison, 10);
+        let val2 = branch.value;
+        if (compare !== 6) val2 = this.evalIfPossible(val2, cache);
+        switch (compare) {
+          case 0:
+            result = val1 !== undefined;
+            break;
+          case 1:
+            result = val1 == val2;
+            break;
+          case 2:
+            result = val1 === val2;
+            break;
+          case 3:
+            result = val1 < val2;
+            break;
+          case 4:
+            result = val1 > val2;
+            break;
+          case 5:
+            if (typeof val1.includes === "function") {
+              result = val1.includes(val2);
+            }
+            break;
+          case 6:
+            result = Boolean(val1.match(new RegExp("^" + val2 + "$", "i")));
+            break;
+        }
+        if(result) {
+          this.executeSubActionsThenNextAction(branch.actions, cache);
           break;
-        case 1:
-          result = typeof variable === "string";
-          break;
-        case 2:
-          result = variable instanceof this.getDBM().JIMP;
-          break;
-        case 3:
-          result = variable instanceof DiscordJS.GuildMember;
-          break;
-        case 4:
-          result = variable instanceof DiscordJS.Message;
-          break;
-        case 5:
-          result =
-            variable instanceof DiscordJS.TextChannel ||
-            variable instanceof DiscordJS.NewsChannel ||
-            variable instanceof DiscordJS.StoreChannel;
-          break;
-        case 6:
-          result = variable instanceof DiscordJS.VoiceChannel;
-          break;
-        case 7:
-          result = variable instanceof DiscordJS.Role;
-          break;
-        case 8:
-          result = variable instanceof DiscordJS.Guild;
-          break;
-        case 9:
-          result = variable instanceof DiscordJS.Emoji || variable instanceof DiscordJS.GuildEmoji;
-          break;
+        }
       }
     }
-    this.executeResults(result, data?.branch ?? data, cache);
+    if(!result) {
+      this.callNextAction(cache);
+    }
   },
 
   //---------------------------------------------------------------------
