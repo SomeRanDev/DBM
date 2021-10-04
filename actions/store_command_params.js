@@ -114,9 +114,9 @@ module.exports = {
 	</div>
 </div>
 
-<br><br><br><br>
+<br><br><br>
 
-<store-in-variable dropdownLabel="Store In" selectId="storage" variableContainerId="varNameContainer" variableInputId="varName"></store-in-variable>`;
+<store-in-variable style="padding-top: 8px;" dropdownLabel="Store In" selectId="storage" variableContainerId="varNameContainer" variableInputId="varName"></store-in-variable>`;
   },
 
   //---------------------------------------------------------------------

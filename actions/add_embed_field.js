@@ -58,11 +58,11 @@ module.exports = {
 <br><br><br>
 
 <div style="padding-top: 8px;">
-	<div style="float: left; width: 50%;">
+	<div style="float: left; width: calc(50% - 12px);">
 		<span class="dbminputlabel">Field Name</span><br>
 		<input id="fieldName" class="round" type="text">
 	</div>
-	<div style="float: left; width: 50%;">
+	<div style="float: right; width: calc(50% - 12px);">
 		<span class="dbminputlabel">Display Inline</span><br>
 		<select id="inline" class="round">
 			<option value="0">Yes</option>
@@ -71,7 +71,11 @@ module.exports = {
 	</div>
 </div>
 
-<br><br><br>
+<br><br><br><br>
+
+<hr class="subtlebar">
+
+<br>
 
 <div style="padding-top: 8px;">
 	<span class="dbminputlabel">Field Description</span><br>

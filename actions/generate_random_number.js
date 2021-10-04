@@ -66,20 +66,22 @@ module.exports = {
 
   html(isEvent, data) {
     return `
-<div>
-	<div style="float: left; width: 50%; margin: 0; padding: 0;">
-		<span class="dbminputlabel">Minimum Range</span><br>
-		<input id="min" class="round" type="text"><br>
-	</div>
-	<div style="float: left; width: 50%; margin: 0; padding: 0;">
-		<span class="dbminputlabel">Maximum Range</span><br>
-		<input id="max" class="round" type="text"><br>
-	</div>
+<div style="float: left; width: calc(50% - 12px);">
+	<span class="dbminputlabel">Minimum Range</span><br>
+	<input id="min" class="round" type="text"><br>
+</div>
+<div style="float: right; width: calc(50% - 12px);">
+	<span class="dbminputlabel">Maximum Range</span><br>
+	<input id="max" class="round" type="text"><br>
 </div>
 
-<br><br><br>
+<br><br><br><br>
 
-<store-in-variable style="padding-top: 8px;" dropdownLabel="Store In" selectId="storage" variableContainerId="varNameContainer" variableInputId="varName" selectWidth="45%" variableInputWidth="50%"></store-in-variable>`;
+<hr class="subtlebar">
+
+<br>
+
+<store-in-variable style="padding-top: 8px;" dropdownLabel="Store In" selectId="storage" variableContainerId="varNameContainer" variableInputId="varName"></store-in-variable>`;
   },
 
   //---------------------------------------------------------------------

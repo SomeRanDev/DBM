@@ -53,14 +53,13 @@ module.exports = {
 
   html(isEvent, data) {
     return `
-<div style="width: 90%;">
-	<span class="dbminputlabel">Game Name</span><br>
-	<input id="gameName" class="round" type="text">
-</div><br>
-<div style="width: 90%;">
-	<span class="dbminputlabel">Twitch Stream Link</span><br>
-	<input id="gameLink" class="round" type="text" placeholder="Leave blank to disallow!">
-</div>
+<span class="dbminputlabel">Game Name</span><br>
+<input id="gameName" class="round" type="text">
+
+<br>
+
+<span class="dbminputlabel">Twitch Stream Link</span><br>
+<input id="gameLink" class="round" type="text" placeholder="Leave blank to disallow!">
 `;
   },
 

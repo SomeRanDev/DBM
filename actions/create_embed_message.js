@@ -65,7 +65,7 @@ module.exports = {
 
   html(isEvent, data) {
     return `
-<div style="float: left; width: 50%;">
+<div style="float: left; width: calc(50% - 12px);">
 	<span class="dbminputlabel">Title</span><br>
 	<input id="title" class="round" type="text"><br>
 	<span class="dbminputlabel">Author</span><br>
@@ -73,13 +73,13 @@ module.exports = {
 	<span class="dbminputlabel">Color</span><br>
 	<input id="color" class="round" type="text" placeholder="Leave blank for default!"><br>
 	<span class="dbminputlabel">Use Timestamp</span><br>
-	<select id="timestamp" class="round" style="width: 90%;">
+	<select id="timestamp" class="round">
 		<option value="true">Yes</option>
 		<option value="false" selected>No</option>
 	</select><br>
 </div>
 
-<div style="float: right; width: 50%;">
+<div style="float: right; width: calc(50% - 12px);">
 	<span class="dbminputlabel">URL</span><br>
 	<input id="url" class="round" type="text" placeholder="Leave blank for none!"><br>
 	<span class="dbminputlabel">Author Icon URL</span><br>
@@ -89,6 +89,12 @@ module.exports = {
 	<span class="dbminputlabel">Thumbnail URL</span><br>
 	<input id="thumbUrl" class="round" type="text" placeholder="Leave blank for none!"><br>
 </div>
+
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+
+<hr class="subtlebar">
+
+<br>
 
 <store-in-variable dropdownLabel="Store In" selectId="storage" variableContainerId="varNameContainer" variableInputId="varName"></store-in-variable>`;
   },

@@ -54,16 +54,16 @@ module.exports = {
 
   html(isEvent, data) {
     return `
-<retrieve-from-variable dropdownLabel="Source Image" selectId="storage" variableContainerId="varNameContainer" variableInputId="varName" selectWidth="45%" variableInputWidth="50%"></retrieve-from-variable>
+<retrieve-from-variable dropdownLabel="Source Image" selectId="storage" variableContainerId="varNameContainer" variableInputId="varName"></retrieve-from-variable>
 
 <br><br><br>
 
 <div style="padding-top: 8px;">
-	<div style="float: left; width: 50%;">
+	<div style="float: left; width: calc(50% - 12px);">
 		<span class="dbminputlabel">New Width (direct size or percent)</span><br>
 		<input id="width" class="round" type="text" value="100%"><br>
 	</div>
-	<div style="float: right; width: 50%;">
+	<div style="float: right; width: calc(50% - 12px);">
 		<span class="dbminputlabel">New Height (direct size or percent)</span><br>
 		<input id="height" class="round" type="text" value="100%"><br>
 	</div>

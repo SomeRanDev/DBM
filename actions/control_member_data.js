@@ -61,11 +61,11 @@ module.exports = {
 <br><br><br>
 
 <div style="padding-top: 8px;">
-	<div style="float: left; width: 50%;">
+	<div style="float: left; width: calc(50% - 12px);">
 		<span class="dbminputlabel">Data Name</span><br>
 		<input id="dataName" class="round" type="text">
 	</div>
-	<div style="float: left; width: 45%;">
+	<div style="float: right; width: calc(50% - 12px);">
 		<span class="dbminputlabel">Control Type</span><br>
 		<select id="changeType" class="round">
 			<option value="0" selected>Set Value</option>

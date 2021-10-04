@@ -70,36 +70,40 @@ module.exports = {
 <br><br><br>
 
 <div style="padding-top: 8px;">
-	<div style="float: left; width: 70%;">
+	<div style="float: left; width: calc(70% - 12px);">
 		<span class="dbminputlabel">Max Uses</span><br>
 		<input id="maxUses" class="round" type="text" placeholder="Leave blank for infinite uses!"><br>
 		<span class="dbminputlabel">Invite Lifetime (in seconds)</span><br>
 		<input id="lifetime" class="round" type="text" placeholder="Leave blank to last forever!"><br>
 	</div>
-	<div style="float: right; width: 30%;">
+	<div style="float: right; width: calc(30% - 12px);">
 		<span class="dbminputlabel">Temporary Invite</span><br>
-		<select id="tempInvite" class="round" style="width: 90%;">
+		<select id="tempInvite" class="round">
 			<option value="true">Yes</option>
 			<option value="false" selected>No</option>
 		</select><br>
 		<span class="dbminputlabel">Is Unique</span><br>
-		<select id="unique" class="round" style="width: 90%;">
+		<select id="unique" class="round">
 			<option value="true" selected>Yes</option>
 			<option value="false">No</option>
 		</select>
 	</div>
 </div>
 
-<br><br><br>
-
-<store-in-variable allowNone style="padding-top: 8px;" selectId="storage" variableInputId="varName2" variableContainerId="varNameContainer2"></store-in-variable>
-
 <br><br><br><br><br><br><br>
 
+<hr class="subtlebar">
+
+<br>
+
 <div>
-  <span class="dbminputlabel">Reason</span>
+  <span class="dbminputlabel">Reason</span><br>
   <input id="reason" placeholder="Optional" class="round" type="text">
-</div>`;
+</div>
+
+<br>
+
+<store-in-variable allowNone selectId="storage" variableInputId="varName2" variableContainerId="varNameContainer2"></store-in-variable>`;
   },
 
   //---------------------------------------------------------------------

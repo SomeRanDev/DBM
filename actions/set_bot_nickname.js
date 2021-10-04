@@ -57,7 +57,7 @@ module.exports = {
 
 <br><br><br>
 
-<div style="padding-top: 8px; width: 90%;">
+<div style="padding-top: 8px;">
 	<span class="dbminputlabel">Nickname</span><br>
 	<input id="nickname" class="round" type="text">
 </div>

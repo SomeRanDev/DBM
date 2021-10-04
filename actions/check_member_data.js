@@ -58,11 +58,11 @@ module.exports = {
 <br><br><br>
 
 <div style="padding-top: 8px;">
-	<div style="float: left; width: 50%;">
+	<div style="float: left; width: calc(50% - 12px);">
 		<span class="dbminputlabel">Data Name</span><br>
 		<input id="dataName" class="round" type="text">
 	</div>
-	<div style="float: left; width: 45%;">
+	<div style="float: right; width: calc(50% - 12px);">
 		<span class="dbminputlabel">Comparison Type</span><br>
 		<select id="comparison" class="round">
 			<option value="0">Exists</option>
@@ -82,6 +82,10 @@ module.exports = {
 	<span class="dbminputlabel">Value to Compare to</span><br>
 	<input id="value" class="round" type="text" name="is-eval">
 </div>
+
+<br>
+
+<hr class="subtlebar">
 
 <conditional-input id="branch" style="padding-top: 16px;"></conditional-input>`;
   },

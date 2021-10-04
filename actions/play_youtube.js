@@ -65,13 +65,13 @@ module.exports = {
 	<span class="dbminputlabel">YouTube URL</span><br>
 	<input id="url" class="round" type="text" value="https://www.youtube.com/watch?v=xD7Fo11I8Ow"><br>
 </div>
-<div style="float: left; width: 50%;">
+<div style="float: left; width: calc(50% - 12px);">
 	<span class="dbminputlabel">Seek Position</span><br>
 	<input id="seek" class="round" type="text" value="0"><br>
 	<span class="dbminputlabel">Passes</span><br>
 	<input id="passes" class="round" type="text" value="1">
 </div>
-<div style="float: right; width: 50%;">
+<div style="float: right; width: calc(50% - 12px);">
 	<span class="dbminputlabel">Volume (0 = min; 100 = max)</span><br>
 	<input id="volume" class="round" type="text" placeholder="Leave blank for automatic..."><br>
 	<span class="dbminputlabel">Bitrate</span><br>

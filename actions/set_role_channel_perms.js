@@ -62,13 +62,13 @@ module.exports = {
 <br><br><br>
 
 <div style="padding-top: 8px;">
-	<div style="float: left; width: 45%;">
+	<div style="float: left; width: calc(50% - 12px);">
 		<span class="dbminputlabel">Permission</span><br>
 		<select id="permission" class="round">
 			${data.permissions[0]}
 		</select>
 	</div>
-	<div style="padding-left: 5%; float: left; width: 55%;">
+	<div style="float: right; width: calc(50% - 12px);">
 		<span class="dbminputlabel">Change To</span><br>
 		<select id="state" class="round">
 			<option value="0" selected>Allow</option>
@@ -80,7 +80,7 @@ module.exports = {
 
 <br><br><br>
 
-<div>
+<div style="padding-top: 8px;">
   <span class="dbminputlabel">Reason</span>
   <input id="reason" placeholder="Optional" class="round" type="text">
 </div>`;

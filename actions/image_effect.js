@@ -64,12 +64,12 @@ module.exports = {
 
   html(isEvent, data) {
     return `
-<retrieve-from-variable dropdownLabel="Base Image" selectId="storage" variableContainerId="varNameContainer" variableInputId="varName" selectWidth="45%" variableInputWidth="50%"></retrieve-from-variable>
+<retrieve-from-variable dropdownLabel="Base Image" selectId="storage" variableContainerId="varNameContainer" variableInputId="varName"></retrieve-from-variable>
 
 <br><br><br>
 
 <div style="padding-top: 8px;">
-	<div style="float: left; width: 90%;">
+	<div style="float: left; width: 100%;">
 		<span class="dbminputlabel">Effect</span><br>
 		<select id="effect" class="round">
 			<option value="0" selected>Greyscale</option>

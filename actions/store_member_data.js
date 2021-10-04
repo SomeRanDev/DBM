@@ -73,11 +73,11 @@ module.exports = {
 <br><br><br>
 
 <div style="padding-top: 8px;">
-	<div style="float: left; width: 40%;">
+	<div style="float: left; width: calc(35% - 12px);">
 		<span class="dbminputlabel">Data Name</span><br>
 		<input id="dataName" class="round" type="text">
 	</div>
-	<div style="float: left; width: 60%;">
+	<div style="float: right; width: calc(65% - 12px);">
 		<span class="dbminputlabel">Default Value (if data doesn't exist)</span><br>
 		<input id="defaultVal" class="round" type="text" value="0">
 	</div>

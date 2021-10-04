@@ -53,17 +53,17 @@ module.exports = {
 
   html(isEvent, data) {
     return `
-<retrieve-from-variable dropdownLabel="Source Image" selectId="storage" variableContainerId="varNameContainer" variableInputId="varName" selectWidth="45%" variableInputWidth="50%"></retrieve-from-variable>
+<retrieve-from-variable dropdownLabel="Source Image" selectId="storage" variableContainerId="varNameContainer" variableInputId="varName"></retrieve-from-variable>
 
-<br><br><br><br>
+<br><br><br>
 
-<div style="float: left; width: 50%;">
+<div style="float: left; width: calc(50% - 12px);">
 	<span class="dbminputlabel">Local Font URL (.fnt)</span><br>
 	<input id="font" class="round" type="text" value="fonts/Asimov.fnt"><br>
 	<span class="dbminputlabel">X Position</span><br>
 	<input id="x" class="round" type="text" value="0"><br>
 </div>
-<div style="float: right; width: 50%;">
+<div style="float: right; width: calc(50% - 12px);">
 	<span class="dbminputlabel">Max Width</span><br>
 	<input id="width" class="round" type="text" placeholder="Leave blank for none!"><br>
 	<span class="dbminputlabel">Y Position</span><br>

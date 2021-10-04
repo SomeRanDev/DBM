@@ -5,7 +5,7 @@ module.exports = {
   // This is the name of the action displayed in the editor.
   //---------------------------------------------------------------------
 
-  name: "Edit Role",
+  name: "Set Server Region",
 
   //---------------------------------------------------------------------
   // Action Section
@@ -13,7 +13,7 @@ module.exports = {
   // This is the section the action will fall into.
   //---------------------------------------------------------------------
 
-  section: "Role Control",
+  section: "Server Control",
 
   //---------------------------------------------------------------------
   // Action Subtitle
@@ -22,7 +22,7 @@ module.exports = {
   //---------------------------------------------------------------------
 
   subtitle(data, presets) {
-    return `${presets.getRoleText(data.storage, data.varName)}`;
+    return `${presets.getServerText(data.server, data.varName)} - ${data.region}`;
   },
 
   //---------------------------------------------------------------------
@@ -33,7 +33,7 @@ module.exports = {
   // are also the names of the fields stored in the action's JSON data.
   //---------------------------------------------------------------------
 
-  fields: ["roleName", "hoist", "mentionable", "color", "position", "storage", "varName", "reason"],
+  fields: ["server", "varName", "region", "reason"],
 
   //---------------------------------------------------------------------
   // Command HTML
@@ -53,42 +53,29 @@ module.exports = {
 
   html(isEvent, data) {
     return `
-<role-input dropdownLabel="Source Role" selectId="storage" variableContainerId="varNameContainer" variableInputId="varName"></role-input>
+<server-input dropdownLabel="Server" selectId="server" variableContainerId="varNameContainer" variableInputId="varName"></server-input>
 
 <br><br><br>
 
 <div style="padding-top: 8px;">
-	<span class="dbminputlabel">Name</span><br>
-	<input id="roleName" placeholder="Leave blank to not edit!" class="round" type="text">
+	<span class="dbminputlabel">Server Region</span><br>
+	<select id="region" class="round">
+		<option value="brazil">Brazil</option>
+		<option value="us-west">US West</option>
+		<option value="singapore">Singapore</option>
+		<option value="eu-central">EU Central</option>
+		<option value="hongkong">HongKong</option>
+		<option value="us-south">US South</option>
+		<option value="us-central">US Central</option>
+		<option value="london">London</option>
+		<option value="us-east">US East</option>
+		<option value="sydney">Sydney</option>
+		<option value="amsterdam">Amsterdam</option>
+		<option value="eu-west">EU West</option>
+		<option value="frankfurt">Frankfurt</option>
+		<option value="russia">Russia</option>
+	</select>
 </div>
-
-<br>
-
-<div style="float: left; width: calc(50% - 12px);">
-	<span class="dbminputlabel">Display Separately</span><br>
-	<select id="hoist" class="round">
-		<option value="none" selected>Don't Edit</option>
-		<option value="true">Yes</option>
-		<option value="false">No</option>
-	</select><br>
-	<span class="dbminputlabel">Mentionable</span><br>
-	<select id="mentionable" class="round">
-		<option value="none" selected>Don't Edit</option>
-		<option value="true">Yes</option>
-		<option value="false">No</option>
-	</select><br>
-</div>
-
-<div style="float: right; width: calc(50% - 12px);">
-	<span class="dbminputlabel">Color</span><br>
-	<input id="color" class="round" type="text" placeholder="Leave blank to not edit!"><br>
-	<span class="dbminputlabel">Position</span><br>
-	<input id="position" class="round" type="text" placeholder="Leave blank to not edit!"><br>
-</div>
-
-<br><br><br><br><br><br><br>
-
-<hr class="subtlebar">
 
 <br>
 
@@ -118,31 +105,15 @@ module.exports = {
 
   action(cache) {
     const data = cache.actions[cache.index];
-    const reason = this.evalMessage(data.reason, cache);
-    const roleData = {};
-    if (data.roleName) {
-      roleData.name = this.evalMessage(data.roleName, cache);
-    }
-    if (data.color) {
-      roleData.color = this.evalMessage(data.color, cache);
-    }
-    if (data.position) {
-      roleData.position = parseInt(this.evalMessage(data.position, cache), 10);
-    }
-    if (data.hoist !== "none") {
-      roleData.hoist = JSON.parse(data.hoist);
-    }
-    if (data.mentionable !== "none") {
-      roleData.mentionable = JSON.parse(data.mentionable);
-    }
-    const storage = parseInt(data.storage, 10);
+    const type = parseInt(data.server, 10);
     const varName = this.evalMessage(data.varName, cache);
-    const role = this.getRole(storage, varName, cache);
-    if (Array.isArray(role)) {
-      this.callListFunc(role, "edit", [roleData, reason]).then(() => this.callNextAction(cache));
-    } else if (role?.edit) {
-      role
-        .edit(roleData, reason)
+    const server = this.getServer(type, varName, cache);
+    const reason = this.evalMessage(data.reason, cache);
+    if (Array.isArray(server)) {
+      this.callListFunc(server, "setRegion", [data.region, reason]).then(() => this.callNextAction(cache));
+    } else if (server && server.setRegion) {
+      server
+        .setRegion(data.region, reason)
         .then(() => this.callNextAction(cache))
         .catch((err) => this.displayError(data, cache, err));
     } else {

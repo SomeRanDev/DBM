@@ -66,6 +66,10 @@ module.exports = {
 
 <br>
 
+<hr class="subtlebar">
+
+<br>
+
 <conditional-input id="branch"></conditional-input>`;
   },
 

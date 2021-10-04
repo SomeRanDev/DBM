@@ -56,20 +56,20 @@ module.exports = {
 
   html(isEvent, data) {
     return `
-<retrieve-from-variable dropdownLabel="Source Image" selectId="storage" variableContainerId="varNameContainer" variableInputId="varName" selectWidth="45%" variableInputWidth="50%"></retrieve-from-variable>
+<retrieve-from-variable dropdownLabel="Source Image" selectId="storage" variableContainerId="varNameContainer" variableInputId="varName"></retrieve-from-variable>
 
-<br><br><br><br>
+<br><br><br>
 
-<retrieve-from-variable dropdownLabel="Image that is Drawn" selectId="storage2" variableContainerId="varNameContainer2" variableInputId="varName2" selectWidth="45%" variableInputWidth="50%"></retrieve-from-variable>
+<retrieve-from-variable style="padding-top: 8px;" dropdownLabel="Image that is Drawn" selectId="storage2" variableContainerId="varNameContainer2" variableInputId="varName2"></retrieve-from-variable>
 
 <br><br><br>
 
 <div style="padding-top: 8px;">
-	<div style="float: left; width: 50%;">
+	<div style="float: left; width: calc(50% - 12px);">
 		<span class="dbminputlabel">X Position</span><br>
 		<input id="x" class="round" type="text" value="0"><br>
 	</div>
-	<div style="float: right; width: 50%;">
+	<div style="float: right; width: calc(50% - 12px);">
 		<span class="dbminputlabel">Y Position</span><br>
 		<input id="y" class="round" type="text" value="0"><br>
 	</div>
@@ -77,7 +77,7 @@ module.exports = {
 
 <br><br><br>
 
-<div style="padding-top: 8px; width: 45%">
+<div style="padding-top: 8px; width: calc(50% - 12px)">
 	<span class="dbminputlabel">Draw Effect</span><br>
 	<select id="mask" class="round">
 		<option value="0" selected>Overlay</option>

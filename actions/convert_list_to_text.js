@@ -79,24 +79,24 @@ module.exports = {
 	</div>
 </div>
 
-<br><br><br><br>
+<br><br><br>
 
-<div style="display: table;">
-	<div style="display: table-cell;">
+<div style="width: 100%; padding-top: 8px;">
+	<div style="float: left; width: calc(35% - 12px);">
 		<span class="dbminputlabel">Start Characters</span><br>
 		<input id="start" class="round" type="text">
 	</div>
-	<div style="display: table-cell;">
+	<div style="float: left; width: calc(35% - 12px); padding-left: 25px;">
 		<span class="dbminputlabel">Middle Characters</span><br>
 		<input id="middle" class="round" type="text">
 	</div>
-	<div style="display: table-cell;">
+	<div style="float: left; width: calc(36% - 12px); padding-left: 25px;">
 		<span class="dbminputlabel">End Characters</span><br>
 		<input id="end" class="round" type="text" value="\\n">
 	</div>
 </div>
 
-<br>
+<br><br><br>
 
 <store-in-variable style="padding-top: 8px;" dropdownLabel="Store In" selectId="storage" variableContainerId="varNameContainer2" variableInputId="varName2"></store-in-variable>`;
   },

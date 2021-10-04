@@ -70,8 +70,14 @@ module.exports = {
 			<option value="7">Role</option>
 			<option value="8">Server</option>
 			<option value="9">Emoji</option>
+      <option value="10">Sticker</option>
+      <option value="11">Thread Channel</option>
 		</select>
 </div>
+
+<br>
+
+<hr class="subtlebar">
 
 <br>
 
@@ -155,6 +161,12 @@ module.exports = {
           break;
         case 9:
           result = variable instanceof DiscordJS.Emoji || variable instanceof DiscordJS.GuildEmoji;
+          break;
+        case 10:
+          result = variable instanceof DiscordJS.Sticker;
+          break;
+        case 11:
+          result = variable instanceof DiscordJS.ThreadChannel;
           break;
       }
     }

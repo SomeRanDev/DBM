@@ -57,7 +57,7 @@ module.exports = {
 
 <br><br><br>
 
-<div style="padding-top: 8px; width: 90%;">
+<div style="padding-top: 8px;">
 	<span class="dbminputlabel">Server Name</span><br>
 	<input id="serverName" class="round" type="text">
 </div>

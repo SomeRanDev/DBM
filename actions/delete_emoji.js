@@ -72,7 +72,7 @@ module.exports = {
 
 <br><br><br>
 
-<div>
+<div style="padding-top: 12px;">
   <span class="dbminputlabel">Reason</span>
   <input id="reason" placeholder="Optional" class="round" type="text">
 </div>`;

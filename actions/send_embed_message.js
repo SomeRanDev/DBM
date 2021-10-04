@@ -69,9 +69,13 @@ module.exports = {
 
 <br><br><br>
 
-<send-target-input dropdownLabel="Send To" selectId="channel" variableContainerId="varNameContainer2" variableInputId="varName2"></send-target-input>
+<send-target-input style="padding-top: 8px;" dropdownLabel="Send To" selectId="channel" variableContainerId="varNameContainer2" variableInputId="varName2"></send-target-input>
 
-<br><br><br><br>
+<br><br><br>
+
+<hr class="subtlebar" style="margin-bottom: 0px;">
+
+<br>
 
 <store-in-variable allowNone selectId="storage3" variableInputId="varName3" variableContainerId="varNameContainer3"></store-in-variable>`;
   },

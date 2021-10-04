@@ -58,7 +58,7 @@ module.exports = {
 
 <br><br><br>
 
-<div style="padding-top: 8px; width: 90%;">
+<div style="padding-top: 8px;">
 	<span class="dbminputlabel">Verification Level</span><br>
 	<select id="verification" class="round">
 		<option value="0">None</option>

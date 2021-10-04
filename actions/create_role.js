@@ -70,7 +70,7 @@ module.exports = {
 <br>
 
 <div style="float: left; width: 50%;">
-	<span class="dbminputlabel">Display Separate from Online Users</span><br>
+	<span class="dbminputlabel">Display Separately</span><br>
 	<select id="hoist" class="round" style="width: 90%;">
 		<option value="true">Yes</option>
 		<option value="false" selected>No</option>
@@ -87,6 +87,10 @@ module.exports = {
 	<span class="dbminputlabel">Position</span><br>
 	<input id="position" class="round" type="text" placeholder="Leave blank for default!" style="width: 90%;"><br>
 </div>
+
+<br><br><br><br><br><br><br>
+
+<hr class="subtlebar">
 
 <br>
 

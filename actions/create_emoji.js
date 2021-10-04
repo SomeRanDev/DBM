@@ -65,7 +65,7 @@ module.exports = {
 
   html(isEvent, data) {
     return `
-<div style="width: 90%;">
+<div>
 	<span class="dbminputlabel">Emoji Name</span><br>
 	<input id="emojiName" class="round" type="text">
 </div>
@@ -74,7 +74,11 @@ module.exports = {
 
 <retrieve-from-variable dropdownLabel="Source Image" selectId="storage" variableContainerId="varNameContainer" variableInputId="varName"></retrieve-from-variable>
 
-<br><br><br>
+<br><br><br><br>
+
+<hr class="subtlebar" style="magin-top: 0px;">
+
+<br>
 
 <store-in-variable allowNone style="padding-top: 8px;" selectId="storage2" variableInputId="varName2" variableContainerId="varNameContainer2"></store-in-variable>`;
   },

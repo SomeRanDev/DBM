@@ -71,18 +71,24 @@ module.exports = {
 <br>
 
 <span class="dbminputlabel">Category Id</span><br>
-<input id= "categoryID" class="round" type="text" placeholder="Leave blank for default!" style="width: 95%">
+<input id= "categoryID" class="round" type="text" placeholder="Leave blank for default!">
 
 <br>
 
-<div style="float: left; width: 50%;">
+<div style="float: left; width: calc(50% - 12px);">
 	<span class="dbminputlabel">Topic</span><br>
 	<input id="topic" class="round" type="text"><br>
 </div>
-<div style="float: right; width: 50%;">
+<div style="float: right; width: calc(50% - 12px);">
 	<span class="dbminputlabel">Position</span><br>
-	<input id="position" class="round" type="text" placeholder="Leave blank for default!" style="width: 90%;"><br>
+	<input id="position" class="round" type="text" placeholder="Leave blank for default!"><br>
 </div>
+
+<br><br><br><br>
+
+<hr class="subtlebar" style="margin-top: 0px;">
+
+<br>
 
 <div>
   <span class="dbminputlabel">Reason</span>

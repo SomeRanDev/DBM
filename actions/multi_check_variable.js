@@ -57,7 +57,7 @@ module.exports = {
 
 <br><br><br><br>
 
-<dialog-list id="branches" fields='["comparison", "value", "actions"]' dialogResizable dialogTitle="Check Variable Info" dialogWidth="600" dialogHeight="400" listLabel="Comparisons and Actions" listStyle="height: calc(100vh - 280px);" itemName="Condition" itemHeight="28px;" itemTextFunction="glob.formatItem(data)" itemStyle="line-height: 28px;">
+<dialog-list id="branches" fields='["comparison", "value", "actions"]' dialogResizable dialogTitle="Check Variable Info" dialogWidth="600" dialogHeight="400" listLabel="Comparisons and Actions" listStyle="height: calc(100vh - 290px);" itemName="Condition" itemHeight="28px;" itemTextFunction="glob.formatItem(data)" itemStyle="line-height: 28px;">
   <div style="padding: 16px;">
     <div style="float: left; width: 35%;">
       <span class="dbminputlabel">Comparison Type</span><br>

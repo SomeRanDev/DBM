@@ -62,7 +62,7 @@ module.exports = {
   html(isEvent, data) {
     return `
 <div>
-	<div style="float: left; width: 45%;">
+	<div style="float: left; width: calc(50% - 12px);">
 		<span class="dbminputlabel">Condition</span><br>
 		<select id="condition" class="round">
 			<option value="0" selected>Number of Parameters is...</option>
@@ -71,7 +71,7 @@ module.exports = {
 			<option value="3">Number of Role Mentions are...</option>
 		</select>
 	</div>
-	<div style="padding-left: 5%; float: left; width: 25%;">
+	<div style="padding-left: 18px; float: left; width: calc(25% - 12px);">
 		<span class="dbminputlabel">Comparison</span><br>
 		<select id="comparison" class="round">
 			<option value="0" selected>=</option>
@@ -79,13 +79,17 @@ module.exports = {
 			<option value="2">\></option>
 		</select>
 	</div>
-	<div style="padding-left: 5%; float: left; width: 25%;">
+	<div style="padding-left: 18px; float: left; width: calc(25% - 12px);">
 		<span class="dbminputlabel">Number</span><br>
 		<input id="value" class="round" type="text">
 	</div>
 </div>
 
-<br><br><br>
+<br><br><br><br>
+
+<hr class="subtlebar">
+
+<br>
 
 <conditional-input id="branch" style="padding-top: 8px;"></conditional-input>`;
   },

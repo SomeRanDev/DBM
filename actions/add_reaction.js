@@ -69,7 +69,7 @@ module.exports = {
 		</select>
 	</div>
 	<div id="varNameContainer2" style="float: right; width: 60%;">
-		<span id="extName">Emoji (right-click -> Insert Emoji)</span>:<br>
+		<span id="extName" class="dbminputlabel">Emoji (right-click -> Insert Emoji)</span><br>
 		<input id="varName2" class="round" type="text">
 	</div>
 	<div id="varNameContainer3" style="float: right; width: 60%; display: none;">

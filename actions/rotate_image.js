@@ -57,12 +57,12 @@ module.exports = {
 
   html(isEvent, data) {
     return `
-<retrieve-from-variable dropdownLabel="Source Image" selectId="storage" variableContainerId="varNameContainer" variableInputId="varName" selectWidth="45%" variableInputWidth="50%"></retrieve-from-variable>
+<retrieve-from-variable dropdownLabel="Source Image" selectId="storage" variableContainerId="varNameContainer" variableInputId="varName"></retrieve-from-variable>
 
 <br><br><br>
 
 <div style="padding-top: 8px;">
-	<div style="float: left; width: 45%;">
+	<div style="float: left; width: calc(50% - 12px);">
 		<span class="dbminputlabel">Mirror</span><br>
 		<select id="mirror" class="round">
 			<option value="0" selected>None</option>
@@ -71,7 +71,7 @@ module.exports = {
 			<option value="3">Diagonal Mirror</option>
 		</select><br>
 	</div>
-	<div style="float: right; width: 50%;">
+	<div style="float: right; width: calc(50% - 12px);">
 		<span class="dbminputlabel">Rotation (degrees)</span><br>
 		<input id="rotation" class="round" type="text" value="0"><br>
 	</div>

@@ -62,7 +62,11 @@ module.exports = {
 
 <store-in-variable style="padding-top: 8px;" dropdownLabel="Source Image" selectId="storage" variableContainerId="varNameContainer2" variableInputId="varName2"></store-in-variable>
 
-<br><br><br>
+<br><br><br><br>
+
+<hr class="subtlebar">
+
+<br>
 
 <div style="padding-top: 8px;">
   <span class="dbminputlabel">Reason</span>

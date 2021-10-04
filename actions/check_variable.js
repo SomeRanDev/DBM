@@ -76,7 +76,11 @@ module.exports = {
 	</div>
 </div>
 
-<br><br><br>
+<br><br><br><br>
+
+<hr class="subtlebar">
+
+<br>
 
 <conditional-input id="branch" style="padding-top: 8px;"></conditional-input>`;
   },

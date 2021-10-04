@@ -69,13 +69,13 @@ module.exports = {
 
 <br><br><br>
 
-<send-target-input dropdownLabel="Send To" selectId="channel" variableContainerId="varNameContainer2" variableInputId="varName2"></send-target-input>
+<send-target-input style="padding-top: 8px;" dropdownLabel="Send To" selectId="channel" variableContainerId="varNameContainer2" variableInputId="varName2"></send-target-input>
 
 <br><br><br>
 
 <div style="padding-top: 8px;">
 	<span class="dbminputlabel">Message</span><br>
-	<textarea id="message" class="dbm_monospace" rows="8" placeholder="Insert message here..." style="white-space: nowrap; resize: none;"></textarea>
+	<textarea id="message" class="dbm_monospace" rows="7" placeholder="Insert message here..." style="white-space: nowrap; resize: none;"></textarea>
 </div>
 
 <br>
