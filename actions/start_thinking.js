@@ -78,10 +78,15 @@ module.exports = {
 
   action(cache) {
     const data = cache.actions[cache.index];
-    if(cache.interaction) {
-      cache.interaction.deferReply?.({ ephemeral: data.ephemeral }).then(function() {
-        this.callNextAction(cache);
-      }.bind(this)).catch((err) => this.displayError(data, cache, err));
+    if (cache.interaction) {
+      cache.interaction
+        .deferReply?.({ ephemeral: data.ephemeral })
+        .then(
+          function () {
+            this.callNextAction(cache);
+          }.bind(this),
+        )
+        .catch((err) => this.displayError(data, cache, err));
     } else {
       this.callNextAction(cache);
     }

@@ -208,16 +208,19 @@ Bot.onRawData = function (packet) {
   const channel = client.channels.resolve(packet.d.channel_id);
   if (channel.messages.cache.has(packet.d.message_id)) return;
 
-  channel.messages.fetch(packet.d.message_id).then(function (message) {
-    const emoji = packet.d.emoji.id ? `${packet.d.emoji.name}:${packet.d.emoji.id}` : packet.d.emoji.name;
-    const reaction = message.reactions.resolve(emoji);
-    if (packet.t === "MESSAGE_REACTION_ADD") {
-      client.emit("messageReactionAdd", reaction, client.users.resolve(packet.d.user_id));
-    }
-    if (packet.t === "MESSAGE_REACTION_REMOVE") {
-      client.emit("messageReactionRemove", reaction, client.users.resolve(packet.d.user_id));
-    }
-  }).catch(() => {});
+  channel.messages
+    .fetch(packet.d.message_id)
+    .then(function (message) {
+      const emoji = packet.d.emoji.id ? `${packet.d.emoji.name}:${packet.d.emoji.id}` : packet.d.emoji.name;
+      const reaction = message.reactions.resolve(emoji);
+      if (packet.t === "MESSAGE_REACTION_ADD") {
+        client.emit("messageReactionAdd", reaction, client.users.resolve(packet.d.user_id));
+      }
+      if (packet.t === "MESSAGE_REACTION_REMOVE") {
+        client.emit("messageReactionRemove", reaction, client.users.resolve(packet.d.user_id));
+      }
+    })
+    .catch(() => {});
 };
 
 Bot.reformatData = function () {
@@ -750,7 +753,7 @@ const ActionsCache = (Actions.ActionsCache = class ActionsCache {
           ephemeral: true,
           content: Actions.getDefaultResponseText(),
         };
-        if(this.interaction.deferred) {
+        if (this.interaction.deferred) {
           this.interaction.editReply(replyData);
         } else {
           this.interaction.reply(replyData);
@@ -856,7 +859,7 @@ Actions.eval = function (content, cache, throwError = true) {
   try {
     return eval(content);
   } catch (e) {
-    if(throwError) console.error(e);
+    if (throwError) console.error(e);
     return false;
   }
 };
@@ -868,8 +871,8 @@ Actions.evalMessage = function (content, cache) {
 };
 
 Actions.evalIfPossible = function (content, cache) {
-  if(!this.__cachedText) this.__cachedText = {};
-  if(content in this.__cachedText) return content;
+  if (!this.__cachedText) this.__cachedText = {};
+  if (content in this.__cachedText) return content;
   let result = this.eval(content, cache, false);
   if (result === false) result = this.evalMessage(content, cache);
   if (result === false) {
@@ -1070,7 +1073,7 @@ Actions.invokeEvent = function (event, server, temp) {
   const actions = event.actions;
   if (actions.length > 0) {
     const cache = new ActionsCache(actions, server, {
-      temp: { ...temp }
+      temp: { ...temp },
     });
     this.callNextAction(cache);
   }
@@ -1689,7 +1692,7 @@ const Events = (DBM.Events = {});
 
 let $evts = null;
 
-Events.generateData = function() {
+Events.generateData = function () {
   return [
     [],
     [],
@@ -1699,14 +1702,14 @@ Events.generateData = function() {
     ["guildDelete", 0, 0, 1],
     ["guildMemberAdd", 1, 0, 2],
     ["guildMemberRemove", 1, 0, 2],
-    ["channelCreate", 1, 0, 2, true, (arg1) => arg1.type === 'GUILD_TEXT'],
-    ["channelDelete", 1, 0, 2, true, (arg1) => arg1.type === 'GUILD_TEXT'],
+    ["channelCreate", 1, 0, 2, true, (arg1) => arg1.type === "GUILD_TEXT"],
+    ["channelDelete", 1, 0, 2, true, (arg1) => arg1.type === "GUILD_TEXT"],
     ["roleCreate", 1, 0, 2],
     ["roleDelete", 1, 0, 2],
     ["guildBanAdd", 3, 0, 1],
     ["guildBanRemove", 3, 0, 1],
-    ["channelCreate", 1, 0, 2, true, (arg1) => arg1.type === 'GUILD_VOICE'],
-    ["channelDelete", 1, 0, 2, true, (arg1) => arg1.type === 'GUILD_VOICE'],
+    ["channelCreate", 1, 0, 2, true, (arg1) => arg1.type === "GUILD_VOICE"],
+    ["channelDelete", 1, 0, 2, true, (arg1) => arg1.type === "GUILD_VOICE"],
     ["emojiCreate", 1, 0, 2],
     ["emojiDelete", 1, 0, 2],
     ["messageDelete", 1, 0, 2, true],
@@ -1730,8 +1733,8 @@ Events.generateData = function() {
     ["guildUnavailable", 1, 0, 1],
     ["inviteCreate", 1, 0, 2],
     ["inviteDelete", 1, 0, 2],
-    ["channelCreate", 1, 0, 2, true, (arg1) => arg1.type !== 'GUILD_TEXT' && arg1.type !== 'GUILD_VOICE'],
-    ["channelDelete", 1, 0, 2, true, (arg1) => arg1.type !== 'GUILD_TEXT' && arg1.type !== 'GUILD_VOICE'],
+    ["channelCreate", 1, 0, 2, true, (arg1) => arg1.type !== "GUILD_TEXT" && arg1.type !== "GUILD_VOICE"],
+    ["channelDelete", 1, 0, 2, true, (arg1) => arg1.type !== "GUILD_TEXT" && arg1.type !== "GUILD_VOICE"],
     ["stickerCreate", 1, 0, 2, true],
     ["stickerDelete", 1, 0, 2, true],
     ["threadCreate", 1, 0, 2, true],
@@ -2301,9 +2304,11 @@ Audio.Subscription = class {
       if (isNaN(seconds) || seconds < 0) seconds = 0;
       if (leaveVoiceTimeout === "" || !isFinite(seconds)) return;
 
-      require("node:timers").setTimeout(() => {
-        Audio.disconnectFromVoice(this.voiceConnection.joinConfig.guildId);
-      }, seconds * 1e3);
+      require("node:timers")
+        .setTimeout(() => {
+          Audio.disconnectFromVoice(this.voiceConnection.joinConfig.guildId);
+        }, seconds * 1e3)
+        .unref();
     }
 
     this.queueLock = true;

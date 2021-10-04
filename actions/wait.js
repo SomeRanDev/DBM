@@ -94,21 +94,19 @@ module.exports = {
     const time = parseInt(this.evalMessage(data.time, cache), 10);
     const type = parseInt(data.measurement, 10);
     switch (type) {
-      case 0:
-        setTimeout(this.callNextAction.bind(this, cache), time);
-        break;
       case 1:
-        setTimeout(this.callNextAction.bind(this, cache), time * 1000);
+        time *= 1e3;
         break;
       case 2:
-        setTimeout(this.callNextAction.bind(this, cache), time * 1000 * 60);
+        time *= 1e3 * 60;
         break;
       case 3:
-        setTimeout(this.callNextAction.bind(this, cache), time * 1000 * 60 * 60);
+        time *= 1e3 * 60 * 60;
         break;
       default:
-        this.callNextAction(cache);
+        return this.callNextAction(cache);
     }
+    setTimeout(() => this.callNextAction(cache), time).unref();
   },
 
   //---------------------------------------------------------------------

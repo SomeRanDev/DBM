@@ -441,14 +441,12 @@ module.exports = {
         messageOptions.ephemeral = true;
       }
       let promise = null;
-      if(cache.interaction.deferred) {
+      if (cache.interaction.deferred) {
         promise = cache.interaction.editReply(messageOptions);
       } else {
         promise = cache.interaction.reply(messageOptions);
       }
-      promise
-        .then(onComplete)
-        .catch((err) => this.displayError(data, cache, err));
+      promise.then(onComplete).catch((err) => this.displayError(data, cache, err));
     } else if (target?.send) {
       target
         .send(messageOptions)

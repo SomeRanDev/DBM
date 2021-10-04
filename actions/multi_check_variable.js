@@ -95,17 +95,31 @@ module.exports = {
   init() {
     const { glob } = this;
 
-    glob.formatItem = function(data) {
-      let result = "<div style=\"display: inline-block; width: 200px; padding-left: 8px;\">VAR ";
+    glob.formatItem = function (data) {
+      let result = '<div style="display: inline-block; width: 200px; padding-left: 8px;">VAR ';
       const comp = data.comparison;
-      switch(comp) {
-        case "0": result += "Exists"; break;
-        case "1": result += "= " + data.value; break;
-        case "2": result += "= " + data.value; break;
-        case "3": result += "< " + data.value; break;
-        case "4": result += "> " + data.value; break;
-        case "5": result += "Includes " + data.value; break;
-        case "6": result += "Matches Regex " + data.value; break;
+      switch (comp) {
+        case "0":
+          result += "Exists";
+          break;
+        case "1":
+          result += "= " + data.value;
+          break;
+        case "2":
+          result += "= " + data.value;
+          break;
+        case "3":
+          result += "< " + data.value;
+          break;
+        case "4":
+          result += "> " + data.value;
+          break;
+        case "5":
+          result += "Includes " + data.value;
+          break;
+        case "6":
+          result += "Matches Regex " + data.value;
+          break;
       }
       result += "</div><span>Call " + data.actions.length + " Actions</span>";
       return result;
@@ -129,7 +143,7 @@ module.exports = {
     if (variable) {
       const val1 = variable;
       const branches = data.branches;
-      for(let i = 0; i < branches.length; i++) {
+      for (let i = 0; i < branches.length; i++) {
         const branch = branches[i];
         const compare = parseInt(branch.comparison, 10);
         let val2 = branch.value;
@@ -159,13 +173,13 @@ module.exports = {
             result = Boolean(val1.match(new RegExp("^" + val2 + "$", "i")));
             break;
         }
-        if(result) {
+        if (result) {
           this.executeSubActionsThenNextAction(branch.actions, cache);
           break;
         }
       }
     }
-    if(!result) {
+    if (!result) {
       this.callNextAction(cache);
     }
   },
