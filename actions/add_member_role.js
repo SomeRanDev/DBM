@@ -99,7 +99,9 @@ module.exports = {
         member.map((m) => m.roles),
         "add",
         [role, reason],
-      ).then(() => this.callNextAction(cache));
+      )
+      .then(() => this.callNextAction(cache))
+      .catch((err) => this.displayError(data, cache, err));
     } else if (members?.roles) {
       member.roles
         .add(role, reason)

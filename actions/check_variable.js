@@ -137,7 +137,7 @@ module.exports = {
     if (variable) {
       const val1 = variable;
       const compare = parseInt(data.comparison, 10);
-      let val2 = branch.value;
+      let val2 = data.value;
       if (compare !== 6) val2 = this.evalIfPossible(val2, cache);
       switch (compare) {
         case 0:

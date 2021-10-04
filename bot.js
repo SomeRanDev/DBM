@@ -217,7 +217,7 @@ Bot.onRawData = function (packet) {
     if (packet.t === "MESSAGE_REACTION_REMOVE") {
       client.emit("messageReactionRemove", reaction, client.users.resolve(packet.d.user_id));
     }
-  });
+  }).catch(() => {});
 };
 
 Bot.reformatData = function () {

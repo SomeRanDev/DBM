@@ -136,7 +136,9 @@ module.exports = {
     }
 
     if (Array.isArray(message)) {
-      this.callListFunc(message, "react", [emoji]).then(() => this.callNextAction(cache));
+      this.callListFunc(message, "react", [emoji])
+        .then(() => this.callNextAction(cache))
+        .catch((err) => this.displayError(data, cache, err));
     } else if (emoji && message && message.react) {
       message
         .react(emoji)

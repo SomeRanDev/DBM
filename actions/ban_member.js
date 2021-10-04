@@ -94,7 +94,9 @@ module.exports = {
     const reason = this.evalMessage(data.reason, cache);
     const days = parseInt(data.days, 10) || 0;
     if (Array.isArray(member)) {
-      this.callListFunc(member, "ban", [{ days, reason }]).then(() => this.callNextAction(cache));
+      this.callListFunc(member, "ban", [{ days, reason }])
+        .then(() => this.callNextAction(cache))
+        .catch((err) => this.displayError(data, cache, err));
     } else if (member && member.ban) {
       member
         .ban({ days, reason })

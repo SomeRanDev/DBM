@@ -89,9 +89,9 @@ module.exports = {
     const member = this.getMember(type, varName, cache);
 
     if (Array.isArray(member)) {
-      this.callListFunc(member, "unban", [server, this.evalMessage(data.reason, cache)]).then(() =>
-        this.callNextAction(cache),
-      );
+      this.callListFunc(member, "unban", [server, this.evalMessage(data.reason, cache)])
+        .then(() => this.callNextAction(cache))
+        .catch((err) => this.displayError(data, cache, err));
     } else if ((member?.author || member.id) && server?.bans) {
       server.bans
         .remove(member.author ?? member.id, this.evalMessage(data.reason, cache))
