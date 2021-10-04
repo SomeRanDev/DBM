@@ -97,7 +97,7 @@ module.exports = {
       this.callListFunc(member, "ban", [{ days, reason }])
         .then(() => this.callNextAction(cache))
         .catch((err) => this.displayError(data, cache, err));
-    } else if (member && member.ban) {
+    } else if (member?.ban) {
       member
         .ban({ days, reason })
         .then(() => this.callNextAction(cache))

@@ -101,29 +101,27 @@ module.exports = {
     const data = cache.actions[cache.index];
     const channel = parseInt(data.channel, 10);
     const message = data.message;
-    if (channel === undefined || message === undefined) return;
+    if (!channel || !message) return this.callNextAction(cache);
     const varName = this.evalMessage(data.varName, cache);
     const target = this.getSendTarget(channel, varName, cache);
     if (Array.isArray(target)) {
-      this.callListFunc(target, "send", [this.evalMessage(message, cache), { tts: true }]).then(
-        function (resultMsg) {
+      this.callListFunc(target, "send", [{ content: this.evalMessage(message, cache), tts: true }]).then(
+        (resultMsg) => {
           const varName2 = this.evalMessage(data.varName2, cache);
           const storage = parseInt(data.storage, 10);
           this.storeValue(resultMsg, storage, varName2, cache);
           this.callNextAction(cache);
-        }.bind(this),
+        },
       );
-    } else if (target && target.send) {
+    } else if (target?.send) {
       target
-        .send(this.evalMessage(message, cache), { tts: true })
-        .then(
-          function (resultMsg) {
-            const varName2 = this.evalMessage(data.varName2, cache);
-            const storage = parseInt(data.storage, 10);
-            this.storeValue(resultMsg, storage, varName2, cache);
-            this.callNextAction(cache);
-          }.bind(this),
-        )
+        .send({ content: this.evalMessage(message, cache), tts: true })
+        .then((resultMsg) => {
+          const varName2 = this.evalMessage(data.varName2, cache);
+          const storage = parseInt(data.storage, 10);
+          this.storeValue(resultMsg, storage, varName2, cache);
+          this.callNextAction(cache);
+        })
         .catch((err) => this.displayError(data, cache, err));
     } else {
       this.callNextAction(cache);

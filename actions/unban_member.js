@@ -92,9 +92,9 @@ module.exports = {
       this.callListFunc(member, "unban", [server, this.evalMessage(data.reason, cache)])
         .then(() => this.callNextAction(cache))
         .catch((err) => this.displayError(data, cache, err));
-    } else if ((member?.author || member.id) && server?.bans) {
+    } else if (member?.id && server?.bans) {
       server.bans
-        .remove(member.author ?? member.id, this.evalMessage(data.reason, cache))
+        .remove(member.id, this.evalMessage(data.reason, cache))
         .then(() => this.callNextAction(cache))
         .catch((err) => this.displayError(data, cache, err));
     } else {

@@ -87,7 +87,7 @@ module.exports = {
     const reason = this.evalMessage(data.reason, cache);
     if (Array.isArray(message)) {
       this.callListFunc(message, "delete", [{ reason }]).then(() => this.callNextAction(cache));
-    } else if (message && message.delete) {
+    } else if (message?.delete) {
       message
         .delete({ reason })
         .then(() => this.callNextAction(cache))

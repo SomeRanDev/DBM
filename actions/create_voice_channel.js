@@ -115,36 +115,32 @@ module.exports = {
   action(cache) {
     const data = cache.actions[cache.index];
     const server = cache.server;
-    if (server?.channels) {
-      const name = this.evalMessage(data.channelName, cache);
-      const storage = parseInt(data.storage, 10);
-      const reason = this.evalMessage(data.reason, cache);
-      const channelData = { reason };
-      if (data.bitrate) {
-        channelData.bitrate = parseInt(this.evalMessage(data.bitrate, cache), 10) * 1000;
-      }
-      if (data.userLimit) {
-        channelData.userLimit = parseInt(this.evalMessage(data.userLimit, cache), 10);
-      }
-      if (data.categoryID) {
-        channelData.parent = this.evalMessage(data.categoryID, cache);
-      }
-      server.channels
-        .create(name, {
-          ...channelData,
-          type: "voice",
-        })
-        .then(
-          function (channel) {
-            const varName = this.evalMessage(data.varName, cache);
-            this.storeValue(channel, storage, varName, cache);
-            this.callNextAction(cache);
-          }.bind(this),
-        )
-        .catch((err) => this.displayError(data, cache, err));
-    } else {
-      this.callNextAction(cache);
+    if (!server?.channels) return this.callNextAction(cache);
+    const name = this.evalMessage(data.channelName, cache);
+    const storage = parseInt(data.storage, 10);
+    const reason = this.evalMessage(data.reason, cache);
+    /** @type {import('discord.js').GuildChannelCreateOptions} */
+    const channelData = { reason };
+    if (data.bitrate) {
+      channelData.bitrate = parseInt(this.evalMessage(data.bitrate, cache), 10) * 1000;
     }
+    if (data.userLimit) {
+      channelData.userLimit = parseInt(this.evalMessage(data.userLimit, cache), 10);
+    }
+    if (data.categoryID) {
+      channelData.parent = this.evalMessage(data.categoryID, cache);
+    }
+    server.channels
+      .create(name, {
+        ...channelData,
+        type: "GUILD_VOICE",
+      })
+      .then((channel) => {
+        const varName = this.evalMessage(data.varName, cache);
+        this.storeValue(channel, storage, varName, cache);
+        this.callNextAction(cache);
+      })
+      .catch((err) => this.displayError(data, cache, err));
   },
 
   //---------------------------------------------------------------------

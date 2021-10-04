@@ -105,7 +105,7 @@ module.exports = {
     const type = parseInt(data.member, 10);
     const varName = this.evalMessage(data.varName, cache);
     const member = this.getMember(type, varName, cache);
-    if (member && member.setData) {
+    if (member?.setData) {
       const dataName = this.evalMessage(data.dataName, cache);
       const isAdd = data.changeType === "1";
       let val = this.evalMessage(data.value, cache);
@@ -118,11 +118,11 @@ module.exports = {
         if (Array.isArray(member)) {
           if (isAdd) {
             member.forEach(function (mem) {
-              if (mem && mem.addData) mem.addData(dataName, val);
+              if (mem?.addData) mem.addData(dataName, val);
             });
           } else {
             member.forEach(function (mem) {
-              if (mem && mem.setData) mem.setData(dataName, val);
+              if (mem?.setData) mem.setData(dataName, val);
             });
           }
         } else {

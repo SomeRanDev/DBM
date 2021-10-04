@@ -615,17 +615,16 @@ Bot.checkIncludes = function (msg) {
   const icds = this.$icds;
   const icds_len = icds.length;
   for (let i = 0; i < icds_len; i++) {
-    if (icds[i] && icds[i].name) {
-      if (text.match(new RegExp("\\b" + icds[i].name + "\\b", "i"))) {
-        Actions.preformActionsFromMessage(msg, icds[i]);
-      } else if (icds[i]._aliases) {
-        const aliases = icds[i]._aliases;
-        const aliases_len = aliases.length;
-        for (let j = 0; j < aliases_len; j++) {
-          if (text.match(new RegExp("\\b" + aliases[j] + "\\b", "i"))) {
-            Actions.preformActionsFromMessage(msg, icds[i]);
-            break;
-          }
+    if (!icds[i]?.name) continue;
+    if (text.match(new RegExp("\\b" + icds[i].name + "\\b", "i"))) {
+      Actions.preformActionsFromMessage(msg, icds[i]);
+    } else if (icds[i]._aliases) {
+      const aliases = icds[i]._aliases;
+      const aliases_len = aliases.length;
+      for (let j = 0; j < aliases_len; j++) {
+        if (text.match(new RegExp("\\b" + aliases[j] + "\\b", "i"))) {
+          Actions.preformActionsFromMessage(msg, icds[i]);
+          break;
         }
       }
     }
@@ -638,7 +637,7 @@ Bot.checkRegExps = function (msg) {
   const regx = this.$regx;
   const regx_len = regx.length;
   for (let i = 0; i < regx_len; i++) {
-    if (regx[i] && regx[i].name) {
+    if (regx[i]?.name) {
       if (text.match(new RegExp(regx[i].name, "i"))) {
         Actions.preformActionsFromMessage(msg, regx[i]);
       } else if (regx[i]._aliases) {
@@ -871,7 +870,7 @@ Actions.evalMessage = function (content, cache) {
 };
 
 Actions.evalIfPossible = function (content, cache) {
-  if (!this.__cachedText) this.__cachedText = {};
+  this.__cachedText ??= {};
   if (content in this.__cachedText) return content;
   let result = this.eval(content, cache, false);
   if (result === false) result = this.evalMessage(content, cache);
@@ -1645,40 +1644,38 @@ Actions.checkTemporaryInteractionResponses = function (interaction) {
 };
 
 Actions.registerTemporaryInteraction = function (message, time, customId, userId) {
-  if (!this._temporaryInteractionIdMax) this._temporaryInteractionIdMax = 0;
-  if (!this._temporaryInteractions) this._temporaryInteractions = {};
-  if (!this._temporaryInteractions[customId]) this._temporaryInteractions[customId] = [];
-  return new Promise(
-    function (resolve, reject) {
-      const uniqueId = this._temporaryInteractionIdMax++;
-      let removed = false;
+  this._temporaryInteractionIdMax ??= 0;
+  this._temporaryInteractions ??= {};
+  this._temporaryInteractions[customId] ??= [];
+  return new Promise((resolve, reject) => {
+    const uniqueId = this._temporaryInteractionIdMax++;
+    let removed = false;
 
-      const removeInteraction = () => {
-        if (!removed) removed = true;
-        else return;
-        const interactions = this._temporaryInteractions[customId];
-        if (interactions) {
-          let i = 0;
-          for (; i < interactions.length; i++) {
-            if (interactions[i].uniqueId === uniqueId) {
-              break;
-            }
+    const removeInteraction = () => {
+      if (!removed) removed = true;
+      else return;
+      const interactions = this._temporaryInteractions[customId];
+      if (interactions) {
+        let i = 0;
+        for (; i < interactions.length; i++) {
+          if (interactions[i].uniqueId === uniqueId) {
+            break;
           }
-          if (i < interactions.length) interactions.splice(i, 1);
         }
-      };
-
-      const callback = (interaction) => {
-        resolve(interaction);
-        removeInteraction();
-      };
-
-      this._temporaryInteractions[customId].push({ message, userId, callback, uniqueId });
-      if (time > 0) {
-        require("node:timers").setTimeout(removeInteraction, time).unref();
+        if (i < interactions.length) interactions.splice(i, 1);
       }
-    }.bind(this),
-  );
+    };
+
+    const callback = (interaction) => {
+      resolve(interaction);
+      removeInteraction();
+    };
+
+    this._temporaryInteractions[customId].push({ message, userId, callback, uniqueId });
+    if (time > 0) {
+      require("node:timers").setTimeout(removeInteraction, time).unref();
+    }
+  });
 };
 
 //#endregion
@@ -2174,7 +2171,7 @@ Files.restoreRole = function (value, bot) {
   const roleId = split[0].slice(2);
   const serverId = split[1].slice(2);
   const server = bot.guilds.resolve(serverId);
-  if (server && server.roles && server.roles.cache) {
+  if (server?.roles) {
     return server.roles.resolve(roleId);
   }
 };
@@ -2394,7 +2391,6 @@ Audio.BasicTrack = class {
   }
 };
 
-Audio.volumes = [];
 Audio.subscriptions = new Map();
 
 Audio.isConnected = function (cache) {
@@ -2432,14 +2428,9 @@ Audio.disconnectFromVoice = function (guildId) {
   this.subscriptions.delete(guildId);
 };
 
-// broken
-Audio.setVolume = function (volume, cache) {
-  if (!cache.server) return;
-  const id = cache.server.id;
-  if (this.dispatchers[id]) {
-    this.volumes[id] = volume;
-    this.dispatchers[id].setVolumeLogarithmic(volume);
-  }
+// not implemented
+Audio.setVolume = function (volume, guildId) {
+  if (!id) return;
 };
 
 Audio.addToQueue = async function ([type, options, url], cache) {

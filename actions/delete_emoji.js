@@ -122,11 +122,8 @@ module.exports = {
     } else {
       emoji = this.getVariable(type, varName, cache);
     }
-    if (!emoji) {
-      this.callNextAction(cache);
-      return;
-    }
-    if (emoji && emoji.delete) {
+    if (!emoji) return this.callNextAction(cache);
+    if (emoji?.delete) {
       emoji
         .delete(reason)
         .then(() => this.callNextAction(cache))

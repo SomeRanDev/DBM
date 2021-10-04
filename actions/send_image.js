@@ -103,6 +103,7 @@ module.exports = {
 
   action(cache) {
     const data = cache.actions[cache.index];
+    const { DiscordJS, Images } = this.getDBM();
     const storage = parseInt(data.storage, 10);
     const varName = this.evalMessage(data.varName, cache);
     const image = this.getVariable(storage, varName, cache);
@@ -115,55 +116,35 @@ module.exports = {
     const varName3 = this.evalMessage(data.varName3, cache);
     const storage2 = parseInt(data.storage2, 10);
     const target = this.getSendTarget(channel, varName2, cache);
-    if (Array.isArray(target)) {
-      const Images = this.getDBM().Images;
-      Images.createBuffer(image)
-        .then(
-          function (buffer) {
-            this.callListFunc(target, "send", [
-              this.evalMessage(data.message, cache),
-              {
-                files: [
-                  {
-                    attachment: buffer,
-                    name: "image.png",
-                  },
-                ],
-              },
-            ])
-              .then((msg) => {
-                this.storeValue(msg, storage2, varName3, cache);
-                this.callNextAction(cache);
-              })
-              .catch((err) => this.displayError(data, cache, err));
-          }.bind(this),
-        )
-        .catch((err) => this.displayError(data, cache, err));
-    } else if (target && target.send) {
-      const Images = this.getDBM().Images;
-      Images.createBuffer(image)
-        .then(
-          function (buffer) {
-            target
-              .send(this.evalMessage(data.message, cache), {
-                files: [
-                  {
-                    attachment: buffer,
-                    name: "image.png",
-                  },
-                ],
-              })
-              .then((msg) => {
-                this.storeValue(msg, storage2, varName3, cache);
-                this.callNextAction(cache);
-              })
-              .catch((err) => this.displayError(data, cache, err));
-          }.bind(this),
-        )
-        .catch((err) => this.displayError(data, cache, err));
-    } else {
-      this.callNextAction(cache);
-    }
+    if (!Array.isArray(target) && !target?.send) return this.callNextAction(cache);
+    Images.createBuffer(image)
+      .then((buffer) => {
+        if (Array.isArray(target)) {
+          this.callListFunc(target, "send", [
+            {
+              content: this.evalMessage(data.message, cache),
+              files: [new DiscordJS.MessageAttachment(buffer, "image.png")],
+            },
+          ])
+            .then((msg) => {
+              this.storeValue(msg, storage2, varName3, cache);
+              this.callNextAction(cache);
+            })
+            .catch((err) => this.displayError(data, cache, err));
+        } else if (target?.send) {
+          target
+            .send({
+              content: this.evalMessage(data.message, cache),
+              files: [new DiscordJS.MessageAttachment(buffer, "image.png")],
+            })
+            .then((msg) => {
+              this.storeValue(msg, storage2, varName3, cache);
+              this.callNextAction(cache);
+            })
+            .catch((err) => this.displayError(data, cache, err));
+        }
+      })
+      .catch((err) => this.displayError(data, cache, err));
   },
 
   //---------------------------------------------------------------------

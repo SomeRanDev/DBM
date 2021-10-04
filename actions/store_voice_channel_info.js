@@ -169,10 +169,8 @@ module.exports = {
       const storage = parseInt(data.storage, 10);
       const varName2 = this.evalMessage(data.varName2, cache);
       this.storeValue(result, storage, varName2, cache);
-      this.callNextAction(cache);
-    } else {
-      this.callNextAction(cache);
     }
+    this.callNextAction(cache);
   },
 
   //---------------------------------------------------------------------

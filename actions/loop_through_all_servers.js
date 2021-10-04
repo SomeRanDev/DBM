@@ -108,7 +108,7 @@ module.exports = {
     let actions;
     const allData = Files.data.events;
     for (let i = 0; i < allData.length; i++) {
-      if (allData[i] && allData[i]._id === id) {
+      if (allData[i]?._id === id) {
         actions = allData[i].actions;
         break;
       }
@@ -131,7 +131,7 @@ module.exports = {
           index: 0,
           temp: cache.temp,
           server: servers[i],
-          msg: cache.msg || null,
+          msg: cache.msg ?? null,
         };
         cache2.callback = function () {
           looper(i + 1);

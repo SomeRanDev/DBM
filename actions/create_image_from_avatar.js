@@ -97,14 +97,12 @@ module.exports = {
     const member = this.getMember(type, varName, cache);
     const Images = this.getDBM().Images;
     Images.getImage(member.user.displayAvatarURL({ format: "png" }))
-      .then(
-        function (image) {
-          const varName2 = this.evalMessage(data.varName2, cache);
-          const storage = parseInt(data.storage, 10);
-          this.storeValue(image, storage, varName2, cache);
-          this.callNextAction(cache);
-        }.bind(this),
-      )
+      .then((image) => {
+        const varName2 = this.evalMessage(data.varName2, cache);
+        const storage = parseInt(data.storage, 10);
+        this.storeValue(image, storage, varName2, cache);
+        this.callNextAction(cache);
+      })
       .catch((err) => this.displayError(data, cache, err));
   },
 

@@ -127,7 +127,7 @@ module.exports = {
     const varName = this.evalMessage(data.varName, cache);
     const member = this.getMember(type, varName, cache);
     let result = false;
-    if (member && member.data) {
+    if (member?.data) {
       const dataName = this.evalMessage(data.dataName, cache);
       const val1 = member.data(dataName);
       const compare = parseInt(data.comparison, 10);

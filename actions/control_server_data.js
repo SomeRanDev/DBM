@@ -104,7 +104,7 @@ module.exports = {
     const type = parseInt(data.server, 10);
     const varName = this.evalMessage(data.varName, cache);
     const server = this.getServer(type, varName, cache);
-    if (server && server.setData) {
+    if (server?.setData) {
       const dataName = this.evalMessage(data.dataName, cache);
       const isAdd = data.changeType === "1";
       let val = this.evalMessage(data.value, cache);

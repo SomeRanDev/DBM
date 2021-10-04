@@ -133,13 +133,16 @@ module.exports = {
         result = channels.find((c) => c.name === find);
         break;
       case 2:
-        result = channels.find((c) => c.position === parseInt(find, 10));
+        const position = parseInt(find, 10);
+        result = channels.find((c) => c.position === position);
         break;
       case 3:
-        result = channels.find((c) => c.userLimit === parseInt(find, 10));
+        const userLimit = parseInt(find, 10);
+        result = channels.find((c) => c.userLimit === userLimit);
         break;
       case 4:
-        result = channels.find((c) => c.bitrate === parseInt(find, 10) / 1000);
+        const bitrate = parseInt(find, 10) / 1000;
+        result = channels.find((c) => c.bitrate === bitrate);
         break;
       case 5:
         result = channels.find((c) => c.parentId === find);
@@ -151,10 +154,8 @@ module.exports = {
       const storage = parseInt(data.storage, 10);
       const varName = this.evalMessage(data.varName, cache);
       this.storeValue(result, storage, varName, cache);
-      this.callNextAction(cache);
-    } else {
-      this.callNextAction(cache);
     }
+    this.callNextAction(cache);
   },
 
   //---------------------------------------------------------------------

@@ -84,9 +84,7 @@ module.exports = {
     const storage = parseInt(data.storage, 10);
     const varName = this.evalMessage(data.varName, cache);
     const embed = this.getVariable(storage, varName, cache);
-    if (embed && embed.setDescription) {
-      embed.setDescription(this.evalMessage(data.message, cache));
-    }
+    embed?.setDescription?.(this.evalMessage(data.message, cache));
     this.callNextAction(cache);
   },
 

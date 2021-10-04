@@ -128,7 +128,8 @@ module.exports = {
         result = channels.find((c) => c.topic === find);
         break;
       case 3:
-        result = channels.find((c) => c.position === parseInt(find, 10));
+        const position = parseInt(find, 10);
+        result = channels.find((c) => c.position === position);
         break;
       case 4:
         result = channels.find((c) => c.parentId === find);
@@ -140,10 +141,8 @@ module.exports = {
       const storage = parseInt(data.storage, 10);
       const varName = this.evalMessage(data.varName, cache);
       this.storeValue(result, storage, varName, cache);
-      this.callNextAction(cache);
-    } else {
-      this.callNextAction(cache);
     }
+    this.callNextAction(cache);
   },
 
   //---------------------------------------------------------------------

@@ -93,14 +93,15 @@ module.exports = {
     const type = parseInt(data.server, 10);
     const varName = this.evalMessage(data.varName, cache);
     const server = this.getServer(type, varName, cache);
-    const nickname = this.evalMessage(data.nickname, cache);
+    const nickname = this.evalMessage(data.nickname, cache) || null;
     const reason = this.evalMessage(data.reason, cache);
-    const bot = server.me;
-    if (bot && bot.setNickname) {
-      bot
+    const botMember = server.me;
+    if (botMember?.setNickname) {
+      botMember
         .setNickname(nickname, reason)
         .then(() => this.callNextAction(cache))
         .catch((err) => this.displayError(data, cache, err));
+    } else {
       this.callNextAction(cache);
     }
   },

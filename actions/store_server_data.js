@@ -111,7 +111,7 @@ module.exports = {
     const type = parseInt(data.server, 10);
     const varName = this.evalMessage(data.varName, cache);
     const server = this.getServer(type, varName, cache);
-    if (server && server.data) {
+    if (server?.data) {
       const dataName = this.evalMessage(data.dataName, cache);
       const defVal = this.eval(this.evalMessage(data.defaultVal, cache), cache);
       let result;

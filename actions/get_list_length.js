@@ -111,13 +111,11 @@ module.exports = {
     const storage = parseInt(data.list, 10);
     const varName = this.evalMessage(data.varName, cache);
     const list = this.getList(storage, varName, cache);
-
-    if (list && list.length) {
+    if (list?.length) {
       const varName2 = this.evalMessage(data.varName2, cache);
       const storage2 = parseInt(data.storage, 10);
       this.storeValue(list.length, storage2, varName2, cache);
     }
-
     this.callNextAction(cache);
   },
 

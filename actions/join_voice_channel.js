@@ -79,12 +79,8 @@ module.exports = {
     const type = parseInt(data.channel, 10);
     const varName = this.evalMessage(data.varName, cache);
     const channel = this.getVoiceChannel(type, varName, cache);
-    if (channel !== undefined) {
-      Audio.connectToVoice(channel);
-      this.callNextAction(cache);
-    } else {
-      this.callNextAction(cache);
-    }
+    if (channel) Audio.connectToVoice(channel);
+    this.callNextAction(cache);
   },
 
   //---------------------------------------------------------------------

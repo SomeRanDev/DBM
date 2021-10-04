@@ -238,7 +238,7 @@ module.exports = {
   // so be sure to provide checks for variable existence.
   //---------------------------------------------------------------------
 
-  action(cache) {
+  async action(cache) {
     const data = cache.actions[cache.index];
     const member = parseInt(data.member, 10);
     const varName = this.evalMessage(data.varName, cache);
@@ -340,7 +340,7 @@ module.exports = {
         result = mem.permissions.toArray();
         break;
       case 28:
-        result = mem.user?.flags?.toArray();
+        result = mem.user?.flags?.toArray() ?? (await mem.user?.fetchFlags())?.toArray();
         break;
       case 29:
         const status = mem.presence?.clientStatus;

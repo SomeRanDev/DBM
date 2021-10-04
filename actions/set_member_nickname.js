@@ -91,11 +91,11 @@ module.exports = {
     const type = parseInt(data.member, 10);
     const varName = this.evalMessage(data.varName, cache);
     const member = this.getMember(type, varName, cache);
-    const nick = this.evalMessage(data.nickname, cache);
+    const nick = this.evalMessage(data.nickname, cache) || null;
     const reason = this.evalMessage(data.reason, cache);
     if (Array.isArray(member)) {
       this.callListFunc(member, "setNickname", [nick, reason]).then(() => this.callNextAction(cache));
-    } else if (member && member.setNickname) {
+    } else if (member?.setNickname) {
       member
         .setNickname(nick, reason)
         .then(() => this.callNextAction(cache))

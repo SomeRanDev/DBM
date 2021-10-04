@@ -99,22 +99,19 @@ module.exports = {
     const storage = parseInt(data.storage, 10);
     const varName = this.evalMessage(data.varName, cache);
     const embed = this.getVariable(storage, varName, cache);
-    if (!embed) {
-      this.callNextAction(cache);
-      return;
-    }
+    if (!embed) return this.callNextAction(cache);
     const channel = parseInt(data.channel, 10);
     const varName2 = this.evalMessage(data.varName2, cache);
     const varName3 = this.evalMessage(data.varName3, cache);
     const storage3 = parseInt(data.storage3, 10);
     const target = this.getSendTarget(channel, varName2, cache);
     if (Array.isArray(target)) {
-      this.callListFunc(target, "send", [embed]).then(() => this.callNextAction(cache));
-    } else if (target && target.send) {
+      this.callListFunc(target, "send", [{ embeds: [embed] }]).then(() => this.callNextAction(cache));
+    } else if (target?.send) {
       target
-        .send(embed)
+        .send({ embeds: [embed] })
         .then((msg) => {
-          if (msg && varName3) this.storeValue(msg, storage3, varName3, cache);
+          if (varName3) this.storeValue(msg, storage3, varName3, cache);
           this.callNextAction(cache);
         })
         .catch((err) => this.displayError(data, cache, err));

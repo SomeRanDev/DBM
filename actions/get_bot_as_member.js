@@ -95,7 +95,7 @@ module.exports = {
     const type = parseInt(data.server, 10);
     const varName = this.evalMessage(data.varName, cache);
     const server = this.getServer(type, varName, cache);
-    if (server && server.me) {
+    if (server?.me) {
       const varName2 = this.evalMessage(data.varName2, cache);
       const storage = parseInt(data.storage, 10);
       this.storeValue(server.me, storage, varName2, cache);

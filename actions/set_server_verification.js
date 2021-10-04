@@ -22,7 +22,7 @@ module.exports = {
   //---------------------------------------------------------------------
 
   subtitle(data, presets) {
-    const verifications = ["None", "Low", "Medium", "(╯°□°）╯︵ ┻━┻", "┻━┻彡 ヽ(ಠДಠ)ノ彡┻━┻﻿"];
+    const verifications = ["None", "Low", "Medium", "High", "Highest"];
     return `${presets.getServerText(data.server, data.varName)} - ${verifications[parseInt(data.verification, 10)]}`;
   },
 
@@ -64,8 +64,8 @@ module.exports = {
 		<option value="0">None</option>
 		<option value="1">Low</option>
 		<option value="2">Medium</option>
-		<option value="3">(╯°□°）╯︵ ┻━┻</option>
-		<option value="4">┻━┻彡 ヽ(ಠДಠ)ノ彡┻━┻﻿</option>
+		<option value="3">High</option>
+		<option value="4">Highest</option>
 	</select>
 </div>
 
@@ -101,13 +101,12 @@ module.exports = {
     const varName = this.evalMessage(data.varName, cache);
     const server = this.getServer(type, varName, cache);
     const reason = this.evalMessage(data.reason, cache);
+    const level = ["NONE", "LOW", "MEDIUM", "HIGH", "VERY_HIGH"][parseInt(data.verification, 10)];
     if (Array.isArray(server)) {
-      this.callListFunc(server, "setVerificationLevel", [parseInt(data.verification, 10), reason]).then(() =>
-        this.callNextAction(cache),
-      );
-    } else if (server && server.setVerificationLevel) {
+      this.callListFunc(server, "setVerificationLevel", [level, reason]).then(() => this.callNextAction(cache));
+    } else if (server?.setVerificationLevel) {
       server
-        .setVerificationLevel(parseInt(data.verification, 10), reason)
+        .setVerificationLevel(level, reason)
         .then(() => this.callNextAction(cache))
         .catch((err) => this.displayError(data, cache, err));
     } else {

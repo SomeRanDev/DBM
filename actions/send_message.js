@@ -242,7 +242,7 @@ module.exports = {
           <action-list-input id="actions" height="calc(100vh - 460px)">
             <script class="setupTempVars">
               const elem = document.getElementById("tempVarName");
-              if(elem && elem.value) {
+              if(elem?.value) {
                 tempVars.push([elem.value, "Text"]);
               }
             </script>

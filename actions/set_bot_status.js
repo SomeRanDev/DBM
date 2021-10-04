@@ -86,27 +86,10 @@ module.exports = {
   action(cache) {
     const botClient = this.getDBM().Bot.bot.user;
     const data = cache.actions[cache.index];
-    const status = parseInt(data.status, 10);
-    let targetStatus = "";
-    if (status >= 0) {
-      switch (status) {
-        case 0:
-          targetStatus = "online";
-          break;
-        case 1:
-          targetStatus = "idle";
-          break;
-        case 2:
-          targetStatus = "invisible";
-          break;
-        case 3:
-          targetStatus = "dnd";
-          break;
-      }
-    }
-    if (botClient && botClient.setStatus) {
+    const status = ["online", "idle", "invisible", "dnd"][parseInt(data.status, 10)];
+    if (status) {
       botClient
-        .setPresence({ status: targetStatus })
+        .setStatus(status)
         .then(() => this.callNextAction(cache))
         .catch((err) => this.displayError(data, cache, err));
     } else {

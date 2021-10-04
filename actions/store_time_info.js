@@ -134,10 +134,10 @@ module.exports = {
         result = date.getSeconds();
         break;
       case 6:
-        result = date.getMiliseconds();
+        result = date.getMilliseconds();
         break;
       case 7:
-        const months = [
+        result = [
           "January",
           "February",
           "March",
@@ -150,8 +150,7 @@ module.exports = {
           "October",
           "November",
           "December",
-        ];
-        result = months[date.getMonth()];
+        ][date.getMonth()];
         break;
       default:
         break;

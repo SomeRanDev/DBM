@@ -89,27 +89,21 @@ module.exports = {
 
   action(cache) {
     const data = cache.actions[cache.index];
+    const { DiscordJS } = this.getDBM();
     const channel = parseInt(data.channel, 10);
     const message = data.message;
-    if (channel === undefined || message === undefined) return;
+    if (!channel || !message) return this.callNextAction(cache);
     const varName = this.evalMessage(data.varName, cache);
     const target = this.getSendTarget(channel, varName, cache);
-    const options = {
-      files: [this.getLocalFile(this.evalMessage(data.file, cache))],
-    };
+    const file = new DiscordJS.MessageAttachment(this.getLocalFile(this.evalMessage(data.file, cache)));
+    const options = { content: this.evalMessage(message, cache), files: [file] };
     if (Array.isArray(target)) {
-      this.callListFunc(target, "send", [this.evalMessage(message, cache), options]).then(() =>
-        this.callNextAction(cache),
-      );
-    } else if (target && target.send) {
-      try {
-        target
-          .send(this.evalMessage(message, cache), options)
-          .then(() => this.callNextAction(cache))
-          .catch((err) => this.displayError(data, cache, err));
-      } catch (e) {
-        this.displayError(data, cache, e);
-      }
+      this.callListFunc(target, "send", [options]).then(() => this.callNextAction(cache));
+    } else if (target?.send) {
+      target
+        .send(options)
+        .then(() => this.callNextAction(cache))
+        .catch((err) => this.displayError(data, cache, err));
     } else {
       this.callNextAction(cache);
     }

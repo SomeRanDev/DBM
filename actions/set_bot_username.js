@@ -83,14 +83,10 @@ module.exports = {
     const botClient = this.getDBM().Bot.bot.user;
     const data = cache.actions[cache.index];
     const username = this.evalMessage(data.username, cache);
-    if (botClient && botClient.setUsername) {
-      botClient
-        .setUsername(username)
-        .then(() => this.callNextAction(cache))
-        .catch((err) => this.displayError(data, cache, err));
-    } else {
-      this.callNextAction(cache);
-    }
+    botClient
+      .setUsername(username)
+      .then(() => this.callNextAction(cache))
+      .catch((err) => this.displayError(data, cache, err));
   },
 
   //---------------------------------------------------------------------

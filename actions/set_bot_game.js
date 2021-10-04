@@ -85,22 +85,18 @@ module.exports = {
   action(cache) {
     const botClient = this.getDBM().Bot.bot.user;
     const data = cache.actions[cache.index];
-    const game = this.evalMessage(data.gameName, cache);
-    const link = this.evalMessage(data.gameLink, cache);
-    if (botClient && botClient.setPresence) {
-      if (link) {
-        botClient
-          .setPresence({ activity: { name: game, type: "STREAMING", url: link } })
-          .then(() => this.callNextAction(cache))
-          .catch((err) => this.displayError(data, cache, err));
-      } else {
-        botClient
-          .setPresence({ activity: { name: game, type: "PLAYING" } })
-          .then(() => this.callNextAction(cache))
-          .catch((err) => this.displayError(data, cache, err));
-      }
+    const name = this.evalMessage(data.gameName, cache);
+    const url = this.evalMessage(data.gameLink, cache);
+    if (url) {
+      botClient
+        .setActivity(name, { type: "STREAMING", url })
+        .then(() => this.callNextAction(cache))
+        .catch((err) => this.displayError(data, cache, err));
     } else {
-      this.callNextAction(cache);
+      botClient
+        .setActivity(name, { type: "PLAYING" })
+        .then(() => this.callNextAction(cache))
+        .catch((err) => this.displayError(data, cache, err));
     }
   },
 

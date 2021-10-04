@@ -136,7 +136,7 @@ module.exports = {
     const role = this.getRole(storage, varName, cache);
     if (Array.isArray(role)) {
       this.callListFunc(role, "edit", [roleData, reason]).then(() => this.callNextAction(cache));
-    } else if (role && role.edit) {
+    } else if (role?.edit) {
       role
         .edit(roleData, reason)
         .then(() => this.callNextAction(cache))

@@ -80,7 +80,7 @@ module.exports = {
     const message = this.getMessage(storage, varName, cache);
     if (Array.isArray(message)) {
       this.callListFunc(message, "pin", []).then(() => this.callNextAction(cache));
-    } else if (message && message.pin) {
+    } else if (message?.pin) {
       message
         .pin()
         .then(() => this.callNextAction(cache))

@@ -89,7 +89,7 @@ module.exports = {
     const reason = this.evalMessage(data.reason, cache);
     if (Array.isArray(role)) {
       this.callListFunc(role, "delete", [reason]).then(() => this.callNextAction(cache));
-    } else if (role && role.delete) {
+    } else if (role?.delete) {
       role
         .delete(reason)
         .then(() => this.callNextAction(cache))

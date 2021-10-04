@@ -134,7 +134,7 @@ module.exports = {
       const info = ["yt", options, url];
       if (data.type === "0") {
         Audio.addToQueue(info, cache);
-      } else if (cache.server && cache.server.id !== undefined) {
+      } else if (cache.server) {
         Audio.playItem(info, cache.server.id);
       }
     }

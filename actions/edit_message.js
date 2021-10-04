@@ -98,7 +98,7 @@ module.exports = {
     if (Array.isArray(message)) {
       const content = this.evalMessage(data.message, cache);
       this.callListFunc(message, "edit", [content]).then(() => this.callNextAction(cache));
-    } else if (message && message.delete) {
+    } else if (message?.edit) {
       const content = this.evalMessage(data.message, cache);
       message
         .edit(content)

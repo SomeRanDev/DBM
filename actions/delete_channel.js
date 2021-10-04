@@ -89,7 +89,7 @@ module.exports = {
     const reason = this.evalMessage(data.reason, cache);
     if (Array.isArray(channel)) {
       this.callListFunc(channel, "delete", [reason]).then(() => this.callNextAction(cache));
-    } else if (channel && channel.delete) {
+    } else if (channel?.delete) {
       channel
         .delete(reason)
         .then(() => this.callNextAction(cache))

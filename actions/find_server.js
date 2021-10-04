@@ -136,7 +136,8 @@ module.exports = {
         result = servers.find((s) => s.nameAcronym === find);
         break;
       case 3:
-        result = servers.find((s) => s.memberCount === parseInt(find, 10));
+        const memberCount = parseInt(find, 10);
+        result = servers.find((s) => s.memberCount === memberCount);
         break;
       case 5:
         result = servers.find((s) => s.ownerId === find);
@@ -145,7 +146,8 @@ module.exports = {
         result = servers.find((s) => s.verificationLevel === find);
         break;
       case 7:
-        result = servers.find((s) => s.available === (find === "true"));
+        const available = find === "true";
+        result = servers.find((s) => s.available === available);
         break;
       default:
         break;
@@ -154,10 +156,8 @@ module.exports = {
       const storage = parseInt(data.storage, 10);
       const varName = this.evalMessage(data.varName, cache);
       this.storeValue(result, storage, varName, cache);
-      this.callNextAction(cache);
-    } else {
-      this.callNextAction(cache);
     }
+    this.callNextAction(cache);
   },
 
   //---------------------------------------------------------------------

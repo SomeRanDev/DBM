@@ -108,7 +108,7 @@ module.exports = {
 
   action(cache) {
     const server = cache.server;
-    if (!server || !server.members) {
+    if (!server?.members) {
       this.callNextAction(cache);
       return;
     }
@@ -123,7 +123,7 @@ module.exports = {
         result = members.get(find);
         break;
       case 1:
-        result = members.find((m) => m.user && m.user.username === find);
+        result = members.find((m) => m.user?.username === find);
         break;
       case 2:
         result = members.find((m) => m.displayName === find);
@@ -132,7 +132,7 @@ module.exports = {
         result = members.find((m) => m.displayHexColor === find);
         break;
       case 4:
-        result = members.find((m) => m.user && m.user.tag === find);
+        result = members.find((m) => m.user?.tag === find);
         break;
       default:
         break;
@@ -141,10 +141,8 @@ module.exports = {
       const storage = parseInt(data.storage, 10);
       const varName = this.evalMessage(data.varName, cache);
       this.storeValue(result, storage, varName, cache);
-      this.callNextAction(cache);
-    } else {
-      this.callNextAction(cache);
     }
+    this.callNextAction(cache);
   },
 
   //---------------------------------------------------------------------

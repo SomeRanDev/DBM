@@ -97,7 +97,7 @@ module.exports = {
     const reason = this.evalMessage(data.reason, cache);
     if (Array.isArray(server)) {
       this.callListFunc(server, "setName", [name, reason]).then(() => this.callNextAction(cache));
-    } else if (server && server.setName) {
+    } else if (server?.setName) {
       server
         .setName(name, reason)
         .then(() => this.callNextAction(cache))

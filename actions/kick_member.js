@@ -86,11 +86,12 @@ module.exports = {
     const type = parseInt(data.member, 10);
     const varName = this.evalMessage(data.varName, cache);
     const member = this.getMember(type, varName, cache);
+    const reason = this.evalMessage(data.reason, cache);
     if (Array.isArray(member)) {
-      this.callListFunc(member, "kick", [this.evalMessage(data.reason, cache)]).then(() => this.callNextAction(cache));
-    } else if (member && member.kick) {
+      this.callListFunc(member, "kick", [reason]).then(() => this.callNextAction(cache));
+    } else if (member?.kick) {
       member
-        .kick(this.evalMessage(data.reason, cache))
+        .kick(reason)
         .then(() => this.callNextAction(cache))
         .catch((err) => this.displayError(data, cache, err));
     } else {

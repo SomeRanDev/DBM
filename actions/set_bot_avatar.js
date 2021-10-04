@@ -80,17 +80,15 @@ module.exports = {
     const storage = parseInt(data.storage, 10);
     const varName = this.evalMessage(data.varName, cache);
     const image = this.getVariable(storage, varName, cache);
-    if (botClient && botClient.setAvatar) {
+    if (botClient?.setAvatar) {
       const Images = this.getDBM().Images;
       Images.createBuffer(image)
-        .then(
-          function (buffer) {
-            botClient
-              .setAvatar(buffer)
-              .then(() => this.callNextAction(cache))
-              .catch((err) => this.displayError(data, cache, err));
-          }.bind(this),
-        )
+        .then((buffer) => {
+          botClient
+            .setAvatar(buffer)
+            .then(() => this.callNextAction(cache))
+            .catch((err) => this.displayError(data, cache, err));
+        })
         .catch((err) => this.displayError(data, cache, err));
     } else {
       this.callNextAction(cache);

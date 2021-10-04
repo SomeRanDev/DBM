@@ -127,7 +127,8 @@ module.exports = {
         result = roles.find((r) => r.hexColor === find);
         break;
       case 3:
-        result = roles.find((r) => r.position === parseInt(find, 10));
+        const position = parseInt(find, 10);
+        result = roles.find((r) => r.position === position);
         break;
       default:
         break;

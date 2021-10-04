@@ -126,6 +126,7 @@ module.exports = {
     const varName = this.evalMessage(data.varName, cache);
     const channel = this.getChannel(storage, varName, cache);
     const reason = this.evalMessage(data.reason, cache);
+    /** @type {import('discord.js').CreateInviteOptions} */
     const options = {};
     if (data.maxUses) {
       options.maxUses = parseInt(this.evalMessage(data.maxUses, cache), 10);
@@ -137,31 +138,26 @@ module.exports = {
     } else {
       options.maxAge = 0;
     }
-    if (reason) {
-      options.reason = reason;
-    }
-    options.maxUses = data.temporary === "true";
+    if (options.maxAge > 86400) options.maxAge = 86400;
+    if (reason) options.reason = reason;
+    options.temporary = data.temporary === "true";
     options.unique = data.unique === "true";
     if (Array.isArray(channel)) {
-      this.callListFunc(channel, "createInvite", [options]).then(
-        function (invite) {
+      this.callListFunc(channel, "createInvite", [options]).then((invite) => {
+        const varName2 = this.evalMessage(data.varName2, cache);
+        const storage2 = parseInt(data.storage, 10);
+        this.storeValue(invite.url, storage2, varName2, cache);
+        this.callNextAction(cache);
+      });
+    } else if (channel?.createInvite) {
+      channel
+        .createInvite(options)
+        .then((invite) => {
           const varName2 = this.evalMessage(data.varName2, cache);
           const storage2 = parseInt(data.storage, 10);
           this.storeValue(invite.url, storage2, varName2, cache);
           this.callNextAction(cache);
-        }.bind(this),
-      );
-    } else if (channel && channel.createInvite) {
-      channel
-        .createInvite(options)
-        .then(
-          function (invite) {
-            const varName2 = this.evalMessage(data.varName2, cache);
-            const storage2 = parseInt(data.storage, 10);
-            this.storeValue(invite.url, storage2, varName2, cache);
-            this.callNextAction(cache);
-          }.bind(this),
-        )
+        })
         .catch((err) => this.displayError(data, cache, err));
     } else {
       this.callNextAction(cache);

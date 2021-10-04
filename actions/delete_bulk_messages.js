@@ -123,7 +123,7 @@ module.exports = {
         }
         break;
       case 1:
-        if (msg && msg.mentions) {
+        if (msg?.mentions) {
           source = msg.mentions.channels.first();
         }
         break;
@@ -144,44 +144,39 @@ module.exports = {
         source = this.global[varName];
         break;
     }
-    if (source?.messages) {
-      const count = Math.min(parseInt(this.evalMessage(data.count, cache), 10), 100);
-      source.messages
-        .fetch({ limit: count, before: msg.id })
-        .then(
-          function (messages) {
-            const condition = parseInt(data.condition, 10);
-            if (condition === 1) {
-              let author;
-              try {
-                author = this.eval(data.custom, cache);
-              } catch (e) {
-                this.displayError(data, cache, e);
-                author = null;
-              }
-              if (author) {
-                messages = messages.filter((m) => m.author.id === author.id);
-              }
-            } else if (condition === 2) {
-              const cond = data.custom;
-              messages = messages.filter(function (message) {
-                let result = false;
-                try {
-                  result = !!this.eval(cond, cache);
-                } catch {}
-                return result;
-              }, this);
-            }
-            source
-              .bulkDelete(messages)
-              .then(() => this.callNextAction(cache))
-              .catch((err) => this.displayError(data, cache, err));
-          }.bind(this),
-        )
-        .catch((err) => this.displayError(data, cache, err));
-    } else {
-      this.callNextAction(cache);
-    }
+    if (!source?.messages) return this.callNextAction(cache);
+    const count = Math.min(parseInt(this.evalMessage(data.count, cache), 10), 100);
+    source.messages
+      .fetch({ limit: count, before: msg.id })
+      .then((messages) => {
+        const condition = parseInt(data.condition, 10);
+        if (condition === 1) {
+          let author;
+          try {
+            author = this.eval(data.custom, cache);
+          } catch (e) {
+            this.displayError(data, cache, e);
+            author = null;
+          }
+          if (author) {
+            messages = messages.filter((m) => m.author.id === author.id);
+          }
+        } else if (condition === 2) {
+          const cond = data.custom;
+          messages = messages.filter((message) => {
+            let result = false;
+            try {
+              result = !!this.eval(cond, cache);
+            } catch {}
+            return result;
+          });
+        }
+        source
+          .bulkDelete(messages, true)
+          .then(() => this.callNextAction(cache))
+          .catch((err) => this.displayError(data, cache, err));
+      })
+      .catch((err) => this.displayError(data, cache, err));
   },
 
   //---------------------------------------------------------------------

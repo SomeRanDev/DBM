@@ -221,7 +221,7 @@ module.exports = {
         result = msg.content;
         break;
       case 3:
-        result = msg.member || msg.author;
+        result = msg.member ?? msg.author;
         break;
       case 4:
         result = msg.channel;

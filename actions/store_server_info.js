@@ -325,8 +325,10 @@ module.exports = {
     const info = parseInt(data.info, 10);
     const targetServer = this.getServer(server, varName, cache);
     if (!targetServer) return this.callNextAction(cache);
-    const fetchMembers = async () =>
-      targetServer.memberCount !== targetServer.members.cache.size ? await targetServer.members.fetch() : null;
+    const fetchMembers = async (withPresences = false) =>
+      targetServer.memberCount !== targetServer.members.cache.size
+        ? await targetServer.members.fetch({ withPresences })
+        : null;
     let result;
     switch (info) {
       case 0:
@@ -386,8 +388,8 @@ module.exports = {
       case 18:
         result = targetServer.createdAt;
         break;
-      case 19: // check below
-        result = targetServer.afkTimeout;
+      case 19:
+        result = targetServer.afkTimeout ?? 0;
         break;
       case 20:
         result = targetServer.available;
@@ -408,19 +410,19 @@ module.exports = {
         result = !!targetServer.widgetEnabled;
         break;
       case 26:
-        await fetchMembers();
+        await fetchMembers(true);
         result = targetServer.members.cache.filter((m) => m.user?.presence?.status === "dnd").size;
         break;
       case 27:
-        await fetchMembers();
+        await fetchMembers(true);
         result = targetServer.members.cache.filter((m) => m.user?.presence?.status === "online").size;
         break;
       case 28:
-        await fetchMembers();
+        await fetchMembers(true);
         result = targetServer.members.cache.filter((m) => m.user?.presence?.status === "offline").size;
         break;
       case 29:
-        await fetchMembers();
+        await fetchMembers(true);
         result = targetServer.members.cache.filter((m) => m.user?.presence?.status === "idle").size;
         break;
       case 30:
@@ -453,11 +455,11 @@ module.exports = {
         result = targetServer.verified;
         break;
       case 41:
-        const bans = await targetServer.fetchBans();
+        const bans = await targetServer.bans.fetch();
         result = [...bans.values()];
         break;
       case 42:
-        const invites = await targetServer.fetchInvites();
+        const invites = await targetServer.invites.fetch();
         result = [...invites.values()];
         break;
       case 43:

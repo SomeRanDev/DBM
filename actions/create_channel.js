@@ -115,33 +115,29 @@ module.exports = {
   action(cache) {
     const data = cache.actions[cache.index];
     const server = cache.server;
-    if (server && server.channels && server.channels.create) {
-      const name = this.evalMessage(data.channelName, cache);
-      const storage = parseInt(data.storage, 10);
-      const reason = this.evalMessage(data.reason, cache);
-      const channelData = { reason };
-      if (data.topic) {
-        channelData.topic = this.evalMessage(data.topic, cache);
-      }
-      if (data.position) {
-        channelData.position = parseInt(this.evalMessage(data.position, cache), 10);
-      }
-      if (data.categoryID) {
-        channelData.parent = this.evalMessage(data.categoryID, cache);
-      }
-      server.channels
-        .create(name, channelData)
-        .then(
-          function (channel) {
-            const varName = this.evalMessage(data.varName, cache);
-            this.storeValue(channel, storage, varName, cache);
-            this.callNextAction(cache);
-          }.bind(this),
-        )
-        .catch((err) => this.displayError(data, cache, err));
-    } else {
+    if (!server?.channels?.create) {
       this.callNextAction(cache);
     }
+    const name = this.evalMessage(data.channelName, cache);
+    const storage = parseInt(data.storage, 10);
+    const channelData = { reason: this.evalMessage(data.reason, cache) };
+    if (data.topic) {
+      channelData.topic = this.evalMessage(data.topic, cache);
+    }
+    if (data.position) {
+      channelData.position = parseInt(this.evalMessage(data.position, cache), 10);
+    }
+    if (data.categoryID) {
+      channelData.parent = this.evalMessage(data.categoryID, cache);
+    }
+    server.channels
+      .create(name, channelData)
+      .then((channel) => {
+        const varName = this.evalMessage(data.varName, cache);
+        this.storeValue(channel, storage, varName, cache);
+        this.callNextAction(cache);
+      })
+      .catch((err) => this.displayError(data, cache, err));
   },
 
   //---------------------------------------------------------------------

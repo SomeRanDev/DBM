@@ -32,8 +32,7 @@ module.exports = {
   //---------------------------------------------------------------------
 
   variableStorage(data, varType) {
-    const type = parseInt(data.storage, 10);
-    if (type !== varType) return;
+    if (parseInt(data.storage, 10) !== varType) return;
     return [data.varName, "Role"];
   },
 
@@ -122,7 +121,9 @@ module.exports = {
   action(cache) {
     const data = cache.actions[cache.index];
     const server = cache.server;
+    if (!server) return this.callNextAction(cache);
     const reason = this.evalMessage(data.reason, cache);
+    /** @type {import('discord.js').CreateRoleOptions} */
     const roleData = {};
     if (data.roleName) {
       roleData.name = this.evalMessage(data.roleName, cache);
@@ -133,21 +134,17 @@ module.exports = {
     if (data.position) {
       roleData.position = parseInt(this.evalMessage(data.position, cache), 10);
     }
-    roleData.hoist = JSON.parse(data.hoist);
-    roleData.mentionable = JSON.parse(data.mentionable);
-    if (server?.roles) {
-      const storage = parseInt(data.storage, 10);
-      server.roles
-        .create({ data: roleData, reason })
-        .then((role) => {
-          const varName = this.evalMessage(data.varName, cache);
-          this.storeValue(role, storage, varName, cache);
-          this.callNextAction(cache);
-        })
-        .catch((err) => this.displayError(data, cache, err));
-    } else {
-      this.callNextAction(cache);
-    }
+    roleData.hoist = data.hoist === "true";
+    roleData.mentionable = data.mentionable === "true";
+    const storage = parseInt(data.storage, 10);
+    server.roles
+      .create({ ...roleData, reason })
+      .then((role) => {
+        const varName = this.evalMessage(data.varName, cache);
+        this.storeValue(role, storage, varName, cache);
+        this.callNextAction(cache);
+      })
+      .catch((err) => this.displayError(data, cache, err));
   },
 
   //---------------------------------------------------------------------

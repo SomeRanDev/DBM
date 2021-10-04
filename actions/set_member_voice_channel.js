@@ -96,7 +96,7 @@ module.exports = {
 
     const storage2 = parseInt(data.channel, 10);
     const varName2 = this.evalMessage(data.varName2, cache);
-    const channel = this.getVoiceChannel(storage2, varName2, cache);
+    const channel = this.getVoiceChannel(storage2, varName2, cache) || null;
     const reason = this.evalMessage(data.reason, cache);
 
     if (Array.isArray(member)) {
@@ -110,6 +110,8 @@ module.exports = {
         .setChannel(channel, reason)
         .then(() => this.callNextAction(cache))
         .catch((err) => this.displayError(data, cache, err));
+      this.callNextAction(cache);
+    } else {
       this.callNextAction(cache);
     }
   },
