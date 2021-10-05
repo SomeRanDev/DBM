@@ -2362,7 +2362,13 @@ Audio.Track = class {
           Audio.voice
             .demuxProbe(stream)
             .then((probe) =>
-              resolve(Audio.voice.createAudioResource(probe.stream, { metadata: this, inlineVolume: Audio.inlineVolume, inputType: probe.type })),
+              resolve(
+                Audio.voice.createAudioResource(probe.stream, {
+                  metadata: this,
+                  inlineVolume: Audio.inlineVolume,
+                  inputType: probe.type,
+                }),
+              ),
             )
             .catch(onError),
         )
@@ -2388,7 +2394,10 @@ Audio.BasicTrack = class {
 
   /** @param {String} url */
   createAudioResource() {
-    return Audio.voice.createAudioResource(this.url, { inlineVolume: Audio.inlineVolume, inputType: Audio.voice.StreamType.Arbitrary });
+    return Audio.voice.createAudioResource(this.url, {
+      inlineVolume: Audio.inlineVolume,
+      inputType: Audio.voice.StreamType.Arbitrary,
+    });
   }
 };
 
@@ -2432,7 +2441,7 @@ Audio.disconnectFromVoice = function (guildId) {
 };
 
 Audio.setVolume = function (volume, guildId) {
-  if (!this.inlineVolume) throw new Error('Tried setting volume but inlineVolume is disabled');
+  if (!this.inlineVolume) throw new Error("Tried setting volume but inlineVolume is disabled");
   const subscription = this.subscriptions.get(guildId);
   if (!subscription) return;
   subscription.volume = volume;
@@ -2444,14 +2453,14 @@ Audio.setVolume = function (volume, guildId) {
 Audio.addToQueue = async function ([type, options, url], cache) {
   if (!cache.server) return;
   const id = cache.server.id;
-  if (typeof options.volume !== 'undefined') this.setVolume(options.volume, id)
+  if (typeof options.volume !== "undefined") this.setVolume(options.volume, id);
   this.subscriptions.get(id)?.enqueue(await this.getTrack(url, type));
 };
 
 Audio.playItem = async function ([type, options, url], guildId) {
   const subscription = this.subscriptions.get(guildId);
   if (!subscription) return;
-  if (typeof options.volume !== 'undefined') this.setVolume(options.volume, id)
+  if (typeof options.volume !== "undefined") this.setVolume(options.volume, id);
   subscription.enqueue(await this.getTrack(url, type), true);
   subscription.audioPlayer.stop(true);
 };
