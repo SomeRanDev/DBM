@@ -185,6 +185,28 @@ module.exports = {
   },
 
   //---------------------------------------------------------------------
+  // Action Bot Mod Init
+  //
+  // An optional function for action mods. Upon the bot's initialization,
+  // each command/event's actions are iterated through. This is to
+  // initialize responses to interactions created within actions
+  // (e.g. buttons and select menus for Send Message).
+  //
+  // If an action provides inputs for more actions within, be sure
+  // to call the `this.prepareActions` function to ensure all actions are
+  // recursively iterated through.
+  //---------------------------------------------------------------------
+
+  modInit(data) {
+    if (Array.isArray(data?.branches)) {
+      for (let i = 0; i < data.branches.length; i++) {
+        const branch = data.branches[i];
+        this.prepareActions(branch.actions);
+      }
+    }
+  },
+
+  //---------------------------------------------------------------------
   // Action Bot Mod
   //
   // Upon initialization of the bot, this code is run. Using the bot's

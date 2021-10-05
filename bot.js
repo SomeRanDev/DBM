@@ -9,9 +9,9 @@ DBM.version = "2.0.0";
 
 const DiscordJS = (DBM.DiscordJS = require("discord.js"));
 
-if (DiscordJS.version < "13.1.0") {
+if (DiscordJS.version < "13.2.0") {
   console.log(
-    'This version of Discord Bot Maker requires discord.JS v13.1.0.\nPlease use "Project > Module Manager" and "Project > Reinstall Node Modules" to update to discord.js v13.\n',
+    'This version of Discord Bot Maker requires discord.JS v13.2.0.\nPlease use "Project > Module Manager" and "Project > Reinstall Node Modules" to update to discord.js v13.\n',
   );
   throw new Error("Need discord.js v13 to run!!!");
 }
@@ -1225,6 +1225,34 @@ Actions.getSendTarget = function (type, varName, cache) {
         return server.getDefaultChannel();
       }
       break;
+    case 100: {
+      const result = Bot.bot.users.cache.find((user) => user.username === varName);
+      if (result) {
+        return result;
+      }
+      break;
+    }
+    case 101: {
+      const result = Bot.bot.users.cache.find((user) => user.id === varName);
+      if (result) {
+        return result;
+      }
+      break;
+    }
+    case 102: {
+      const result = Bot.bot.channels.cache.find((channel) => channel.name === varName);
+      if (result) {
+        return result;
+      }
+      break;
+    }
+    case 103: {
+      const result = Bot.bot.channels.cache.find((channel) => channel.id === varName);
+      if (result) {
+        return result;
+      }
+      break;
+    }
     default:
       return this.getTargetFromVariableOrParameter(type - 5, varName, cache);
   }
@@ -1249,6 +1277,20 @@ Actions.getMember = function (type, varName, cache) {
         return msg.member ?? msg.author;
       }
       break;
+    case 100: {
+      const result = Bot.bot.users.cache.find((user) => user.username === varName);
+      if (result) {
+        return result;
+      }
+      break;
+    }
+    case 101: {
+      const result = Bot.bot.users.cache.find((user) => user.id === varName);
+      if (result) {
+        return result;
+      }
+      break;
+    }
     default:
       return this.getTargetFromVariableOrParameter(type - 2, varName, cache);
   }
@@ -1305,6 +1347,24 @@ Actions.getRole = function (type, varName, cache) {
         return server.roles.cache.first();
       }
       break;
+    case 100: {
+      if(server) {
+        const result = server.roles.cache.find((role) => role.name === varName);
+        if (result) {
+          return result;
+        }
+      }
+      break;
+    }
+    case 101: {
+      if(server) {
+        const result = server.roles.cache.find((role) => role.id === varName);
+        if (result) {
+          return result;
+        }
+      }
+      break;
+    }
     default:
       return this.getTargetFromVariableOrParameter(type - 3, varName, cache);
   }
@@ -1334,6 +1394,20 @@ Actions.getChannel = function (type, varName, cache) {
         return server.getDefaultChannel();
       }
       break;
+    case 100: {
+      const result = Bot.bot.channels.cache.find((channel) => channel.name === varName);
+      if (result) {
+        return result;
+      }
+      break;
+    }
+    case 101: {
+      const result = Bot.bot.channels.cache.find((channel) => channel.id === varName);
+      if (result) {
+        return result;
+      }
+      break;
+    }
     default:
       return this.getTargetFromVariableOrParameter(type - 3, varName, cache);
   }
@@ -1366,6 +1440,20 @@ Actions.getVoiceChannel = function (type, varName, cache) {
         return server.getDefaultVoiceChannel();
       }
       break;
+    case 100: {
+      const result = Bot.bot.channels.cache.find((channel) => channel.name === varName);
+      if (result) {
+        return result;
+      }
+      break;
+    }
+    case 101: {
+      const result = Bot.bot.channels.cache.find((channel) => channel.id === varName);
+      if (result) {
+        return result;
+      }
+      break;
+    }
     default:
       return this.getTargetFromVariableOrParameter(type - 3, varName, cache);
   }
