@@ -431,7 +431,9 @@ module.exports = {
     };
 
     const canReply =
-      cache?.interaction?.replied === false && target?.id?.length > 0 && (target?.id ?? "") === cache?.interaction?.channel?.id;
+      cache?.interaction?.replied === false &&
+      target?.id?.length > 0 &&
+      (target?.id ?? "") === cache?.interaction?.channel?.id;
 
     if (Array.isArray(target)) {
       this.callListFunc(target, "send", [messageOptions]).then(onComplete);

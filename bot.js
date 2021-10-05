@@ -1357,7 +1357,7 @@ Actions.getRole = function (type, varName, cache) {
       }
       break;
     case 100: {
-      if(server) {
+      if (server) {
         const result = server.roles.cache.find((role) => role.name === varName);
         if (result) {
           return result;
@@ -1366,7 +1366,7 @@ Actions.getRole = function (type, varName, cache) {
       break;
     }
     case 101: {
-      if(server) {
+      if (server) {
         const result = server.roles.cache.get(varName);
         if (result) {
           return result;
