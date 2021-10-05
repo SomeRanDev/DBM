@@ -2322,6 +2322,7 @@ Audio.Subscription = class {
     this.audioPlayer = Audio.voice.createAudioPlayer();
     this.queue = [];
     this.volume = 0.5;
+    this.bitrate = 96;
 
     this.voiceConnection.on("stateChange", async (_, newState) => {
       if (newState.status === Audio.voice.VoiceConnectionStatus.Disconnected) {
@@ -2353,8 +2354,9 @@ Audio.Subscription = class {
         try {
           await Audio.voice.entersState(this.voiceConnection, Audio.voice.VoiceConnectionStatus.Ready, 20_000);
         } catch {
-          if (this.voiceConnection.state.status !== Audio.voice.VoiceConnectionStatus.Destroyed)
+          if (this.voiceConnection.state.status !== Audio.voice.VoiceConnectionStatus.Destroyed) {
             this.voiceConnection.destroy();
+          }
         } finally {
           this.readyLock = false;
         }
@@ -2404,6 +2406,7 @@ Audio.Subscription = class {
           Audio.disconnectFromVoice(this.voiceConnection.joinConfig.guildId);
         }, seconds * 1e3)
         .unref();
+      return;
     }
 
     this.queueLock = true;
@@ -2412,6 +2415,7 @@ Audio.Subscription = class {
     try {
       const resource = await nextTrack.createAudioResource();
       if (Audio.inlineVolume) resource.volume.volume = this.volume;
+      // resource.encoder.setBitrate(this.bitrate * 1e3);
       this.audioPlayer.play(resource);
       this.queueLock = false;
     } catch {
@@ -2500,18 +2504,6 @@ Audio.BasicTrack = class {
 
 Audio.subscriptions = new Map();
 
-Audio.isConnected = function (cache) {
-  if (!cache.server) return false;
-  const id = cache.server.id;
-  return this.subscriptions.get(id)?.voiceConnection.state.status === this.voice.VoiceConnectionStatus.Ready;
-};
-
-Audio.isPlaying = function (cache) {
-  if (!cache.server) return false;
-  const id = cache.server.id;
-  return this.subscriptions.get(id)?.audioPlayer.state.status === this.voice.AudioPlayerStatus.Playing;
-};
-
 /** @param {import('discord.js').VoiceChannel} voiceChannel */
 Audio.connectToVoice = function (voiceChannel) {
   Audio.inlineVolume ??= Files.data.settings.mutableVolume === "true";
@@ -2538,7 +2530,7 @@ Audio.disconnectFromVoice = function (guildId) {
 };
 
 Audio.setVolume = function (volume, guildId) {
-  if (!this.inlineVolume) throw new Error("Tried setting volume but inlineVolume is disabled");
+  if (!this.inlineVolume) return console.error("Tried setting volume but 'Mutable Volume' is disabled");
   const subscription = this.subscriptions.get(guildId);
   if (!subscription) return;
   subscription.volume = volume;
@@ -2550,14 +2542,18 @@ Audio.setVolume = function (volume, guildId) {
 Audio.addToQueue = async function ([type, options, url], cache) {
   if (!cache.server) return;
   const id = cache.server.id;
+  const subscription = this.subscriptions.get(id);
+  if (!subscription) return;
   if (typeof options.volume !== "undefined") this.setVolume(options.volume, id);
-  this.subscriptions.get(id)?.enqueue(await this.getTrack(url, type));
+  if (typeof options.bitrate !== "undefined") subscription.bitrate = options.bitrate;
+  subscription.enqueue(await this.getTrack(url, type));
 };
 
 Audio.playItem = async function ([type, options, url], guildId) {
   const subscription = this.subscriptions.get(guildId);
   if (!subscription) return;
   if (typeof options.volume !== "undefined") this.setVolume(options.volume, id);
+  if (typeof options.bitrate !== "undefined") subscription.bitrate = options.bitrate;
   subscription.enqueue(await this.getTrack(url, type), true);
   subscription.audioPlayer.stop(true);
 };

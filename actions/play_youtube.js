@@ -122,8 +122,6 @@ module.exports = {
     }
     if (data.bitrate) {
       options.bitrate = parseInt(this.evalMessage(data.bitrate, cache), 10);
-    } else {
-      options.bitrate = "auto";
     }
     const url = this.evalMessage(data.url, cache);
     if (url) {
