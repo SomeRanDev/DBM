@@ -835,6 +835,7 @@ Actions.eval = function (content, cache, throwError = true) {
   const globalVars = this.getActionVariable.bind(this.global);
   const slashParams = this.getSlashParameter.bind(this, cache.interaction);
   const msg = cache.msg;
+  const interaction = cache.interaction;
   const server = cache.server;
   const client = DBM.Bot.bot;
   const bot = DBM.Bot.bot;
@@ -850,6 +851,14 @@ Actions.eval = function (content, cache, throwError = true) {
     if (msg.mentions) {
       mentionedUser = msg.mentions.users.first() ?? "";
       mentionedChannel = msg.mentions.channels.first() ?? "";
+    }
+  }
+  if (interaction) {
+    user = interaction.user;
+    member = interaction.member;
+    if (interaction.options) {
+      mentionedUser = interaction.options.resolved?.users?.first?.() ?? "";
+      mentionedChannel = interaction.options.resolved?.channels?.first?.() ?? "";
     }
   }
   if (server) {
