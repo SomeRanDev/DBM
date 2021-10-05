@@ -95,14 +95,12 @@ module.exports = {
   action(cache) {
     const data = cache.actions[cache.index];
     const { Images } = this.getDBM();
-    const type = parseInt(data.server, 10);
     const varName = this.evalMessage(data.varName, cache);
-    const server = this.getServer(type, varName, cache);
+    const server = this.getServer(parseInt(data.server, 10), varName, cache);
     const reason = this.evalMessage(data.reason, cache);
     if (!Array.isArray(server) && !server?.setIcon) return this.callNextAction(cache);
-    const type = parseInt(data.storage, 10);
     const varName2 = this.evalMessage(data.varName2, cache);
-    const image = this.getVariable(type, varName2, cache);
+    const image = this.getVariable(parseInt(data.storage, 10), varName2, cache);
     Images.createBuffer(image)
       .then((buffer) => {
         if (Array.isArray(server)) {

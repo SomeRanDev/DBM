@@ -116,10 +116,6 @@ module.exports = {
     }
     if (data.volume) {
       options.volume = parseInt(this.evalMessage(data.volume, cache), 10) / 100;
-    } else if (cache.server) {
-      options.volume = Audio.volumes[cache.server.id] || 0.5;
-    } else {
-      options.volume = 0.5;
     }
     if (data.passes) {
       options.passes = parseInt(this.evalMessage(data.passes, cache), 10);

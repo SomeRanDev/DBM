@@ -2224,6 +2224,7 @@ Audio.Subscription = class {
     this.voiceConnection = voiceConnection;
     this.audioPlayer = Audio.voice.createAudioPlayer();
     this.queue = [];
+    this.volume = 0.5;
 
     this.voiceConnection.on("stateChange", async (_, newState) => {
       if (newState.status === Audio.voice.VoiceConnectionStatus.Disconnected) {
@@ -2313,6 +2314,7 @@ Audio.Subscription = class {
     const nextTrack = this.queue.shift();
     try {
       const resource = await nextTrack.createAudioResource();
+      if (Audio.inlineVolume) resource.volume.volume = this.volume;
       this.audioPlayer.play(resource);
       this.queueLock = false;
     } catch {
@@ -2352,7 +2354,6 @@ Audio.Track = class {
       const stream = child.stdout;
       const onError = (error) => {
         if (!child.killed) child.kill();
-        console.error("demux: ", error);
         stream.resume();
         reject(error);
       };
@@ -2361,7 +2362,7 @@ Audio.Track = class {
           Audio.voice
             .demuxProbe(stream)
             .then((probe) =>
-              resolve(Audio.voice.createAudioResource(probe.stream, { metadata: this, inputType: probe.type })),
+              resolve(Audio.voice.createAudioResource(probe.stream, { metadata: this, inlineVolume: Audio.inlineVolume, inputType: probe.type })),
             )
             .catch(onError),
         )
@@ -2387,7 +2388,7 @@ Audio.BasicTrack = class {
 
   /** @param {String} url */
   createAudioResource() {
-    return Audio.voice.createAudioResource(this.url, { inputType: Audio.voice.StreamType.Arbitrary });
+    return Audio.voice.createAudioResource(this.url, { inlineVolume: Audio.inlineVolume, inputType: Audio.voice.StreamType.Arbitrary });
   }
 };
 
@@ -2407,6 +2408,8 @@ Audio.isPlaying = function (cache) {
 
 /** @param {import('discord.js').VoiceChannel} voiceChannel */
 Audio.connectToVoice = function (voiceChannel) {
+  Audio.inlineVolume ??= Files.data.settings.mutableVolume === "true";
+
   this.subscriptions.set(
     voiceChannel.guildId,
     new this.Subscription(
@@ -2428,20 +2431,27 @@ Audio.disconnectFromVoice = function (guildId) {
   this.subscriptions.delete(guildId);
 };
 
-// not implemented
 Audio.setVolume = function (volume, guildId) {
-  if (!id) return;
+  if (!this.inlineVolume) throw new Error('Tried setting volume but inlineVolume is disabled');
+  const subscription = this.subscriptions.get(guildId);
+  if (!subscription) return;
+  subscription.volume = volume;
+  if (subscription.audioPlayer.state.status === this.voice.AudioPlayerStatus.Playing) {
+    subscription.audioPlayer.state.resource.volume.volume = volume;
+  }
 };
 
 Audio.addToQueue = async function ([type, options, url], cache) {
   if (!cache.server) return;
   const id = cache.server.id;
+  if (typeof options.volume !== 'undefined') this.setVolume(options.volume, id)
   this.subscriptions.get(id)?.enqueue(await this.getTrack(url, type));
 };
 
 Audio.playItem = async function ([type, options, url], guildId) {
   const subscription = this.subscriptions.get(guildId);
   if (!subscription) return;
+  if (typeof options.volume !== 'undefined') this.setVolume(options.volume, id)
   subscription.enqueue(await this.getTrack(url, type), true);
   subscription.audioPlayer.stop(true);
 };
