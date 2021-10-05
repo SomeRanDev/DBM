@@ -1242,7 +1242,7 @@ Actions.getSendTarget = function (type, varName, cache) {
       break;
     }
     case 101: {
-      const result = Bot.bot.users.cache.find((user) => user.id === varName);
+      const result = Bot.bot.users.cache.get(varName);
       if (result) {
         return result;
       }
@@ -1256,7 +1256,7 @@ Actions.getSendTarget = function (type, varName, cache) {
       break;
     }
     case 103: {
-      const result = Bot.bot.channels.cache.find((channel) => channel.id === varName);
+      const result = Bot.bot.channels.cache.get(varName);
       if (result) {
         return result;
       }
@@ -1294,7 +1294,7 @@ Actions.getMember = function (type, varName, cache) {
       break;
     }
     case 101: {
-      const result = Bot.bot.users.cache.find((user) => user.id === varName);
+      const result = Bot.bot.users.cache.get(varName);
       if (result) {
         return result;
       }
@@ -1367,7 +1367,7 @@ Actions.getRole = function (type, varName, cache) {
     }
     case 101: {
       if(server) {
-        const result = server.roles.cache.find((role) => role.id === varName);
+        const result = server.roles.cache.get(varName);
         if (result) {
           return result;
         }
@@ -1411,7 +1411,7 @@ Actions.getChannel = function (type, varName, cache) {
       break;
     }
     case 101: {
-      const result = Bot.bot.channels.cache.find((channel) => channel.id === varName);
+      const result = Bot.bot.channels.cache.get(varName);
       if (result) {
         return result;
       }
@@ -1457,7 +1457,7 @@ Actions.getVoiceChannel = function (type, varName, cache) {
       break;
     }
     case 101: {
-      const result = Bot.bot.channels.cache.find((channel) => channel.id === varName);
+      const result = Bot.bot.channels.cache.get(varName);
       if (result) {
         return result;
       }
