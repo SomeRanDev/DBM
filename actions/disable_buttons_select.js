@@ -97,9 +97,9 @@ module.exports = {
   init() {
     const { glob } = this;
 
-    glob.onButtonSelectTypeChange = function(event) {
+    glob.onButtonSelectTypeChange = function (event) {
       const input = document.getElementById("nameContainer");
-      input.style.display = (event.value === "findButton" || event.value === "findSelect") ? null : "none";
+      input.style.display = event.value === "findButton" || event.value === "findSelect" ? null : "none";
     };
 
     glob.onButtonSelectTypeChange(document.getElementById("type"));
@@ -142,7 +142,7 @@ module.exports = {
         const comps = oldComponents[i].toJSON();
         for (let j = 0; j < comps.components.length; j++) {
           const comp = comps.components[j];
-          switch(type) {
+          switch (type) {
             case "all": {
               comp.disabled = disable;
               break;

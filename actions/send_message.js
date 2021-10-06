@@ -404,7 +404,7 @@ module.exports = {
 
     if (data.file) {
       const file = this.evalMessage(data.file, cache);
-      if (file) messageOptions.files = [ file ];
+      if (file) messageOptions.files = [file];
     }
 
     const onComplete = (resultMsg) => {

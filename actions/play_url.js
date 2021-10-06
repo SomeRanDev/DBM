@@ -41,7 +41,7 @@ module.exports = {
   // are also the names of the fields stored in the action's JSON data.
   //---------------------------------------------------------------------
 
-  fields: ["url", "seek", "volume", "passes", "bitrate", "type"],
+  fields: ["url", "seek", "volume", "bitrate", "type"],
 
   //---------------------------------------------------------------------
   // Command HTML
@@ -66,16 +66,14 @@ module.exports = {
 	<input id="url" class="round" type="text" value="http://"><br>
 </div>
 <div style="float: left; width: calc(50% - 12px);">
-	<span class="dbminputlabel">Seek Position</span><br>
-	<input id="seek" class="round" type="text" value="0"><br>
-	<span class="dbminputlabel">Passes</span><br>
-	<input id="passes" class="round" type="text" value="1">
+  <span class="dbminputlabel">Volume (0 = min; 100 = max)</span><br>
+  <input id="volume" class="round" type="text" placeholder="Leave blank for automatic..."><br>
+  <span class="dbminputlabel">Bitrate</span><br>
+  <input id="bitrate" class="round" type="text" placeholder="Leave blank for automatic...">
 </div>
 <div style="float: right; width: calc(50% - 12px);">
-	<span class="dbminputlabel">Volume (0 = min; 100 = max)</span><br>
-	<input id="volume" class="round" type="text" placeholder="Leave blank for automatic..."><br>
-	<span class="dbminputlabel">Bitrate</span><br>
-	<input id="bitrate" class="round" type="text" placeholder="Leave blank for automatic...">
+	<span class="dbminputlabel">Seek Position</span><br>
+	<input id="seek" class="round" type="text" value="0"><br>
 </div>
 
 <br><br><br><br><br><br><br>
@@ -116,9 +114,6 @@ module.exports = {
     }
     if (data.volume) {
       options.volume = parseInt(this.evalMessage(data.volume, cache), 10) / 100;
-    }
-    if (data.passes) {
-      options.passes = parseInt(this.evalMessage(data.passes, cache), 10);
     }
     if (data.bitrate) {
       options.bitrate = parseInt(this.evalMessage(data.bitrate, cache), 10);
