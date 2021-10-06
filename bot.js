@@ -1670,7 +1670,17 @@ Actions.generateSelectMenu = function (select) {
 Actions.addButtonToActionRowArray = function (array, rowText, buttonData, cache) {
   let row = 0;
   if (!rowText) {
-    if (array.length !== 0) {
+    let found = false;
+    for (let i = 0; i < array.length; i++) {
+      if (array[i].length < 5) {
+        if (array[i][0].type === "BUTTON") {
+          found = true;
+          row = i;
+          break;
+        }
+      }
+    }
+    if (!found && array.length !== 0) {
       row = array.length - 1;
       if (array[row].length >= 5) {
         row++;
