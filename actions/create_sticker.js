@@ -5,7 +5,7 @@ module.exports = {
   // This is the name of the action displayed in the editor.
   //---------------------------------------------------------------------
 
-  name: "Create Emoji",
+  name: "Create Sticker",
 
   //---------------------------------------------------------------------
   // Action Section
@@ -13,7 +13,7 @@ module.exports = {
   // This is the section the action will fall into.
   //---------------------------------------------------------------------
 
-  section: "Emoji Control",
+  section: "Sticker Control",
 
   //---------------------------------------------------------------------
   // Action Subtitle
@@ -22,7 +22,7 @@ module.exports = {
   //---------------------------------------------------------------------
 
   subtitle(data, presets) {
-    return `${data.emojiName}`;
+    return `${data.stickerName}`;
   },
 
   //---------------------------------------------------------------------
@@ -32,9 +32,8 @@ module.exports = {
   //---------------------------------------------------------------------
 
   variableStorage(data, varType) {
-    const type = parseInt(data.storage2, 10);
-    if (type !== varType) return;
-    return [data.varName2, "Emoji"];
+    if (parseInt(data.storage2, 10) !== varType) return;
+    return [data.varName2, "Sticker"];
   },
 
   //---------------------------------------------------------------------
@@ -45,7 +44,7 @@ module.exports = {
   // are also the names of the fields stored in the action's JSON data.
   //---------------------------------------------------------------------
 
-  fields: ["emojiName", "storage", "varName", "storage2", "varName2"],
+  fields: ["stickerName", "description", "tag", "storage", "varName", "storage2", "varName2"],
 
   //---------------------------------------------------------------------
   // Command HTML
@@ -66,15 +65,29 @@ module.exports = {
   html(isEvent, data) {
     return `
 <div>
-	<span class="dbminputlabel">Emoji Name</span><br>
-	<input id="emojiName" class="round" type="text">
+	<span class="dbminputlabel">Sticker Name</span><br>
+	<input id="stickerName" class="round" type="text">
 </div>
 
 <br>
 
 <retrieve-from-variable dropdownLabel="Source Image" selectId="storage" variableContainerId="varNameContainer" variableInputId="varName"></retrieve-from-variable>
 
-<br><br><br><br>
+<br><br><br>
+
+<div>
+  <span class="dbminputlabel">Sticker Tag</span><br>
+  <input id="tag" class="round" type="text" placeholder="A standard emoji name. This is required.">
+</div>
+
+<br>
+
+<div>
+	<span class="dbminputlabel">Sticker Description</span><br>
+	<input id="description" class="round" type="text" placeholder="Leave empty for none">
+</div>
+
+<br>
 
 <hr class="subtlebar" style="margin-top: 0px;">
 
@@ -104,11 +117,10 @@ module.exports = {
   async action(cache) {
     const data = cache.actions[cache.index];
     const server = cache.server;
-    if (!server?.emojis) return this.callNextAction(cache);
+    if (!server) return this.callNextAction(cache);
 
-    const type = parseInt(data.storage, 10);
     const varName = this.evalMessage(data.varName, cache);
-    const image = this.getVariable(type, varName, cache);
+    const image = this.getVariable(parseInt(data.storage, 10), varName, cache);
     const { Images } = this.getDBM();
 
     let buffer;
@@ -118,12 +130,15 @@ module.exports = {
       return this.displayError(data, cache);
     }
 
-    server.emojis
-      .create(buffer, this.evalMessage(data.emojiName, cache))
-      .then((emoji) => {
+    const tag = this.evalMessage(data.tag, cache);
+    const description = this.evalMessage(data.description, cache);
+
+    server.stickers
+      .create(buffer, this.evalMessage(data.stickerName, cache), tag, { description })
+      .then((sticker) => {
         const varName2 = this.evalMessage(data.varName2, cache);
         const storage = parseInt(data.storage, 10);
-        this.storeValue(emoji, storage, varName2, cache);
+        this.storeValue(sticker, storage, varName2, cache);
         this.callNextAction(cache);
       })
       .catch((err) => this.displayError(data, cache, err));

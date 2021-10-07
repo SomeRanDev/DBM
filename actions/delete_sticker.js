@@ -5,7 +5,7 @@ module.exports = {
   // This is the name of the action displayed in the editor.
   //---------------------------------------------------------------------
 
-  name: "Create Emoji",
+  name: "Delete Sticker",
 
   //---------------------------------------------------------------------
   // Action Section
@@ -13,7 +13,7 @@ module.exports = {
   // This is the section the action will fall into.
   //---------------------------------------------------------------------
 
-  section: "Emoji Control",
+  section: "Sticker Control",
 
   //---------------------------------------------------------------------
   // Action Subtitle
@@ -22,19 +22,8 @@ module.exports = {
   //---------------------------------------------------------------------
 
   subtitle(data, presets) {
-    return `${data.emojiName}`;
-  },
-
-  //---------------------------------------------------------------------
-  // Action Storage Function
-  //
-  // Stores the relevant variable info for the editor.
-  //---------------------------------------------------------------------
-
-  variableStorage(data, varType) {
-    const type = parseInt(data.storage2, 10);
-    if (type !== varType) return;
-    return [data.varName2, "Emoji"];
+    const inputTypes = ["Specific Sticker", "Temp Variable", "Server Variable", "Global Variable"];
+    return `${inputTypes[parseInt(data.sticker, 10)]} (${data.varName})`;
   },
 
   //---------------------------------------------------------------------
@@ -45,7 +34,7 @@ module.exports = {
   // are also the names of the fields stored in the action's JSON data.
   //---------------------------------------------------------------------
 
-  fields: ["emojiName", "storage", "varName", "storage2", "varName2"],
+  fields: ["sticker", "varName", "reason"],
 
   //---------------------------------------------------------------------
   // Command HTML
@@ -66,21 +55,27 @@ module.exports = {
   html(isEvent, data) {
     return `
 <div>
-	<span class="dbminputlabel">Emoji Name</span><br>
-	<input id="emojiName" class="round" type="text">
+	<div style="float: left; width: 35%;">
+		<span class="dbminputlabel">Source Emoji</span><br>
+		<select id="sticker" class="round" onchange="glob.onChange1(this)">
+			<option value="0" selected>Specific Sticker</option>
+			<option value="1">Temp Variable</option>
+			<option value="2">Server Variable</option>
+			<option value="3">Global Variable</option>
+		</select>
+	</div>
+	<div id="varNameContainer" style="float: right; width: 60%;">
+		<span class="dbminputlabel" id="extName">Sticker Name</span>:<br>
+		<input id="varName" class="round" type="text" list="variableList"><br>
+	</div>
 </div>
 
-<br>
+<br><br><br>
 
-<retrieve-from-variable dropdownLabel="Source Image" selectId="storage" variableContainerId="varNameContainer" variableInputId="varName"></retrieve-from-variable>
-
-<br><br><br><br>
-
-<hr class="subtlebar" style="margin-top: 0px;">
-
-<br>
-
-<store-in-variable allowNone style="padding-top: 8px;" selectId="storage2" variableInputId="varName2" variableContainerId="varNameContainer2"></store-in-variable>`;
+<div style="padding-top: 12px;">
+  <span class="dbminputlabel">Reason</span>
+  <input id="reason" placeholder="Optional" class="round" type="text">
+</div>`;
   },
 
   //---------------------------------------------------------------------
@@ -91,7 +86,21 @@ module.exports = {
   // functions for the DOM elements.
   //---------------------------------------------------------------------
 
-  init() {},
+  init() {
+    const { glob, document } = this;
+
+    glob.onChange1 = function (event) {
+      const value = parseInt(event.value, 10);
+      const varNameInput = document.getElementById("extName");
+      if (value === 0) {
+        varNameInput.innerHTML = "Sticker Name";
+      } else {
+        varNameInput.innerHTML = "Variable Name";
+      }
+    };
+
+    glob.onChange1(document.getElementById("sticker"));
+  },
 
   //---------------------------------------------------------------------
   // Action Bot Function
@@ -101,32 +110,27 @@ module.exports = {
   // so be sure to provide checks for variable existence.
   //---------------------------------------------------------------------
 
-  async action(cache) {
+  action(cache) {
     const data = cache.actions[cache.index];
     const server = cache.server;
-    if (!server?.emojis) return this.callNextAction(cache);
-
-    const type = parseInt(data.storage, 10);
+    const type = parseInt(data.sticker, 10);
+    const reason = this.evalMessage(data.reason, cache);
     const varName = this.evalMessage(data.varName, cache);
-    const image = this.getVariable(type, varName, cache);
-    const { Images } = this.getDBM();
-
-    let buffer;
-    try {
-      buffer = Images.createBuffer(image);
-    } catch {
-      return this.displayError(data, cache);
+    let sticker;
+    if (type === 0) {
+      sticker = server.stickers.cache.find((e) => e.name === varName);
+    } else {
+      sticker = this.getVariable(type, varName, cache);
     }
-
-    server.emojis
-      .create(buffer, this.evalMessage(data.emojiName, cache))
-      .then((emoji) => {
-        const varName2 = this.evalMessage(data.varName2, cache);
-        const storage = parseInt(data.storage, 10);
-        this.storeValue(emoji, storage, varName2, cache);
-        this.callNextAction(cache);
-      })
-      .catch((err) => this.displayError(data, cache, err));
+    if (!sticker) return this.callNextAction(cache);
+    if (sticker?.delete) {
+      sticker
+        .delete(reason)
+        .then(() => this.callNextAction(cache))
+        .catch((err) => this.displayError(data, cache, err));
+    } else {
+      this.callNextAction(cache);
+    }
   },
 
   //---------------------------------------------------------------------
