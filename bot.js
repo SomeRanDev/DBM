@@ -574,17 +574,23 @@ Bot.generateTagRegex = function (tag, allowPrefixSpace) {
   return new RegExp(`^${this.escapeRegExp(tag)}${allowPrefixSpace ? "\\s*" : ""}`);
 };
 
-Bot.checkTag = function (content) {
+Bot.populateTagRegex = function () {
+  if (this.tagRegex) return;
   const tag = Files.data.settings.tag;
   const allowPrefixSpace = Files.data.settings.allowPrefixSpace === "true";
-  this.tagRegex ??= this.generateTagRegex(tag, allowPrefixSpace);
+  this.tagRegex = this.generateTagRegex(tag, allowPrefixSpace);
+  return this.tagRegex;
+};
+
+Bot.checkTag = function (content) {
+  const allowPrefixSpace = Files.data.settings.allowPrefixSpace === "true";
+  const tag = Files.data.settings.tag;
+  this.populateTagRegex();
   const separator = Files.data.settings.separator || "\\s+";
   if (content.startsWith(tag)) {
-    if (allowPrefixSpace) {
-      if (this.tagRegex.test(content)) {
-        content = content.replace(this.tagRegex, "");
-        return content.split(new RegExp(separator))[0];
-      }
+    if (allowPrefixSpace && this.tagRegex.test(content)) {
+      content = content.replace(this.tagRegex, "");
+      return content.split(new RegExp(separator))[0];
     } else {
       content = content.split(new RegExp(separator))[0];
       return content.substring(tag.length);

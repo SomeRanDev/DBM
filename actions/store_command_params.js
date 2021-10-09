@@ -170,27 +170,30 @@ module.exports = {
     const data = cache.actions[cache.index];
     const msg = cache.msg;
     if (!msg) return this.callNextAction(cache);
+    const { Bot, Files } = this.getDBM();
     const infoType = parseInt(data.info, 10);
-    const index = parseInt(this.evalMessage(data.infoIndex, cache), 10);
-    const separator = this.getDBM().Files.data.settings.separator || "\\s+";
+    const index = parseInt(this.evalMessage(data.infoIndex, cache), 10) - 1;
+    const separator = Files.data.settings.separator || "\\s+";
+    Bot.populateTagRegex();
+    const content = msg.content?.replace(Bot.tagRegex, "").replace(Bot.checkTag(msg.content), "").trimStart();
     let source;
     switch (infoType) {
       case 0:
-        if (msg.content) {
-          const params = msg.content.split(new RegExp(separator));
+        if (content) {
+          const params = content.split(new RegExp(separator));
           source = params[index] || "";
         }
         break;
       case 1:
-        if (msg.content) {
-          const params = msg.content.split(new RegExp(separator));
+        if (content) {
+          const params = content.split(new RegExp(separator));
           source = "";
           for (let i = 0; i < index; i++) {
             source += params[i] + " ";
           }
-          const location = msg.content.indexOf(source);
+          const location = content.indexOf(source);
           if (location === 0) {
-            source = msg.content.substring(source.length);
+            source = content.substring(source.length);
           }
         }
         break;
