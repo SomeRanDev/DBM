@@ -102,7 +102,7 @@ module.exports = {
       )
         .then(() => this.callNextAction(cache))
         .catch((err) => this.displayError(data, cache, err));
-    } else if (members?.roles) {
+    } else if (member?.roles) {
       member.roles
         .add(role, reason)
         .then(() => this.callNextAction(cache))
