@@ -848,12 +848,14 @@ Actions.eval = function (content, cache, throwError = true) {
   const me = server?.me ?? null;
   let user = "",
     member = "",
+    channel = "",
     mentionedUser = "",
     mentionedChannel = "",
     defaultChannel = "";
   if (msg) {
     user = msg.author;
     member = msg.member;
+    channel = msg.member;
     if (msg.mentions) {
       mentionedUser = msg.mentions.users.first() ?? "";
       mentionedChannel = msg.mentions.channels.first() ?? "";
@@ -862,6 +864,7 @@ Actions.eval = function (content, cache, throwError = true) {
   if (interaction) {
     user = interaction.user;
     member = interaction.member;
+    channel = interaction.member;
     if (interaction.options) {
       mentionedUser = interaction.options.resolved?.users?.first?.() ?? "";
       mentionedChannel = interaction.options.resolved?.channels?.first?.() ?? "";
