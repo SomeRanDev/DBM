@@ -13,7 +13,7 @@ module.exports = {
   // This is the section the action will fall into.
   //---------------------------------------------------------------------
 
-  section: "Emoji Control",
+  section: "Emoji/Sticker Control",
 
   //---------------------------------------------------------------------
   // Action Subtitle

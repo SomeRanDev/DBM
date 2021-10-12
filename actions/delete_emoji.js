@@ -13,7 +13,7 @@ module.exports = {
   // This is the section the action will fall into.
   //---------------------------------------------------------------------
 
-  section: "Emoji Control",
+  section: "Emoji/Sticker Control",
 
   //---------------------------------------------------------------------
   // Action Subtitle
@@ -65,7 +65,7 @@ module.exports = {
 		</select>
 	</div>
 	<div id="varNameContainer" style="float: right; width: 60%;">
-		<span class="dbminputlabel" id="extName">Emoji Name</span>:<br>
+		<span class="dbminputlabel" id="extName">Emoji Name</span><br>
 		<input id="varName" class="round" type="text" list="variableList"><br>
 	</div>
 </div>

@@ -13,7 +13,7 @@ module.exports = {
   // This is the section the action will fall into.
   //---------------------------------------------------------------------
 
-  section: "Sticker Control",
+  section: "Emoji/Sticker Control",
 
   //---------------------------------------------------------------------
   // Action Subtitle
@@ -87,7 +87,7 @@ module.exports = {
 	<input id="description" class="round" type="text" placeholder="Leave empty for none">
 </div>
 
-<br>
+<br><br>
 
 <hr class="subtlebar" style="margin-top: 0px;">
 

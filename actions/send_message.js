@@ -22,7 +22,15 @@ module.exports = {
   //---------------------------------------------------------------------
 
   subtitle(data, presets) {
-    return `${presets.getSendTargetText(data.channel, data.varName)}: "${data.message.replace(/[\n\r]+/, "")}"`;
+    let text = "";
+    if(data.message) {
+      text = `"${data.message.replace(/[\n\r]+/, " ↲ ")}"`;
+    } else if(data.attachments?.length > 0) {
+      text = `${data.attachments.length} Attachments`;
+    } else if(data.buttons?.length > 0 || data.selectMenus?.length > 0) {
+      text = `${data.buttons.length} Buttons and ${data.selectMenus.length} Select Menus`;
+    }
+    return `${presets.getSendTargetText(data.channel, data.varName)}: ${text}`;
   },
 
   //---------------------------------------------------------------------
@@ -51,10 +59,10 @@ module.exports = {
     "message",
     "buttons",
     "selectMenus",
+    "attachments",
     "reply",
     "ephemeral",
     "tts",
-    "file",
     "storage",
     "varName2",
   ],
@@ -255,6 +263,30 @@ module.exports = {
   </tab>
 
 
+  <tab label="Attachments" icon="file image">
+    <div style="padding: 8px;">
+
+      <dialog-list id="attachments" fields='["url", "name", "spoiler"]' dialogTitle="Attachment Info" dialogWidth="400" dialogHeight="280" listLabel="Attachments" listStyle="height: calc(100vh - 350px);" itemName="Attachment" itemCols="1" itemHeight="30px;" itemTextFunction="data.url" itemStyle="text-align: left; line-height: 30px;">
+        <div style="padding: 16px;">
+          <span class="dbminputlabel">Attachment Local/Web URL</span>
+          <input id="url" class="round" type="text" value="resources/">
+
+          <br>
+
+          <span class="dbminputlabel">Attachment Name</span>
+          <input id="name" class="round" type="text" placeholder="Leave blank for default...">
+
+          <br>
+
+          <div style="text-align: center; padding-top: 4px;">
+            <dbm-checkbox id="spoiler" label="Make Attachment Spoiler"></dbm-checkbox>
+          </div>
+        </div>
+      </dialog-list>
+    </div>
+  </tab>
+
+
   <tab label="Settings" icon="cogs">
     <div style="padding: 8px;">
       <dbm-checkbox style="float: left;" id="reply" label="Reply to Interaction if Possible" checked></dbm-checkbox>
@@ -267,12 +299,11 @@ module.exports = {
 
       <br><br>
 
-      <div style="padding-top: 12px;">
-        <span class="dbminputlabel">Local File Attachment URL</span>
-        <input id="file" placeholder="Leave blank for no attachment..." class="round" type="text">
-      </div>
+      <hr class="subtlebar">
 
-      <div style="padding-top: 14px; padding-bottom: 8px;">
+      <br>
+
+      <div style="padding-bottom: 12px;">
         <store-in-variable allowNone selectId="storage" variableInputId="varName2" variableContainerId="varNameContainer2"></store-in-variable>
       </div>
 
@@ -326,6 +357,37 @@ module.exports = {
   },
 
   //---------------------------------------------------------------------
+  // Action Editor On Paste
+  //
+  // When the data for the action is pasted, this function is called.
+  // It provides the ability to modify the final data associated with
+  // the action by retrieving it as an argument and returning a modified
+  // version through the return value.
+  //
+  // Its inclusion within action mods is optional.
+  //---------------------------------------------------------------------
+
+  onPaste(data, helpers) {
+    if (Array.isArray(data?.buttons)) {
+      for (let i = 0; i < data.buttons.length; i++) {
+        const id = data.buttons[i].id;
+        if (!id || id.startsWith("msg-button-")) {
+          data.buttons[i].id = "msg-button-" + helpers.generateUUID().substring(0, 7);
+        }
+      }
+    }
+    if (Array.isArray(data?.selectMenus)) {
+      for (let i = 0; i < data.selectMenus.length; i++) {
+        const id = data.selectMenus[i].id;
+        if (!id || id.startsWith("msg-select-")) {
+          data.selectMenus[i].id = "msg-select-" + helpers.generateUUID().substring(0, 7);
+        }
+      }
+    }
+    return data;
+  },
+
+  //---------------------------------------------------------------------
   // Action Bot Function
   //
   // This is the function for the action within the Bot's Action class.
@@ -341,9 +403,12 @@ module.exports = {
     const varName = this.evalMessage(data.varName, cache);
     const target = this.getSendTarget(channel, varName, cache);
 
-    const messageOptions = {
-      content: this.evalMessage(message, cache),
-    };
+    const messageOptions = {};
+
+    const content = this.evalMessage(message, cache);
+    if (content) {
+      messageOptions.content = content;
+    }
 
     let componentsArr = [];
     let awaitResponses = [];
@@ -402,9 +467,24 @@ module.exports = {
       messageOptions.tts = true;
     }
 
-    if (data.file) {
-      const file = this.evalMessage(data.file, cache);
-      if (file) messageOptions.files = [file];
+    if (data.attachments?.length > 0) {
+      const { MessageAttachment } = this.getDBM().DiscordJS;
+      messageOptions.files = [];
+      for (let i = 0; i < data.attachments.length; i++) {
+        const attachment = data.attachments[i];
+        const url = this.evalMessage(attachment?.url, cache);
+        if (url) {
+          let name = attachment?.name;
+          if (!name) {
+            name = "file" + require("path").extname(url);
+          }
+          const msgAttachment = new MessageAttachment(url, name);
+          if (attachment?.spoiler) {
+            msgAttachment.setSpoiler(true);
+          }
+          messageOptions.files.push(msgAttachment);
+        }
+      }
     }
 
     const onComplete = (resultMsg) => {
