@@ -23,11 +23,11 @@ module.exports = {
 
   subtitle(data, presets) {
     let text = "";
-    if(data.message) {
+    if (data.message) {
       text = `"${data.message.replace(/[\n\r]+/, " ↲ ")}"`;
-    } else if(data.attachments?.length > 0) {
+    } else if (data.attachments?.length > 0) {
       text = `${data.attachments.length} Attachments`;
-    } else if(data.buttons?.length > 0 || data.selectMenus?.length > 0) {
+    } else if (data.buttons?.length > 0 || data.selectMenus?.length > 0) {
       text = `${data.buttons.length} Buttons and ${data.selectMenus.length} Select Menus`;
     }
     return `${presets.getSendTargetText(data.channel, data.varName)}: ${text}`;
