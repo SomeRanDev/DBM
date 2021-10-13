@@ -73,7 +73,9 @@ module.exports = {
   // so be sure to provide checks for variable existence.
   //---------------------------------------------------------------------
 
-  action(cache) {},
+  action(cache) {
+    this.endActions(cache);
+  },
 
   //---------------------------------------------------------------------
   // Action Bot Mod

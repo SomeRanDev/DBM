@@ -1131,8 +1131,7 @@ Actions.callNextAction = function (cache) {
   const actions = cache.actions;
   const act = actions[index];
   if (!act) {
-    cache.callback?.();
-    cache.onCompleted?.();
+    this.endActions(cache);
     return;
   }
   if (this.exists(act.name)) {
@@ -1146,6 +1145,11 @@ Actions.callNextAction = function (cache) {
     this.callNextAction(cache);
   }
 };
+
+Actions.endActions = function (cache) {
+  cache.callback?.();
+  cache.onCompleted?.();
+}
 
 Actions.getInvalidButtonResponseText = function () {
   return Files.data.settings.invalidButtonText ?? "Button response no longer valid.";
