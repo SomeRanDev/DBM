@@ -1674,7 +1674,7 @@ Actions.generateSelectMenu = function (select) {
     maxValues: parseInt(select.max, 10) ?? 1,
     options: select.options.map((option, index) => {
       option.label ||= "No Label";
-      option.value ||= `${index}`;
+      option.value ||= index.toString();
       return option;
     }),
   };
