@@ -22,7 +22,7 @@ module.exports = {
   //---------------------------------------------------------------------
 
   subtitle(data, presets) {
-    const list = presets.list;
+    const list = presets.lists;
     return `Loop ${list[parseInt(data.list, 10)]} through Event Id "${data.source}"`;
   },
 

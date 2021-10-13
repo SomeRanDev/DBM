@@ -22,7 +22,8 @@ module.exports = {
   //---------------------------------------------------------------------
 
   subtitle(data, presets) {
-    const list = presets.list;
+    const list = presets.lists;
+    console.log(presets.lists);
     return `Get ${list[parseInt(data.list, 10)]} Length`;
   },
 

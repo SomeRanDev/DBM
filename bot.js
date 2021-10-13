@@ -1,11 +1,11 @@
 /******************************************************
  * Discord Bot Maker Bot
- * Version 2.0.0
+ * Version 2.0.1
  * Robert Borghese
  ******************************************************/
 
 const DBM = {};
-DBM.version = "2.0.0";
+DBM.version = "2.0.1";
 
 const DiscordJS = (DBM.DiscordJS = require("discord.js"));
 
@@ -35,11 +35,13 @@ const MsgType = {
   INVALID_SLASH_COMMAND_SERVER_ID: 9,
   DUPLICATE_BUTTON_ID: 10,
   DUPLICATE_SELECT_ID: 11,
+
+  MISSING_APPLICATION_COMMAND_ACCESS: 100,
 };
 
 function PrintError(type) {
   const { format } = require("node:util");
-  const { error } = console;
+  const { error, warn } = console;
 
   switch (type) {
     case MsgType.MISSING_ACTION: {
@@ -59,8 +61,10 @@ function PrintError(type) {
       );
       break;
     }
+
+
     case MsgType.DUPLICATE_SLASH_COMMAND: {
-      error(format('Slash command with name "%s" already exists!\nThis duplicate will be ignored.\n', arguments[1]));
+      warn(format('Slash command with name "%s" already exists!\nThis duplicate will be ignored.\n', arguments[1]));
       break;
     }
     case MsgType.INVALID_SLASH_NAME: {
@@ -73,15 +77,15 @@ function PrintError(type) {
       break;
     }
     case MsgType.DUPLICATE_USER_COMMAND: {
-      error(format('User command with name "%s" already exists!\nThis duplicate will be ignored.\n', arguments[1]));
+      warn(format('User command with name "%s" already exists!\nThis duplicate will be ignored.\n', arguments[1]));
       break;
     }
     case MsgType.DUPLICATE_MESSAGE_COMMAND: {
-      error(format('Message command with name "%s" already exists!\nThis duplicate will be ignored.\n', arguments[1]));
+      warn(format('Message command with name "%s" already exists!\nThis duplicate will be ignored.\n', arguments[1]));
       break;
     }
     case MsgType.DUPLICATE_SLASH_PARAMETER: {
-      error(
+      warn(
         format(
           'Slash command "%s" parameter #%d ("%s") has a name that\'s already being used!\nThis duplicate will be ignored.\n',
           arguments[1],
@@ -110,7 +114,7 @@ function PrintError(type) {
       break;
     }
     case MsgType.DUPLICATE_BUTTON_ID: {
-      error(
+      warn(
         format(
           'Button interaction with unique id "%s" already exists!\nThis duplicate will be ignored.\n',
           arguments[1],
@@ -119,13 +123,24 @@ function PrintError(type) {
       break;
     }
     case MsgType.DUPLICATE_SELECT_ID: {
-      error(
+      warn(
         format(
           'Select menu interaction with unique id "%s" already exists!\nThis duplicate will be ignored.\n',
           arguments[1],
         ),
       );
       break;
+    }
+
+
+    case MsgType.MISSING_APPLICATION_COMMAND_ACCESS: {
+      warn(
+        format(
+          'Slash commands cannot be provided to server: %s (ID: %s).\nPlease re-invite the bot to this server using the invite link found in "Settings -> Bot Settings".\nAlternatively, you can switch to using Global Slash Commands in "Settings -> Slash Command Settings -> Slash Command Creation Preference". However, please note global commands take a long time to update (~1 hour).',
+          arguments[1],
+          arguments[2],
+        ),
+      );
     }
   }
 }
@@ -486,29 +501,51 @@ Bot.registerApplicationCommands = function () {
       break;
     }
     case "global": {
-      this.setAllServerCommands([]);
+      this.setAllServerCommands([], false);
       this.setGlobalCommands(this.applicationCommandData);
       break;
     }
     case "manual": {
-      const serverList = Files.data.settings.slashServers.split(/[\n\r]+/);
+      const serverList = Files.data.settings?.slashServers?.split?.(/[\n\r]+/) ?? [];
       this.setCertainServerCommands(this.applicationCommandData, serverList);
       this.setGlobalCommands([]);
+      break;
+    }
+    case "manualglobal": {
+      const serverList = Files.data.settings?.slashServers?.split?.(/[\n\r]+/) ?? [];
+      this.setCertainServerCommands(this.applicationCommandData, serverList);
+      this.setGlobalCommands(this.applicationCommandData);
       break;
     }
   }
 };
 
 Bot.setGlobalCommands = function (commands) {
-  this.bot.application?.commands?.set?.(commands);
+  this.bot.application?.commands?.set?.(commands).then(function() {}).catch(function(e) {
+    console.error(e);
+  })
 };
 
-Bot.setAllServerCommands = function (commands) {
+Bot.setCommandsForServer = function(guild, commands, printMissingAccessError) {
+  if(guild?.commands?.set) {
+    guild.commands.set(commands).then(function() {}).catch(function(e) {
+      if (e.code === 50001) {
+        if (printMissingAccessError) {
+          PrintError(MsgType.MISSING_APPLICATION_COMMAND_ACCESS, guild.name, guild.id);
+        }
+      } else {
+        console.error(e);
+      }
+    });
+  }
+};
+
+Bot.setAllServerCommands = function (commands, printMissingAccessError = true) {
   this.bot.guilds.cache.forEach((key, value) => {
     this.bot.guilds
       .fetch(key)
       .then((guild) => {
-        guild?.commands?.set(commands);
+        this.setCommandsForServer(guild, commands, printMissingAccessError);
       })
       .catch(function (e) {
         console.error(e);
@@ -521,7 +558,7 @@ Bot.setCertainServerCommands = function (commands, serverIdList) {
     this.bot.guilds
       .fetch(serverIdList[i])
       .then((guild) => {
-        guild?.commands?.set(commands);
+        this.setCommandsForServer(guild, commands, true);
       })
       .catch(function (e) {
         PrintError(MsgType.INVALID_SLASH_COMMAND_SERVER_ID, serverIdList[i]);
@@ -823,6 +860,12 @@ Actions.getActionVariable = function (name, defaultValue) {
 
 Actions.getSlashParameter = function (interaction, name, defaultValue) {
   if (!interaction) return defaultValue ?? null;
+  if(interaction.__originalInteraction) {
+    const result = this.getParameterFromInteraction(interaction.__originalInteraction, name);
+    if (result !== null) {
+      return result;
+    }
+  }
   const result = this.getParameterFromInteraction(interaction, name);
   if (result !== null) {
     return result;

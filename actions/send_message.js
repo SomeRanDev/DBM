@@ -499,6 +499,7 @@ module.exports = {
           this.registerTemporaryInteraction(resultMsg.id, response.time, response.id, response.user)
             .then((interaction) => {
               if (response.data) {
+                interaction.__originalInteraction = cache.interaction?.__originalInteraction ?? cache.interaction;
                 if (response.type === "BUTTON") {
                   this.preformActionsFromInteraction(interaction, response.data, cache.temp);
                 } else {

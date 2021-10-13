@@ -22,7 +22,7 @@ module.exports = {
   //---------------------------------------------------------------------
 
   subtitle(data, presets) {
-    const list = presets.list;
+    const list = presets.lists;
     return `Convert ${list[parseInt(data.list, 10)]} to Text`;
   },
 

@@ -91,7 +91,7 @@ module.exports = {
 
   action(cache) {
     const data = cache.actions[cache.index];
-    const time = parseInt(this.evalMessage(data.time, cache), 10);
+    let time = parseInt(this.evalMessage(data.time, cache), 10);
     const type = parseInt(data.measurement, 10);
     switch (type) {
       case 1:
