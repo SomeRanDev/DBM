@@ -16,6 +16,8 @@ if (DiscordJS.version < "13.2.0") {
   throw new Error("Need discord.js v13 to run!!!");
 }
 
+const noop = () => void 0;
+
 //---------------------------------------------------------------------
 //#region Output Messages
 // Gathered all the output messages in single place for easier translation.
@@ -221,11 +223,11 @@ Bot.onRawData = function (packet) {
 
   const client = Bot.bot;
   const channel = client.channels.resolve(packet.d.channel_id);
-  if (channel.messages.cache.has(packet.d.message_id)) return;
+  if (channel?.messages.cache.has(packet.d.message_id)) return;
 
   channel.messages
     .fetch(packet.d.message_id)
-    .then(function (message) {
+    .then((message) => {
       const emoji = packet.d.emoji.id ? `${packet.d.emoji.name}:${packet.d.emoji.id}` : packet.d.emoji.name;
       const reaction = message.reactions.resolve(emoji);
       if (packet.t === "MESSAGE_REACTION_ADD") {
@@ -235,7 +237,7 @@ Bot.onRawData = function (packet) {
         client.emit("messageReactionRemove", reaction, client.users.resolve(packet.d.user_id));
       }
     })
-    .catch(() => {});
+    .catch(noop);
 };
 
 Bot.reformatData = function () {
@@ -578,7 +580,6 @@ Bot.preformInitialization = function () {
 
 Bot.onMessage = function (msg) {
   if (msg.author.bot) return;
-
   try {
     if (!this.checkCommand(msg)) {
       this.onAnyMessage(msg);
@@ -832,7 +833,7 @@ Actions.getDBM = function () {
 };
 
 Actions.callListFunc = function (list, funcName, args) {
-  return new Promise(function (resolve) {
+  return new Promise((resolve) => {
     const max = list.length;
     let curr = 0;
     function callItem() {
@@ -873,7 +874,7 @@ Actions.getSlashParameter = function (interaction, name, defaultValue) {
   return defaultValue !== undefined ? defaultValue : result;
 };
 
-Actions.eval = function (content, cache, throwError = true) {
+Actions.eval = function (content, cache, logError = true) {
   if (!content) return false;
   const DBM = this.getDBM();
   const tempVars = this.getActionVariable.bind(cache.temp);
@@ -899,10 +900,8 @@ Actions.eval = function (content, cache, throwError = true) {
     user = msg.author;
     member = msg.member;
     channel = msg.member;
-    if (msg.mentions) {
-      mentionedUser = msg.mentions.users.first() ?? "";
-      mentionedChannel = msg.mentions.channels.first() ?? "";
-    }
+    mentionedUser = msg.mentions.users.first() ?? "";
+    mentionedChannel = msg.mentions.channels.first() ?? "";
   }
   if (interaction) {
     user = interaction.user;
@@ -919,7 +918,7 @@ Actions.eval = function (content, cache, throwError = true) {
   try {
     return eval(content);
   } catch (e) {
-    if (throwError) console.error(e);
+    if (logError) console.error(e);
     return false;
   }
 };
@@ -945,30 +944,26 @@ Actions.evalIfPossible = function (content, cache) {
 Actions.initMods = function () {
   this.modInitReferences = {};
   const fs = require("node:fs");
-  this.modDirectories().forEach(
-    function (dir) {
-      fs.readdirSync(dir).forEach(
-        function (file) {
-          if (file.match(/\.js/i)) {
-            const action = require(require("node:path").join(dir, file));
-            if (action.action) {
-              this[action.name] = action.action;
-            }
-            if (action.modInit) {
-              this.modInitReferences[action.name] = action.modInit;
-            }
-            if (action.mod) {
-              try {
-                action.mod(DBM);
-              } catch (e) {
-                console.error(e);
-              }
-            }
-          }
-        }.bind(this),
-      );
-    }.bind(this),
-  );
+  const path = require("node:path");
+  this.modDirectories().forEach((dir) => {
+    fs.readdirSync(dir).forEach((file) => {
+      if (!/\.js/i.test(file)) return;
+      const action = require(path.join(dir, file));
+      if (action.action) {
+        this[action.name] = action.action;
+      }
+      if (action.modInit) {
+        this.modInitReferences[action.name] = action.modInit;
+      }
+      if (action.mod) {
+        try {
+          action.mod(DBM);
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    });
+  });
 };
 
 Actions.modDirectories = function () {
@@ -1061,7 +1056,6 @@ Actions.checkTimeRestriction = function (user, cmd, returnTimeString = false) {
       return returnTimeString ? timeString : false;
     }
   }
-  return false;
 };
 
 Actions.generateTimeString = function (milliseconds) {
@@ -1106,25 +1100,19 @@ Actions.checkPermissions = function (member, permissions) {
   if (!permissions) return true;
   if (!member) return false;
   if (permissions === "NONE") return true;
-  if (member?.guild?.ownerId === member.id) return true;
+  if (member.guild?.ownerId === member.id) return true;
   return member.permissions.has(permissions);
 };
 
 Actions.invokeActions = function (msg, actions) {
   if (actions.length > 0) {
-    const cache = new ActionsCache(actions, msg.guild, {
-      msg: msg,
-    });
-    this.callNextAction(cache);
+    this.callNextAction(new ActionsCache(actions, msg.guild, { msg }));
   }
 };
 
 Actions.invokeInteraction = function (interaction, actions, initialTempVars) {
   if (actions.length > 0) {
-    const cache = new ActionsCache(actions, interaction.guild, {
-      interaction: interaction,
-      temp: initialTempVars ? { ...initialTempVars } : {},
-    });
+    const cache = new ActionsCache(actions, interaction.guild, { interaction, temp: { ...(initialTempVars || {}) } });
     this.callNextAction(cache);
   }
 };
@@ -1132,9 +1120,7 @@ Actions.invokeInteraction = function (interaction, actions, initialTempVars) {
 Actions.invokeEvent = function (event, server, temp) {
   const actions = event.actions;
   if (actions.length > 0) {
-    const cache = new ActionsCache(actions, server, {
-      temp: { ...temp },
-    });
+    const cache = new ActionsCache(actions, server, { temp: { ...temp } });
     this.callNextAction(cache);
   }
 };
@@ -1145,12 +1131,8 @@ Actions.callNextAction = function (cache) {
   const actions = cache.actions;
   const act = actions[index];
   if (!act) {
-    if (cache.callback) {
-      cache.callback();
-    }
-    if (cache.onCompleted) {
-      cache.onCompleted();
-    }
+    cache.callback?.();
+    cache.onCompleted?.();
     return;
   }
   if (this.exists(act.name)) {
@@ -1249,9 +1231,7 @@ Actions.getTargetFromVariableOrParameter = function (varType, varName, cache) {
 };
 
 Actions.getSendTarget = function (type, varName, cache) {
-  const msg = cache.msg;
-  const interaction = cache.interaction;
-  const server = cache.server;
+  const { interaction, msg, server } = cache.msg;
   switch (type) {
     case 0:
       if (interaction) {
@@ -1320,9 +1300,7 @@ Actions.getSendTarget = function (type, varName, cache) {
 };
 
 Actions.getMember = function (type, varName, cache) {
-  const msg = cache.msg;
-  const interaction = cache.interaction;
-  const server = cache.server;
+  const { interaction, msg } = cache.msg;
   switch (type) {
     case 0: {
       const members = interaction?.options?.resolved?.members ?? msg?.mentions?.members;
@@ -1359,7 +1337,6 @@ Actions.getMember = function (type, varName, cache) {
 
 Actions.getMessage = function (type, varName, cache) {
   const msg = cache.msg;
-  const server = cache.server;
   switch (type) {
     case 0:
       if (msg) {
@@ -1385,9 +1362,7 @@ Actions.getServer = function (type, varName, cache) {
 };
 
 Actions.getRole = function (type, varName, cache) {
-  const msg = cache.msg;
-  const interaction = cache.interaction;
-  const server = cache.server;
+  const { interaction, msg, server } = cache.msg;
   switch (type) {
     case 0: {
       const roles = interaction?.options?.resolved?.roles ?? msg?.mentions?.roles;
@@ -1403,11 +1378,12 @@ Actions.getRole = function (type, varName, cache) {
       }
       break;
     }
-    case 2:
+    case 2: {
       if (server?.roles?.cache?.size) {
         return server.roles.cache.first();
       }
       break;
+    }
     case 100: {
       if (server) {
         const result = server.roles.cache.find((role) => role.name === varName);
@@ -1432,9 +1408,7 @@ Actions.getRole = function (type, varName, cache) {
 };
 
 Actions.getChannel = function (type, varName, cache) {
-  const msg = cache.msg;
-  const interaction = cache.interaction;
-  const server = cache.server;
+  const { interaction, msg, server } = cache.msg;
   switch (type) {
     case 0:
       if (interaction) {
@@ -1475,9 +1449,7 @@ Actions.getChannel = function (type, varName, cache) {
 };
 
 Actions.getVoiceChannel = function (type, varName, cache) {
-  const msg = cache.msg;
-  const interaction = cache.interaction;
-  const server = cache.server;
+  const { interaction, msg, server } = cache.msg;
   switch (type) {
     case 0: {
       const member = interaction?.member ?? msg?.member;
@@ -1521,9 +1493,7 @@ Actions.getVoiceChannel = function (type, varName, cache) {
 };
 
 Actions.getList = function (type, varName, cache) {
-  const msg = cache.msg;
-  const interaction = cache.interaction;
-  const server = cache.server;
+  const { interaction, msg, server } = cache.msg;
   switch (type) {
     case 0:
       if (server) {
@@ -1659,24 +1629,16 @@ Actions.executeResults = function (result, data, cache) {
 };
 
 Actions.executeSubActionsThenNextAction = function (actions, cache) {
-  return this.executeSubActions(
-    actions,
-    cache,
-    function () {
-      this.callNextAction(cache);
-    }.bind(this),
-  );
+  return this.executeSubActions(actions, cache, () => this.callNextAction(cache));
 };
 
 Actions.executeSubActions = function (actions, cache, callback = null) {
   if (!actions) {
-    if (callback) callback();
+    callback?.();
     return false;
   }
   const newCache = this.generateSubCache(cache, actions);
-  newCache.callback = function () {
-    if (callback) callback();
-  }.bind(this);
+  newCache.callback = () => callback?.();
   this.callNextAction(newCache);
   return true;
 };
@@ -1690,7 +1652,7 @@ Actions.generateButton = function (button) {
   const buttonData = {
     type: "BUTTON",
     label: button.name,
-    style: style,
+    style,
   };
   if (button.url) {
     buttonData.url = button.url;
@@ -1708,11 +1670,11 @@ Actions.generateSelectMenu = function (select) {
     type: "SELECT_MENU",
     customId: select.id,
     placeholder: select.placeholder,
-    minValues: parseInt(select.min) || 1,
-    maxValues: parseInt(select.max) || 1,
+    minValues: parseInt(select.min, 10) ?? 1,
+    maxValues: parseInt(select.max, 10) ?? 1,
     options: select.options.map((option, index) => {
       option.label ||= "No Label";
-      option.value ||= index.toString();
+      option.value ||= `${index}`;
       return option;
     }),
   };
@@ -1739,7 +1701,7 @@ Actions.addButtonToActionRowArray = function (array, rowText, buttonData, cache)
       }
     }
   } else {
-    row = parseInt(rowText) - 1;
+    row = parseInt(rowText, 10) - 1;
   }
   if (row >= 0 && row < 5) {
     while (array.length <= row + 1) {
@@ -1765,7 +1727,7 @@ Actions.addSelectToActionRowArray = function (array, rowText, selectData, cache)
       }
     }
   } else {
-    row = parseInt(rowText) - 1;
+    row = parseInt(rowText, 10) - 1;
   }
   if (row >= 0 && row < 5) {
     while (array.length <= row + 1) {
@@ -1775,13 +1737,13 @@ Actions.addSelectToActionRowArray = function (array, rowText, selectData, cache)
       this.displayError(
         cache.actions[cache.index],
         cache,
-        "Action row #" + row + " cannot have a select menu when there are any buttons on it!",
+        `Action row #${row} cannot have a select menu when there are any buttons on it!`,
       );
     } else {
       array[row].push(selectData);
     }
   } else {
-    this.displayError(cache.actions[cache.index], cache, 'Invalid action row: "' + rowText + '".');
+    this.displayError(cache.actions[cache.index], cache, `Invalid action row: '${rowText}'.`);
   }
 };
 
@@ -1789,7 +1751,6 @@ Actions.checkTemporaryInteractionResponses = function (interaction) {
   const customId = interaction.customId;
   if (this._temporaryInteractions?.[customId]) {
     const interactions = this._temporaryInteractions[customId];
-    const callbacks = [];
     for (let i = 0; i < interactions.length; i++) {
       const interData = interactions[i];
       const usersMatch = !interData.userId || interData.userId === interaction.user.id;
@@ -1806,7 +1767,7 @@ Actions.registerTemporaryInteraction = function (message, time, customId, userId
   this._temporaryInteractionIdMax ??= 0;
   this._temporaryInteractions ??= {};
   this._temporaryInteractions[customId] ??= [];
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     const uniqueId = this._temporaryInteractionIdMax++;
     let removed = false;
 
@@ -1960,14 +1921,11 @@ Events.setupIntervals = function (bot) {
   for (let i = 0; i < events.length; i++) {
     const event = events[i];
     const time = event.temp ? parseFloat(event.temp) : 60;
-    setInterval(
-      function () {
-        for (const server of bot.guilds.cache.values()) {
-          Actions.invokeEvent(event, server, {});
-        }
-      }.bind(this),
-      time * 1e3,
-    ).unref();
+    setInterval(() => {
+      for (const server of bot.guilds.cache.values()) {
+        Actions.invokeEvent(event, server, {});
+      }
+    }, time * 1e3).unref();
   }
 };
 
@@ -2037,7 +1995,7 @@ Images.getFont = function (url) {
 };
 
 Images.createBuffer = function (image) {
-  return new Promise(function (resolve, reject) {
+  return new Promise((resolve, reject) => {
     image.getBuffer(this.JIMP.MIME_PNG, function (err, buffer) {
       if (err) {
         reject(err);
@@ -2109,24 +2067,21 @@ Files.readData = function (callback) {
   for (let i = 0; i < max; i++) {
     const filePath = path.join(process.cwd(), "data", this.dataFiles[i]);
     if (!fs.existsSync(filePath)) continue;
-    fs.readFile(
-      filePath,
-      function (error, content) {
-        const filename = this.dataFiles[i].slice(0, -5);
-        let data;
-        try {
-          if (typeof content !== "string" && content.toString) content = content.toString();
-          data = JSON.parse(this.decrypt(content));
-        } catch (e) {
-          PrintError(MsgType.DATA_PARSING_ERROR, this.dataFiles[i]);
-          return;
-        }
-        this.data[filename] = data;
-        if (++cur === max) {
-          callback();
-        }
-      }.bind(this),
-    );
+    fs.readFile(filePath, (_error, content) => {
+      const filename = this.dataFiles[i].slice(0, -5);
+      let data;
+      try {
+        if (typeof content !== "string" && content.toString) content = content.toString();
+        data = JSON.parse(this.decrypt(content));
+      } catch {
+        PrintError(MsgType.DATA_PARSING_ERROR, this.dataFiles[i]);
+        return;
+      }
+      this.data[filename] = data;
+      if (++cur === max) {
+        callback();
+      }
+    });
   }
 };
 
@@ -2137,14 +2092,7 @@ Files.saveData = function (file, callback) {
     const fstorm = require("fstorm");
     this.writers[file] = fstorm(path.join(process.cwd(), "data", file + ".json"));
   }
-  this.writers[file].write(
-    this.encrypt(JSON.stringify(data)),
-    function () {
-      if (callback) {
-        callback();
-      }
-    }.bind(this),
-  );
+  this.writers[file].write(this.encrypt(JSON.stringify(data)), () => callback?.());
 };
 
 Files.initEncryption = function () {
@@ -2158,17 +2106,13 @@ Files.initEncryption = function () {
 Files.encrypt = function (text) {
   if (this.password.length === 0) return text;
   const cipher = this.crypto.createCipher("aes-128-ofb", this.password);
-  let encrypted = cipher.update(text, "utf8", "hex");
-  encrypted += cipher.final("hex");
-  return encrypted;
+  return cipher.update(text, "utf8", "hex") + cipher.final("hex");
 };
 
 Files.decrypt = function (text) {
   if (this.password.length === 0) return text;
   const decipher = this.crypto.createDecipher("aes-128-ofb", this.password);
-  let dec = decipher.update(text, "hex", "utf8");
-  dec += decipher.final("utf8");
-  return dec;
+  return decipher.update(text, "hex", "utf8") + decipher.final("utf8");
 };
 
 Files.convertItem = function (item) {
@@ -2228,91 +2172,80 @@ Files.restoreGlobalVariables = function () {
 };
 
 Files.restoreVariable = function (value, type, varName, serverId) {
-  const bot = Bot.bot;
-  let cache = {};
+  const cache = {};
   if (serverId) {
     cache.server = { id: serverId };
   }
   if (typeof value === "string" || Array.isArray(value)) {
-    this.restoreValue(value, bot)
-      .then(
-        function (finalValue) {
-          if (finalValue) {
-            Actions.storeValue(finalValue, type, varName, cache);
-          }
-        }.bind(this),
-      )
-      .catch(() => {});
+    this.restoreValue(value, Bot.bot)
+      .then((finalValue) => {
+        if (finalValue) {
+          Actions.storeValue(finalValue, type, varName, cache);
+        }
+      })
+      .catch(noop);
   } else {
     Actions.storeValue(value, type, varName, cache);
   }
 };
 
 Files.restoreValue = function (value, bot) {
-  return new Promise(
-    function (resolve, reject) {
-      if (typeof value === "string") {
-        if (value.startsWith("mem-")) {
-          return resolve(this.restoreMember(value, bot));
-        } else if (value.startsWith("msg-")) {
-          return this.restoreMessage(value, bot).then(resolve).catch(reject);
-        } else if (value.startsWith("tc-")) {
-          return resolve(this.restoreTextChannel(value, bot));
-        } else if (value.startsWith("vc-")) {
-          return resolve(this.restoreVoiceChannel(value, bot));
-        } else if (value.startsWith("r-")) {
-          return resolve(this.restoreRole(value, bot));
-        } else if (value.startsWith("s-")) {
-          return resolve(this.restoreServer(value, bot));
-        } else if (value.startsWith("e-")) {
-          return resolve(this.restoreEmoji(value, bot));
-        } else if (value.startsWith("usr-")) {
-          return resolve(this.restoreUser(value, bot));
-        }
-        resolve(value);
-      } else if (Array.isArray(value)) {
-        const result = [];
-        const length = value.length;
-        let curr = 0;
-        for (let i = 0; i < length; i++) {
-          this.restoreValue(value[i], bot)
-            .then(function (item) {
-              result[i] = item;
-              if (++curr >= length) {
-                resolve(result);
-              }
-            })
-            .catch(function () {
-              if (++curr >= length) {
-                resolve(result);
-              }
-            });
-        }
-      } else {
-        resolve(value);
+  return new Promise((resolve, reject) => {
+    if (typeof value === "string") {
+      if (value.startsWith("mem-")) {
+        return resolve(this.restoreMember(value, bot));
+      } else if (value.startsWith("msg-")) {
+        return this.restoreMessage(value, bot).then(resolve).catch(reject);
+      } else if (value.startsWith("tc-")) {
+        return resolve(this.restoreTextChannel(value, bot));
+      } else if (value.startsWith("vc-")) {
+        return resolve(this.restoreVoiceChannel(value, bot));
+      } else if (value.startsWith("r-")) {
+        return resolve(this.restoreRole(value, bot));
+      } else if (value.startsWith("s-")) {
+        return resolve(this.restoreServer(value, bot));
+      } else if (value.startsWith("e-")) {
+        return resolve(this.restoreEmoji(value, bot));
+      } else if (value.startsWith("usr-")) {
+        return resolve(this.restoreUser(value, bot));
       }
-    }.bind(this),
-  );
+      resolve(value);
+    } else if (Array.isArray(value)) {
+      const result = [];
+      const length = value.length;
+      let curr = 0;
+      for (let i = 0; i < length; i++) {
+        this.restoreValue(value[i], bot)
+          .then((item) => {
+            result[i] = item;
+            if (++curr >= length) {
+              resolve(result);
+            }
+          })
+          .catch(() => {
+            if (++curr >= length) {
+              resolve(result);
+            }
+          });
+      }
+    } else {
+      resolve(value);
+    }
+  });
 };
 
 Files.restoreMember = function (value, bot) {
   const split = value.split("_");
   const memId = split[0].slice(4);
   const serverId = split[1].slice(2);
-  const server = bot.guilds.get(serverId);
-  if (server) {
-    return server.members.resolve(memId);
-  }
+  return bot.guilds.resolve(serverId)?.members.resolve(memId);
 };
 
 Files.restoreMessage = function (value, bot) {
   const split = value.split("_");
   const msgId = split[0].slice(4);
   const channelId = split[1].slice(2);
-  const channel = bot.channels.resolve(channelId);
-  if (channel) {
-    return channel.messages.fetch(msgId);
-  }
+  return bot.channels.resolve(channelId)?.messages.fetch(msgId);
 };
 
 Files.restoreTextChannel = function (value, bot) {
@@ -2329,10 +2262,7 @@ Files.restoreRole = function (value, bot) {
   const split = value.split("_");
   const roleId = split[0].slice(2);
   const serverId = split[1].slice(2);
-  const server = bot.guilds.resolve(serverId);
-  if (server?.roles) {
-    return server.roles.resolve(roleId);
-  }
+  return bot.guilds.resolve(serverId)?.roles.resolve(roleId);
 };
 
 Files.restoreServer = function (value, bot) {

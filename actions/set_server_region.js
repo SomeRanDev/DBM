@@ -104,21 +104,7 @@ module.exports = {
   //---------------------------------------------------------------------
 
   action(cache) {
-    const data = cache.actions[cache.index];
-    const type = parseInt(data.server, 10);
-    const varName = this.evalMessage(data.varName, cache);
-    const server = this.getServer(type, varName, cache);
-    const reason = this.evalMessage(data.reason, cache);
-    if (Array.isArray(server)) {
-      this.callListFunc(server, "setRegion", [data.region, reason]).then(() => this.callNextAction(cache));
-    } else if (server && server.setRegion) {
-      server
-        .setRegion(data.region, reason)
-        .then(() => this.callNextAction(cache))
-        .catch((err) => this.displayError(data, cache, err));
-    } else {
-      this.callNextAction(cache);
-    }
+    this.callNextAction(cache);
   },
 
   //---------------------------------------------------------------------

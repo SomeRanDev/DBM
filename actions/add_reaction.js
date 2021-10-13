@@ -139,7 +139,7 @@ module.exports = {
       this.callListFunc(message, "react", [emoji])
         .then(() => this.callNextAction(cache))
         .catch((err) => this.displayError(data, cache, err));
-    } else if (emoji && message && message.react) {
+    } else if (emoji && message?.react) {
       message
         .react(emoji)
         .then(() => this.callNextAction(cache))
