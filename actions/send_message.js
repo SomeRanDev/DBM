@@ -25,6 +25,8 @@ module.exports = {
     let text = "";
     if (data.message) {
       text = `"${data.message.replace(/[\n\r]+/, " ↲ ")}"`;
+    } else if (data.embeds?.length > 0) {
+      text = `${data.embeds.length} Embeds`;
     } else if (data.attachments?.length > 0) {
       text = `${data.attachments.length} Attachments`;
     } else if (data.buttons?.length > 0 || data.selectMenus?.length > 0) {
@@ -60,6 +62,7 @@ module.exports = {
     "buttons",
     "selectMenus",
     "attachments",
+    "embeds",
     "reply",
     "ephemeral",
     "tts",
@@ -89,7 +92,7 @@ module.exports = {
 
 <br><br><br>
 
-<tab-system>
+<tab-system style="margin-top: 20px;">
 
 
   <tab label="Message" icon="align left">
@@ -126,11 +129,16 @@ module.exports = {
 
             <br>
 
-            <span class="dbminputlabel">Action Response Mode</span><br>
+            <span class="dbminputlabel">
+              Action Response Mode
+              <help-icon type="ACTION_RESPONSE_MODE"></help-icon>
+            </span><br>
             <select id="mode" class="round">
-              <option value="PERSONAL">Temporary, Only for Command User</option>
-              <option value="PUBLIC">Temporary, Anyone Can Use</option>
-              <option value="PERSISTENT" selected>Persistent (Works After Bot Resets)</option>
+              <option value="PERSONAL">Once, Command User Only</option>
+              <option value="PUBLIC">Once, Anyone Can Use</option>
+              <option value="MULTIPERSONAL">Multi, Command User Only</option>
+              <option value="MULTI" selected>Multi, Anyone Can Use</option>
+              <option value="PERSISTENT">Persistent</option>
             </select>
           </div>
           <div style="width: calc(50% - 12px); float: right;">
@@ -164,7 +172,7 @@ module.exports = {
   </tab>
 
 
-  <tab label="Select Menus" icon="list alternate">
+  <tab label="Selects" icon="list alternate">
     <div style="padding: 8px;">
 
       <dialog-list id="selectMenus" fields='["placeholder", "id", "tempVarName", "row", "min", "max", "mode", "time", "options", "actions"]' dialogTitle="Select Menu Info" dialogWidth="800" dialogHeight="700" listLabel="Select Menus" listStyle="height: calc(100vh - 350px);" itemName="Select Menu" itemCols="1" itemHeight="40px;" itemTextFunction="data.placeholder + '<br>' + data.options" itemStyle="text-align: left; line-height: 40px;">
@@ -185,11 +193,16 @@ module.exports = {
 
             <br>
 
-            <span class="dbminputlabel">Action Response Mode</span><br>
+            <span class="dbminputlabel">
+              Action Response Mode
+              <help-icon type="ACTION_RESPONSE_MODE"></help-icon>
+            </span><br>
             <select id="mode" class="round">
-              <option value="PERSONAL">Temporary, Only for Command User</option>
-              <option value="PUBLIC">Temporary, Anyone Can Use</option>
-              <option value="PERSISTENT" selected>Persistent (Works After Bot Resets)</option>
+              <option value="PERSONAL">Once, Command User Only</option>
+              <option value="PUBLIC">Once, Anyone Can Use</option>
+              <option value="MULTIPERSONAL">Multi, Command User Only</option>
+              <option value="MULTI" selected>Multi, Anyone Can Use</option>
+              <option value="PERSISTENT">Persistent</option>
             </select>
           </div>
           <div style="width: calc(33% - 16px); float: left; margin-right: 16px;">
@@ -263,10 +276,10 @@ module.exports = {
   </tab>
 
 
-  <tab label="Attachments" icon="file image">
+  <tab label="Files" icon="file image">
     <div style="padding: 8px;">
 
-      <dialog-list id="attachments" fields='["url", "name", "spoiler"]' dialogTitle="Attachment Info" dialogWidth="400" dialogHeight="280" listLabel="Attachments" listStyle="height: calc(100vh - 350px);" itemName="Attachment" itemCols="1" itemHeight="30px;" itemTextFunction="data.url" itemStyle="text-align: left; line-height: 30px;">
+      <dialog-list id="attachments" fields='["url", "name", "spoiler"]' dialogTitle="Attachment Info" dialogWidth="400" dialogHeight="280" listLabel="Files" listStyle="height: calc(100vh - 350px);" itemName="File" itemCols="1" itemHeight="30px;" itemTextFunction="data.url" itemStyle="text-align: left; line-height: 30px;">
         <div style="padding: 16px;">
           <span class="dbminputlabel">Attachment Local/Web URL</span>
           <input id="url" class="round" type="text" value="resources/">
@@ -283,6 +296,38 @@ module.exports = {
           </div>
         </div>
       </dialog-list>
+    </div>
+  </tab>
+
+
+  <tab label="Embeds" icon="book image">
+    <div style="padding: 8px;">
+
+      <dialog-list id="embeds" fields='["storage", "varName"]' dialogTitle="Embed Info" dialogWidth="540" dialogHeight="400" listLabel="Embeds" listStyle="height: calc(100vh - 350px);" itemName="Embed" itemCols="1" itemHeight="30px;" itemTextFunction="data.varName" itemStyle="text-align: left; line-height: 30px;">
+        <div style="padding: 0px 16px 0px 16px;">
+
+          <tab-system>
+
+            <tab label="General" icon="file image">
+            </tab>
+
+            <tab label="Description" icon="file image">
+            </tab>
+
+            <tab label="Fields" icon="file image">
+            </tab>
+
+            <tab label="Author" icon="file image">
+            </tab>
+
+            <tab label="Footer" icon="file image">
+            </tab>
+
+          </tab-system>
+
+        </div>
+      </dialog-list>
+
     </div>
   </tab>
 
@@ -426,7 +471,8 @@ module.exports = {
             type: "BUTTON",
             time: button.time ? parseInt(button.time) || defaultTime : defaultTime,
             id: button.id,
-            user: button.mode === "PERSONAL" ? cache.getUser()?.id : null,
+            user: button.mode.endsWith("PERSONAL") ? cache.getUser()?.id : null,
+            multi: button.mode.startsWith("MULTI"),
             data: button,
           });
         }
@@ -445,7 +491,8 @@ module.exports = {
             type: "SELECT",
             time: select.time ? parseInt(select.time) || defaultTime : defaultTime,
             id: select.id,
-            user: select.mode === "PERSONAL" ? cache.getUser()?.id : null,
+            user: select.mode.endsWith("PERSONAL") ? cache.getUser()?.id : null,
+            multi: select.mode.startsWith("MULTI"),
             data: select,
           });
         }
@@ -496,18 +543,18 @@ module.exports = {
 
         for (let i = 0; i < awaitResponses.length; i++) {
           const response = awaitResponses[i];
-          this.registerTemporaryInteraction(resultMsg.id, response.time, response.id, response.user)
-            .then((interaction) => {
-              if (response.data) {
-                interaction.__originalInteraction = cache.interaction?.__originalInteraction ?? cache.interaction;
-                if (response.type === "BUTTON") {
-                  this.preformActionsFromInteraction(interaction, response.data, cache.temp);
-                } else {
-                  this.preformActionsFromSelectInteraction(interaction, response.data, cache.temp);
-                }
+          const originalInteraction = cache.interaction?.__originalInteraction ?? cache.interaction;
+          const tempVariables = cache.temp || {};
+          this.registerTemporaryInteraction(resultMsg.id, response.time, response.id, response.user, response.multi, (interaction) => {
+            if (response.data) {
+              interaction.__originalInteraction = originalInteraction;
+              if (response.type === "BUTTON") {
+                this.preformActionsFromInteraction(interaction, response.data, tempVariables);
+              } else {
+                this.preformActionsFromSelectInteraction(interaction, response.data, tempVariables);
               }
-            })
-            .catch((err) => this.displayError(data, cache, err));
+            }
+          });
         }
       }
     };

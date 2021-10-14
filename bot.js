@@ -1,11 +1,11 @@
 /******************************************************
  * Discord Bot Maker Bot
- * Version 2.0.1
+ * Version 2.0.2
  * Robert Borghese
  ******************************************************/
 
 const DBM = {};
-DBM.version = "2.0.1";
+DBM.version = "2.0.2";
 
 const DiscordJS = (DBM.DiscordJS = require("discord.js"));
 
@@ -724,9 +724,19 @@ Bot.onSlashCommandInteraction = function (interaction) {
 Bot.onContextMenuInteraction = function (interaction) {
   const interactionName = interaction.commandName;
   if (this.$user[interactionName]) {
-    Actions.preformActionsFromInteraction(interaction, this.$user[interactionName]);
+    if (interaction.guild) {
+      interaction.guild.members.fetch(interaction.targetId).then(function(member) {
+        interaction._targetMember = member;
+        Actions.preformActionsFromInteraction(interaction, this.$user[interactionName]);
+      }).catch(console.error);
+    }
   } else if (this.$msge[interactionName]) {
-    Actions.preformActionsFromInteraction(interaction, this.$msge[interactionName]);
+    if (interaction.channel) {
+      interaction.channel.messages.fetch(interaction.targetId).then(function(message) {
+        interaction._targetMessage = message;
+        Actions.preformActionsFromInteraction(interaction, this.$msge[interactionName]);
+      }).catch(console.error);
+    }
   }
 };
 
@@ -860,17 +870,22 @@ Actions.getActionVariable = function (name, defaultValue) {
 };
 
 Actions.getSlashParameter = function (interaction, name, defaultValue) {
-  if (!interaction) return defaultValue ?? null;
+  if (!interaction) {
+    return defaultValue ?? null;
+  }
+
   if(interaction.__originalInteraction) {
     const result = this.getParameterFromInteraction(interaction.__originalInteraction, name);
     if (result !== null) {
       return result;
     }
   }
+
   const result = this.getParameterFromInteraction(interaction, name);
   if (result !== null) {
     return result;
   }
+
   return defaultValue !== undefined ? defaultValue : result;
 };
 
@@ -1112,7 +1127,7 @@ Actions.invokeActions = function (msg, actions) {
 
 Actions.invokeInteraction = function (interaction, actions, initialTempVars) {
   if (actions.length > 0) {
-    const cache = new ActionsCache(actions, interaction.guild, { interaction, temp: { ...(initialTempVars || {}) } });
+    const cache = new ActionsCache(actions, interaction.guild, { interaction, temp: (initialTempVars || {}) });
     this.callNextAction(cache);
   }
 };
@@ -1184,7 +1199,7 @@ Actions.displayError = function (data, cache, err) {
 
 Actions.getParameterFromInteraction = function (interaction, name) {
   if (interaction?.options?.get) {
-    const option = interaction.options.get(name);
+    const option = interaction.options.get(name.toLowerCase());
     switch (option?.type) {
       case "STRING":
       case "INTEGER":
@@ -1320,6 +1335,11 @@ Actions.getMember = function (type, varName, cache) {
         return msg.member ?? msg.author;
       }
       break;
+    case 6:
+      if (interaction?._targetMember) {
+        return interaction._targetMember;
+      }
+      break;
     case 100: {
       const result = Bot.bot.users.cache.find((user) => user.username === varName);
       if (result) {
@@ -1340,11 +1360,17 @@ Actions.getMember = function (type, varName, cache) {
 };
 
 Actions.getMessage = function (type, varName, cache) {
-  const msg = cache.msg;
+  const { interaction, msg } = cache;
   switch (type) {
     case 0:
       if (msg) {
         return msg;
+      } else if (interaction) {
+        if (interaction.message) {
+          return interaction.message;
+        } else if (interaction._targetMessage) {
+          return interaction._targetMessage;
+        }
       }
       break;
     default:
@@ -1767,39 +1793,41 @@ Actions.checkTemporaryInteractionResponses = function (interaction) {
   return false;
 };
 
-Actions.registerTemporaryInteraction = function (message, time, customId, userId) {
+Actions.registerTemporaryInteraction = function (message, time, customId, userId, multi, interactionCallback) {
   this._temporaryInteractionIdMax ??= 0;
   this._temporaryInteractions ??= {};
   this._temporaryInteractions[customId] ??= [];
-  return new Promise((resolve) => {
-    const uniqueId = this._temporaryInteractionIdMax++;
-    let removed = false;
 
-    const removeInteraction = () => {
-      if (!removed) removed = true;
-      else return;
-      const interactions = this._temporaryInteractions[customId];
-      if (interactions) {
-        let i = 0;
-        for (; i < interactions.length; i++) {
-          if (interactions[i].uniqueId === uniqueId) {
-            break;
-          }
+  const uniqueId = this._temporaryInteractionIdMax++;
+  let removed = false;
+
+  const removeInteraction = () => {
+    if (!removed) removed = true;
+    else return;
+    const interactions = this._temporaryInteractions[customId];
+    if (interactions) {
+      let i = 0;
+      for (; i < interactions.length; i++) {
+        if (interactions[i].uniqueId === uniqueId) {
+          break;
         }
-        if (i < interactions.length) interactions.splice(i, 1);
       }
-    };
-
-    const callback = (interaction) => {
-      resolve(interaction);
-      removeInteraction();
-    };
-
-    this._temporaryInteractions[customId].push({ message, userId, callback, uniqueId });
-    if (time > 0) {
-      require("node:timers").setTimeout(removeInteraction, time).unref();
+      if (i < interactions.length) interactions.splice(i, 1);
     }
-  });
+  };
+
+  const callback = (interaction) => {
+    interactionCallback?.(interaction);
+    if (!multi) {
+      console.log("REMOVED");
+      removeInteraction();
+    }
+  };
+
+  this._temporaryInteractions[customId].push({ message, userId, callback, uniqueId });
+  if (time > 0) {
+    require("node:timers").setTimeout(removeInteraction, time).unref();
+  }
 };
 
 //#endregion
@@ -2242,14 +2270,22 @@ Files.restoreMember = function (value, bot) {
   const split = value.split("_");
   const memId = split[0].slice(4);
   const serverId = split[1].slice(2);
-  return bot.guilds.resolve(serverId)?.members.resolve(memId);
+  const server = bot.guilds.get(serverId);
+  if (server) {
+    return server.members.resolve(memId);
+  }
+  return null;
 };
 
 Files.restoreMessage = function (value, bot) {
   const split = value.split("_");
   const msgId = split[0].slice(4);
   const channelId = split[1].slice(2);
-  return bot.channels.resolve(channelId)?.messages.fetch(msgId);
+  const channel = bot.channels.resolve(channelId);
+  if (channel) {
+    return channel.messages.fetch(msgId);
+  }
+  return null;
 };
 
 Files.restoreTextChannel = function (value, bot) {
@@ -2266,7 +2302,11 @@ Files.restoreRole = function (value, bot) {
   const split = value.split("_");
   const roleId = split[0].slice(2);
   const serverId = split[1].slice(2);
-  return bot.guilds.resolve(serverId)?.roles.resolve(roleId);
+  const server = bot.guilds.resolve(serverId);
+  if (server?.roles) {
+    return server.roles.resolve(roleId);
+  }
+  return null;
 };
 
 Files.restoreServer = function (value, bot) {
