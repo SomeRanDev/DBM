@@ -1182,6 +1182,10 @@ Actions.getInvalidPermissionsResponse = function () {
   return Files.data.settings.invalidPermissionsText ?? "Invalid permissions!";
 };
 
+Actions.getInvalidUserResponse = function () {
+  return Files.data.settings.invalidUserText ?? "Invalid user!";
+};
+
 Actions.getInvalidCooldownResponse = function () {
   return Files.data.settings.invalidCooldownText ?? "Must wait %s before using this action.";
 };
@@ -1784,8 +1788,15 @@ Actions.checkTemporaryInteractionResponses = function (interaction) {
     for (let i = 0; i < interactions.length; i++) {
       const interData = interactions[i];
       const usersMatch = !interData.userId || interData.userId === interaction.user.id;
-      if (interData.message === interaction.message.id && usersMatch) {
-        interData.callback?.(interaction);
+      if (interData.message === interaction.message.id) {
+        if (usersMatch) {
+          interData.callback?.(interaction);
+        } else {
+          const invalidUserText = this.getInvalidUserResponse();
+          if (invalidUserText) {
+            interaction.reply({ content: invalidUserText, ephemeral: true });
+          }
+        }
         return true;
       }
     }
@@ -1819,7 +1830,6 @@ Actions.registerTemporaryInteraction = function (message, time, customId, userId
   const callback = (interaction) => {
     interactionCallback?.(interaction);
     if (!multi) {
-      console.log("REMOVED");
       removeInteraction();
     }
   };
