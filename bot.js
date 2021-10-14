@@ -1235,7 +1235,7 @@ Actions.getTargetFromVariableOrParameter = function (varType, varName, cache) {
 };
 
 Actions.getSendTarget = function (type, varName, cache) {
-  const { interaction, msg, server } = cache.msg;
+  const { interaction, msg, server } = cache;
   switch (type) {
     case 0:
       if (interaction) {
@@ -1304,7 +1304,7 @@ Actions.getSendTarget = function (type, varName, cache) {
 };
 
 Actions.getMember = function (type, varName, cache) {
-  const { interaction, msg } = cache.msg;
+  const { interaction, msg } = cache;
   switch (type) {
     case 0: {
       const members = interaction?.options?.resolved?.members ?? msg?.mentions?.members;
@@ -1366,7 +1366,7 @@ Actions.getServer = function (type, varName, cache) {
 };
 
 Actions.getRole = function (type, varName, cache) {
-  const { interaction, msg, server } = cache.msg;
+  const { interaction, msg, server } = cache;
   switch (type) {
     case 0: {
       const roles = interaction?.options?.resolved?.roles ?? msg?.mentions?.roles;
@@ -1412,7 +1412,7 @@ Actions.getRole = function (type, varName, cache) {
 };
 
 Actions.getChannel = function (type, varName, cache) {
-  const { interaction, msg, server } = cache.msg;
+  const { interaction, msg, server } = cache;
   switch (type) {
     case 0:
       if (interaction) {
@@ -1453,7 +1453,7 @@ Actions.getChannel = function (type, varName, cache) {
 };
 
 Actions.getVoiceChannel = function (type, varName, cache) {
-  const { interaction, msg, server } = cache.msg;
+  const { interaction, msg, server } = cache;
   switch (type) {
     case 0: {
       const member = interaction?.member ?? msg?.member;
@@ -1497,7 +1497,7 @@ Actions.getVoiceChannel = function (type, varName, cache) {
 };
 
 Actions.getList = function (type, varName, cache) {
-  const { interaction, msg, server } = cache.msg;
+  const { interaction, msg, server } = cache;
   switch (type) {
     case 0:
       if (server) {
