@@ -131,7 +131,8 @@ module.exports = {
       sourceSelect = cache.interaction.customId;
     }
 
-    const disable = (data.disable ?? "true") === "true";
+    const disable = (data.disable ?? "disable") === "disable";
+    console.log(disable);
     let components = null;
     let searchValue = null;
 

@@ -102,6 +102,126 @@ module.exports = {
   </tab>
 
 
+  <tab label="Embeds" icon="book image">
+    <div style="padding: 8px;">
+
+      <dialog-list id="embeds" fields='["title", "url", "color", "timestamp", "imageUrl", "thumbUrl", "description", "fields", "author", "authorUrl", "authorIcon", "footerText", "footerIconUrl"]' dialogTitle="Embed Info" dialogWidth="540" dialogHeight="460" listLabel="Embeds" listStyle="height: calc(100vh - 350px);" itemName="Embed" itemCols="1" itemHeight="30px;" itemTextFunction="data.title + ' - ' + data.description" itemStyle="text-align: left; line-height: 30px;">
+        <div style="padding: 16px 16px 0px 16px;">
+
+          <tab-system>
+
+            <tab label="General" icon="file image">
+              <div style="padding: 8px">
+                <div style="float: left; width: calc(50% - 12px);">
+                  <span class="dbminputlabel">Title</span><br>
+                  <input id="title" class="round" type="text">
+
+                  <br>
+
+                  <span class="dbminputlabel">Color</span><br>
+                  <input id="color" class="round" type="text" placeholder="Leave blank for default...">
+                </div>
+
+                <div style="float: right; width: calc(50% - 12px);">
+                  <span class="dbminputlabel">URL</span><br>
+                  <input id="url" class="round" type="text" placeholder="Leave blank for none...">
+
+                  <br>
+
+                  <span class="dbminputlabel">Use Timestamp</span><br>
+                  <select id="timestamp" class="round">
+                    <option value="true">Yes</option>
+                    <option value="false" selected>No</option>
+                  </select>
+                </div>
+
+                <br><br><br><br><br><br><br>
+
+                <hr class="subtlebar">
+
+                <br>
+
+                <span class="dbminputlabel">Image URL</span><br>
+                <input id="imageUrl" class="round" type="text" placeholder="Leave blank for none...">
+
+                <br>
+
+                <span class="dbminputlabel">Thumbnail URL</span><br>
+                <input id="thumbUrl" class="round" type="text" placeholder="Leave blank for none...">
+              </div>
+            </tab>
+
+            <tab label="Description" icon="file image">
+              <div style="padding: 8px">
+                <textarea id="description" class="dbm_monospace" rows="10" placeholder="Insert description here..." style="height: calc(100vh - 149px); white-space: nowrap; resize: none;"></textarea>
+              </div>
+            </tab>
+
+            <tab label="Fields" icon="file image">
+              <div style="padding: 8px">
+                <dialog-list id="fields" fields='["name", "value", "inline"]' dialogTitle="Field Info" dialogWidth="540" dialogHeight="300" listLabel="Fields" listStyle="height: calc(100vh - 190px);" itemName="Field" itemCols="1" itemHeight="30px;" itemTextFunction="data.name + '<br>' + data.value" itemStyle="text-align: left; line-height: 30px;">
+                  <div style="padding: 16px;">
+                    <div style="float: left; width: calc(50% - 12px);">
+                      <span class="dbminputlabel">Field Name</span><br>
+                      <input id="name" class="round" type="text">
+                    </div>
+
+                    <div style="float: right; width: calc(50% - 12px);">
+                      <span class="dbminputlabel">Inline?</span><br>
+                      <select id="inline" class="round">
+                        <option value="true">Yes</option>
+                        <option value="false" selected>No</option>
+                      </select>
+                    </div>
+
+                    <br><br><br><br>
+
+                    <span class="dbminputlabel">Field Value</span><br>
+                    <textarea id="value" class="dbm_monospace" rows="10" placeholder="Insert field text here..." style="height: calc(100vh - 190px); white-space: nowrap; resize: none;"></textarea>
+
+                  </div>
+                </dialog-list>
+              </div>
+            </tab>
+
+            <tab label="Author" icon="file image">
+              <div style="padding: 8px">
+                <span class="dbminputlabel">Author Text</span><br>
+                <input id="author" class="round" type="text" placeholder="Leave blank to disallow...">
+
+                <br>
+
+                <span class="dbminputlabel">Author URL</span><br>
+                <input id="authorUrl" class="round" type="text" placeholder="Leave blank for none...">
+
+                <br>
+
+                <span class="dbminputlabel">Author Icon URL</span><br>
+                <input id="authorIcon" class="round" type="text" placeholder="Leave blank for none...">
+              </div>
+            </tab>
+
+            <tab label="Footer" icon="file image">
+              <div style="padding: 8px;">
+                <span class="dbminputlabel">Footer Icon URL</span><br>
+                <input id="footerIconUrl" class="round" type="text" placeholder="Leave blank for none...">
+
+                <br>
+
+                <span class="dbminputlabel">Footer Text</span><br>
+                <textarea id="footerText" class="dbm_monospace" rows="10" placeholder="Leave blank to disallow..." style="height: calc(100vh - 234px); white-space: nowrap; resize: none;"></textarea>
+              </div>
+            </tab>
+
+          </tab-system>
+
+        </div>
+      </dialog-list>
+
+    </div>
+  </tab>
+
+
   <tab label="Buttons" icon="clone">
     <div style="padding: 8px;">
 
@@ -300,38 +420,6 @@ module.exports = {
   </tab>
 
 
-  <tab label="Embeds" icon="book image">
-    <div style="padding: 8px;">
-
-      <dialog-list id="embeds" fields='["storage", "varName"]' dialogTitle="Embed Info" dialogWidth="540" dialogHeight="400" listLabel="Embeds" listStyle="height: calc(100vh - 350px);" itemName="Embed" itemCols="1" itemHeight="30px;" itemTextFunction="data.varName" itemStyle="text-align: left; line-height: 30px;">
-        <div style="padding: 0px 16px 0px 16px;">
-
-          <tab-system>
-
-            <tab label="General" icon="file image">
-            </tab>
-
-            <tab label="Description" icon="file image">
-            </tab>
-
-            <tab label="Fields" icon="file image">
-            </tab>
-
-            <tab label="Author" icon="file image">
-            </tab>
-
-            <tab label="Footer" icon="file image">
-            </tab>
-
-          </tab-system>
-
-        </div>
-      </dialog-list>
-
-    </div>
-  </tab>
-
-
   <tab label="Settings" icon="cogs">
     <div style="padding: 8px;">
       <dbm-checkbox style="float: left;" id="reply" label="Reply to Interaction if Possible" checked></dbm-checkbox>
@@ -453,6 +541,52 @@ module.exports = {
     const content = this.evalMessage(message, cache);
     if (content) {
       messageOptions.content = content;
+    }
+
+    if (data.embeds?.length > 0) {
+      const { MessageEmbed } = this.getDBM().DiscordJS;
+
+      messageOptions.embeds = [];
+
+      const embedDatas = data.embeds;
+      for (let i = 0; i < embedDatas.length; i++) {
+        const embedData = embedDatas[i];
+        const embed = new MessageEmbed();
+
+        if (embedData.title) embed.setTitle(this.evalMessage(embedData.title, cache));
+        if (embedData.url) embed.setURL(this.evalMessage(embedData.url, cache));
+        if (embedData.color) embed.setColor(this.evalMessage(embedData.color, cache));
+        if (embedData.timestamp === "true") embed.setTimestamp();
+        if (embedData.imageUrl) embed.setThumbnail(this.evalMessage(embedData.imageUrl, cache));
+        if (embedData.thumbUrl) embed.setThumbnail(this.evalMessage(embedData.thumbUrl, cache));
+
+        if (embedData.description) embed.setDescription(this.evalMessage(embedData.description, cache));
+
+        if (embedData.fields?.length > 0) {
+          const fields = embedData.fields;
+          for (let i = 0; i < fields.length; i++) {
+            const f = fields[i];
+            embed.addField(f.name, f.value, f.inline === "true");
+          }
+        }
+
+        if (embedData.author) {
+          embed.setAuthor(
+            this.evalMessage(embedData.author, cache),
+            embedData.authorIcon ? this.evalMessage(embedData.authorIcon, cache) : null,
+            embedData.authorUrl ? this.evalMessage(embedData.authorUrl, cache) : null
+          );
+        }
+
+        if (embedData.footerText) {
+          embed.setFooter(
+            this.evalMessage(embedData.footerText, cache),
+            embedData.footerIconUrl ? this.evalMessage(embedData.footerIconUrl, cache) : null
+          );
+        }
+
+        messageOptions.embeds.push(embed);
+      }
     }
 
     let componentsArr = [];
