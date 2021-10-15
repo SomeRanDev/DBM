@@ -110,7 +110,7 @@ module.exports = {
 
           <tab-system>
 
-            <tab label="General" icon="file image">
+            <tab label="General" icon="certificate">
               <div style="padding: 8px">
                 <div style="float: left; width: calc(50% - 12px);">
                   <span class="dbminputlabel">Title</span><br>
@@ -157,7 +157,7 @@ module.exports = {
               </div>
             </tab>
 
-            <tab label="Fields" icon="file image">
+            <tab label="Fields" icon="list">
               <div style="padding: 8px">
                 <dialog-list id="fields" fields='["name", "value", "inline"]' dialogTitle="Field Info" dialogWidth="540" dialogHeight="300" listLabel="Fields" listStyle="height: calc(100vh - 190px);" itemName="Field" itemCols="1" itemHeight="30px;" itemTextFunction="data.name + '<br>' + data.value" itemStyle="text-align: left; line-height: 30px;">
                   <div style="padding: 16px;">
@@ -184,7 +184,7 @@ module.exports = {
               </div>
             </tab>
 
-            <tab label="Author" icon="file image">
+            <tab label="Author" icon="user circle">
               <div style="padding: 8px">
                 <span class="dbminputlabel">Author Text</span><br>
                 <input id="author" class="round" type="text" placeholder="Leave blank to disallow...">
@@ -201,7 +201,7 @@ module.exports = {
               </div>
             </tab>
 
-            <tab label="Footer" icon="file image">
+            <tab label="Footer" icon="map outline">
               <div style="padding: 8px;">
                 <span class="dbminputlabel">Footer Icon URL</span><br>
                 <input id="footerIconUrl" class="round" type="text" placeholder="Leave blank for none...">
