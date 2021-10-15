@@ -725,14 +725,14 @@ Bot.onContextMenuInteraction = function (interaction) {
   const interactionName = interaction.commandName;
   if (this.$user[interactionName]) {
     if (interaction.guild) {
-      interaction.guild.members.fetch(interaction.targetId).then(function(member) {
+      interaction.guild.members.fetch(interaction.targetId).then((member) => {
         interaction._targetMember = member;
         Actions.preformActionsFromInteraction(interaction, this.$user[interactionName]);
       }).catch(console.error);
     }
   } else if (this.$msge[interactionName]) {
     if (interaction.channel) {
-      interaction.channel.messages.fetch(interaction.targetId).then(function(message) {
+      interaction.channel.messages.fetch(interaction.targetId).then((message) => {
         interaction._targetMessage = message;
         Actions.preformActionsFromInteraction(interaction, this.$msge[interactionName]);
       }).catch(console.error);
