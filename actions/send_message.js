@@ -557,7 +557,7 @@ module.exports = {
         if (embedData.url) embed.setURL(this.evalMessage(embedData.url, cache));
         if (embedData.color) embed.setColor(this.evalMessage(embedData.color, cache));
         if (embedData.timestamp === "true") embed.setTimestamp();
-        if (embedData.imageUrl) embed.setThumbnail(this.evalMessage(embedData.imageUrl, cache));
+        if (embedData.imageUrl) embed.setImage(this.evalMessage(embedData.imageUrl, cache));
         if (embedData.thumbUrl) embed.setThumbnail(this.evalMessage(embedData.thumbUrl, cache));
 
         if (embedData.description) embed.setDescription(this.evalMessage(embedData.description, cache));
