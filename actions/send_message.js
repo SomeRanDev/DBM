@@ -564,9 +564,8 @@ module.exports = {
 
         if (embedData.fields?.length > 0) {
           const fields = embedData.fields;
-          for (let i = 0; i < fields.length; i++) {
-            const f = fields[i];
-            embed.addField(f.name, f.value, f.inline === "true");
+          for (const f of fields) {
+            embed.addField(this.evalMessage(f.name, cache), this.evalMessage(f.value, cache), f.inline === "true");
           }
         }
 
@@ -614,7 +613,6 @@ module.exports = {
     }
 
     if (Array.isArray(data.selectMenus)) {
-      let selectMenus = [];
       for (let i = 0; i < data.selectMenus.length; i++) {
         const select = data.selectMenus[i];
         const selectData = this.generateSelectMenu(select);
