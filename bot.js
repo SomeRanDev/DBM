@@ -64,6 +64,7 @@ function PrintError(type) {
       break;
     }
 
+
     case MsgType.DUPLICATE_SLASH_COMMAND: {
       warn(format('Slash command with name "%s" already exists!\nThis duplicate will be ignored.\n', arguments[1]));
       break;
@@ -132,6 +133,7 @@ function PrintError(type) {
       );
       break;
     }
+
 
     case MsgType.MISSING_APPLICATION_COMMAND_ACCESS: {
       warn(
@@ -538,28 +540,22 @@ Bot.registerApplicationCommands = function () {
 };
 
 Bot.setGlobalCommands = function (commands) {
-  this.bot.application?.commands
-    ?.set?.(commands)
-    .then(function () {})
-    .catch(function (e) {
-      console.error(e);
-    });
+  this.bot.application?.commands?.set?.(commands).then(function() {}).catch(function(e) {
+    console.error(e);
+  })
 };
 
-Bot.setCommandsForServer = function (guild, commands, printMissingAccessError) {
-  if (guild?.commands?.set) {
-    guild.commands
-      .set(commands)
-      .then(function () {})
-      .catch(function (e) {
-        if (e.code === 50001) {
-          if (printMissingAccessError) {
-            PrintError(MsgType.MISSING_APPLICATION_COMMAND_ACCESS, guild.name, guild.id);
-          }
-        } else {
-          console.error(e);
+Bot.setCommandsForServer = function(guild, commands, printMissingAccessError) {
+  if(guild?.commands?.set) {
+    guild.commands.set(commands).then(function() {}).catch(function(e) {
+      if (e.code === 50001) {
+        if (printMissingAccessError) {
+          PrintError(MsgType.MISSING_APPLICATION_COMMAND_ACCESS, guild.name, guild.id);
         }
-      });
+      } else {
+        console.error(e);
+      }
+    });
   }
 };
 
@@ -725,6 +721,11 @@ Bot.onInteraction = function (interaction) {
   } else if (interaction.isContextMenu()) {
     this.onContextMenuInteraction(interaction);
   } else {
+    if (interaction.component?.type === "BUTTON") {
+      interaction._button = interaction.component;
+    } else if (interaction.component?.type === "SELECT_MENU") {
+      interaction._select = interaction.component;
+    }
     if (!Actions.checkTemporaryInteractionResponses(interaction)) {
       if (interaction.isButton()) {
         this.onButtonInteraction(interaction);
@@ -746,23 +747,17 @@ Bot.onContextMenuInteraction = function (interaction) {
   const interactionName = interaction.commandName;
   if (this.$user[interactionName]) {
     if (interaction.guild) {
-      interaction.guild.members
-        .fetch(interaction.targetId)
-        .then((member) => {
-          interaction._targetMember = member;
-          Actions.preformActionsFromInteraction(interaction, this.$user[interactionName]);
-        })
-        .catch(console.error);
+      interaction.guild.members.fetch(interaction.targetId).then((member) => {
+        interaction._targetMember = member;
+        Actions.preformActionsFromInteraction(interaction, this.$user[interactionName]);
+      }).catch(console.error);
     }
   } else if (this.$msge[interactionName]) {
     if (interaction.channel) {
-      interaction.channel.messages
-        .fetch(interaction.targetId)
-        .then((message) => {
-          interaction._targetMessage = message;
-          Actions.preformActionsFromInteraction(interaction, this.$msge[interactionName]);
-        })
-        .catch(console.error);
+      interaction.channel.messages.fetch(interaction.targetId).then((message) => {
+        interaction._targetMessage = message;
+        Actions.preformActionsFromInteraction(interaction, this.$msge[interactionName]);
+      }).catch(console.error);
     }
   }
 };
@@ -901,7 +896,7 @@ Actions.getSlashParameter = function (interaction, name, defaultValue) {
     return defaultValue ?? null;
   }
 
-  if (interaction.__originalInteraction) {
+  if(interaction.__originalInteraction) {
     const result = this.getParameterFromInteraction(interaction.__originalInteraction, name);
     if (result !== null) {
       return result;
@@ -928,6 +923,8 @@ Actions.eval = function (content, cache, logError = true) {
   const slashParams = this.getSlashParameter.bind(this, cache.interaction);
   const msg = cache.msg;
   const interaction = cache.interaction;
+  const button = interaction?._button ?? "";
+  const select = interaction?._select ?? "";
   const server = cache.server;
   const client = DBM.Bot.bot;
   const bot = DBM.Bot.bot;
@@ -1154,7 +1151,7 @@ Actions.invokeActions = function (msg, actions) {
 
 Actions.invokeInteraction = function (interaction, actions, initialTempVars) {
   if (actions.length > 0) {
-    const cache = new ActionsCache(actions, interaction.guild, { interaction, temp: initialTempVars || {} });
+    const cache = new ActionsCache(actions, interaction.guild, { interaction, temp: (initialTempVars || {}) });
     this.callNextAction(cache);
   }
 };
@@ -1709,20 +1706,20 @@ Actions.generateSubCache = function (cache, actions) {
   return ActionsCache.extend(cache, actions);
 };
 
-Actions.generateButton = function (button) {
+Actions.generateButton = function (button, cache) {
   const style = button.url ? "LINK" : button.type;
   const buttonData = {
     type: "BUTTON",
-    label: button.name,
+    label: this.evalMessage(button.name, cache),
     style,
   };
   if (button.url) {
-    buttonData.url = button.url;
+    buttonData.url = this.evalMessage(button.url, cache);
   } else {
-    buttonData.customId = button.id;
+    buttonData.customId = this.evalMessage(button.id, cache);
   }
   if (button.emoji) {
-    buttonData.emoji = button.emoji;
+    buttonData.emoji = this.evalMessage(button.emoji, cache);
   }
   return buttonData;
 };
@@ -1730,13 +1727,14 @@ Actions.generateButton = function (button) {
 Actions.generateSelectMenu = function (select) {
   const selectData = {
     type: "SELECT_MENU",
-    customId: select.id,
-    placeholder: select.placeholder,
-    minValues: parseInt(select.min, 10) ?? 1,
-    maxValues: parseInt(select.max, 10) ?? 1,
+    customId: this.evalMessage(select.id, cache),
+    placeholder: this.evalMessage(select.placeholder, cache),
+    minValues: parseInt(this.evalMessage(select.min, cache), 10) ?? 1,
+    maxValues: parseInt(this.evalMessage(select.max, cache), 10) ?? 1,
     options: select.options.map((option, index) => {
-      option.label ||= "No Label";
-      option.value ||= index.toString();
+      option.label = this.evalMessage(option.label, cache) || "No Label";
+      option.description = this.evalMessage(option.description, cache) || "";
+      option.value = this.evalMessage(option.value, cache) || index.toString();
       return option;
     }),
   };
@@ -1796,7 +1794,11 @@ Actions.addSelectToActionRowArray = function (array, rowText, selectData, cache)
       array.push([]);
     }
     if (array[row].length >= 1) {
-      this.displayError(null, cache, `Action row #${row} cannot have a select menu when there are any buttons on it!`);
+      this.displayError(
+        null,
+        cache,
+        `Action row #${row} cannot have a select menu when there are any buttons on it!`,
+      );
     } else {
       array[row].push(selectData);
     }

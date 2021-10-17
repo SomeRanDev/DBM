@@ -127,17 +127,22 @@ module.exports = {
 
     const messageId = message.id;
     if (type === "all") {
+
       components = [];
       this.clearAllTemporaryInteractions(messageId);
+
     } else if (message?.components) {
+
       const oldComponents = message.components;
       const newComponents = [];
 
       for (let i = 0; i < oldComponents.length; i++) {
+
         const comps = oldComponents[i].toJSON();
         const newComps = [];
 
         for (let j = 0; j < comps.components.length; j++) {
+
           const comp = comps.components[j];
           let deleted = false;
 
@@ -178,6 +183,7 @@ module.exports = {
 
         comps.components = newComps;
         if (newComps.length > 0) newComponents.push(comps);
+
       }
       components = newComponents;
     }

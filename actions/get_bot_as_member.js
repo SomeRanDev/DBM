@@ -90,15 +90,26 @@ module.exports = {
   // so be sure to provide checks for variable existence.
   //---------------------------------------------------------------------
 
-  async action(cache) {
+  action(cache) {
     const data = cache.actions[cache.index];
-    const { bot } = this.getDBM().Bot;
     const type = parseInt(data.server, 10);
     const varName = this.evalMessage(data.varName, cache);
     const server = this.getServer(type, varName, cache);
-    const me = server?.me ?? (await server?.members.fetch(bot.user.id));
-    this.storeValue(me, parseInt(data.storage, 10), this.evalMessage(data.varName2, cache), cache);
-    this.callNextAction(cache);
+
+    const callback = (me) => {
+      const storage = parseInt(data.storage, 10);
+      const varName2 = this.evalMessage(data.varName2, cache);
+      this.storeValue(me, storage, varName2, cache);
+      this.callNextAction(cache);
+    };
+
+    if (server?.me) {
+      callback(server.me);
+    } else {
+      server?.members?.fetch?.(this.getDBM().Bot.bot.user.id)
+        .then(callback)
+        .catch((err) => this.displayError(data, cache, err));
+    }
   },
 
   //---------------------------------------------------------------------

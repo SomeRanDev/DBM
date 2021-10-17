@@ -31,6 +31,13 @@ module.exports = {
       text = `${data.attachments.length} Attachments`;
     } else if (data.buttons?.length > 0 || data.selectMenus?.length > 0) {
       text = `${data.buttons.length} Buttons and ${data.selectMenus.length} Select Menus`;
+    } else if (data.editMessage && data.editMessage !== "0") {
+      text = `Message Data - ${presets.getVariableText(data.editMessage, data.editMessageVarName)}`;
+    } else {
+      text = `Nothing (might cause error)`;
+    }
+    if (data.dontSend) {
+      return `Store Data: ${text}`;
     }
     return `${presets.getSendTargetText(data.channel, data.varName)}: ${text}`;
   },
@@ -614,14 +621,14 @@ module.exports = {
           embed.setAuthor(
             this.evalMessage(embedData.author, cache),
             embedData.authorIcon ? this.evalMessage(embedData.authorIcon, cache) : null,
-            embedData.authorUrl ? this.evalMessage(embedData.authorUrl, cache) : null,
+            embedData.authorUrl ? this.evalMessage(embedData.authorUrl, cache) : null
           );
         }
 
         if (embedData.footerText) {
           embed.setFooter(
             this.evalMessage(embedData.footerText, cache),
-            embedData.footerIconUrl ? this.evalMessage(embedData.footerIconUrl, cache) : null,
+            embedData.footerIconUrl ? this.evalMessage(embedData.footerIconUrl, cache) : null
           );
         }
 
@@ -632,19 +639,25 @@ module.exports = {
     let componentsArr = [];
     let awaitResponses = [];
 
+    if (!overwrite && messageOptions.components?.length > 0) {
+      componentsArr = messageOptions.components.map(function (comps) {
+        return comps.components;
+      });
+    }
+
     const defaultTime = 60000;
 
     if (Array.isArray(data.buttons)) {
       for (let i = 0; i < data.buttons.length; i++) {
         const button = data.buttons[i];
-        const buttonData = this.generateButton(button);
-        this.addButtonToActionRowArray(componentsArr, button.row, buttonData, cache);
+        const buttonData = this.generateButton(button, cache);
+        this.addButtonToActionRowArray(componentsArr, this.evalMessage(button.row, cache), buttonData, cache);
 
         if (button.mode !== "PERSISTENT") {
           awaitResponses.push({
             type: "BUTTON",
-            time: button.time ? parseInt(button.time) || defaultTime : defaultTime,
-            id: button.id,
+            time: button.time ? parseInt(this.evalMessage(button.time, cache)) || defaultTime : defaultTime,
+            id: this.evalMessage(button.id, cache),
             user: button.mode.endsWith("PERSONAL") ? cache.getUser()?.id : null,
             multi: button.mode.startsWith("MULTI"),
             data: button,
@@ -656,14 +669,14 @@ module.exports = {
     if (Array.isArray(data.selectMenus)) {
       for (let i = 0; i < data.selectMenus.length; i++) {
         const select = data.selectMenus[i];
-        const selectData = this.generateSelectMenu(select);
-        this.addSelectToActionRowArray(componentsArr, select.row, selectData, cache);
+        const selectData = this.generateSelectMenu(select, cache);
+        this.addSelectToActionRowArray(componentsArr, this.evalMessage(select.row, cache), selectData, cache);
 
         if (select.mode !== "PERSISTENT") {
           awaitResponses.push({
             type: "SELECT",
-            time: select.time ? parseInt(select.time) || defaultTime : defaultTime,
-            id: select.id,
+            time: select.time ? parseInt(this.evalMessage(select.time, cache)) || defaultTime : defaultTime,
+            id: this.evalMessage(select.id, cache),
             user: select.mode.endsWith("PERSONAL") ? cache.getUser()?.id : null,
             multi: select.mode.startsWith("MULTI"),
             data: select,
@@ -690,11 +703,7 @@ module.exports = {
           };
         });
 
-      if (messageOptions.components && !overwrite) {
-        messageOptions.components = newComponents.concat(messageOptions.components);
-      } else {
-        messageOptions.components = newComponents;
-      }
+      messageOptions.components = newComponents;
     }
 
     if (data.tts) {
@@ -734,23 +743,16 @@ module.exports = {
           const response = awaitResponses[i];
           const originalInteraction = cache.interaction?.__originalInteraction ?? cache.interaction;
           const tempVariables = cache.temp || {};
-          this.registerTemporaryInteraction(
-            resultMsg.id,
-            response.time,
-            response.id,
-            response.user,
-            response.multi,
-            (interaction) => {
-              if (response.data) {
-                interaction.__originalInteraction = originalInteraction;
-                if (response.type === "BUTTON") {
-                  this.preformActionsFromInteraction(interaction, response.data, tempVariables);
-                } else {
-                  this.preformActionsFromSelectInteraction(interaction, response.data, tempVariables);
-                }
+          this.registerTemporaryInteraction(resultMsg.id, response.time, response.id, response.user, response.multi, (interaction) => {
+            if (response.data) {
+              interaction.__originalInteraction = originalInteraction;
+              if (response.type === "BUTTON") {
+                this.preformActionsFromInteraction(interaction, response.data, tempVariables);
+              } else {
+                this.preformActionsFromSelectInteraction(interaction, response.data, tempVariables);
               }
-            },
-          );
+            }
+          });
         }
       }
     };
@@ -766,14 +768,20 @@ module.exports = {
       messageOptions._awaitResponses = awaitResponses;
       this.storeValue(messageOptions, storage, varName2, cache);
       this.callNextAction(cache);
-    } else if (Array.isArray(target)) {
+    }
+
+    else if (Array.isArray(target)) {
       this.callListFunc(target, "send", [messageOptions]).then(onComplete);
-    } else if (isEdit && target?.edit) {
+    }
+
+    else if(isEdit && target?.edit) {
       target
         .edit(messageOptions)
         .then(onComplete)
         .catch((err) => this.displayError(data, cache, err));
-    } else if (data.reply === true && canReply) {
+    }
+
+    else if (data.reply === true && canReply) {
       messageOptions.fetchReply = true;
       if (data.ephemeral === true) {
         messageOptions.ephemeral = true;
@@ -785,12 +793,16 @@ module.exports = {
         promise = cache.interaction.reply(messageOptions);
       }
       promise.then(onComplete).catch((err) => this.displayError(data, cache, err));
-    } else if (target?.send) {
+    }
+
+    else if (target?.send) {
       target
         .send(messageOptions)
         .then(onComplete)
         .catch((err) => this.displayError(data, cache, err));
-    } else {
+    }
+
+    else {
       this.callNextAction(cache);
     }
   },
