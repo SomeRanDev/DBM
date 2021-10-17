@@ -711,7 +711,7 @@ module.exports = {
     }
 
     if (data.attachments?.length > 0) {
-      const { MessageAttachment } = this.getDBM().DiscordJS;
+      const { Util, MessageAttachment } = this.getDBM().DiscordJS;
       if (!Array.isArray(messageOptions.files) || overwrite) {
         messageOptions.files = [];
       }
@@ -719,12 +719,10 @@ module.exports = {
         const attachment = data.attachments[i];
         const url = this.evalMessage(attachment?.url, cache);
         if (url) {
-          let name = attachment?.name;
-          if (!name) {
-            name = "file" + require("path").extname(url);
-          }
+          const spoiler = !!attachment?.spoiler;
+          const name = attachment?.name || (spoiler ? Util.basename(url) : undefined);
           const msgAttachment = new MessageAttachment(url, name);
-          if (attachment?.spoiler) {
+          if (spoiler) {
             msgAttachment.setSpoiler(true);
           }
           messageOptions.files.push(msgAttachment);

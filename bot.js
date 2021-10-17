@@ -1724,7 +1724,7 @@ Actions.generateButton = function (button, cache) {
   return buttonData;
 };
 
-Actions.generateSelectMenu = function (select) {
+Actions.generateSelectMenu = function (select, cache) {
   const selectData = {
     type: "SELECT_MENU",
     customId: this.evalMessage(select.id, cache),
