@@ -125,43 +125,65 @@ module.exports = {
 
     let searchValue = null;
 
+    const messageId = message.id;
     if (type === "all") {
+
       components = [];
+      this.clearAllTemporaryInteractions(messageId);
+
     } else if (message?.components) {
+
       const oldComponents = message.components;
       const newComponents = [];
+
       for (let i = 0; i < oldComponents.length; i++) {
+
         const comps = oldComponents[i].toJSON();
         const newComps = [];
+
         for (let j = 0; j < comps.components.length; j++) {
+
           const comp = comps.components[j];
+          let deleted = false;
+
           switch (type) {
             case "allButtons": {
               if (comp.type !== 2) newComps.push(comp);
+              else deleted = true;
               break;
             }
             case "allSelects": {
               if (comp.type !== 3) newComps.push(comp);
+              else deleted = true;
               break;
             }
             case "sourceButton": {
               if (comp.custom_id !== sourceButton) newComps.push(comp);
+              else deleted = true;
               break;
             }
             case "sourceSelect": {
               if (comp.custom_id !== sourceSelect) newComps.push(comp);
+              else deleted = true;
               break;
             }
             case "findButton":
             case "findSelect": {
               if (searchValue === null) searchValue = this.evalMessage(data.searchValue, cache);
               if (comp.custom_id !== searchValue && comp.label !== searchValue) newComps.push(comp);
+              else deleted = true;
               break;
             }
           }
+
+          if (deleted) {
+            this.clearTemporaryInteraction(messageId, comp.custom_id);
+          }
         }
+
         comps.components = newComps;
         if (newComps.length > 0) newComponents.push(comps);
+
       }
       components = newComponents;
     }

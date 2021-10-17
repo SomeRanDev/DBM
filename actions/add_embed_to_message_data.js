@@ -5,7 +5,7 @@ module.exports = {
   // This is the name of the action displayed in the editor.
   //---------------------------------------------------------------------
 
-  name: "Get List Length",
+  name: "Add Embed to Message Data",
 
   //---------------------------------------------------------------------
   // Action Section
@@ -13,7 +13,7 @@ module.exports = {
   // This is the section the action will fall into.
   //---------------------------------------------------------------------
 
-  section: "Lists and Loops",
+  section: "Embed Message",
 
   //---------------------------------------------------------------------
   // Action Subtitle
@@ -22,20 +22,7 @@ module.exports = {
   //---------------------------------------------------------------------
 
   subtitle(data, presets) {
-    const list = presets.lists;
-    return `Get ${list[parseInt(data.list, 10)]} Length`;
-  },
-
-  //---------------------------------------------------------------------
-  // Action Storage Function
-  //
-  // Stores the relevant variable info for the editor.
-  //---------------------------------------------------------------------
-
-  variableStorage(data, varType) {
-    const type = parseInt(data.storage, 10);
-    if (type !== varType) return;
-    return [data.varName2, "Number"];
+    return `Store ${presets.getVariableText(data.storage, data.varName)} in ${presets.getVariableText(data.editMessage, data.editMessageVarName)}`;
   },
 
   //---------------------------------------------------------------------
@@ -46,7 +33,7 @@ module.exports = {
   // are also the names of the fields stored in the action's JSON data.
   //---------------------------------------------------------------------
 
-  fields: ["list", "varName", "storage", "varName2"],
+  fields: ["storage", "varName", "editMessage", "editMessageVarName"],
 
   //---------------------------------------------------------------------
   // Command HTML
@@ -66,22 +53,11 @@ module.exports = {
 
   html(isEvent, data) {
     return `
-<div>
-	<div style="float: left; width: 35%;">
-		Source List:<br>
-		<select id="list" class="round" onchange="glob.listChange(this, 'varNameContainer')">
-			${data.lists[isEvent ? 1 : 0]}
-		</select>
-	</div>
-	<div id="varNameContainer" style="display: none; float: right; width: 60%;">
-		Variable Name:<br>
-		<input id="varName" class="round" type="text" list="variableList"><br>
-	</div>
-</div>
+<retrieve-from-variable dropdownLabel="Source Embed Object" selectId="storage" variableContainerId="varNameContainer" variableInputId="varName"></retrieve-from-variable>
 
-<br><br><br>
+<br><br><br><br>
 
-<store-in-variable style="padding-top: 8px;" dropdownLabel="Store In" selectId="storage" variableContainerId="varNameContainer2" variableInputId="varName2"></store-in-variable>`;
+<retrieve-from-variable dropdownLabel="Message Data to Edit" selectId="editMessage" variableInputId="editMessageVarName" variableContainerId="editMessageVarNameContainer"></retrieve-from-variable>`;
   },
 
   //---------------------------------------------------------------------
@@ -92,11 +68,7 @@ module.exports = {
   // functions for the DOM elements.
   //---------------------------------------------------------------------
 
-  init() {
-    const { glob, document } = this;
-
-    glob.listChange(document.getElementById("list"), "varNameContainer");
-  },
+  init() {},
 
   //---------------------------------------------------------------------
   // Action Bot Function
@@ -108,14 +80,23 @@ module.exports = {
 
   action(cache) {
     const data = cache.actions[cache.index];
-    const storage = parseInt(data.list, 10);
+    const storage = parseInt(data.storage, 10);
     const varName = this.evalMessage(data.varName, cache);
-    const list = this.getList(storage, varName, cache);
-    if (list?.length) {
-      const varName2 = this.evalMessage(data.varName2, cache);
-      const storage2 = parseInt(data.storage, 10);
-      this.storeValue(list.length, storage2, varName2, cache);
+    const embed = this.getVariable(storage, varName, cache);
+    
+    if (embed) {
+      const editMessage = parseInt(data.editMessage, 10);
+      if (typeof editMessage === "number" && editMessage >= 0) {
+        const editVarName = this.evalMessage(data.editMessageVarName, cache);
+        const editObject = this.getVariable(editMessage, editVarName, cache);
+        if (Array.isArray(editObject.embeds)) {
+          editObject.embeds.push(embed);
+        } else {
+          editObject.embeds = [ embed ];
+        }
+      }
     }
+
     this.callNextAction(cache);
   },
 

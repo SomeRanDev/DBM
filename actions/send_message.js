@@ -44,7 +44,7 @@ module.exports = {
   variableStorage(data, varType) {
     const type = parseInt(data.storage, 10);
     if (type !== varType) return;
-    return [data.varName2, "Message"];
+    return [data.varName2, data.dontSend ? "Message Data" : "Message"];
   },
 
   //---------------------------------------------------------------------
@@ -66,6 +66,10 @@ module.exports = {
     "reply",
     "ephemeral",
     "tts",
+    "overwrite",
+    "dontSend",
+    "editMessage",
+    "editMessageVarName",
     "storage",
     "varName2",
   ],
@@ -225,7 +229,7 @@ module.exports = {
   <tab label="Buttons" icon="clone">
     <div style="padding: 8px;">
 
-      <dialog-list id="buttons" fields='["name", "type", "id", "url", "emoji", "disabled", "mode", "time", "actions"]' dialogTitle="Button Info" dialogWidth="600" dialogHeight="700" listLabel="Buttons" listStyle="height: calc(100vh - 350px);" itemName="Button" itemCols="4" itemHeight="40px;" itemTextFunction="data.name" itemStyle="text-align: center; line-height: 40px;">
+      <dialog-list id="buttons" fields='["name", "type", "id", "row", "url", "emoji", "disabled", "mode", "time", "actions"]' dialogTitle="Button Info" dialogWidth="600" dialogHeight="700" listLabel="Buttons" listStyle="height: calc(100vh - 350px);" itemName="Button" itemCols="4" itemHeight="40px;" itemTextFunction="data.name" itemStyle="text-align: center; line-height: 40px;">
         <div style="padding: 16px;">
           <div style="width: calc(50% - 12px); float: left;">
             <span class="dbminputlabel">Name</span>
@@ -428,13 +432,25 @@ module.exports = {
 
       <br><br>
 
-      <dbm-checkbox style="float: left;" id="tts" label="Text-to-Speech"></dbm-checkbox>
+      <div style="display: flex; justify-content: space-between;">
+        <dbm-checkbox id="tts" label="Text-to-Speech"></dbm-checkbox>
 
-      <br><br>
+        <dbm-checkbox id="overwrite" label="Overwrite Changes"></dbm-checkbox>
+
+        <dbm-checkbox id="dontSend" label="Don't Send Message"></dbm-checkbox>
+      </div>
+
+      <br>
 
       <hr class="subtlebar">
 
       <br>
+
+      <div style="padding-bottom: 12px;">
+        <retrieve-from-variable allowNone dropdownLabel="Message/Data to Edit" selectId="editMessage" variableInputId="editMessageVarName" variableContainerId="editMessageVarNameContainer"></retrieve-from-variable>
+      </div>
+
+      <br><br><br>
 
       <div style="padding-bottom: 12px;">
         <store-in-variable allowNone selectId="storage" variableInputId="varName2" variableContainerId="varNameContainer2"></store-in-variable>
@@ -534,19 +550,43 @@ module.exports = {
     const message = data.message;
     if (channel === undefined || message === undefined) return;
     const varName = this.evalMessage(data.varName, cache);
-    const target = this.getSendTarget(channel, varName, cache);
+    let target = this.getSendTarget(channel, varName, cache);
 
-    const messageOptions = {};
+    let messageOptions = {};
+
+    const overwrite = data.overwrite;
+
+    let isEdit = false;
+    const editMessage = parseInt(data.editMessage, 10);
+    if (typeof editMessage === "number" && editMessage >= 0) {
+      const editVarName = this.evalMessage(data.editMessageVarName, cache);
+      const editObject = this.getVariable(editMessage, editVarName, cache);
+      const { Message } = this.getDBM().DiscordJS;
+      if (editObject) {
+        if (editObject instanceof Message) {
+          target = editObject;
+          isEdit = true;
+        } else {
+          messageOptions = editObject;
+        }
+      }
+    }
 
     const content = this.evalMessage(message, cache);
     if (content) {
-      messageOptions.content = content;
+      if (messageOptions.content && !overwrite) {
+        messageOptions.content += content;
+      } else {
+        messageOptions.content = content;
+      }
     }
 
     if (data.embeds?.length > 0) {
       const { MessageEmbed } = this.getDBM().DiscordJS;
 
-      messageOptions.embeds = [];
+      if (!Array.isArray(messageOptions.embeds) || overwrite) {
+        messageOptions.embeds = [];
+      }
 
       const embedDatas = data.embeds;
       for (let i = 0; i < embedDatas.length; i++) {
@@ -564,7 +604,8 @@ module.exports = {
 
         if (embedData.fields?.length > 0) {
           const fields = embedData.fields;
-          for (const f of fields) {
+          for (let i = 0; i < fields.length; i++) {
+            const f = fields[i];
             embed.addField(this.evalMessage(f.name, cache), this.evalMessage(f.value, cache), f.inline === "true");
           }
         }
@@ -631,8 +672,16 @@ module.exports = {
       }
     }
 
+    if (messageOptions._awaitResponses?.length > 0) {
+      if (overwrite && awaitResponses.length > 0) {
+        messageOptions._awaitResponses = [];
+      } else {
+        awaitResponses = messageOptions._awaitResponses.concat(awaitResponses);
+      }
+    }
+
     if (componentsArr.length > 0) {
-      messageOptions.components = componentsArr
+      const newComponents = componentsArr
         .filter((comps) => comps.length > 0)
         .map(function (comps) {
           return {
@@ -640,6 +689,12 @@ module.exports = {
             components: comps,
           };
         });
+
+      if (messageOptions.components && !overwrite) {
+        messageOptions.components = newComponents.concat(messageOptions.components);
+      } else {
+        messageOptions.components = newComponents;
+      }
     }
 
     if (data.tts) {
@@ -648,7 +703,9 @@ module.exports = {
 
     if (data.attachments?.length > 0) {
       const { MessageAttachment } = this.getDBM().DiscordJS;
-      messageOptions.files = [];
+      if (!Array.isArray(messageOptions.files) || overwrite) {
+        messageOptions.files = [];
+      }
       for (let i = 0; i < data.attachments.length; i++) {
         const attachment = data.attachments[i];
         const url = this.evalMessage(attachment?.url, cache);
@@ -696,9 +753,26 @@ module.exports = {
       target?.id?.length > 0 &&
       (target?.id ?? "") === cache?.interaction?.channel?.id;
 
-    if (Array.isArray(target)) {
+    if (data.dontSend) {
+      const varName2 = this.evalMessage(data.varName2, cache);
+      const storage = parseInt(data.storage, 10);
+      messageOptions._awaitResponses = awaitResponses;
+      this.storeValue(messageOptions, storage, varName2, cache);
+      this.callNextAction(cache);
+    }
+
+    else if (Array.isArray(target)) {
       this.callListFunc(target, "send", [messageOptions]).then(onComplete);
-    } else if (data.reply === true && canReply) {
+    }
+
+    else if(isEdit && target?.edit) {
+      target
+        .edit(messageOptions)
+        .then(onComplete)
+        .catch((err) => this.displayError(data, cache, err));
+    }
+
+    else if (data.reply === true && canReply) {
       messageOptions.fetchReply = true;
       if (data.ephemeral === true) {
         messageOptions.ephemeral = true;
@@ -710,12 +784,16 @@ module.exports = {
         promise = cache.interaction.reply(messageOptions);
       }
       promise.then(onComplete).catch((err) => this.displayError(data, cache, err));
-    } else if (target?.send) {
+    }
+
+    else if (target?.send) {
       target
         .send(messageOptions)
         .then(onComplete)
         .catch((err) => this.displayError(data, cache, err));
-    } else {
+    }
+
+    else {
       this.callNextAction(cache);
     }
   },

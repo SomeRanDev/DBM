@@ -62,7 +62,7 @@ module.exports = {
 	Call Type:<br>
 	<select id="type" class="round">
 		<option value="true" selected>Wait for Completion</option>
-		<option value="false">Run Asynchronously</option>
+		<option value="false">Run Simultaneously</option>
 	</select>
 </div>`;
   },

@@ -132,7 +132,6 @@ module.exports = {
     }
 
     const disable = (data.disable ?? "disable") === "disable";
-    console.log(disable);
     let components = null;
     let searchValue = null;
 

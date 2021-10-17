@@ -22,7 +22,7 @@ module.exports = {
   //---------------------------------------------------------------------
 
   subtitle(data, presets) {
-    return `Loop Servers through Event Id "${data.source}"`;
+    return `Loop through every server and run ${data.actions?.length ?? 0} actions.`;
   },
 
   //---------------------------------------------------------------------
@@ -33,7 +33,7 @@ module.exports = {
   // are also the names of the fields stored in the action's JSON data.
   //---------------------------------------------------------------------
 
-  fields: ["source", "type"],
+  fields: ["type", "actions"],
 
   //---------------------------------------------------------------------
   // Command HTML
@@ -53,21 +53,32 @@ module.exports = {
 
   html(isEvent, data) {
     return `
-<div style="width: 85%;">
-	<span class="dbminputlabel">Event</span><br>
-	<select id="source" class="round">
-	</select>
-</div>
+<span class="dbminputlabel">Call Type</span><br>
+<select id="type" class="round">
+  <option value="true" selected>Wait for Completion</option>
+  <option value="false">Process Simultaneously</option>
+</select>
 
-<br>
+<br><br>
 
-<div style="width: 85%;">
-	<span class="dbminputlabel">Call Type</span><br>
-	<select id="type" class="round">
-		<option value="true" selected>Wait for Completion</option>
-		<option value="false">Process Simultaneously</option>
-	</select>
-</div>`;
+<action-list-input id="actions" height="calc(100vh - 300px)"></action-list-input>`;
+  },
+
+  //---------------------------------------------------------------------
+  // Action Editor Pre-Init Code
+  //
+  // Before the fields from existing data in this action are applied
+  // to the user interface, this function is called if it exists.
+  // The existing data is provided, and a modified version can be
+  // returned. The returned version will be used if provided.
+  // This is to help provide compatibility with older versions of the action.
+  //
+  // The "formatters" argument contains built-in functions for formatting
+  // the data required for official DBM action compatibility.
+  //---------------------------------------------------------------------
+
+  preInit(data, formatters) {
+    return formatters.compatibility_2_0_3_loopevent_to_actions(data);
   },
 
   //---------------------------------------------------------------------
@@ -78,18 +89,7 @@ module.exports = {
   // functions for the DOM elements.
   //---------------------------------------------------------------------
 
-  init() {
-    const { glob, document } = this;
-
-    const $evts = glob.$evts;
-    const source = document.getElementById("source");
-    source.innerHTML = "";
-    for (let i = 0; i < $evts.length; i++) {
-      if ($evts[i]) {
-        source.innerHTML += `<option value="${i}">${$evts[i].name}</option>\n`;
-      }
-    }
-  },
+  init() {},
 
   //---------------------------------------------------------------------
   // Action Bot Function
@@ -101,48 +101,51 @@ module.exports = {
 
   action(cache) {
     const data = cache.actions[cache.index];
-    const Files = this.getDBM().Files;
     const bot = this.getDBM().Bot.bot;
 
-    const id = data.source;
-    let actions;
-    const allData = Files.data.events;
-    for (let i = 0; i < allData.length; i++) {
-      if (allData[i]?._id === id) {
-        actions = allData[i].actions;
-        break;
-      }
-    }
-    if (!actions) {
+    const actions = data.actions;
+    if (!actions || actions.length <= 0) {
       this.callNextAction(cache);
       return;
     }
 
+    const waitForCompletion = data.type === "true";
+
     const servers = [...bot.guilds.cache.values()];
     const act = actions[0];
     if (act && this.exists(act.name)) {
-      const looper = function (i) {
+      const looper = (i) => {
         if (!servers[i]) {
-          if (data.type === "true") this.callNextAction(cache);
+          if (waitForCompletion) this.callNextAction(cache);
           return;
         }
-        const cache2 = {
-          actions,
-          index: 0,
-          temp: cache.temp,
-          server: servers[i],
-          msg: cache.msg ?? null,
-        };
-        cache2.callback = function () {
-          looper(i + 1);
-        }.bind(this);
-        this[act.name](cache2);
-      }.bind(this);
+
+        this.executeSubActions(actions, cache, () => looper(i + 1));
+      };
+
       looper(0);
-      if (data.type === "false") this.callNextAction(cache);
+
+      if (!waitForCompletion) this.callNextAction(cache);
     } else {
       this.callNextAction(cache);
     }
+  },
+
+  //---------------------------------------------------------------------
+  // Action Bot Mod Init
+  //
+  // An optional function for action mods. Upon the bot's initialization,
+  // each command/event's actions are iterated through. This is to
+  // initialize responses to interactions created within actions
+  // (e.g. buttons and select menus for Send Message).
+  //
+  // If an action provides inputs for more actions within, be sure
+  // to call the `this.prepareActions` function to ensure all actions are
+  // recursively iterated through.
+  //---------------------------------------------------------------------
+
+  modInit(data) {
+    this.prepareActions(data.actions);
   },
 
   //---------------------------------------------------------------------

@@ -5,7 +5,7 @@ module.exports = {
   // This is the name of the action displayed in the editor.
   //---------------------------------------------------------------------
 
-  name: "Loop Through List",
+  name: "Loop Through Numbers",
 
   //---------------------------------------------------------------------
   // Action Section
@@ -22,8 +22,10 @@ module.exports = {
   //---------------------------------------------------------------------
 
   subtitle(data, presets) {
-    const list = presets.lists;
-    return `Loop ${list[parseInt(data.list, 10)]} through ${data.actions?.length ?? 0} actions.`;
+    if (Math.abs(parseInt(data.increment, 10)) === 1) {
+      return `Call ${data.actions?.length ?? 0} actions ${Math.abs(data.endNum - data.startNum)} times.`
+    }
+    return `Call ${data.actions?.length ?? 0} actions while counting by ${data.increment}, from ${data.startNum} to ${data.endNum}.`;
   },
 
   //---------------------------------------------------------------------
@@ -34,7 +36,7 @@ module.exports = {
   // are also the names of the fields stored in the action's JSON data.
   //---------------------------------------------------------------------
 
-  fields: ["list", "varName", "tempVarName", "type", "actions"],
+  fields: ["startNum", "endNum", "increment", "tempVarName", "type", "actions"],
 
   //---------------------------------------------------------------------
   // Command HTML
@@ -58,15 +60,19 @@ module.exports = {
   <tab label="Iteration Options" icon="align right">
     <div style="padding: 12px;">
       <div style="display: flex; justify-content: space-between;">
-        <div style="width: calc(40% - 12px);">
-          <span class="dbminputlabel">Source List</span><br>
-          <select id="list" class="round" onchange="glob.onChange1(this)">
-            ${data.lists[isEvent ? 1 : 0]}
-          </select>
+        <div style="width: calc(33% - 8px);">
+          <span class="dbminputlabel">Start Number</span><br>
+          <input id="startNum" class="round" type="text" value="1">
         </div>
-        <div id="varNameContainer" style="width: calc(60% - 12px);">
-          <span class="dbminputlabel">Variable Name</span><br>
-          <input id="varName" class="round" type="text" list="variableList">
+
+        <div style="width: calc(33% - 8px);">
+          <span class="dbminputlabel">End Number</span><br>
+          <input id="endNum" class="round" type="text" value="5">
+        </div>
+
+        <div style="width: calc(33% - 8px);">
+          <span class="dbminputlabel">Increment By</span><br>
+          <input id="increment" class="round" type="text" value="1">
         </div>
       </div>
     </div>
@@ -76,7 +82,7 @@ module.exports = {
     <div style="padding: 12px;">
       <div style="display: flex; justify-content: space-between;">
         <div style="width: calc(50% - 12px);">
-          <span class="dbminputlabel">Temp Var. Name (stores <span id="tempName">member</span>)</span><br>
+          <span class="dbminputlabel">Temp Var. Name (stores number)</span><br>
           <input id="tempVarName" class="round" type="text" placeholder="Leave blank for none...">
         </div>
 
@@ -98,28 +104,7 @@ module.exports = {
   <script class="setupTempVars">
     const elem = document.getElementById("tempVarName");
     if(elem?.value) {
-      const typeElem = document.getElementById("list");
-      let result = "Unknown Type";
-      switch (typeElem.value) {
-        case "0":
-          result = "Member";
-          break;
-        case "1":
-          result = "Channel";
-          break;
-        case "4":
-          result = "Server";
-          break;
-        case "2":
-        case "5":
-        case "6":
-          result = "Role";
-          break;
-        case "3":
-          result = "Emoji";
-          break;
-      }
-      tempVars.push([elem.value, result]);
+      tempVars.push([elem.value, "Number"]);
     }
   </script>
 </action-list-input>`;
@@ -133,42 +118,7 @@ module.exports = {
   // functions for the DOM elements.
   //---------------------------------------------------------------------
 
-  init() {
-    const { glob, document } = this;
-
-    glob.onChange1 = function (event) {
-      this.listChange(event, "varNameContainer");
-      const id = parseInt(event.value, 10);
-      let result = "";
-      switch (id) {
-        case 0:
-          result = "member";
-          break;
-        case 1:
-          result = "channel";
-          break;
-        case 4:
-          result = "server";
-          break;
-        case 2:
-        case 5:
-        case 6:
-          result = "role";
-          break;
-        case 3:
-          result = "emoji";
-          break;
-        case 7:
-        case 8:
-        case 9:
-          result = "item";
-          break;
-      }
-      document.getElementById("tempName").innerHTML = result;
-    };
-
-    glob.onChange1(document.getElementById("list"));
-  },
+  init() {},
 
   //---------------------------------------------------------------------
   // Action Bot Function
@@ -182,39 +132,79 @@ module.exports = {
     const data = cache.actions[cache.index];
 
     const actions = data.actions;
-    if (!actions) {
+    if (!actions || actions.length <= 0) {
       this.callNextAction(cache);
       return;
     }
 
-    const storage = parseInt(data.list, 10);
-    const varName = this.evalMessage(data.varName, cache);
-    const list = this.getList(storage, varName, cache);
+    const startNumText = this.evalMessage(data.startNum, cache);
+    const endNumText = this.evalMessage(data.endNum, cache);
+    const incrementText = this.evalMessage(data.increment, cache);
+    let startNum = parseInt(startNumText, 10);
+    let endNum = parseInt(endNumText, 10);
+    let increment = parseInt(incrementText, 10);
+
+    let valid = isNaN(startNum) ? 1 : (isNaN(endNum) ? 2 : (isNaN(increment) ? 3 : 0));
+    if (valid === 0) {
+      if (increment === 0) {
+        valid = 4;
+      } else if (increment > 0 && startNum > endNum) {
+        valid = 5;
+      } else if (increment < 0 && startNum < endNum) {
+        valid = 6;
+      }
+    }
+
+    switch (valid) {
+      case 1: { this.displayError(data, cache, `Start Number (${startNumText}) is not a valid number.`); break; }
+      case 2: { this.displayError(data, cache, `End Number (${endNumText}) is not a valid number.`); break; }
+      case 3: { this.displayError(data, cache, `Increment (${incrementText}) is not a valid number.`); break; }
+      case 4: { this.displayError(data, cache, `Increment cannot be 0.`); break; }
+      case 5:
+      case 6: { this.displayError(data, cache, `Increment detected to cause infinite loop.`); break; }
+    }
+
+    if (valid !== 0) {
+      this.callNextAction(cache);
+      return;
+    }
 
     const waitForCompletion = data.type === "true";
 
-    const act = actions[0];
-    if (act && this.exists(act.name)) {
-      const looper = (i) => {
-        if (!list[i]) {
-          if (waitForCompletion) {
-            this.callNextAction(cache);
-          }
-          return;
+    const looper = (i) => {
+      if ((startNum < endNum && i > endNum) || (startNum > endNum && i < endNum)) {
+        if (waitForCompletion) {
+          this.callNextAction(cache);
         }
-
-        this.storeValue(list[i], 1, data.tempVarName, cache);
-        this.executeSubActions(actions, cache, () => looper(i + 1));
-      };
-
-      looper(0);
-
-      if (!waitForCompletion) {
-        this.callNextAction(cache);
+        return;
       }
-    } else {
+
+      this.storeValue(i, 1, data.tempVarName, cache);
+      this.executeSubActions(actions, cache, () => looper(i + increment));
+    };
+
+    looper(startNum);
+
+    if (!waitForCompletion) {
       this.callNextAction(cache);
     }
+  },
+
+  //---------------------------------------------------------------------
+  // Action Bot Mod Init
+  //
+  // An optional function for action mods. Upon the bot's initialization,
+  // each command/event's actions are iterated through. This is to
+  // initialize responses to interactions created within actions
+  // (e.g. buttons and select menus for Send Message).
+  //
+  // If an action provides inputs for more actions within, be sure
+  // to call the `this.prepareActions` function to ensure all actions are
+  // recursively iterated through.
+  //---------------------------------------------------------------------
+
+  modInit(data) {
+    this.prepareActions(data.actions);
   },
 
   //---------------------------------------------------------------------

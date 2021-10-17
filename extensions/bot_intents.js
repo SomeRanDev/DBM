@@ -1,3 +1,24 @@
+//---------------------------------------------------------------------
+// Defining global array of intents so they are not repeated later on.
+//---------------------------------------------------------------------
+const INTENTS = [
+  "GUILDS",
+  "GUILD_MEMBERS",
+  "GUILD_BANS",
+  "GUILD_EMOJIS_AND_STICKERS",
+  "GUILD_INTEGRATIONS",
+  "GUILD_WEBHOOKS",
+  "GUILD_INVITES",
+  "GUILD_VOICE_STATES",
+  "GUILD_PRESENCES",
+  "GUILD_MESSAGES",
+  "GUILD_MESSAGE_REACTIONS",
+  "GUILD_MESSAGE_TYPING",
+  "DIRECT_MESSAGES",
+  "DIRECT_MESSAGE_REACTIONS",
+  "DIRECT_MESSAGE_TYPING",
+];
+
 module.exports = {
   //---------------------------------------------------------------------
   // Editor Extension Name
@@ -35,6 +56,15 @@ module.exports = {
   isEditorExtension: true,
 
   //---------------------------------------------------------------------
+  // Save Button Text
+  //
+  // Customizes the text of the "Save Extension" at the bottom
+  // of the extension window.
+  //---------------------------------------------------------------------
+
+  saveButtonText: "Save Intents",
+
+  //---------------------------------------------------------------------
   // Extension Fields
   //
   // These are the fields for the extension. These fields are customized
@@ -61,7 +91,7 @@ module.exports = {
   //---------------------------------------------------------------------
 
   size: function () {
-    return { width: 340, height: 520 };
+    return { width: 340, height: 560 };
   },
 
   //---------------------------------------------------------------------
@@ -92,7 +122,11 @@ module.exports = {
 			<input type="radio" id="Custom" name="RatioButton" value="Custom" ${data.intents >= 0 ? "checked" : ""}>
 			<label for="Custom">Custom</label><br>
 
+      <br>
+
 			<hr>
+
+      <br>
 
 			<input type="checkbox" id="GUILDS" name="GUILDS" value="GUILDS" ${intents & (1 << 0) ? "checked" : ""}>
 			<label for="GUILDS">Server Events</label><br>
@@ -105,10 +139,10 @@ module.exports = {
 			<input type="checkbox" id="GUILD_BANS" name="GUILD_BANS" value="GUILD_BANS" ${intents & (1 << 2) ? "checked" : ""}>
 			<label for="GUILD_BANS">Server Ban Events</label><br>
 
-			<input type="checkbox" id="GUILD_EMOJIS" name="GUILD_EMOJIS" value="GUILD_EMOJIS" ${
+			<input type="checkbox" id="GUILD_EMOJIS_AND_STICKERS" name="GUILD_EMOJIS_AND_STICKERS" value="GUILD_EMOJIS_AND_STICKERS" ${
         intents & (1 << 3) ? "checked" : ""
       }>
-			<label for="GUILD_EMOJIS">Server Emoji Events</label><br>
+			<label for="GUILD_EMOJIS_AND_STICKERS">Server Emoji and Stickers Events</label><br>
 
 			<input type="checkbox" id="GUILD_INTEGRATIONS" name="GUILD_INTEGRATIONS" value="GUILD_INTEGRATIONS" ${
         intents & (1 << 4) ? "checked" : ""
@@ -165,7 +199,11 @@ module.exports = {
       }>
 			<label for="DIRECT_MESSAGE_TYPING">DM Typing Events</label><br>
 
+      <br>
+
 			<hr>
+
+      <br>
 
 			<label>*** These require your bot to have them enabled in the developer portal. Furthermore, they can only be enabled if your bot is in less than 100 servers or is whitelisted. If you enable them without turning them on in the portal, your bot will crash!</label>
 		</div>`;
@@ -180,23 +218,6 @@ module.exports = {
   //---------------------------------------------------------------------
 
   init: function (document, globalObject) {
-    const INTENTS = [
-      "GUILDS",
-      "GUILD_MEMBERS",
-      "GUILD_BANS",
-      "GUILD_EMOJIS",
-      "GUILD_INTEGRATIONS",
-      "GUILD_WEBHOOKS",
-      "GUILD_INVITES",
-      "GUILD_VOICE_STATES",
-      "GUILD_PRESENCES",
-      "GUILD_MESSAGES",
-      "GUILD_MESSAGE_REACTIONS",
-      "GUILD_MESSAGE_TYPING",
-      "DIRECT_MESSAGES",
-      "DIRECT_MESSAGE_REACTIONS",
-      "DIRECT_MESSAGE_TYPING",
-    ];
     const PRIVILEGED = ["GUILD_PRESENCES", "GUILD_MEMBERS"];
     function EnableAll(enable) {
       for (let i = 0; i < INTENTS.length; i++) {
@@ -240,23 +261,6 @@ module.exports = {
 
   close: function (document, data, globalObject) {
     let result = 0;
-    const INTENTS = [
-      "GUILDS",
-      "GUILD_MEMBERS",
-      "GUILD_BANS",
-      "GUILD_EMOJIS_AND_STICKERS",
-      "GUILD_INTEGRATIONS",
-      "GUILD_WEBHOOKS",
-      "GUILD_INVITES",
-      "GUILD_VOICE_STATES",
-      "GUILD_PRESENCES",
-      "GUILD_MESSAGES",
-      "GUILD_MESSAGE_REACTIONS",
-      "GUILD_MESSAGE_TYPING",
-      "DIRECT_MESSAGES",
-      "DIRECT_MESSAGE_REACTIONS",
-      "DIRECT_MESSAGE_TYPING",
-    ];
     if (document.getElementById("All").checked) {
       result = -1;
     } else if (document.getElementById("NonPrivileged").checked) {

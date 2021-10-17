@@ -5,7 +5,7 @@
  ******************************************************/
 
 const DBM = {};
-DBM.version = "2.0.2";
+DBM.version = "2.0.3";
 
 const DiscordJS = (DBM.DiscordJS = require("discord.js"));
 
@@ -207,11 +207,28 @@ Bot.init = function () {
 };
 
 Bot.initBot = function () {
-  this.bot = new DiscordJS.Client({ intents: this.intents() });
+  const options = this.makeClientOptions();
+  options.intents = this.intents();
+  if (this.usePartials()) {
+    options.partials = this.partials();
+  }
+  this.bot = new DiscordJS.Client(options);
+};
+
+Bot.makeClientOptions = function () {
+  return {};
 };
 
 Bot.intents = function () {
   return this.NON_PRIVILEGED_INTENTS;
+};
+
+Bot.usePartials = function () {
+  return false;
+};
+
+Bot.partials = function () {
+  return [];
 };
 
 Bot.setupBot = function () {
@@ -1196,6 +1213,7 @@ Actions.getErrorString = function (data, cache) {
 };
 
 Actions.displayError = function (data, cache, err) {
+  if (!data) data = cache.actions[cache.index];
   const dbm = this.getErrorString(data, cache);
   console.error(dbm + ":\n" + (err.stack ?? err));
   Events.onError(dbm, err.stack ?? err, cache);
@@ -1721,7 +1739,7 @@ Actions.addButtonToActionRowArray = function (array, rowText, buttonData, cache)
     let found = false;
     for (let i = 0; i < array.length; i++) {
       if (array[i].length < 5) {
-        if (array[i][0].type === "BUTTON") {
+        if (array[i].length === 0 || array[i][0]?.type === "BUTTON") {
           found = true;
           row = i;
           break;
@@ -1742,12 +1760,12 @@ Actions.addButtonToActionRowArray = function (array, rowText, buttonData, cache)
       array.push([]);
     }
     if (array[row].length >= 5) {
-      this.displayError(data, cache, "Action row #" + row + " exceeded the maximum of 5 buttons!");
+      this.displayError(null, cache, "Action row #" + row + " exceeded the maximum of 5 buttons!");
     } else {
       array[row].push(buttonData);
     }
   } else {
-    this.displayError(cache.actions[cache.index], cache, 'Invalid action row: "' + rowText + '".');
+    this.displayError(null, cache, 'Invalid action row: "' + rowText + '".');
   }
 };
 
@@ -1769,7 +1787,7 @@ Actions.addSelectToActionRowArray = function (array, rowText, selectData, cache)
     }
     if (array[row].length >= 1) {
       this.displayError(
-        cache.actions[cache.index],
+        null,
         cache,
         `Action row #${row} cannot have a select menu when there are any buttons on it!`,
       );
@@ -1777,18 +1795,19 @@ Actions.addSelectToActionRowArray = function (array, rowText, selectData, cache)
       array[row].push(selectData);
     }
   } else {
-    this.displayError(cache.actions[cache.index], cache, `Invalid action row: '${rowText}'.`);
+    this.displayError(null, cache, `Invalid action row: '${rowText}'.`);
   }
 };
 
 Actions.checkTemporaryInteractionResponses = function (interaction) {
   const customId = interaction.customId;
-  if (this._temporaryInteractions?.[customId]) {
-    const interactions = this._temporaryInteractions[customId];
+  const messageId = interaction.message.id;
+  if (this._temporaryInteractions?.[messageId]) {
+    const interactions = this._temporaryInteractions[messageId];
     for (let i = 0; i < interactions.length; i++) {
       const interData = interactions[i];
       const usersMatch = !interData.userId || interData.userId === interaction.user.id;
-      if (interData.message === interaction.message.id) {
+      if (interData.customId === customId) {
         if (usersMatch) {
           interData.callback?.(interaction);
         } else {
@@ -1804,10 +1823,10 @@ Actions.checkTemporaryInteractionResponses = function (interaction) {
   return false;
 };
 
-Actions.registerTemporaryInteraction = function (message, time, customId, userId, multi, interactionCallback) {
+Actions.registerTemporaryInteraction = function (messageId, time, customId, userId, multi, interactionCallback) {
   this._temporaryInteractionIdMax ??= 0;
   this._temporaryInteractions ??= {};
-  this._temporaryInteractions[customId] ??= [];
+  this._temporaryInteractions[messageId] ??= [];
 
   const uniqueId = this._temporaryInteractionIdMax++;
   let removed = false;
@@ -1815,16 +1834,7 @@ Actions.registerTemporaryInteraction = function (message, time, customId, userId
   const removeInteraction = () => {
     if (!removed) removed = true;
     else return;
-    const interactions = this._temporaryInteractions[customId];
-    if (interactions) {
-      let i = 0;
-      for (; i < interactions.length; i++) {
-        if (interactions[i].uniqueId === uniqueId) {
-          break;
-        }
-      }
-      if (i < interactions.length) interactions.splice(i, 1);
-    }
+    this.removeTemporaryInteraction(messageId, uniqueId);
   };
 
   const callback = (interaction) => {
@@ -1834,9 +1844,38 @@ Actions.registerTemporaryInteraction = function (message, time, customId, userId
     }
   };
 
-  this._temporaryInteractions[customId].push({ message, userId, callback, uniqueId });
+  this._temporaryInteractions[messageId].push({ customId, userId, callback, uniqueId });
   if (time > 0) {
     require("node:timers").setTimeout(removeInteraction, time).unref();
+  }
+};
+
+Actions.removeTemporaryInteraction = function (messageId, uniqueOrCustomId) {
+  const interactions = this._temporaryInteractions?.[messageId];
+  if (interactions) {
+    let i = 0;
+    for (; i < interactions.length; i++) {
+      if (
+        (typeof uniqueOrCustomId === "string" && interactions[i].customId === uniqueOrCustomId) ||
+        interactions[i].uniqueId === uniqueOrCustomId
+      ) {
+        break;
+      }
+    }
+    if (i < interactions.length) interactions.splice(i, 1);
+  }
+};
+
+Actions.clearTemporaryInteraction = function (messageId, customId) {
+  if (this._temporaryInteractions?.[messageId]) {
+    this.removeTemporaryInteraction(messageId, customId);
+  }
+};
+
+Actions.clearAllTemporaryInteractions = function (messageId) {
+  if (this._temporaryInteractions?.[messageId]) {
+    this._temporaryInteractions[messageId] = null;
+    delete this._temporaryInteractions[messageId];
   }
 };
 
