@@ -7,6 +7,8 @@ module.exports = {
 
   name: "Set Bot Game",
 
+  displayName: "Set Bot Activity",
+
   //---------------------------------------------------------------------
   // Action Section
   //
@@ -22,7 +24,14 @@ module.exports = {
   //---------------------------------------------------------------------
 
   subtitle(data, presets) {
-    return `${data.gameName}${data.gameLink ? " [" + data.gameLink + "]" : ""}`;
+    const activityPrefix = {
+      PLAYING: "Playing",
+      STREAMING: "Streaming",
+      LISTENING: "Listening to",
+      WATCHING: "Watching",
+      COMPETING: "Competing in",
+    };
+    return `${activityPrefix[data.activityType]} ${data.gameName}${data.gameLink ? " [" + data.gameLink + "]" : ""}`;
   },
 
   //---------------------------------------------------------------------
@@ -33,7 +42,7 @@ module.exports = {
   // are also the names of the fields stored in the action's JSON data.
   //---------------------------------------------------------------------
 
-  fields: ["gameName", "gameLink"],
+  fields: ["gameName", "gameLink", "activityType"],
 
   //---------------------------------------------------------------------
   // Command HTML
@@ -59,7 +68,18 @@ module.exports = {
 <br>
 
 <span class="dbminputlabel">Twitch Stream Link</span><br>
-<input id="gameLink" class="round" type="text" placeholder="Leave blank to disallow!">
+<input id="gameLink" class="round" type="text" placeholder="Leave blank to disallow! If set, overrules the activity type">
+
+<br>
+
+<span class="dbminputlabel">Activity Type</span>
+<select id="activityType" class="round">
+  <option value="PLAYING" selected>Playing</option>
+  <option value="STREAMING">Streaming</option>
+  <option value="LISTENING">Listening</option>
+  <option value="WATCHING">Watching</option>
+  <option value="COMPETING">Competing</option>
+</select>
 `;
   },
 
@@ -89,7 +109,7 @@ module.exports = {
     if (url) {
       botClient.setActivity(name, { type: "STREAMING", url });
     } else {
-      botClient.setActivity(name, { type: "PLAYING" });
+      botClient.setActivity(name, { type: data.activityType });
     }
     this.callNextAction(cache);
   },
