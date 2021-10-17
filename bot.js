@@ -64,7 +64,6 @@ function PrintError(type) {
       break;
     }
 
-
     case MsgType.DUPLICATE_SLASH_COMMAND: {
       warn(format('Slash command with name "%s" already exists!\nThis duplicate will be ignored.\n', arguments[1]));
       break;
@@ -133,7 +132,6 @@ function PrintError(type) {
       );
       break;
     }
-
 
     case MsgType.MISSING_APPLICATION_COMMAND_ACCESS: {
       warn(
@@ -540,22 +538,28 @@ Bot.registerApplicationCommands = function () {
 };
 
 Bot.setGlobalCommands = function (commands) {
-  this.bot.application?.commands?.set?.(commands).then(function() {}).catch(function(e) {
-    console.error(e);
-  })
+  this.bot.application?.commands
+    ?.set?.(commands)
+    .then(function () {})
+    .catch(function (e) {
+      console.error(e);
+    });
 };
 
-Bot.setCommandsForServer = function(guild, commands, printMissingAccessError) {
-  if(guild?.commands?.set) {
-    guild.commands.set(commands).then(function() {}).catch(function(e) {
-      if (e.code === 50001) {
-        if (printMissingAccessError) {
-          PrintError(MsgType.MISSING_APPLICATION_COMMAND_ACCESS, guild.name, guild.id);
+Bot.setCommandsForServer = function (guild, commands, printMissingAccessError) {
+  if (guild?.commands?.set) {
+    guild.commands
+      .set(commands)
+      .then(function () {})
+      .catch(function (e) {
+        if (e.code === 50001) {
+          if (printMissingAccessError) {
+            PrintError(MsgType.MISSING_APPLICATION_COMMAND_ACCESS, guild.name, guild.id);
+          }
+        } else {
+          console.error(e);
         }
-      } else {
-        console.error(e);
-      }
-    });
+      });
   }
 };
 
@@ -742,17 +746,23 @@ Bot.onContextMenuInteraction = function (interaction) {
   const interactionName = interaction.commandName;
   if (this.$user[interactionName]) {
     if (interaction.guild) {
-      interaction.guild.members.fetch(interaction.targetId).then((member) => {
-        interaction._targetMember = member;
-        Actions.preformActionsFromInteraction(interaction, this.$user[interactionName]);
-      }).catch(console.error);
+      interaction.guild.members
+        .fetch(interaction.targetId)
+        .then((member) => {
+          interaction._targetMember = member;
+          Actions.preformActionsFromInteraction(interaction, this.$user[interactionName]);
+        })
+        .catch(console.error);
     }
   } else if (this.$msge[interactionName]) {
     if (interaction.channel) {
-      interaction.channel.messages.fetch(interaction.targetId).then((message) => {
-        interaction._targetMessage = message;
-        Actions.preformActionsFromInteraction(interaction, this.$msge[interactionName]);
-      }).catch(console.error);
+      interaction.channel.messages
+        .fetch(interaction.targetId)
+        .then((message) => {
+          interaction._targetMessage = message;
+          Actions.preformActionsFromInteraction(interaction, this.$msge[interactionName]);
+        })
+        .catch(console.error);
     }
   }
 };
@@ -891,7 +901,7 @@ Actions.getSlashParameter = function (interaction, name, defaultValue) {
     return defaultValue ?? null;
   }
 
-  if(interaction.__originalInteraction) {
+  if (interaction.__originalInteraction) {
     const result = this.getParameterFromInteraction(interaction.__originalInteraction, name);
     if (result !== null) {
       return result;
@@ -1144,7 +1154,7 @@ Actions.invokeActions = function (msg, actions) {
 
 Actions.invokeInteraction = function (interaction, actions, initialTempVars) {
   if (actions.length > 0) {
-    const cache = new ActionsCache(actions, interaction.guild, { interaction, temp: (initialTempVars || {}) });
+    const cache = new ActionsCache(actions, interaction.guild, { interaction, temp: initialTempVars || {} });
     this.callNextAction(cache);
   }
 };
@@ -1181,7 +1191,7 @@ Actions.callNextAction = function (cache) {
 Actions.endActions = function (cache) {
   cache.callback?.();
   cache.onCompleted?.();
-}
+};
 
 Actions.getInvalidButtonResponseText = function () {
   return Files.data.settings.invalidButtonText ?? "Button response no longer valid.";
@@ -1786,11 +1796,7 @@ Actions.addSelectToActionRowArray = function (array, rowText, selectData, cache)
       array.push([]);
     }
     if (array[row].length >= 1) {
-      this.displayError(
-        null,
-        cache,
-        `Action row #${row} cannot have a select menu when there are any buttons on it!`,
-      );
+      this.displayError(null, cache, `Action row #${row} cannot have a select menu when there are any buttons on it!`);
     } else {
       array[row].push(selectData);
     }

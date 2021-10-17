@@ -23,9 +23,11 @@ module.exports = {
 
   subtitle(data, presets) {
     if (Math.abs(parseInt(data.increment, 10)) === 1) {
-      return `Call ${data.actions?.length ?? 0} actions ${Math.abs(data.endNum - data.startNum)} times.`
+      return `Call ${data.actions?.length ?? 0} actions ${Math.abs(data.endNum - data.startNum)} times.`;
     }
-    return `Call ${data.actions?.length ?? 0} actions while counting by ${data.increment}, from ${data.startNum} to ${data.endNum}.`;
+    return `Call ${data.actions?.length ?? 0} actions while counting by ${data.increment}, from ${data.startNum} to ${
+      data.endNum
+    }.`;
   },
 
   //---------------------------------------------------------------------
@@ -144,7 +146,7 @@ module.exports = {
     let endNum = parseInt(endNumText, 10);
     let increment = parseInt(incrementText, 10);
 
-    let valid = isNaN(startNum) ? 1 : (isNaN(endNum) ? 2 : (isNaN(increment) ? 3 : 0));
+    let valid = isNaN(startNum) ? 1 : isNaN(endNum) ? 2 : isNaN(increment) ? 3 : 0;
     if (valid === 0) {
       if (increment === 0) {
         valid = 4;
@@ -156,12 +158,27 @@ module.exports = {
     }
 
     switch (valid) {
-      case 1: { this.displayError(data, cache, `Start Number (${startNumText}) is not a valid number.`); break; }
-      case 2: { this.displayError(data, cache, `End Number (${endNumText}) is not a valid number.`); break; }
-      case 3: { this.displayError(data, cache, `Increment (${incrementText}) is not a valid number.`); break; }
-      case 4: { this.displayError(data, cache, `Increment cannot be 0.`); break; }
+      case 1: {
+        this.displayError(data, cache, `Start Number (${startNumText}) is not a valid number.`);
+        break;
+      }
+      case 2: {
+        this.displayError(data, cache, `End Number (${endNumText}) is not a valid number.`);
+        break;
+      }
+      case 3: {
+        this.displayError(data, cache, `Increment (${incrementText}) is not a valid number.`);
+        break;
+      }
+      case 4: {
+        this.displayError(data, cache, `Increment cannot be 0.`);
+        break;
+      }
       case 5:
-      case 6: { this.displayError(data, cache, `Increment detected to cause infinite loop.`); break; }
+      case 6: {
+        this.displayError(data, cache, `Increment detected to cause infinite loop.`);
+        break;
+      }
     }
 
     if (valid !== 0) {

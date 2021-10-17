@@ -87,16 +87,11 @@ module.exports = {
     const name = this.evalMessage(data.gameName, cache);
     const url = this.evalMessage(data.gameLink, cache);
     if (url) {
-      botClient
-        .setActivity(name, { type: "STREAMING", url })
-        .then(() => this.callNextAction(cache))
-        .catch((err) => this.displayError(data, cache, err));
+      botClient.setActivity(name, { type: "STREAMING", url });
     } else {
-      botClient
-        .setActivity(name, { type: "PLAYING" })
-        .then(() => this.callNextAction(cache))
-        .catch((err) => this.displayError(data, cache, err));
+      botClient.setActivity(name, { type: "PLAYING" });
     }
+    this.callNextAction(cache);
   },
 
   //---------------------------------------------------------------------

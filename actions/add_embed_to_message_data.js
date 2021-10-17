@@ -22,7 +22,10 @@ module.exports = {
   //---------------------------------------------------------------------
 
   subtitle(data, presets) {
-    return `Store ${presets.getVariableText(data.storage, data.varName)} in ${presets.getVariableText(data.editMessage, data.editMessageVarName)}`;
+    return `Store ${presets.getVariableText(data.storage, data.varName)} in ${presets.getVariableText(
+      data.editMessage,
+      data.editMessageVarName,
+    )}`;
   },
 
   //---------------------------------------------------------------------
@@ -83,7 +86,7 @@ module.exports = {
     const storage = parseInt(data.storage, 10);
     const varName = this.evalMessage(data.varName, cache);
     const embed = this.getVariable(storage, varName, cache);
-    
+
     if (embed) {
       const editMessage = parseInt(data.editMessage, 10);
       if (typeof editMessage === "number" && editMessage >= 0) {
@@ -92,7 +95,7 @@ module.exports = {
         if (Array.isArray(editObject.embeds)) {
           editObject.embeds.push(embed);
         } else {
-          editObject.embeds = [ embed ];
+          editObject.embeds = [embed];
         }
       }
     }

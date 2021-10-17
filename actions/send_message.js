@@ -614,14 +614,14 @@ module.exports = {
           embed.setAuthor(
             this.evalMessage(embedData.author, cache),
             embedData.authorIcon ? this.evalMessage(embedData.authorIcon, cache) : null,
-            embedData.authorUrl ? this.evalMessage(embedData.authorUrl, cache) : null
+            embedData.authorUrl ? this.evalMessage(embedData.authorUrl, cache) : null,
           );
         }
 
         if (embedData.footerText) {
           embed.setFooter(
             this.evalMessage(embedData.footerText, cache),
-            embedData.footerIconUrl ? this.evalMessage(embedData.footerIconUrl, cache) : null
+            embedData.footerIconUrl ? this.evalMessage(embedData.footerIconUrl, cache) : null,
           );
         }
 
@@ -734,16 +734,23 @@ module.exports = {
           const response = awaitResponses[i];
           const originalInteraction = cache.interaction?.__originalInteraction ?? cache.interaction;
           const tempVariables = cache.temp || {};
-          this.registerTemporaryInteraction(resultMsg.id, response.time, response.id, response.user, response.multi, (interaction) => {
-            if (response.data) {
-              interaction.__originalInteraction = originalInteraction;
-              if (response.type === "BUTTON") {
-                this.preformActionsFromInteraction(interaction, response.data, tempVariables);
-              } else {
-                this.preformActionsFromSelectInteraction(interaction, response.data, tempVariables);
+          this.registerTemporaryInteraction(
+            resultMsg.id,
+            response.time,
+            response.id,
+            response.user,
+            response.multi,
+            (interaction) => {
+              if (response.data) {
+                interaction.__originalInteraction = originalInteraction;
+                if (response.type === "BUTTON") {
+                  this.preformActionsFromInteraction(interaction, response.data, tempVariables);
+                } else {
+                  this.preformActionsFromSelectInteraction(interaction, response.data, tempVariables);
+                }
               }
-            }
-          });
+            },
+          );
         }
       }
     };
@@ -759,20 +766,14 @@ module.exports = {
       messageOptions._awaitResponses = awaitResponses;
       this.storeValue(messageOptions, storage, varName2, cache);
       this.callNextAction(cache);
-    }
-
-    else if (Array.isArray(target)) {
+    } else if (Array.isArray(target)) {
       this.callListFunc(target, "send", [messageOptions]).then(onComplete);
-    }
-
-    else if(isEdit && target?.edit) {
+    } else if (isEdit && target?.edit) {
       target
         .edit(messageOptions)
         .then(onComplete)
         .catch((err) => this.displayError(data, cache, err));
-    }
-
-    else if (data.reply === true && canReply) {
+    } else if (data.reply === true && canReply) {
       messageOptions.fetchReply = true;
       if (data.ephemeral === true) {
         messageOptions.ephemeral = true;
@@ -784,16 +785,12 @@ module.exports = {
         promise = cache.interaction.reply(messageOptions);
       }
       promise.then(onComplete).catch((err) => this.displayError(data, cache, err));
-    }
-
-    else if (target?.send) {
+    } else if (target?.send) {
       target
         .send(messageOptions)
         .then(onComplete)
         .catch((err) => this.displayError(data, cache, err));
-    }
-
-    else {
+    } else {
       this.callNextAction(cache);
     }
   },
