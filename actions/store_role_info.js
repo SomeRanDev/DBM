@@ -222,7 +222,7 @@ module.exports = {
         result = targetRole.members.size;
         break;
       case 13:
-        result = targetRole.icon;
+        result = targetRole.iconURL({ dynamic: true, format: "png", size: 4096 });
         break;
       default:
         break;
