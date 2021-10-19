@@ -448,11 +448,15 @@ Bot.reformatEvents = function () {
 
 Bot.prepareActions = function (actions) {
   if (actions) {
+    const customData = {};
     for (let i = 0; i < actions.length; i++) {
       const action = actions[i];
       if (action?.name && Actions.modInitReferences[action.name]) {
-        Actions.modInitReferences[action.name].call(this, action);
+        Actions.modInitReferences[action.name].call(this, action, customData, i);
       }
+    }
+    if (Object.keys(customData).length > 0) {
+      actions._customData = customData;
     }
   }
 };
@@ -1419,7 +1423,7 @@ Actions.getServer = function (type, varName, cache) {
       }
       break;
     case 100: {
-      const result = Bot.bot.guilds.cache.find((channel) => channel.name === varName);
+      const result = Bot.bot.guilds.cache.find((guild) => guild.name === varName);
       if (result) {
         return result;
       }
@@ -1642,70 +1646,45 @@ Actions.storeValue = function (value, type, varName, cache) {
 };
 
 Actions.executeResults = function (result, data, cache) {
-  if (result) {
-    const type = parseInt(data.iftrue, 10);
-    switch (type) {
-      case 0: {
-        this.callNextAction(cache);
-        break;
-      }
-      case 2: {
-        const val = parseInt(this.evalMessage(data.iftrueVal, cache), 10);
-        const index = Math.max(val - 1, 0);
-        if (cache.actions[index]) {
-          cache.index = index - 1;
-          this.callNextAction(cache);
-        }
-        break;
-      }
-      case 3: {
-        const amount = parseInt(this.evalMessage(data.iftrueVal, cache), 10);
-        const index2 = cache.index + amount + 1;
-        if (cache.actions[index2]) {
-          cache.index = index2 - 1;
-          this.callNextAction(cache);
-        }
-        break;
-      }
-      case 99: {
-        this.executeSubActionsThenNextAction(data.iftrueActions, cache);
-        break;
-      }
-      default:
-        break;
+  const type = parseInt(result ? data.iftrue : data.iffalse, 10);
+  switch (type) {
+    case 0: {
+      this.callNextAction(cache);
+      break;
     }
-  } else {
-    const type = parseInt(data.iffalse, 10);
-    switch (type) {
-      case 0: {
+    case 2: {
+      const val = parseInt(this.evalMessage(result ? data.iftrueVal : data.iffalseVal, cache), 10);
+      const index = Math.max(val - 1, 0);
+      if (cache.actions[index]) {
+        cache.index = index - 1;
         this.callNextAction(cache);
-        break;
       }
-      case 2: {
-        const val = parseInt(this.evalMessage(data.iffalseVal, cache), 10);
-        const index = Math.max(val - 1, 0);
-        if (cache.actions[index]) {
-          cache.index = index - 1;
-          this.callNextAction(cache);
-        }
-        break;
-      }
-      case 3: {
-        const amount = parseInt(this.evalMessage(data.iffalseVal, cache), 10);
-        const index2 = cache.index + amount + 1;
-        if (cache.actions[index2]) {
-          cache.index = index2 - 1;
-          this.callNextAction(cache);
-        }
-        break;
-      }
-      case 99: {
-        this.executeSubActionsThenNextAction(data.iffalseActions, cache);
-        break;
-      }
-      default:
-        break;
+      break;
     }
+    case 3: {
+      const amount = parseInt(this.evalMessage(result ? data.iftrueVal : data.iffalseVal, cache), 10);
+      const index2 = cache.index + amount + 1;
+      if (cache.actions[index2]) {
+        cache.index = index2 - 1;
+        this.callNextAction(cache);
+      }
+      break;
+    }
+    case 4: {
+      const anchorName = this.evalMessage(result ? data.iftrueVal : data.iffalseVal, cache);
+      const index = cache.actions?._customData?.anchors?.[anchorName];
+      if (typeof index === "number" && cache.actions[index]) {
+        cache.index = index - 1;
+        this.callNextAction(cache);
+      }
+      break;
+    }
+    case 99: {
+      this.executeSubActionsThenNextAction(result ? data.iftrueActions : data.iffalseActions, cache);
+      break;
+    }
+    default:
+      break;
   }
 };
 
