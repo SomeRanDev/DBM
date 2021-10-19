@@ -590,6 +590,9 @@ Bot.preformInitialization = function () {
   if (this.$evts["1"]) {
     Events.onInitialization(bot);
   }
+  if (this.$evts["48"]) {
+    Events.onInitializationOnce(bot);
+  }
   if (this.$evts["3"]) {
     Events.setupIntervals(bot);
   }
@@ -1415,6 +1418,20 @@ Actions.getServer = function (type, varName, cache) {
         return server;
       }
       break;
+    case 100: {
+      const result = Bot.bot.guilds.cache.find((channel) => channel.name === varName);
+      if (result) {
+        return result;
+      }
+      break;
+    }
+    case 101: {
+      const result = Bot.bot.guilds.cache.get(varName);
+      if (result) {
+        return result;
+      }
+      break;
+    }
     default:
       return this.getTargetFromVariableOrParameter(type - 1, varName, cache);
   }
@@ -1486,6 +1503,11 @@ Actions.getChannel = function (type, varName, cache) {
     case 2:
       if (server) {
         return server.getDefaultChannel();
+      }
+      break;
+    case 7:
+      if (server) {
+        return server.publicUpdatesChannel;
       }
       break;
     case 100: {
@@ -1948,6 +1970,7 @@ Events.generateData = function () {
     ["stickerUpdate", 1, 3, 4, true],
     ["threadUpdate", 1, 3, 4, true],
     ["threadMemberUpdate", 1, 3, 100, true],
+    [],
   ];
 };
 
@@ -2002,6 +2025,14 @@ Events.onInitialization = function (bot) {
     for (const server of bot.guilds.cache.values()) {
       Actions.invokeEvent(event, server, {});
     }
+  }
+};
+
+Events.onInitializationOnce = function (bot) {
+  const events = $evts["48"];
+  const server = bot.guilds.cache.first();
+  for (let i = 0; i < events.length; i++) {
+    Actions.invokeEvent(events[i], server, {});
   }
 };
 
@@ -2801,8 +2832,7 @@ Reflect.defineProperty(DiscordJS.Guild.prototype, "getDefaultChannel", {
       [...this.channels.cache.values()].forEach((c) => {
         if (
           c.permissionsFor(DBM.Bot.bot.user)?.has(DiscordJS.Permissions.FLAGS.SEND_MESSAGES) &&
-          c.type === "GUILD_TEXT" &&
-          c.type === "GUILD_NEWS"
+          (c.type === "GUILD_TEXT" || c.type === "GUILD_NEWS")
         ) {
           if (!channel || channel.position > c.position) {
             channel = c;

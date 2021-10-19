@@ -294,7 +294,7 @@ module.exports = {
 
           <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 
-          <action-list-input id="actions" height="calc(100vh - 460px)"></action-list-input>
+          <action-list-input mode="BUTTON" id="actions" height="calc(100vh - 460px)"></action-list-input>
 
         </div>
       </dialog-list>
@@ -391,7 +391,7 @@ module.exports = {
 
           <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 
-          <action-list-input id="actions" height="calc(100vh - 460px)">
+          <action-list-input mode="SELECT" id="actions" height="calc(100vh - 460px)">
             <script class="setupTempVars">
               const elem = document.getElementById("tempVarName");
               if(elem?.value) {

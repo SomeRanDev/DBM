@@ -446,7 +446,7 @@ module.exports = {
         result = targetServer.roles.cache.size;
         break;
       case 38:
-        result = targetServer.channels.cache.filter((c) => c.type === "GUILD_TEXT" && c.type === "GUILD_NEWS").size;
+        result = targetServer.channels.cache.filter((c) => c.type === "GUILD_TEXT" || c.type === "GUILD_NEWS").size;
         break;
       case 39:
         result = targetServer.channels.cache.filter((c) => c.type === "GUILD_VOICE").size;

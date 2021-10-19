@@ -112,42 +112,23 @@ module.exports = {
   action(cache) {
     const data = cache.actions[cache.index];
     const server = cache.server;
-    let source;
     const channel = parseInt(data.channel, 10);
-    const msg = cache.msg;
     const varName = this.evalMessage(data.varName, cache);
-    switch (channel) {
-      case 0:
-        if (msg) {
-          source = msg.channel;
-        }
-        break;
-      case 1:
-        if (msg?.mentions) {
-          source = msg.mentions.channels.first();
-        }
-        break;
-      case 2:
-        if (server) {
-          source = server.channels.cache.first();
-        }
-        break;
-      case 3:
-        source = cache.temp[varName];
-        break;
-      case 4:
-        if (server && this.server[server.id]) {
-          source = this.server[server.id][varName];
-        }
-        break;
-      case 5:
-        source = this.global[varName];
-        break;
-    }
+    const source = this.getChannel(channel, varName, cache);
+
     if (!source?.messages) return this.callNextAction(cache);
+
     const count = Math.min(parseInt(this.evalMessage(data.count, cache), 10), 100);
+    const options = {
+      limit: count
+    };
+
+    if (cache.msg) {
+      options.before = msg.id;
+    }
+
     source.messages
-      .fetch({ limit: count, before: msg.id })
+      .fetch(options)
       .then((messages) => {
         const condition = parseInt(data.condition, 10);
         if (condition === 1) {
@@ -158,7 +139,7 @@ module.exports = {
             this.displayError(data, cache, e);
             author = null;
           }
-          if (author) {
+          if (author?.id) {
             messages = messages.filter((m) => m.author.id === author.id);
           }
         } else if (condition === 2) {
@@ -167,7 +148,9 @@ module.exports = {
             let result = false;
             try {
               result = !!this.eval(cond, cache);
-            } catch {}
+            } catch(e) {
+              this.displayError(data, cache, "Error with custom eval:\n" + e.stack);
+            }
             return result;
           });
         }
