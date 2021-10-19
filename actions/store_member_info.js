@@ -54,6 +54,7 @@ module.exports = {
       "Member Flags List",
       "Member Client Status",
       "Member Custom Status",
+      "Member Server Avatar URL"
     ];
     return `${presets.getMemberText(data.member, data.varName)} - ${info[parseInt(data.info, 10)]}`;
   },
@@ -102,6 +103,7 @@ module.exports = {
         dataType = "Text";
         break;
       case 16:
+      case 31:
         dataType = "Image URL";
         break;
       case 17:
@@ -186,6 +188,7 @@ module.exports = {
 			<option value="4">Member Color</option>
 			<option value="15">Member Status</option>
 			<option value="16">Member Avatar URL</option>
+			<option value="31">Member Server Avatar URL</option>
 			<option value="5">Member Server</option>
 			<option value="6">Member Last Message (Removed)</option>
 			<option value="26">Member Last Message Id (Removed)</option>
@@ -196,21 +199,21 @@ module.exports = {
 			<option value="10">Member Is Owner?</option>
 			<option value="11">Member Is Muted?</option>
 			<option value="12">Member Is Deafened?</option>
-      <option value="13">Member Is Bannable?</option>
-      <option value="14">Member Playing Status Name</option>
-      <option value="30">Member Custom Status</option>
-      <option value="17">Member Roles List</option>
-      <option value="18">Member Roles Amount</option>
-      <option value="19">Member Voice Channel</option>
-      <option value="20">Member Discriminator</option>
-      <option value="21">Member Tag</option>
-      <option value="22">Member Created At</option>
-      <option value="23">Member Created Timestamp</option>
-      <option value="24">Member Joined At</option>
-      <option value="25">Member Joined Timestamp</option>
-      <option value="27">Member Permission List</option>
-      <option value="28">Member Flags List</option>
-      <option value="29">Member Client Status</option>
+			<option value="13">Member Is Bannable?</option>
+			<option value="14">Member Playing Status Name</option>
+			<option value="30">Member Custom Status</option>
+			<option value="17">Member Roles List</option>
+			<option value="18">Member Roles Amount</option>
+			<option value="19">Member Voice Channel</option>
+			<option value="20">Member Discriminator</option>
+			<option value="21">Member Tag</option>
+			<option value="22">Member Created At</option>
+			<option value="23">Member Created Timestamp</option>
+			<option value="24">Member Joined At</option>
+			<option value="25">Member Joined Timestamp</option>
+			<option value="27">Member Permission List</option>
+			<option value="28">Member Flags List</option>
+			<option value="29">Member Client Status</option>
 		</select>
 	</div>
 </div>
@@ -243,61 +246,61 @@ module.exports = {
     const member = parseInt(data.member, 10);
     const varName = this.evalMessage(data.varName, cache);
     const info = parseInt(data.info, 10);
-    const mem = this.getMember(member, varName, cache);
-    if (!mem) {
+    const member = this.getMember(member, varName, cache);
+    if (!member) {
       this.callNextAction(cache);
       return;
     }
     let result;
     switch (info) {
       case 0:
-        result = mem;
+        result = member;
         break;
       case 1:
-        result = mem.id;
+        result = member.id;
         break;
       case 2:
-        result = mem.user?.username;
+        result = member.user?.username;
         break;
       case 3:
-        result = mem.displayName;
+        result = member.displayName;
         break;
       case 4:
-        result = mem.displayHexColor;
+        result = member.displayHexColor;
         break;
       case 5:
-        result = mem.guild;
+        result = member.guild;
         break;
       case 7:
-        result = mem.roles.highest;
+        result = member.roles.highest;
         break;
       case 8:
-        result = mem.roles.hoist;
+        result = member.roles.hoist;
         break;
       case 9:
-        result = mem.roles.color;
+        result = member.roles.color;
         break;
       case 10:
-        result = mem.id === mem.guild?.ownerId;
+        result = member.id === member.guild?.ownerId;
         break;
       case 11:
-        result = mem.voice.mute;
+        result = member.voice.mute;
         break;
       case 12:
-        result = mem.voice.deaf;
+        result = member.voice.deaf;
         break;
       case 13:
-        result = mem.bannable;
+        result = member.bannable;
         break;
       case 14:
-        if (mem.presence?.activities.length) {
-          const status = mem.presence.activities.filter((s) => s.type !== "CUSTOM");
+        if (member.presence?.activities.length) {
+          const status = member.presence.activities.filter((s) => s.type !== "CUSTOM");
           result = status[0]?.name;
         }
         break;
       case 15:
-        if (mem.presence?.status) {
-          const status = mem.presence.status;
+        if (member.presence?.status) {
+          const status = member.presence.status;
           if (status === "online") result = "Online";
           else if (status === "offline") result = "Offline";
           else if (status === "idle") result = "Idle";
@@ -305,49 +308,52 @@ module.exports = {
         }
         break;
       case 16:
-        if (mem.user) {
-          result = mem.user.displayAvatarURL({ dynamic: true, format: "png", size: 4096 });
+        if (member.user) {
+          result = member.user.displayAvatarURL({ dynamic: true, format: "png", size: 4096 });
         }
         break;
       case 17:
-        result = [...mem.roles.cache.values()];
+        result = [...member.roles.cache.values()];
         break;
       case 18:
-        result = mem.roles.cache.size;
+        result = member.roles.cache.size;
         break;
       case 19:
-        result = mem.voice.channel;
+        result = member.voice.channel;
         break;
       case 20:
-        result = mem.user?.discriminator;
+        result = member.user?.discriminator;
         break;
       case 21:
-        result = mem.user?.tag;
+        result = member.user?.tag;
         break;
       case 22:
-        result = mem.user?.createdAt;
+        result = member.user?.createdAt;
         break;
       case 23:
-        result = mem.user?.createdTimestamp;
+        result = member.user?.createdTimestamp;
         break;
       case 24:
-        result = mem.joinedAt;
+        result = member.joinedAt;
         break;
       case 25:
-        result = mem.joinedTimestamp;
+        result = member.joinedTimestamp;
         break;
       case 27:
-        result = mem.permissions.toArray();
+        result = member.permissions.toArray();
         break;
       case 28:
-        result = mem.user?.flags?.toArray() ?? (await mem.user?.fetchFlags())?.toArray();
+        result = member.user?.flags?.toArray() ?? (await member.user?.fetchFlags())?.toArray();
         break;
       case 29:
-        const status = mem.presence?.clientStatus;
+        const status = member.presence?.clientStatus;
         result = status && Object.keys(status);
         break;
       case 30:
-        result = mem.presence?.activities.find((s) => s.type === "CUSTOM")?.state;
+        result = member.presence?.activities.find((s) => s.type === "CUSTOM")?.state;
+        break;
+      case 31:
+        result = member.displayAvatarURL({ dynamic: true, format: "png", size: 4096 });
         break;
       default:
         break;

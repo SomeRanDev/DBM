@@ -5,7 +5,7 @@ module.exports = {
   // This is the name of the action displayed in the editor.
   //---------------------------------------------------------------------
 
-  name: "Set Bot Avatar",
+  name: "Edit Role Icon",
 
   //---------------------------------------------------------------------
   // Action Section
@@ -13,7 +13,7 @@ module.exports = {
   // This is the section the action will fall into.
   //---------------------------------------------------------------------
 
-  section: "Bot Client Control",
+  section: "Role Control",
 
   //---------------------------------------------------------------------
   // Action Subtitle
@@ -22,8 +22,7 @@ module.exports = {
   //---------------------------------------------------------------------
 
   subtitle(data, presets) {
-    const storeTypes = presets.variables;
-    return `${storeTypes[parseInt(data.storage, 10)]} (${data.varName})`;
+    return `Set Icon of ${presets.getRoleText(data.role, data.roleVarName)} to ${presets.getVariableText(data.image, data.imageVarName)}`;
   },
 
   //---------------------------------------------------------------------
@@ -34,7 +33,7 @@ module.exports = {
   // are also the names of the fields stored in the action's JSON data.
   //---------------------------------------------------------------------
 
-  fields: ["storage", "varName"],
+  fields: ["role", "roleVarName", "image", "imageVarName", "reason"],
 
   //---------------------------------------------------------------------
   // Command HTML
@@ -53,7 +52,30 @@ module.exports = {
   //---------------------------------------------------------------------
 
   html(isEvent, data) {
-    return `<retrieve-from-variable dropdownLabel="Source Image" selectId="storage" variableContainerId="varNameContainer" variableInputId="varName"></retrieve-from-variable>`;
+    return `
+<div>
+  <p>
+    <u>Note:</u><br>
+    Role icons only work in servers with a high enough boost level. If you are having issues, please ensure you are able to set role icons yourself before attempting with the bot.
+  </p>
+</div>
+
+<br>
+
+<hr class="subtlebar">
+
+<br>
+
+<role-input dropdownLabel="Source Role" selectId="role" variableContainerId="varNameContainer" variableInputId="roleVarName"></role-input>
+
+<br><br><br><br>
+
+<retrieve-from-variable dropdownLabel="Source Image" selectId="image" variableContainerId="varNameContainer2" variableInputId="imageVarName"></retrieve-from-variable>
+
+<br><br><br><br>
+
+<span class="dbminputlabel">Reason</span>
+<input id="reason" placeholder="Optional" class="round" type="text">`;
   },
 
   //---------------------------------------------------------------------
@@ -73,26 +95,35 @@ module.exports = {
   // Keep in mind event calls won't have access to the "msg" parameter,
   // so be sure to provide checks for variable existence.
   //---------------------------------------------------------------------
-
+//  fields: ["role", "roleVarName", "image", "imageVarName", "reason"],
   action(cache) {
-    const botClient = this.getDBM().Bot.bot.user;
     const data = cache.actions[cache.index];
-    const storage = parseInt(data.storage, 10);
-    const varName = this.evalMessage(data.varName, cache);
-    const image = this.getVariable(storage, varName, cache);
-    if (botClient?.setAvatar) {
-      const Images = this.getDBM().Images;
-      Images.createBuffer(image)
-        .then((buffer) => {
-          botClient
-            .setAvatar(buffer)
+    const reason = this.evalMessage(data.reason, cache);
+
+    const roleStorage = parseInt(data.role, 10);
+    const roleVarName = this.evalMessage(data.roleVarName, cache);
+    const role = this.getRole(roleStorage, roleVarName, cache);
+
+    const imageStorage = parseInt(data.image, 10);
+    const imageVarName = this.evalMessage(data.imageVarName, cache);
+    const image = this.getVariable(imageStorage, imageVarName, cache);
+
+    const Images = this.getDBM().Images;
+    Images.createBuffer(image)
+      .then((buffer) => {
+        if (Array.isArray(role)) {
+          this.callListFunc(role, "setIcon", [buffer, reason])
+            .then(() => this.callNextAction(cache));
+        } else if (role?.edit) {
+          role
+            .setIcon(buffer, reason)
             .then(() => this.callNextAction(cache))
             .catch((err) => this.displayError(data, cache, err));
-        })
-        .catch((err) => this.displayError(data, cache, err));
-    } else {
-      this.callNextAction(cache);
-    }
+        } else {
+          this.callNextAction(cache);
+        }
+      })
+      .catch((err) => this.displayError(data, cache, err));
   },
 
   //---------------------------------------------------------------------

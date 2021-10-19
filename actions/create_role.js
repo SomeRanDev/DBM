@@ -74,7 +74,10 @@ module.exports = {
 	<select id="hoist" class="round" style="width: 90%;">
 		<option value="true">Yes</option>
 		<option value="false" selected>No</option>
-	</select><br>
+	</select>
+
+  <br>
+
 	<span class="dbminputlabel">Mentionable</span><br>
 	<select id="mentionable" class="round" style="width: 90%;">
 		<option value="true" selected>Yes</option>
@@ -83,9 +86,12 @@ module.exports = {
 </div>
 <div style="float: right; width: 50%;">
 	<span class="dbminputlabel">Color</span><br>
-	<input id="color" class="round" type="text" placeholder="Leave blank for default!"><br>
+	<input id="color" class="round" type="text" placeholder="Leave blank for default!">
+
+  <br>
+
 	<span class="dbminputlabel">Position</span><br>
-	<input id="position" class="round" type="text" placeholder="Leave blank for default!" style="width: 90%;"><br>
+	<input id="position" class="round" type="text" placeholder="Leave blank for default!"><br>
 </div>
 
 <br><br><br><br><br><br><br>
