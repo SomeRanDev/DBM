@@ -36,6 +36,7 @@ module.exports = {
       "Role Creation Date",
       "Role Permissions",
       "Role Members Amount",
+      "Role Icon",
     ];
     return `${presets.getRoleText(data.role, data.varName)} - ${info[parseInt(data.info, 10)]}`;
   },
@@ -84,6 +85,9 @@ module.exports = {
       case 11:
       case 12:
         dataType = "Number";
+        break;
+      case 13:
+        dataType = "Image URL";
         break;
     }
     return [data.varName2, dataType];
@@ -138,6 +142,7 @@ module.exports = {
       <option value="10">Role Creation Date</option>
       <option value="11">Role Permissions</option>
       <option value="12">Role Members Amount</option>
+      <option value="13">Role Icon URL</option>
 		</select>
 	</div>
 </div>
@@ -215,6 +220,9 @@ module.exports = {
         break;
       case 12:
         result = targetRole.members.size;
+        break;
+      case 13:
+        result = targetRole.icon;
         break;
       default:
         break;
