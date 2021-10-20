@@ -108,7 +108,7 @@ module.exports = {
 
   <tab label="Message" icon="align left">
     <div style="padding: 8px;">
-      <textarea id="message" class="dbm_monospace" rows="10" placeholder="Insert message here..." style="height: calc(100vh - 308px); white-space: nowrap; resize: none;"></textarea>
+      <textarea id="message" class="dbm_monospace" rows="10" placeholder="Insert message here..." style="height: calc(100vh - 309px); white-space: nowrap; resize: none;"></textarea>
     </div>
   </tab>
 
@@ -449,7 +449,7 @@ module.exports = {
 
       <br>
 
-      <hr class="subtlebar">
+      <hr class="subtlebar" style="margin-top: 4px; margin-bottom: 4px;">
 
       <br>
 

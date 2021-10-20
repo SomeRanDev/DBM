@@ -543,21 +543,29 @@ Bot.registerApplicationCommands = function () {
   }
 };
 
+Bot.shouldPrintAnyMissingAccessError = function () {
+  return !(Files.data.settings.ignoreCommandScopeErrors ?? false);
+};
+
+Bot.clearUnspecifiedServerCommands = function () {
+  return Files.data.settings.clearUnlistedServers ?? false;
+};
+
 Bot.setGlobalCommands = function (commands) {
-  this.bot.application?.commands?.set?.(commands).then(function() {}).catch(function(e) {
-    console.error(e);
+  this.bot.application?.commands?.set?.(commands).then(function() {}).catch(function(err) {
+    console.error(err);
   })
 };
 
 Bot.setCommandsForServer = function(guild, commands, printMissingAccessError) {
   if(guild?.commands?.set) {
-    guild.commands.set(commands).then(function() {}).catch(function(e) {
-      if (e.code === 50001) {
-        if (printMissingAccessError) {
+    guild.commands.set(commands).then(function() {}).catch((err) => {
+      if (err.code === 50001) {
+        if (this.shouldPrintAnyMissingAccessError() && printMissingAccessError) {
           PrintError(MsgType.MISSING_APPLICATION_COMMAND_ACCESS, guild.name, guild.id);
         }
       } else {
-        console.error(e);
+        console.error(err);
       }
     });
   }
@@ -570,22 +578,39 @@ Bot.setAllServerCommands = function (commands, printMissingAccessError = true) {
       .then((guild) => {
         this.setCommandsForServer(guild, commands, printMissingAccessError);
       })
-      .catch(function (e) {
-        console.error(e);
+      .catch(function (err) {
+        console.error(err);
       });
   });
 };
 
 Bot.setCertainServerCommands = function (commands, serverIdList) {
-  for (let i = 0; i < serverIdList.length; i++) {
-    this.bot.guilds
-      .fetch(serverIdList[i])
-      .then((guild) => {
-        this.setCommandsForServer(guild, commands, true);
-      })
-      .catch(function (e) {
-        PrintError(MsgType.INVALID_SLASH_COMMAND_SERVER_ID, serverIdList[i]);
-      });
+  if (this.clearUnspecifiedServerCommands()) {
+    this.bot.guilds.cache.forEach((key, value) => {
+      this.bot.guilds
+        .fetch(key)
+        .then((guild) => {
+          if (serverIdList.includes(guild.id)) {
+            this.setCommandsForServer(guild, commands, true);
+          } else {
+            this.setCommandsForServer(guild, [], true);
+          }
+        })
+        .catch(function (err) {
+          console.error(err);
+        });
+    });
+  } else {
+    for (let i = 0; i < serverIdList.length; i++) {
+      this.bot.guilds
+        .fetch(serverIdList[i])
+        .then((guild) => {
+          this.setCommandsForServer(guild, commands, true);
+        })
+        .catch(function (err) {
+          PrintError(MsgType.INVALID_SLASH_COMMAND_SERVER_ID, serverIdList[i]);
+        });
+    }
   }
 };
 
