@@ -24,7 +24,7 @@ module.exports = {
   subtitle(data, presets) {
     const info = [
       "Server Object",
-      "Server Id",
+      "Server ID",
       "Server Name",
       "Server Name Acronym",
       "Server Region (Removed)",
@@ -54,9 +54,9 @@ module.exports = {
       "Server Offline Members Count",
       "Server Idle Members Count",
       "Server Bot Count",
-      "Server Channels Ids List",
-      "Server Roles Ids List",
-      "Server Members Ids List",
+      "Server Channels IDs List",
+      "Server Roles IDs List",
+      "Server Members IDs List",
       "",
       "Server Human Count",
       "",
@@ -71,9 +71,9 @@ module.exports = {
       "Server Boost Tier",
       "Server Banner URL",
       "Server Features List",
-      "Server Owner Id",
+      "Server Owner ID",
       "Server Vanity URL Code",
-      "Server Widget Channel Id",
+      "Server Widget Channel ID",
     ];
     return `${presets.getServerText(data.server, data.varName)} - ${info[parseInt(data.info, 10)]}`;
   },
@@ -94,7 +94,7 @@ module.exports = {
         dataType = "Server";
         break;
       case 1:
-        dataType = "Server Id";
+        dataType = "Server ID";
         break;
       case 2:
       case 3:
@@ -163,7 +163,7 @@ module.exports = {
       case 31:
       case 32:
       case 33:
-        dataType = "Ids List";
+        dataType = "IDs List";
         break;
       case 35:
         dataType = "Number";
@@ -200,7 +200,7 @@ module.exports = {
         dataType = "Text";
         break;
       case 50:
-        dataType = "Channel Id";
+        dataType = "Channel ID";
         break;
     }
     return [data.varName2, dataType];
@@ -210,7 +210,7 @@ module.exports = {
   // Action Fields
   //
   // These are the fields for the action. These fields are customized
-  // by creating elements with corresponding Ids in the HTML. These
+  // by creating elements with corresponding IDs in the HTML. These
   // are also the names of the fields stored in the action's JSON data.
   //---------------------------------------------------------------------
 
@@ -243,7 +243,7 @@ module.exports = {
 		<span class="dbminputlabel">Source Info</span><br>
 		<select id="info" class="round">
       <option value="0">Server Object</options>
-      <option value="1">Server Id</options>
+      <option value="1">Server ID</options>
       <option value="2">Server Name</options>
       <option value="3">Server Name Acronym</options>
       <option value="17">Server Member Count</options>
@@ -256,7 +256,7 @@ module.exports = {
       <option value="8">Server AFK Channel</options>
       <option value="19">Server AFK Timeout</options>
       <option value="10">Server Default Role</options>
-      <option value="48">Server Owner Id</options>
+      <option value="48">Server Owner ID</options>
       <option value="11">Server Owner Object</options>
       <option value="12">Server Bot Member</options>
       <option value="18">Server Created At</options>
@@ -266,14 +266,14 @@ module.exports = {
       <option value="40">Server Verified</options>
       <option value="23">Server Channels Count</options>
       <option value="13">Server Channels List</options>
-      <option value="31">Server Channels Ids List</options>
+      <option value="31">Server Channels IDs List</options>
       <option value="37">Server Roles Count</options>
       <option value="14">Server Roles List</options>
-      <option value="32">Server Roles Ids List</options>
+      <option value="32">Server Roles IDs List</options>
       <option value="30">Server Bot Count</options>
       <option value="35">Server Human Count</options>
       <option value="15">Server Members List</options>
-      <option value="33">Server Members Ids List</options>
+      <option value="33">Server Members IDs List</options>
       <option value="16">Server Emojis List</options>
       <option value="24">Server Emojis Count</options>
       <option value="25">Server Embed Enabled</options>
@@ -290,7 +290,7 @@ module.exports = {
       <option value="46">Server Banner URL</options>
       <option value="47">Server Features List</options>
       <option value="49">Server Vanity URL Code</options>
-      <option value="50">Server Widget Channel Id</options>
+      <option value="50">Server Widget Channel ID</options>
 		</select>
 	</div>
 </div>

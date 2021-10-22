@@ -22,7 +22,7 @@ module.exports = {
   //---------------------------------------------------------------------
 
   subtitle(data, presets) {
-    const info = ["Channel Id", "Channel Name", "Channel Topic", "Channel Position", "Channel Category Id"];
+    const info = ["Channel ID", "Channel Name", "Channel Topic", "Channel Position", "Channel Category ID"];
     return `Find Channel by ${info[parseInt(data.info, 10)]}`;
   },
 
@@ -42,7 +42,7 @@ module.exports = {
   // Action Fields
   //
   // These are the fields for the action. These fields are customized
-  // by creating elements with corresponding Ids in the HTML. These
+  // by creating elements with corresponding IDs in the HTML. These
   // are also the names of the fields stored in the action's JSON data.
   //---------------------------------------------------------------------
 
@@ -70,11 +70,11 @@ module.exports = {
 	<div style="float: left; width: 40%;">
 		<span class="dbminputlabel">Source Field</span><br>
 		<select id="info" class="round">
-			<option value="0" selected>Channel Id</option>
+			<option value="0" selected>Channel ID</option>
 			<option value="1">Channel Name</option>
       <option value="2">Channel Topic</option>
       <option value="3">Channel Position</option>
-      <option value="4">Channel Category Id</option>
+      <option value="4">Channel Category ID</option>
 		</select>
 	</div>
 	<div style="float: right; width: 55%;">

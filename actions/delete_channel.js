@@ -29,7 +29,7 @@ module.exports = {
   // Action Fields
   //
   // These are the fields for the action. These fields are customized
-  // by creating elements with corresponding Ids in the HTML. These
+  // by creating elements with corresponding IDs in the HTML. These
   // are also the names of the fields stored in the action's JSON data.
   //---------------------------------------------------------------------
 
@@ -53,7 +53,7 @@ module.exports = {
 
   html(isEvent, data) {
     return `
-<channel-input dropdownLabel="Source Channel" selectId="storage" variableContainerId="varNameContainer" variableInputId="varName"></channel-input>
+<any-channel-input dropdownLabel="Source Channel" selectId="storage" variableContainerId="varNameContainer" variableInputId="varName"></any-channel-input>
 
 <br><br><br>
 

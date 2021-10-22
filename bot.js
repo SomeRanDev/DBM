@@ -1346,6 +1346,26 @@ Actions.getSendTarget = function (type, varName, cache) {
         return server.getDefaultChannel();
       }
       break;
+    case 9:
+      if (interaction?._targetMember) {
+        return interaction._targetMember;
+      }
+      break;
+    case 10:
+      if (server) {
+        return server.publicUpdatesChannel;
+      }
+      break;
+    case 11:
+      if (server) {
+        return server.rulesChannel;
+      }
+      break;
+    case 12:
+      if (server) {
+        return server.systemChannel;
+      }
+      break;
     case 100: {
       const result = Bot.bot.users.cache.find((user) => user.username === varName);
       if (result) {
@@ -1539,6 +1559,16 @@ Actions.getChannel = function (type, varName, cache) {
         return server.publicUpdatesChannel;
       }
       break;
+    case 8:
+      if (server) {
+        return server.rulesChannel;
+      }
+      break;
+    case 9:
+      if (server) {
+        return server.systemChannel;
+      }
+      break;
     case 100: {
       const result = Bot.bot.channels.cache.find((channel) => channel.name === varName);
       if (result) {
@@ -1583,6 +1613,11 @@ Actions.getVoiceChannel = function (type, varName, cache) {
         return server.getDefaultVoiceChannel();
       }
       break;
+    case 7:
+      if (server) {
+        return server.afkChannel;
+      }
+      break;
     case 100: {
       const result = Bot.bot.channels.cache.find((channel) => channel.name === varName);
       if (result) {
@@ -1599,6 +1634,16 @@ Actions.getVoiceChannel = function (type, varName, cache) {
     }
     default:
       return this.getTargetFromVariableOrParameter(type - 3, varName, cache);
+  }
+};
+
+Actions.getAnyChannel = function (type, varName, cache) {
+  switch (type) {
+    case 10: return this.getVoiceChannel(0, varName, cache);
+    case 11: return this.getVoiceChannel(1, varName, cache);
+    case 12: return this.getVoiceChannel(7, varName, cache);
+    case 13: return this.getVoiceChannel(2, varName, cache);
+    default: return this.getChannel(type, varName, cache);
   }
 };
 
@@ -1675,6 +1720,10 @@ Actions.executeResults = function (result, data, cache) {
   switch (type) {
     case 0: {
       this.callNextAction(cache);
+      break;
+    }
+    case 1: {
+      this.endActions(cache);
       break;
     }
     case 2: {

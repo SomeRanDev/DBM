@@ -29,7 +29,7 @@ module.exports = {
   // Action Fields
   //
   // These are the fields for the action. These fields are customized
-  // by creating elements with corresponding Ids in the HTML. These
+  // by creating elements with corresponding IDs in the HTML. These
   // are also the names of the fields stored in the action's JSON data.
   //---------------------------------------------------------------------
 
@@ -119,6 +119,7 @@ module.exports = {
   action(cache) {
     const data = cache.actions[cache.index];
     const reason = this.evalMessage(data.reason, cache);
+
     const roleData = {};
     if (data.roleName) {
       roleData.name = this.evalMessage(data.roleName, cache);
@@ -130,14 +131,16 @@ module.exports = {
       roleData.position = parseInt(this.evalMessage(data.position, cache), 10);
     }
     if (data.hoist !== "none") {
-      roleData.hoist = JSON.parse(data.hoist);
+      roleData.hoist = data.hoist === "true";
     }
     if (data.mentionable !== "none") {
-      roleData.mentionable = JSON.parse(data.mentionable);
+      roleData.mentionable = data.mentionable === "true";
     }
+
     const storage = parseInt(data.storage, 10);
     const varName = this.evalMessage(data.varName, cache);
     const role = this.getRole(storage, varName, cache);
+
     if (Array.isArray(role)) {
       this.callListFunc(role, "edit", [roleData, reason]).then(() => this.callNextAction(cache));
     } else if (role?.edit) {

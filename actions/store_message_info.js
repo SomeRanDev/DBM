@@ -21,7 +21,7 @@ module.exports = {
   subtitle(data, presets) {
     const info = [
       "Message Object",
-      "Message Id",
+      "Message ID",
       "Message Text",
       "Message Author",
       "Message Channel",
@@ -41,7 +41,7 @@ module.exports = {
       "Message Attachments Count",
       "Message Guild",
       "Message Type",
-      "Message Webhook Id",
+      "Message Webhook ID",
       "Message Embed Object",
     ];
     return `${presets.getMessageText(data.message, data.varName)} - ${info[parseInt(data.info, 10)]}`;
@@ -62,7 +62,7 @@ module.exports = {
         dataType = "Message";
         break;
       case 1:
-        dataType = "Message Id";
+        dataType = "Message ID";
         break;
       case 2:
         dataType = "Text";
@@ -110,7 +110,7 @@ module.exports = {
         dataType = "Message Type";
         break;
       case 21:
-        dataType = "Webhook Id";
+        dataType = "Webhook ID";
         break;
       case 22:
         dataType = "Embed Message";
@@ -123,7 +123,7 @@ module.exports = {
   // Action Fields
   //
   // These are the fields for the action. These fields are customized
-  // by creating elements with corresponding Ids in the HTML. These
+  // by creating elements with corresponding IDs in the HTML. These
   // are also the names of the fields stored in the action's JSON data.
   //---------------------------------------------------------------------
   fields: ["message", "varName", "info", "storage", "varName2"],
@@ -154,7 +154,7 @@ module.exports = {
 		<span class="dbminputlabel">Source Info</span><br>
 		<select id="info" class="round">
 			<option value="0" selected>Message Object</option>
-			<option value="1">Message Id</option>
+			<option value="1">Message ID</option>
 			<option value="2">Message Text</option>
 			<option value="3">Message Author</option>
 			<option value="4">Message Channel</option>
@@ -172,7 +172,7 @@ module.exports = {
 			<option value="18">Message Attachments Count</option>
 			<option value="19">Message Guild</option>
 			<option value="20">Message Type</option>
-			<option value="21">Message Webhook Id</option>
+			<option value="21">Message Webhook ID</option>
 			<option value="22">Message Embed Object</option>
 		</select>
 	</div>

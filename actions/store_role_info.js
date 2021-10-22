@@ -24,7 +24,7 @@ module.exports = {
   subtitle(data, presets) {
     const info = [
       "Role Object",
-      "Role Id",
+      "Role ID",
       "Role Name",
       "Role Color",
       "Role Position",
@@ -57,7 +57,7 @@ module.exports = {
         dataType = "Role";
         break;
       case 1:
-        dataType = "Role Id";
+        dataType = "Role ID";
         break;
       case 2:
         dataType = "Text";
@@ -97,7 +97,7 @@ module.exports = {
   // Action Fields
   //
   // These are the fields for the action. These fields are customized
-  // by creating elements with corresponding Ids in the HTML. These
+  // by creating elements with corresponding IDs in the HTML. These
   // are also the names of the fields stored in the action's JSON data.
   //---------------------------------------------------------------------
 
@@ -130,7 +130,7 @@ module.exports = {
 		<span class="dbminputlabel">Source Info</span><br>
 		<select id="info" class="round">
 			<option value="0" selected>Role Object</option>
-			<option value="1">Role Id</option>
+			<option value="1">Role ID</option>
 			<option value="2">Role Name</option>
 			<option value="3">Role Color</option>
 			<option value="4">Role Position</option>

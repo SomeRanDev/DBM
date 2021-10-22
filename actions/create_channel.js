@@ -41,7 +41,7 @@ module.exports = {
   // Action Fields
   //
   // These are the fields for the action. These fields are customized
-  // by creating elements with corresponding Ids in the HTML. These
+  // by creating elements with corresponding IDs in the HTML. These
   // are also the names of the fields stored in the action's JSON data.
   //---------------------------------------------------------------------
 
@@ -70,7 +70,7 @@ module.exports = {
 
 <br>
 
-<span class="dbminputlabel">Category Id</span><br>
+<span class="dbminputlabel">Category ID</span><br>
 <input id= "categoryID" class="round" type="text" placeholder="Leave blank for default!">
 
 <br>
@@ -124,8 +124,8 @@ module.exports = {
     if (!server?.channels?.create) {
       this.callNextAction(cache);
     }
-    const name = this.evalMessage(data.channelName, cache);
-    const storage = parseInt(data.storage, 10);
+
+    const name = this.evalMessage(data.channelName, cache); 
     const channelData = { reason: this.evalMessage(data.reason, cache) };
     if (data.topic) {
       channelData.topic = this.evalMessage(data.topic, cache);
@@ -136,9 +136,11 @@ module.exports = {
     if (data.categoryID) {
       channelData.parent = this.evalMessage(data.categoryID, cache);
     }
+
     server.channels
       .create(name, channelData)
       .then((channel) => {
+        const storage = parseInt(data.storage, 10);
         const varName = this.evalMessage(data.varName, cache);
         this.storeValue(channel, storage, varName, cache);
         this.callNextAction(cache);

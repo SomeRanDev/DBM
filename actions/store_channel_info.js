@@ -24,7 +24,7 @@ module.exports = {
   subtitle(data, presets) {
     const info = [
       "Channel Object",
-      "Channel Id",
+      "Channel ID",
       "Channel Name",
       "Channel Topic",
       "Channel Last Message (Removed)",
@@ -33,7 +33,7 @@ module.exports = {
       "Channel Is DM?",
       "Channel Is Deleteable?",
       "Channel Creation Date",
-      "Channel Category Id",
+      "Channel Category ID",
       "Channel Created At",
       "Channel Created At Timestamp",
     ];
@@ -56,7 +56,7 @@ module.exports = {
         dataType = "Channel";
         break;
       case 1:
-        dataType = "Channel Id";
+        dataType = "Channel ID";
         break;
       case 2:
       case 3:
@@ -71,7 +71,7 @@ module.exports = {
         dataType = "Boolean";
         break;
       case 10:
-        dataType = "Category Id";
+        dataType = "Category ID";
         break;
       case 11:
         dataType = "Date";
@@ -87,7 +87,7 @@ module.exports = {
   // Action Fields
   //
   // These are the fields for the action. These fields are customized
-  // by creating elements with corresponding Ids in the HTML. These
+  // by creating elements with corresponding IDs in the HTML. These
   // are also the names of the fields stored in the action's JSON data.
   //---------------------------------------------------------------------
 
@@ -120,7 +120,7 @@ module.exports = {
 		<span class="dbminputlabel">Source Info</span><br>
 		<select id="info" class="round">
 			<option value="0" selected>Channel Object</option>
-			<option value="1">Channel Id</option>
+			<option value="1">Channel ID</option>
 			<option value="2">Channel Name</option>
 			<option value="3">Channel Topic</option>
 			<option value="4">Channel Last Message (Removed)</option>
@@ -130,7 +130,7 @@ module.exports = {
 			<option value="8">Channel Is Deleteable?</option>
 			<option value="9">Channel Creation Date</option>
 			<option value="12">Channel Creation Timestamp</option>
-			<option value="10">Channel Category Id</option>
+			<option value="10">Channel Category ID</option>
 		</select>
 	</div>
 </div>

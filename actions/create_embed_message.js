@@ -34,14 +34,14 @@ module.exports = {
   variableStorage(data, varType) {
     const type = parseInt(data.storage, 10);
     if (type !== varType) return;
-    return [data.varName, "Embed Message"];
+    return [data.varName, "Embed Message Data"];
   },
 
   //---------------------------------------------------------------------
   // Action Fields
   //
   // These are the fields for the action. These fields are customized
-  // by creating elements with corresponding Ids in the HTML. These
+  // by creating elements with corresponding IDs in the HTML. These
   // are also the names of the fields stored in the action's JSON data.
   //---------------------------------------------------------------------
 
@@ -119,7 +119,8 @@ module.exports = {
 
   action(cache) {
     const data = cache.actions[cache.index];
-    const embed = this.createEmbed();
+    const { MessageEmbed } = this.getDBM().DiscordJS;
+    const embed = new MessageEmbed();
     if (data.title) {
       embed.setTitle(this.evalMessage(data.title, cache));
     }
@@ -156,11 +157,5 @@ module.exports = {
   // functions you wish to overwrite.
   //---------------------------------------------------------------------
 
-  mod(DBM) {
-    const { Actions, DiscordJS } = DBM;
-
-    Actions.createEmbed = function () {
-      return new DiscordJS.MessageEmbed();
-    };
-  },
+  mod(DBM) {},
 };

@@ -5,7 +5,7 @@ module.exports = {
   // This is the name of the action displayed in the editor.
   //---------------------------------------------------------------------
 
-  name: "Add Embed to Message Data",
+  name: "Create Thread",
 
   //---------------------------------------------------------------------
   // Action Section
@@ -13,7 +13,7 @@ module.exports = {
   // This is the section the action will fall into.
   //---------------------------------------------------------------------
 
-  section: "Embed Message",
+  section: "Messaging",
 
   //---------------------------------------------------------------------
   // Action Subtitle
@@ -22,7 +22,19 @@ module.exports = {
   //---------------------------------------------------------------------
 
   subtitle(data, presets) {
-    return `Store ${presets.getVariableText(data.storage, data.varName)} in ${presets.getVariableText(data.editMessage, data.editMessageVarName)}`;
+    return `Create Thread Named "${data.threadName}" from ${presets.getMessageText(data.storage, data.varName)}`;
+  },
+
+  //---------------------------------------------------------------------
+  // Action Storage Function
+  //
+  // Stores the relevant variable info for the editor.
+  //---------------------------------------------------------------------
+
+  variableStorage(data, varType) {
+    const type = parseInt(data.storage, 10);
+    if (type !== varType) return;
+    return [data.varName, "Thread Channel"];
   },
 
   //---------------------------------------------------------------------
@@ -33,7 +45,7 @@ module.exports = {
   // are also the names of the fields stored in the action's JSON data.
   //---------------------------------------------------------------------
 
-  fields: ["storage", "varName", "editMessage", "editMessageVarName"],
+  fields: ["message", "messageVarName", "threadName", "autoArchiveDuration", "reason", "storage", "storageVarName"],
 
   //---------------------------------------------------------------------
   // Command HTML
@@ -53,11 +65,43 @@ module.exports = {
 
   html(isEvent, data) {
     return `
-<retrieve-from-variable dropdownLabel="Source Embed Object" selectId="storage" variableContainerId="varNameContainer" variableInputId="varName"></retrieve-from-variable>
+<message-input dropdownLabel="Source Message" selectId="message" variableContainerId="varNameContainer" variableInputId="messageVarName"></message-input>
 
 <br><br><br><br>
 
-<retrieve-from-variable dropdownLabel="Message Data to Edit" selectId="editMessage" variableInputId="editMessageVarName" variableContainerId="editMessageVarNameContainer"></retrieve-from-variable>`;
+<div style="float: left; width: calc(50% - 12px);">
+
+  <span class="dbminputlabel">Thread Name</span><br>
+  <input id="threadName" class="round" type="text"><br>
+
+</div>
+<div style="float: right; width: calc(50% - 12px);">
+
+  <span class="dbminputlabel">Auto-Archive Duration</span><br>
+  <select id="autoArchiveDuration" class="round">
+    <option value="60" selected>1 hour</option>
+    <option value="1440">24 hours</option>
+    <option value="4320">3 days (requires boost LVL 1)</option>
+    <option value="10080">1 week (requires boost LVL 2)</option>
+    <option value="max">Maximum</option>
+  </select><br>
+
+</div>
+
+<br><br><br><br>
+
+<hr class="subtlebar" style="margin-top: 0px;">
+
+<br>
+
+<div>
+  <span class="dbminputlabel">Reason</span>
+  <input id="reason" placeholder="Optional" class="round" type="text">
+</div>
+
+<br>
+
+<store-in-variable allowNone selectId="storage" variableInputId="storageVarName" variableContainerId="varNameContainer2"></store-in-variable>`;
   },
 
   //---------------------------------------------------------------------
@@ -80,24 +124,35 @@ module.exports = {
 
   action(cache) {
     const data = cache.actions[cache.index];
-    const storage = parseInt(data.storage, 10);
-    const varName = this.evalMessage(data.varName, cache);
-    const embed = this.getVariable(storage, varName, cache);
-    
-    if (embed) {
-      const editMessage = parseInt(data.editMessage, 10);
-      if (typeof editMessage === "number" && editMessage >= 0) {
-        const editVarName = this.evalMessage(data.editMessageVarName, cache);
-        const editObject = this.getVariable(editMessage, editVarName, cache);
-        if (Array.isArray(editObject.embeds)) {
-          editObject.embeds.push(embed);
-        } else {
-          editObject.embeds = [ embed ];
-        }
-      }
+    const messageVar = parseInt(data.message, 10);
+    const messageVarName = this.evalMessage(data.messageVarName, cache);
+    const message = this.getMessage(messageVar, messageVarName, cache);
+
+    const threadOptions = {
+      name: data.threadName,
+      autoArchiveDuration: data.autoArchiveDuration === "max" ? "max" : parseInt(data.autoArchiveDuration, 10),
+    };
+
+    if (data.reason) {
+      const reason = this.evalMessage(data.reason, cache);
+      threadOptions.reason = reason;
     }
 
-    this.callNextAction(cache);
+    if (Array.isArray(message)) {
+      this.callListFunc(message, "startThread", [threadOptions]).then(() => this.callNextAction(cache));
+    } else if (message?.startThread) {
+      message
+        .startThread(threadOptions)
+        .then((threadChannel) => {
+          const storage = parseInt(data.storage, 10);
+          const storageVarName = this.evalMessage(data.storageVarName, cache);
+          this.storeValue(threadChannel, storage, storageVarName, cache);
+          this.callNextAction(cache);
+        })
+        .catch((err) => this.displayError(data, cache, err));
+    } else {
+      this.callNextAction(cache);
+    }
   },
 
   //---------------------------------------------------------------------

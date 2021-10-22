@@ -24,7 +24,7 @@ module.exports = {
   subtitle(data, presets) {
     const info = [
       "Member Object",
-      "Member Id",
+      "Member ID",
       "Member Username",
       "Member Display Name",
       "Member Color",
@@ -75,7 +75,7 @@ module.exports = {
         dataType = "Server Member";
         break;
       case 1:
-        dataType = "Member Id";
+        dataType = "Member ID";
         break;
       case 2:
       case 3:
@@ -149,7 +149,7 @@ module.exports = {
   // Action Fields
   //
   // These are the fields for the action. These fields are customized
-  // by creating elements with corresponding Ids in the HTML. These
+  // by creating elements with corresponding IDs in the HTML. These
   // are also the names of the fields stored in the action's JSON data.
   //---------------------------------------------------------------------
 
@@ -182,7 +182,7 @@ module.exports = {
 		<span class="dbminputlabel">Source Info</span><br>
 		<select id="info" class="round">
 			<option value="0" selected>Member Object</option>
-			<option value="1">Member Id</option>
+			<option value="1">Member ID</option>
 			<option value="2">Member Username</option>
 			<option value="3">Member Display Name</option>
 			<option value="4">Member Color</option>
