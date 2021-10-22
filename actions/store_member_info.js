@@ -177,45 +177,43 @@ module.exports = {
 
 <br><br><br>
 
-<div>
-	<div style="padding-top: 8px; width: 70%;">
-		<span class="dbminputlabel">Source Info</span><br>
-		<select id="info" class="round">
-			<option value="0" selected>Member Object</option>
-			<option value="1">Member ID</option>
-			<option value="2">Member Username</option>
-			<option value="3">Member Display Name</option>
-			<option value="4">Member Color</option>
-			<option value="15">Member Status</option>
-			<option value="16">Member Avatar URL</option>
-			<option value="31">Member Server Avatar URL</option>
-			<option value="5">Member Server</option>
-			<option value="6">Member Last Message (Removed)</option>
-			<option value="26">Member Last Message Id (Removed)</option>
-			<option value="17">Member Role List</option>
-			<option value="7">Member Highest Role</option>
-			<option value="8">Member Hoist Role</option>
-			<option value="9">Member Color Role</option>
-			<option value="10">Member Is Owner?</option>
-			<option value="11">Member Is Muted?</option>
-			<option value="12">Member Is Deafened?</option>
-			<option value="13">Member Is Bannable?</option>
-			<option value="14">Member Playing Status Name</option>
-			<option value="30">Member Custom Status</option>
-			<option value="17">Member Roles List</option>
-			<option value="18">Member Roles Amount</option>
-			<option value="19">Member Voice Channel</option>
-			<option value="20">Member Discriminator</option>
-			<option value="21">Member Tag</option>
-			<option value="22">Member Created At</option>
-			<option value="23">Member Created Timestamp</option>
-			<option value="24">Member Joined At</option>
-			<option value="25">Member Joined Timestamp</option>
-			<option value="27">Member Permission List</option>
-			<option value="28">Member Flags List</option>
-			<option value="29">Member Client Status</option>
-		</select>
-	</div>
+<div style="padding-top: 8px;">
+	<span class="dbminputlabel">Source Info</span><br>
+	<select id="info" class="round">
+		<option value="0" selected>Member Object</option>
+		<option value="1">Member ID</option>
+		<option value="2">Member Username</option>
+		<option value="3">Member Display Name</option>
+		<option value="4">Member Color</option>
+		<option value="15">Member Status</option>
+		<option value="16">Member Avatar URL</option>
+		<option value="31">Member Server Avatar URL</option>
+		<option value="5">Member Server</option>
+		<option value="6">Member Last Message (Removed)</option>
+		<option value="26">Member Last Message Id (Removed)</option>
+		<option value="17">Member Role List</option>
+		<option value="7">Member Highest Role</option>
+		<option value="8">Member Hoist Role</option>
+		<option value="9">Member Color Role</option>
+		<option value="10">Member Is Owner?</option>
+		<option value="11">Member Is Muted?</option>
+		<option value="12">Member Is Deafened?</option>
+		<option value="13">Member Is Bannable?</option>
+		<option value="14">Member Playing Status Name</option>
+		<option value="30">Member Custom Status</option>
+		<option value="17">Member Roles List</option>
+		<option value="18">Member Roles Amount</option>
+		<option value="19">Member Voice Channel</option>
+		<option value="20">Member Discriminator</option>
+		<option value="21">Member Tag</option>
+		<option value="22">Member Created At</option>
+		<option value="23">Member Created Timestamp</option>
+		<option value="24">Member Joined At</option>
+		<option value="25">Member Joined Timestamp</option>
+		<option value="27">Member Permission List</option>
+		<option value="28">Member Flags List</option>
+		<option value="29">Member Client Status</option>
+	</select>
 </div>
 
 <br>

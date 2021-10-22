@@ -115,24 +115,22 @@ module.exports = {
 
 <br><br><br>
 
-<div>
-	<div style="padding-top: 8px; width: 70%;">
-		<span class="dbminputlabel">Source Info</span><br>
-		<select id="info" class="round">
-			<option value="0" selected>Channel Object</option>
-			<option value="1">Channel ID</option>
-			<option value="2">Channel Name</option>
-			<option value="3">Channel Topic</option>
-			<option value="4">Channel Last Message (Removed)</option>
-			<option value="5">Channel Position</option>
-			<option value="6">Channel Is NSFW?</option>
-			<option value="7">Channel Is DM?</option>
-			<option value="8">Channel Is Deleteable?</option>
-			<option value="9">Channel Creation Date</option>
-			<option value="12">Channel Creation Timestamp</option>
-			<option value="10">Channel Category ID</option>
-		</select>
-	</div>
+<div style="padding-top: 8px;">
+	<span class="dbminputlabel">Source Info</span><br>
+	<select id="info" class="round">
+		<option value="0" selected>Channel Object</option>
+		<option value="1">Channel ID</option>
+		<option value="2">Channel Name</option>
+		<option value="3">Channel Topic</option>
+		<option value="4">Channel Last Message (Removed)</option>
+		<option value="5">Channel Position</option>
+		<option value="6">Channel Is NSFW?</option>
+		<option value="7">Channel Is DM?</option>
+		<option value="8">Channel Is Deleteable?</option>
+		<option value="9">Channel Creation Date</option>
+		<option value="12">Channel Creation Timestamp</option>
+		<option value="10">Channel Category ID</option>
+	</select>
 </div>
 
 <br>

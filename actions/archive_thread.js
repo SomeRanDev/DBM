@@ -5,7 +5,7 @@ module.exports = {
   // This is the name of the action displayed in the editor.
   //---------------------------------------------------------------------
 
-  name: "Create Thread",
+  name: "Archive Thread",
 
   //---------------------------------------------------------------------
   // Action Section
@@ -22,19 +22,7 @@ module.exports = {
   //---------------------------------------------------------------------
 
   subtitle(data, presets) {
-    return `Create Thread Named "${data.threadName}" from ${presets.getMessageText(data.storage, data.varName)}`;
-  },
-
-  //---------------------------------------------------------------------
-  // Action Storage Function
-  //
-  // Stores the relevant variable info for the editor.
-  //---------------------------------------------------------------------
-
-  variableStorage(data, varType) {
-    const type = parseInt(data.storage, 10);
-    if (type !== varType) return;
-    return [data.varName, "Thread Channel"];
+    return `${data.archive === "true" ? "Archive" : "Unarchive"} Thread: "${presets.getChannelText(data.thread, data.threadVarName)}"`;
   },
 
   //---------------------------------------------------------------------
@@ -45,7 +33,7 @@ module.exports = {
   // are also the names of the fields stored in the action's JSON data.
   //---------------------------------------------------------------------
 
-  fields: ["message", "messageVarName", "threadName", "autoArchiveDuration", "reason", "storage", "storageVarName"],
+  fields: ["thread", "threadVarName", "archive"],
 
   //---------------------------------------------------------------------
   // Command HTML
@@ -65,43 +53,21 @@ module.exports = {
 
   html(isEvent, data) {
     return `
-<message-input dropdownLabel="Source Message" selectId="message" variableContainerId="varNameContainer" variableInputId="messageVarName"></message-input>
+<thread-channel-input dropdownLabel="Source Thread" selectId="thread" variableContainerId="varNameContainer" variableInputId="threadVarName"></thread-channel-input>
 
 <br><br><br><br>
 
 <div style="float: left; width: calc(50% - 12px);">
-
-  <span class="dbminputlabel">Thread Name</span><br>
-  <input id="threadName" class="round" type="text"><br>
-
+  <span class="dbminputlabel">New Thread State</span><br>
+  <select id="archive" class="round">
+    <option value="true" selected>Archive</option>
+    <option value="false">Unarchive</option>
+  </select>
 </div>
 <div style="float: right; width: calc(50% - 12px);">
-
-  <span class="dbminputlabel">Auto-Archive Duration</span><br>
-  <select id="autoArchiveDuration" class="round">
-    <option value="60" selected>1 hour</option>
-    <option value="1440">24 hours</option>
-    <option value="4320">3 days (requires boost LVL 1)</option>
-    <option value="10080">1 week (requires boost LVL 2)</option>
-    <option value="max">Maximum</option>
-  </select><br>
-
-</div>
-
-<br><br><br><br>
-
-<hr class="subtlebar" style="margin-top: 0px;">
-
-<br>
-
-<div>
   <span class="dbminputlabel">Reason</span>
   <input id="reason" placeholder="Optional" class="round" type="text">
-</div>
-
-<br>
-
-<store-in-variable allowNone selectId="storage" variableInputId="storageVarName" variableContainerId="varNameContainer2"></store-in-variable>`;
+</div>`;
   },
 
   //---------------------------------------------------------------------
@@ -124,31 +90,19 @@ module.exports = {
 
   action(cache) {
     const data = cache.actions[cache.index];
-    const messageVar = parseInt(data.message, 10);
-    const messageVarName = this.evalMessage(data.messageVarName, cache);
-    const message = this.getMessage(messageVar, messageVarName, cache);
+    const threadVar = parseInt(data.thread, 10);
+    const threadVarName = this.evalMessage(data.threadVarName, cache);
+    const thread = this.getChannel(threadVar, threadVarName, cache);
 
-    const threadOptions = {
-      name: data.threadName,
-      autoArchiveDuration: data.autoArchiveDuration === "max" ? "max" : parseInt(data.autoArchiveDuration, 10),
-    };
+    const reason = this.evalMessage(data.reason, cache);
+    const archive = data.archive === "true";
 
-    if (data.reason) {
-      const reason = this.evalMessage(data.reason, cache);
-      threadOptions.reason = reason;
-    }
-
-    if (Array.isArray(message)) {
-      this.callListFunc(message, "startThread", [threadOptions]).then(() => this.callNextAction(cache));
-    } else if (message?.startThread) {
-      message
-        .startThread(threadOptions)
-        .then((threadChannel) => {
-          const storage = parseInt(data.storage, 10);
-          const storageVarName = this.evalMessage(data.storageVarName, cache);
-          this.storeValue(threadChannel, storage, storageVarName, cache);
-          this.callNextAction(cache);
-        })
+    if (Array.isArray(thread)) {
+      this.callListFunc(thread, "setArchived", [archive, reason]).then(() => this.callNextAction(cache));
+    } else if (thread?.setArchived) {
+      thread
+        .setArchived(archive, reason)
+        .then((threadChannel) => this.callNextAction(cache))
         .catch((err) => this.displayError(data, cache, err));
     } else {
       this.callNextAction(cache);

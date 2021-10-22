@@ -745,9 +745,9 @@ module.exports = {
             if (response.data) {
               interaction.__originalInteraction = originalInteraction;
               if (response.type === "BUTTON") {
-                this.preformActionsFromInteraction(interaction, response.data, tempVariables);
+                this.preformActionsFromInteraction(interaction, response.data, cache.meta, tempVariables);
               } else {
-                this.preformActionsFromSelectInteraction(interaction, response.data, tempVariables);
+                this.preformActionsFromSelectInteraction(interaction, response.data, cache.meta, tempVariables);
               }
             }
           });

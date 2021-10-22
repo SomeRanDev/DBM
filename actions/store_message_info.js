@@ -149,33 +149,31 @@ module.exports = {
 
 <br><br><br>
 
-<div>
-	<div style="padding-top: 8px; width: 70%;">
-		<span class="dbminputlabel">Source Info</span><br>
-		<select id="info" class="round">
-			<option value="0" selected>Message Object</option>
-			<option value="1">Message ID</option>
-			<option value="2">Message Text</option>
-			<option value="3">Message Author</option>
-			<option value="4">Message Channel</option>
-			<option value="5">Message Timestamp</option>
-			<option value="6">Message Is Pinned?</option>
-      <option value="7">Message Is TTS?</option>
-      <option value="8">Message Attachments List</option>
-			<option value="9">Message Edits</option>
-			<option value="12">Messages Reactions Count</option>
-			<option value="13">Messages Mentioned Users List</option>
-			<option value="14">Messages Mentioned Users Count</option>
-			<option value="15">Message URL</option>
-			<option value="16">Message Creation Date</option>
-			<option value="17">Message Content Length</option>
-			<option value="18">Message Attachments Count</option>
-			<option value="19">Message Guild</option>
-			<option value="20">Message Type</option>
-			<option value="21">Message Webhook ID</option>
-			<option value="22">Message Embed Object</option>
-		</select>
-	</div>
+<div style="padding-top: 8px;">
+	<span class="dbminputlabel">Source Info</span><br>
+	<select id="info" class="round">
+		<option value="0" selected>Message Object</option>
+		<option value="1">Message ID</option>
+		<option value="2">Message Text</option>
+		<option value="3">Message Author</option>
+		<option value="4">Message Channel</option>
+		<option value="5">Message Timestamp</option>
+		<option value="6">Message Is Pinned?</option>
+    <option value="7">Message Is TTS?</option>
+    <option value="8">Message Attachments List</option>
+		<option value="9">Message Edits</option>
+		<option value="12">Messages Reactions Count</option>
+		<option value="13">Messages Mentioned Users List</option>
+		<option value="14">Messages Mentioned Users Count</option>
+		<option value="15">Message URL</option>
+		<option value="16">Message Creation Date</option>
+		<option value="17">Message Content Length</option>
+		<option value="18">Message Attachments Count</option>
+		<option value="19">Message Guild</option>
+		<option value="20">Message Type</option>
+		<option value="21">Message Webhook ID</option>
+		<option value="22">Message Embed Object</option>
+	</select>
 </div>
 
 <br>

@@ -5,7 +5,7 @@ module.exports = {
   // This is the name of the action displayed in the editor.
   //---------------------------------------------------------------------
 
-  name: "Create Thread",
+  name: "Store Thread Channel Info",
 
   //---------------------------------------------------------------------
   // Action Section
@@ -22,7 +22,17 @@ module.exports = {
   //---------------------------------------------------------------------
 
   subtitle(data, presets) {
-    return `Create Thread Named "${data.threadName}" from ${presets.getMessageText(data.storage, data.varName)}`;
+    const info = [
+      "Thread Channel Object",
+      "Thread Channel ID",
+      "Thread Channel Name",
+      "Thread Channel Is Archived?",
+      "Thread Channel Is Locked?",
+      "Thread Channel Is Invitable?",
+      "Thread Channel Archived At",
+      "Thread Channel Archived At Timestamp",
+    ];
+    return `${presets.getChannelText(data.thread, data.threadVarName)} - ${info[parseInt(data.info, 10)]}`;
   },
 
   //---------------------------------------------------------------------
@@ -34,7 +44,31 @@ module.exports = {
   variableStorage(data, varType) {
     const type = parseInt(data.storage, 10);
     if (type !== varType) return;
-    return [data.varName, "Thread Channel"];
+    const info = parseInt(data.info, 10);
+    let dataType = "Unknown Type";
+    switch (info) {
+      case 0:
+        dataType = "Thread Channel";
+        break;
+      case 1:
+        dataType = "Thread Channel ID";
+        break;
+      case 2:
+        dataType = "Text";
+        break;
+      case 3:
+      case 4:
+      case 5:
+        dataType = "Boolean";
+        break;
+      case 6:
+        dataType = "Date";
+        break;
+      case 7:
+        dataType = "Timestamp";
+        break;
+    }
+    return [data.storageVarName, dataType];
   },
 
   //---------------------------------------------------------------------
@@ -45,7 +79,7 @@ module.exports = {
   // are also the names of the fields stored in the action's JSON data.
   //---------------------------------------------------------------------
 
-  fields: ["message", "messageVarName", "threadName", "autoArchiveDuration", "reason", "storage", "storageVarName"],
+  fields: ["thread", "threadVarName", "info", "storage", "storageVarName"],
 
   //---------------------------------------------------------------------
   // Command HTML
@@ -65,43 +99,27 @@ module.exports = {
 
   html(isEvent, data) {
     return `
-<message-input dropdownLabel="Source Message" selectId="message" variableContainerId="varNameContainer" variableInputId="messageVarName"></message-input>
+<thread-channel-input dropdownLabel="Source Channel" selectId="thread" variableContainerId="varNameContainer" variableInputId="threadVarName"></thread-channel-input>
 
-<br><br><br><br>
+<br><br><br>
 
-<div style="float: left; width: calc(50% - 12px);">
-
-  <span class="dbminputlabel">Thread Name</span><br>
-  <input id="threadName" class="round" type="text"><br>
-
-</div>
-<div style="float: right; width: calc(50% - 12px);">
-
-  <span class="dbminputlabel">Auto-Archive Duration</span><br>
-  <select id="autoArchiveDuration" class="round">
-    <option value="60" selected>1 hour</option>
-    <option value="1440">24 hours</option>
-    <option value="4320">3 days (requires boost LVL 1)</option>
-    <option value="10080">1 week (requires boost LVL 2)</option>
-    <option value="max">Maximum</option>
-  </select><br>
-
-</div>
-
-<br><br><br><br>
-
-<hr class="subtlebar" style="margin-top: 0px;">
-
-<br>
-
-<div>
-  <span class="dbminputlabel">Reason</span>
-  <input id="reason" placeholder="Optional" class="round" type="text">
+<div style="padding-top: 8px;">
+	<span class="dbminputlabel">Source Info</span><br>
+	<select id="info" class="round">
+		<option value="0" selected>Thread Channel Object</option>
+		<option value="1">Thread Channel ID</option>
+		<option value="2">Thread Channel Name</option>
+		<option value="3">Thread Channel Is Archived?</option>
+		<option value="4">Thread Channel Is Locked?</option>
+		<option value="5">Thread Channel Is Invitable?</option>
+		<option value="6">Thread Channel Archived At</option>
+		<option value="7">Thread Channel Archived At Timestamp</option>
+	</select>
 </div>
 
 <br>
 
-<store-in-variable allowNone selectId="storage" variableInputId="storageVarName" variableContainerId="varNameContainer2"></store-in-variable>`;
+<store-in-variable dropdownLabel="Store In" selectId="storage" variableContainerId="varNameContainer2" variableInputId="storageVarName"></store-in-variable>`;
   },
 
   //---------------------------------------------------------------------
@@ -124,35 +142,54 @@ module.exports = {
 
   action(cache) {
     const data = cache.actions[cache.index];
-    const messageVar = parseInt(data.message, 10);
-    const messageVarName = this.evalMessage(data.messageVarName, cache);
-    const message = this.getMessage(messageVar, messageVarName, cache);
 
-    const threadOptions = {
-      name: data.threadName,
-      autoArchiveDuration: data.autoArchiveDuration === "max" ? "max" : parseInt(data.autoArchiveDuration, 10),
-    };
+    const threadVar = parseInt(data.thread, 10);
+    const threadVarName = this.evalMessage(data.threadVarName, cache);
+    const targetChannel = this.getChannel(threadVar, threadVarName, cache);
 
-    if (data.reason) {
-      const reason = this.evalMessage(data.reason, cache);
-      threadOptions.reason = reason;
-    }
-
-    if (Array.isArray(message)) {
-      this.callListFunc(message, "startThread", [threadOptions]).then(() => this.callNextAction(cache));
-    } else if (message?.startThread) {
-      message
-        .startThread(threadOptions)
-        .then((threadChannel) => {
-          const storage = parseInt(data.storage, 10);
-          const storageVarName = this.evalMessage(data.storageVarName, cache);
-          this.storeValue(threadChannel, storage, storageVarName, cache);
-          this.callNextAction(cache);
-        })
-        .catch((err) => this.displayError(data, cache, err));
-    } else {
+    if (!targetChannel) {
       this.callNextAction(cache);
+      return;
     }
+
+    let result;
+    const info = parseInt(data.info, 10);
+    switch (info) {
+      case 0:
+        result = targetChannel;
+        break;
+      case 1:
+        result = targetChannel.id;
+        break;
+      case 2:
+        result = targetChannel.name;
+        break;
+      case 3:
+        result = targetChannel.archived;
+        break;
+      case 4:
+        result = targetChannel.locked;
+        break;
+      case 5:
+        result = targetChannel.invitable;
+        break;
+      case 6:
+        result = targetChannel.archivedAt;
+        break;
+      case 7:
+        result = targetChannel.archiveTimestamp;
+        break;
+      default:
+        break;
+    }
+
+    if (result !== undefined) {
+      const storage = parseInt(data.storage, 10);
+      const storageVarName = this.evalMessage(data.storageVarName, cache);
+      this.storeValue(result, storage, storageVarName, cache);
+    }
+
+    this.callNextAction(cache);
   },
 
   //---------------------------------------------------------------------

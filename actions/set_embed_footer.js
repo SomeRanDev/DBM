@@ -53,13 +53,15 @@ module.exports = {
 
   html(isEvent, data) {
     return `
-<retrieve-from-variable dropdownLabel="Source Embed Object" selectId="storage" variableContainerId="varNameContainer" variableInputId="varName"></retrieve-from-variable><br><br><br>
+<retrieve-from-variable dropdownLabel="Source Embed Object" selectId="storage" variableContainerId="varNameContainer" variableInputId="varName"></retrieve-from-variable>
+
+<br><br><br>
 
 <div style="padding-top: 8px;">
 	<span class="dbminputlabel">Footer</span><br>
 	<textarea id="message" class="dbm_monospace" rows="3" placeholder="Insert footer here..." style="white-space: nowrap; resize: none;"></textarea>
 </div><br>
-<div style="float: left; width: 99%;">
+<div style="float: left;">
 	<span class="dbminputlabel">Footer Icon URL</span><br>
 	<input id="footerIcon" class="round" type="text" placeholder="Leave blank for none!"><br>
 </div>`;

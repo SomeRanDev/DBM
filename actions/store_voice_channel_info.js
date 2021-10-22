@@ -95,18 +95,16 @@ module.exports = {
 
 <br><br><br>
 
-<div>
-	<div style="padding-top: 8px; width: 90%;">
-		<span class="dbminputlabel">Source Info</span><br>
-		<select id="info" class="round">
-			<option value="0" selected>Voice Channel Object</option>
-			<option value="1">Voice Channel ID</option>
-			<option value="2">Voice Channel Name</option>
-			<option value="3">Voice Channel Position</option>
-			<option value="4">Voice Channel User Limit</option>
-			<option value="5">Voice Channel Bitrate</option>
-		</select>
-	</div>
+<div style="padding-top: 8px;">
+	<span class="dbminputlabel">Source Info</span><br>
+	<select id="info" class="round">
+		<option value="0" selected>Voice Channel Object</option>
+		<option value="1">Voice Channel ID</option>
+		<option value="2">Voice Channel Name</option>
+		<option value="3">Voice Channel Position</option>
+		<option value="4">Voice Channel User Limit</option>
+		<option value="5">Voice Channel Bitrate</option>
+	</select>
 </div>
 
 <br>

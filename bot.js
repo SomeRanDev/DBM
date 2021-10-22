@@ -147,8 +147,8 @@ function PrintError(type) {
   }
 }
 
-function GetActionErrorText(type, name, index) {
-  return require("node:util").format('Error with the %s "%s", Action #%d', type, name, index);
+function GetActionErrorText(location, index, dataName) {
+  return "Error with the " + location + (dataName ? ` - Action #${index} (${dataName})` : "");
 }
 
 //#endregion
@@ -771,7 +771,7 @@ Bot.onInteraction = function (interaction) {
 Bot.onSlashCommandInteraction = function (interaction) {
   const interactionName = interaction.commandName;
   if (this.$slash[interactionName]) {
-    Actions.preformActionsFromInteraction(interaction, this.$slash[interactionName]);
+    Actions.preformActionsFromInteraction(interaction, this.$slash[interactionName], true);
   }
 };
 
@@ -781,14 +781,14 @@ Bot.onContextMenuInteraction = function (interaction) {
     if (interaction.guild) {
       interaction.guild.members.fetch(interaction.targetId).then((member) => {
         interaction._targetMember = member;
-        Actions.preformActionsFromInteraction(interaction, this.$user[interactionName]);
+        Actions.preformActionsFromInteraction(interaction, this.$user[interactionName], true);
       }).catch(console.error);
     }
   } else if (this.$msge[interactionName]) {
     if (interaction.channel) {
       interaction.channel.messages.fetch(interaction.targetId).then((message) => {
         interaction._targetMessage = message;
-        Actions.preformActionsFromInteraction(interaction, this.$msge[interactionName]);
+        Actions.preformActionsFromInteraction(interaction, this.$msge[interactionName], true);
       }).catch(console.error);
     }
   }
@@ -845,6 +845,7 @@ const ActionsCache = (Actions.ActionsCache = class ActionsCache {
     this.msg = options.msg ?? null;
     this.interaction = options.interaction ?? null;
     this.isSubCache = options.isSubCache ?? false;
+    this.meta = options.meta ?? { isEvent: false, name: "" };
   }
 
   onCompleted() {
@@ -861,9 +862,11 @@ const ActionsCache = (Actions.ActionsCache = class ActionsCache {
           content: Actions.getDefaultResponseText(),
         };
         if (this.interaction.deferred) {
-          this.interaction.editReply(replyData);
+          this.interaction.editReply(replyData)
+            .catch((err) => Actions.displayError(null, this, err));
         } else {
-          this.interaction.reply(replyData);
+          this.interaction.reply(replyData)
+            .catch((err) => Actions.displayError(null, this, err));
         }
       }
     }
@@ -873,12 +876,23 @@ const ActionsCache = (Actions.ActionsCache = class ActionsCache {
     return this.interaction?.user ?? this.msg?.author;
   }
 
+  toString() {
+    let result = `${this.meta.isEvent ? "Event" : "Command"} "${this.meta.name}"`;
+    if (this.interaction.isButton()) {
+      result += ", Button" + (this.interaction._button ? ` "${this.interaction._button.label}"` : "");
+    } else if (this.interaction.isSelectMenu()) {
+      result += ", Select Menu" + (this.interaction._select ? ` "${this.interaction._select.placeholder}"` : "");
+    }
+    return result;
+  }
+
   static extend(other, actions) {
     return new ActionsCache(actions, other.server, {
       isSubCache: true,
       temp: other.temp,
       msg: other.msg,
       interaction: other.interaction,
+      meta: other.meta,
     });
   }
 });
@@ -1050,17 +1064,17 @@ Actions.modDirectories = function () {
 
 Actions.preformActionsFromMessage = function (msg, cmd) {
   if (this.checkConditions(msg.guild, msg.member, msg.author, cmd) && this.checkTimeRestriction(msg.author, cmd)) {
-    this.invokeActions(msg, cmd.actions);
+    this.invokeActions(msg, cmd.actions, cmd);
   }
 };
 
-Actions.preformActionsFromInteraction = function (interaction, cmd, initialTempVars = null) {
+Actions.preformActionsFromInteraction = function (interaction, cmd, meta = null, initialTempVars = null) {
   const invalidPermissions = this.getInvalidPermissionsResponse();
   const invalidCooldown = this.getInvalidCooldownResponse();
   if (this.checkConditions(interaction.guild, interaction.member, interaction.user, cmd)) {
     const timeRestriction = this.checkTimeRestriction(interaction.user, cmd, true);
     if (timeRestriction === true) {
-      this.invokeInteraction(interaction, cmd.actions, initialTempVars);
+      this.invokeInteraction(interaction, cmd.actions, initialTempVars, meta === true ? cmd : meta);
     } else if (invalidCooldown) {
       const { format } = require("node:util");
       const content = typeof timeRestriction === "string" ? format(invalidCooldown, timeRestriction) : invalidCooldown;
@@ -1071,13 +1085,13 @@ Actions.preformActionsFromInteraction = function (interaction, cmd, initialTempV
   }
 };
 
-Actions.preformActionsFromSelectInteraction = function (interaction, select, initialTempVars = null) {
+Actions.preformActionsFromSelectInteraction = function (interaction, select, meta = null, initialTempVars = null) {
   const tempVars = initialTempVars ?? {};
   if (typeof select.tempVarName === "string") {
     const values = interaction.values;
     tempVars[select.tempVarName] = !values || values.length === 0 ? 0 : values.length === 1 ? values[0] : values;
   }
-  this.preformActionsFromInteraction(interaction, select, tempVars);
+  this.preformActionsFromInteraction(interaction, select, meta, tempVars);
 };
 
 Actions.checkConditions = function (guild, member, user, cmd) {
@@ -1175,15 +1189,31 @@ Actions.checkPermissions = function (member, permissions) {
   return member.permissions.has(permissions);
 };
 
-Actions.invokeActions = function (msg, actions) {
+Actions.invokeActions = function (msg, actions, cmd = null) {
   if (actions.length > 0) {
-    this.callNextAction(new ActionsCache(actions, msg.guild, { msg }));
+    this.callNextAction(new ActionsCache(actions, msg.guild, {
+      msg,
+      meta: {
+        name: cmd?.name,
+        isEvent: false
+      }
+    }));
   }
 };
 
-Actions.invokeInteraction = function (interaction, actions, initialTempVars) {
+Actions.invokeInteraction = function (interaction, actions, initialTempVars, meta = null) {
   if (actions.length > 0) {
-    const cache = new ActionsCache(actions, interaction.guild, { interaction, temp: (initialTempVars || {}) });
+    const cacheData = {
+      interaction,
+      temp: (initialTempVars || {}),
+    };
+    if (meta) {
+      cacheData.meta = {
+        name: meta?.name,
+        isEvent: false,
+      };
+    }
+    const cache = new ActionsCache(actions, interaction.guild, cacheData);
     this.callNextAction(cache);
   }
 };
@@ -1191,7 +1221,13 @@ Actions.invokeInteraction = function (interaction, actions, initialTempVars) {
 Actions.invokeEvent = function (event, server, temp) {
   const actions = event.actions;
   if (actions.length > 0) {
-    const cache = new ActionsCache(actions, server, { temp: { ...temp } });
+    const cache = new ActionsCache(actions, server, {
+      temp: { ...temp },
+      meta: {
+        name: event.name,
+        isEvent: true
+      }
+    });
     this.callNextAction(cache);
   }
 };
@@ -1247,8 +1283,8 @@ Actions.getInvalidCooldownResponse = function () {
 };
 
 Actions.getErrorString = function (data, cache) {
-  const type = "permissions" in data || "restriction" in data || !("event-type" in data) ? "command" : "event";
-  return GetActionErrorText(type, data.name, cache.index + 1);
+  const location = cache.toString();
+  return GetActionErrorText(location, cache.index + 1, data?.name);
 };
 
 Actions.displayError = function (data, cache, err) {

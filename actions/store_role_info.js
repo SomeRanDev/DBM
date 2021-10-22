@@ -125,26 +125,24 @@ module.exports = {
 
 <br><br><br>
 
-<div>
-	<div style="padding-top: 8px; width: 90%;">
-		<span class="dbminputlabel">Source Info</span><br>
-		<select id="info" class="round">
-			<option value="0" selected>Role Object</option>
-			<option value="1">Role ID</option>
-			<option value="2">Role Name</option>
-			<option value="3">Role Color</option>
-			<option value="4">Role Position</option>
-			<option value="5">Role Timestamp</option>
-			<option value="6">Role Is Mentionable?</option>
-      <option value="7">Role Is Separate From Others?</option>
-      <option value="8">Role Is Managed By Bot/Integration</option>
-      <option value="9">Role Members</option>
-      <option value="10">Role Creation Date</option>
-      <option value="11">Role Permissions</option>
-      <option value="12">Role Members Amount</option>
-      <option value="13">Role Icon URL</option>
-		</select>
-	</div>
+<div style="padding-top: 8px;">
+	<span class="dbminputlabel">Source Info</span><br>
+	<select id="info" class="round">
+		<option value="0" selected>Role Object</option>
+		<option value="1">Role ID</option>
+		<option value="2">Role Name</option>
+		<option value="3">Role Color</option>
+		<option value="4">Role Position</option>
+		<option value="5">Role Timestamp</option>
+		<option value="6">Role Is Mentionable?</option>
+    <option value="7">Role Is Separate From Others?</option>
+    <option value="8">Role Is Managed By Bot/Integration</option>
+    <option value="9">Role Members</option>
+    <option value="10">Role Creation Date</option>
+    <option value="11">Role Permissions</option>
+    <option value="12">Role Members Amount</option>
+    <option value="13">Role Icon URL</option>
+	</select>
 </div>
 
 <br>
