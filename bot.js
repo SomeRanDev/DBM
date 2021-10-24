@@ -2535,10 +2535,6 @@ try {
   Audio.rawYtdl = require("youtube-dl-exec").raw;
 } catch {}
 
-if (!Audio.voice || !Audio.rawYtdl) {
-  PrintError(MsgType.MISSING_MUSIC_MODULES);
-}
-
 Audio.Subscription = class {
   /** @param {import('@discordjs/voice').VoiceConnection} voiceConnection */
   constructor(voiceConnection) {
@@ -2730,6 +2726,10 @@ Audio.subscriptions = new Map();
 
 /** @param {import('discord.js').VoiceChannel} voiceChannel */
 Audio.connectToVoice = function (voiceChannel) {
+  if (!Audio.voice || !Audio.rawYtdl || !Audio.ytdl) {
+    return PrintError(MsgType.MISSING_MUSIC_MODULES);
+  }
+
   Audio.inlineVolume ??= Files.data.settings.mutableVolume === "true";
 
   this.subscriptions.set(
