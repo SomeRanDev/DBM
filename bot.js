@@ -1,11 +1,11 @@
 /******************************************************
  * Discord Bot Maker Bot
- * Version 2.0.2
+ * Version 2.0.4
  * Robert Borghese
  ******************************************************/
 
 const DBM = {};
-DBM.version = "2.0.3";
+DBM.version = "2.0.4";
 
 const DiscordJS = (DBM.DiscordJS = require("discord.js"));
 
@@ -39,6 +39,7 @@ const MsgType = {
   DUPLICATE_SELECT_ID: 11,
 
   MISSING_APPLICATION_COMMAND_ACCESS: 100,
+  MISSING_MUSIC_MODULES: 101,
 };
 
 function PrintError(type) {
@@ -143,6 +144,12 @@ function PrintError(type) {
           arguments[2],
         ),
       );
+      break;
+    }
+
+    case MsgType.MISSING_MUSIC_MODULES {
+      warn(format('Could not load audio-related Node modules.\nPlease run "File -> Music Capabilities -> Update Music Libraries" to ensure they are installed.'));
+      break;
     }
   }
 }
@@ -2527,6 +2534,10 @@ Audio.rawYtdl = null;
 try {
   Audio.rawYtdl = require("youtube-dl-exec").raw;
 } catch {}
+
+if (!Audio.voice || !Audio.rawYtdl) {
+  PrintError(MsgType.MISSING_MUSIC_MODULES);
+}
 
 Audio.Subscription = class {
   /** @param {import('@discordjs/voice').VoiceConnection} voiceConnection */
