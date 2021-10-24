@@ -129,8 +129,8 @@ module.exports = {
     const message = this.getMessage(messageVar, messageVarName, cache);
 
     const threadOptions = {
-      name: data.threadName,
-      autoArchiveDuration: data.autoArchiveDuration === "max" ? "max" : parseInt(data.autoArchiveDuration, 10),
+      name: this.evalMessage(data.threadName, cache),
+      autoArchiveDuration: data.autoArchiveDuration === "max" ? "MAX" : parseInt(data.autoArchiveDuration, 10),
     };
 
     if (data.reason) {
