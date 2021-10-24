@@ -885,9 +885,9 @@ const ActionsCache = (Actions.ActionsCache = class ActionsCache {
 
   toString() {
     let result = `${this.meta.isEvent ? "Event" : "Command"} "${this.meta.name}"`;
-    if (this.interaction.isButton()) {
+    if (this.interaction?.isButton()) {
       result += ", Button" + (this.interaction._button ? ` "${this.interaction._button.label}"` : "");
-    } else if (this.interaction.isSelectMenu()) {
+    } else if (this.interaction?.isSelectMenu()) {
       result += ", Select Menu" + (this.interaction._select ? ` "${this.interaction._select.placeholder}"` : "");
     }
     return result;
