@@ -5,7 +5,7 @@ module.exports = {
   // This is the name of the action displayed in the editor.
   //---------------------------------------------------------------------
 
-  name: "Edit Role Icon",
+  name: "Set Role Icon",
 
   //---------------------------------------------------------------------
   // Action Section
@@ -95,7 +95,7 @@ module.exports = {
   // Keep in mind event calls won't have access to the "msg" parameter,
   // so be sure to provide checks for variable existence.
   //---------------------------------------------------------------------
-//  fields: ["role", "roleVarName", "image", "imageVarName", "reason"],
+
   action(cache) {
     const data = cache.actions[cache.index];
     const reason = this.evalMessage(data.reason, cache);
