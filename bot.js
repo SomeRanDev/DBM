@@ -147,7 +147,7 @@ function PrintError(type) {
       break;
     }
 
-    case MsgType.MISSING_MUSIC_MODULES {
+    case MsgType.MISSING_MUSIC_MODULES: {
       warn(format('Could not load audio-related Node modules.\nPlease run "File -> Music Capabilities -> Update Music Libraries" to ensure they are installed.'));
       break;
     }
