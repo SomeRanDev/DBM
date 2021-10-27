@@ -1,11 +1,11 @@
 /******************************************************
  * Discord Bot Maker Bot
- * Version 2.0.4
+ * Version 2.0.5
  * Robert Borghese
  ******************************************************/
 
 const DBM = {};
-DBM.version = "2.0.4";
+DBM.version = "2.0.5";
 
 const DiscordJS = (DBM.DiscordJS = require("discord.js"));
 
@@ -883,6 +883,14 @@ const ActionsCache = (Actions.ActionsCache = class ActionsCache {
     return this.interaction?.user ?? this.msg?.author;
   }
 
+  goToAnchor(anchorName) {
+    const index = this.actions?._customData?.anchors?.[anchorName];
+    if (typeof index === "number" && this.actions[index]) {
+      this.index = index - 1;
+      Actions.callNextAction(this);
+    }
+  }
+
   toString() {
     let result = `${this.meta.isEvent ? "Event" : "Command"} "${this.meta.name}"`;
     if (this.interaction?.isButton()) {
@@ -964,6 +972,10 @@ Actions.getSlashParameter = function (interaction, name, defaultValue) {
   return defaultValue !== undefined ? defaultValue : result;
 };
 
+Actions.getCustomEmoji = function (nameOrId) {
+  return Bot.bot.emojis.cache.get(nameOrId) ?? Bot.bot.emojis.cache.find((e) => e.name === nameOrId);
+};
+
 Actions.eval = function (content, cache, logError = true) {
   if (!content) return false;
   const DBM = this.getDBM();
@@ -974,6 +986,7 @@ Actions.eval = function (content, cache, logError = true) {
   }
   const globalVars = this.getActionVariable.bind(this.global);
   const slashParams = this.getSlashParameter.bind(this, cache.interaction);
+  const customEmoji = this.getCustomEmoji.bind(this);
   const msg = cache.msg;
   const interaction = cache.interaction;
   const button = interaction?._button ?? "";
@@ -1209,20 +1222,18 @@ Actions.invokeActions = function (msg, actions, cmd = null) {
 };
 
 Actions.invokeInteraction = function (interaction, actions, initialTempVars, meta = null) {
-  if (actions.length > 0) {
-    const cacheData = {
-      interaction,
-      temp: (initialTempVars || {}),
+  const cacheData = {
+    interaction,
+    temp: (initialTempVars || {}),
+  };
+  if (meta) {
+    cacheData.meta = {
+      name: meta?.name,
+      isEvent: false,
     };
-    if (meta) {
-      cacheData.meta = {
-        name: meta?.name,
-        isEvent: false,
-      };
-    }
-    const cache = new ActionsCache(actions, interaction.guild, cacheData);
-    this.callNextAction(cache);
   }
+  const cache = new ActionsCache(actions, interaction.guild, cacheData);
+  this.callNextAction(cache);
 };
 
 Actions.invokeEvent = function (event, server, temp) {
@@ -1789,11 +1800,7 @@ Actions.executeResults = function (result, data, cache) {
     }
     case 4: {
       const anchorName = this.evalMessage(result ? data.iftrueVal : data.iffalseVal, cache);
-      const index = cache.actions?._customData?.anchors?.[anchorName];
-      if (typeof index === "number" && cache.actions[index]) {
-        cache.index = index - 1;
-        this.callNextAction(cache);
-      }
+      cache.goToAnchor(anchorName);
       break;
     }
     case 99: {
