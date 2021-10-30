@@ -83,7 +83,7 @@ module.exports = {
     const server = cache.server;
     if (server) {
       const volume = parseInt(this.evalMessage(data.volume, cache), 10) / 100;
-      Audio.setVolume(volume, server.id);
+      Audio.setVolume(volume, server);
     }
     this.callNextAction(cache);
   },

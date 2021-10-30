@@ -121,11 +121,7 @@ module.exports = {
     const url = this.evalMessage(data.url, cache);
     if (url) {
       const info = ["yt", options, url];
-      if (data.type === "0") {
-        Audio.addToQueue(info, cache);
-      } else if (cache.server) {
-        Audio.playItem(info, cache.server.id);
-      }
+      Audio.addAudio(info, cache.server, data.type === "0");
     }
     this.callNextAction(cache);
   },

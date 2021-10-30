@@ -76,7 +76,7 @@ module.exports = {
   action(cache) {
     const server = cache.server;
     const { Audio } = this.getDBM();
-    if (server) Audio.disconnectFromVoice(server.id);
+    if (server) Audio.disconnectFromVoice(server);
     this.callNextAction(cache);
   },
 

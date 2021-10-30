@@ -40,6 +40,10 @@ const MsgType = {
 
   MISSING_APPLICATION_COMMAND_ACCESS: 100,
   MISSING_MUSIC_MODULES: 101,
+
+  MUTABLE_VOLUME_DISABLED: 200,
+  ERROR_GETTING_YT_INFO: 201,
+  ERROR_CREATING_AUDIO: 202,
 };
 
 function PrintError(type) {
@@ -150,6 +154,20 @@ function PrintError(type) {
     case MsgType.MISSING_MUSIC_MODULES: {
       warn(format('Could not load audio-related Node modules.\nPlease run "File -> Music Capabilities -> Update Music Libraries" to ensure they are installed.'));
       break;
+    }
+
+
+    case MsgType.MUTABLE_VOLUME_DISABLED: {
+      warn(format('Tried setting volume but "Mutable Volume" is disabled.'));
+      break;
+    }
+
+    case MsgType.ERROR_GETTING_YT_INFO: {
+      warn(format('Error getting YouTube info.\n%s', arguments[1]));
+    }
+
+    case MsgType.ERROR_CREATING_AUDIO: {
+      warn(format('Error creating audio resource.\n%s', arguments[1]));
     }
   }
 }
@@ -2629,8 +2647,16 @@ Audio.Subscription = class {
       if (leaveVoiceTimeout === "" || !isFinite(seconds)) return;
 
       require("node:timers")
-        .setTimeout(() => {
-          Audio.disconnectFromVoice(this.voiceConnection.joinConfig.guildId);
+        .setTimeout(async () => {
+          let guild = null;
+          try {
+            guild = await Bot.bot.guilds.resolve(this.voiceConnection.joinConfig.guildId);
+          } catch(e) {
+            console.error(e);
+          }
+          if (guild) {
+            Audio.disconnectFromVoice(guild);
+          }
         }, seconds * 1e3)
         .unref();
       return;
@@ -2704,10 +2730,14 @@ Audio.Track = class {
     });
   }
 
-  /** @param {String} url */
   static async from(url) {
-    const info = await Audio.ytdl.getInfo(url);
-    return new Audio.Track({ title: info.videoDetails.title, url });
+    let info = null;
+    try {
+      info = await Audio.ytdl.getInfo(url);
+    } catch(e) {
+      PrintError(MsgType.ERROR_GETTING_YT_INFO, e.stack.toString());
+    }
+    return new Audio.Track({ title: info?.videoDetails?.title ?? "", url });
   }
 };
 
@@ -2720,7 +2750,6 @@ Audio.BasicTrack = class {
     this.url = url;
   }
 
-  /** @param {String} url */
   createAudioResource() {
     return Audio.voice.createAudioResource(this.url, {
       inlineVolume: Audio.inlineVolume,
@@ -2731,7 +2760,6 @@ Audio.BasicTrack = class {
 
 Audio.subscriptions = new Map();
 
-/** @param {import('discord.js').VoiceChannel} voiceChannel */
 Audio.connectToVoice = function (voiceChannel) {
   if (!Audio.voice || !Audio.rawYtdl || !Audio.ytdl) {
     return PrintError(MsgType.MISSING_MUSIC_MODULES);
@@ -2739,30 +2767,46 @@ Audio.connectToVoice = function (voiceChannel) {
 
   Audio.inlineVolume ??= Files.data.settings.mutableVolume === "true";
 
+  const subscription = new this.Subscription(
+    this.voice.joinVoiceChannel({
+      adapterCreator: voiceChannel.guild.voiceAdapterCreator,
+      channelId: voiceChannel.id,
+      guildId: voiceChannel.guildId,
+      setDeaf: Files.data.settings.autoDeafen ? Files.data.settings.autoDeafen === "true" : true,
+    }),
+  );
+
   this.subscriptions.set(
     voiceChannel.guildId,
-    new this.Subscription(
-      this.voice.joinVoiceChannel({
-        adapterCreator: voiceChannel.guild.voiceAdapterCreator,
-        channelId: voiceChannel.id,
-        guildId: voiceChannel.guildId,
-        setDeaf: Files.data.settings.autoDeafen ? Files.data.settings.autoDeafen === "true" : true,
-      }),
-    ),
+    subscription,
   );
+
+  return subscription;
 };
 
-/** @param {import('discord.js').Snowflake} guildId */
-Audio.disconnectFromVoice = function (guildId) {
-  const subscription = this.subscriptions.get(guildId);
+Audio.getSubscription = function (guild) {
+  const subscription = this.subscriptions.get(guild?.id);
+  if (!subscription) {
+    const voiceChannel = guild?.me?.voice?.channel;
+    if (voiceChannel) {
+      return this.connectToVoice(voiceChannel);
+    }
+  }
+  return subscription;
+};
+
+Audio.disconnectFromVoice = function (guild) {
+  if (!guild) return;
+  const subscription = this.getSubscription(guild);
   if (!subscription) return;
   subscription.voiceConnection.destroy();
-  this.subscriptions.delete(guildId);
+  this.subscriptions.delete(guild?.id);
 };
 
-Audio.setVolume = function (volume, guildId) {
-  if (!this.inlineVolume) return console.error("Tried setting volume but 'Mutable Volume' is disabled");
-  const subscription = this.subscriptions.get(guildId);
+Audio.setVolume = function (volume, guild) {
+  if (!this.inlineVolume) return PrintError(MsgType.MUTABLE_VOLUME_DISABLED);
+  if (!guild) return;
+  const subscription = this.getSubscription(guild);
   if (!subscription) return;
   subscription.volume = volume;
   if (subscription.audioPlayer.state.status === this.voice.AudioPlayerStatus.Playing) {
@@ -2770,29 +2814,56 @@ Audio.setVolume = function (volume, guildId) {
   }
 };
 
-Audio.addToQueue = async function ([type, options, url], cache) {
-  if (!cache.server) return;
-  const id = cache.server.id;
-  const subscription = this.subscriptions.get(id);
-  if (!subscription) return;
-  if (typeof options.volume !== "undefined") this.setVolume(options.volume, id);
-  if (typeof options.bitrate !== "undefined") subscription.bitrate = options.bitrate;
-  subscription.enqueue(await this.getTrack(url, type));
+Audio.addAudio = async function (info, guild, isQueue) {
+  if (!guild) return;
+  if (isQueue) {
+    Audio.addToQueue(info, guild);
+  } else {
+    Audio.playImmediately(info, guild);
+  }
 };
 
-Audio.playItem = async function ([type, options, url], guildId) {
-  const subscription = this.subscriptions.get(guildId);
+Audio.addToQueue = async function ([type, options, url], guild) {
+  if (!guild) return;
+  const id = guild.id;
+  const subscription = this.getSubscription(guild);
   if (!subscription) return;
-  if (typeof options.volume !== "undefined") this.setVolume(options.volume, id);
+  if (typeof options.volume !== "undefined") this.setVolume(options.volume, guild);
   if (typeof options.bitrate !== "undefined") subscription.bitrate = options.bitrate;
-  subscription.enqueue(await this.getTrack(url, type), true);
+  let track = null;
+  try {
+    track = await this.getTrack(url, type);
+  } catch(e) {
+    PrintError(MsgType.ERROR_CREATING_AUDIO, e.stack.toString());
+  }
+  if (track !== null) {
+    subscription.enqueue(track);
+  }
+};
+
+Audio.playImmediately = async function ([type, options, url], guild) {
+  if (!guild) return;
+  const subscription = this.getSubscription(guild);
+  if (!subscription) return;
+  if (typeof options.volume !== "undefined") this.setVolume(options.volume, guild);
+  if (typeof options.bitrate !== "undefined") subscription.bitrate = options.bitrate;
+  let track = null;
+  try {
+    track = await this.getTrack(url, type);
+  } catch(e) {
+    PrintError(MsgType.ERROR_CREATING_AUDIO, e.stack.toString());
+  }
+  if (track !== null) {
+    subscription.enqueue(track, true);
+  }
   subscription.audioPlayer.stop(true);
 };
 
 Audio.clearQueue = function (cache) {
   if (!cache.server) return;
-  const id = cache.server.id;
-  if (this.subscriptions.has(id)) this.subscriptions.get(id).queue = [];
+  const subscription = this.getSubscription(cache.server);
+  if (!subscription) return;
+  subscription.queue = [];
 };
 
 Audio.getTrack = function (url, type) {
