@@ -775,16 +775,16 @@ module.exports = {
       this.callListFunc(target, "send", [messageOptions]).then(onComplete);
     }
 
-    else if (isMessageTarget && target?.reply) {
+    else if(isEdit && target?.edit) {
       target
-        .reply(messageOptions)
+        .edit(messageOptions)
         .then(onComplete)
         .catch((err) => this.displayError(data, cache, err));
     }
 
-    else if(isEdit && target?.edit) {
+    else if (isMessageTarget && target?.reply) {
       target
-        .edit(messageOptions)
+        .reply(messageOptions)
         .then(onComplete)
         .catch((err) => this.displayError(data, cache, err));
     }

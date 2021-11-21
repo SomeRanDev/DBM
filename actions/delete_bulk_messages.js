@@ -124,7 +124,7 @@ module.exports = {
     };
 
     if (cache.msg) {
-      options.before = msg.id;
+      options.before = cache.msg.id;
     }
 
     source.messages
