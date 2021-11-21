@@ -22,7 +22,7 @@ module.exports = {
   //---------------------------------------------------------------------
 
   subtitle(data, presets) {
-    return `Create Thread Named "${data.threadName}" from ${presets.getMessageText(data.storage, data.varName)}`;
+    return `Create Thread Named "${data.threadName}" from ${presets.getMessageText(data.storage, data.storageVarName)}`;
   },
 
   //---------------------------------------------------------------------
@@ -34,7 +34,7 @@ module.exports = {
   variableStorage(data, varType) {
     const type = parseInt(data.storage, 10);
     if (type !== varType) return;
-    return [data.varName, "Thread Channel"];
+    return [data.storageVarName, "Thread Channel"];
   },
 
   //---------------------------------------------------------------------

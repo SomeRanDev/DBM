@@ -1,11 +1,11 @@
 /******************************************************
  * Discord Bot Maker Bot
- * Version 2.0.5
+ * Version 2.0.6
  * Robert Borghese
  ******************************************************/
 
 const DBM = {};
-DBM.version = "2.0.5";
+DBM.version = "2.0.6";
 
 const DiscordJS = (DBM.DiscordJS = require("discord.js"));
 
@@ -901,6 +901,20 @@ const ActionsCache = (Actions.ActionsCache = class ActionsCache {
     return this.interaction?.user ?? this.msg?.author;
   }
 
+  getMessage() {
+    const { msg, interaction } = this;
+    if (msg) {
+      return msg;
+    } else if (interaction) {
+      if (interaction.message) {
+        return interaction.message;
+      } else if (interaction._targetMessage) {
+        return interaction._targetMessage;
+      }
+    }
+    return null;
+  }
+
   goToAnchor(anchorName) {
     const index = this.actions?._customData?.anchors?.[anchorName];
     if (typeof index === "number" && this.actions[index]) {
@@ -988,6 +1002,29 @@ Actions.getSlashParameter = function (interaction, name, defaultValue) {
   }
 
   return defaultValue !== undefined ? defaultValue : result;
+};
+
+Actions._letterEmojis = "🇦 🇧 🇨 🇩 🇪 🇫 🇬 🇭 🇮 🇯 🇰 🇱 🇲 🇳 🇴 🇵 🇶 🇷 🇸 🇹 🇺 🇻 🇼 🇽 🇾 🇿".split(" ");
+
+Actions.convertTextToEmojis = function (text, useRegional = true) {
+  let result = "";
+  for (let i = 0; i < text.length; i++) {
+    const code = text.toUpperCase().charCodeAt(i) - 65;
+    if (code >= 0 && code <= 26) {
+      result += useRegional ? (":regional_indicator_" + text[i].toLowerCase() + ":") : ("\\" + this._letterEmojis[code]);
+    } else {
+      result += text[i];
+    }
+  }
+  return result;
+};
+
+Actions.getFlagEmoji = function (flagName) {
+  if (flagName.startsWith("flag_")) {
+    flagName = flagName.substring(5);
+  }
+  flagName = flagName.toUpperCase();
+  return this._letterEmojis[flagName.charCodeAt(0) - 65] + this._letterEmojis[flagName.charCodeAt(1) - 65];
 };
 
 Actions.getCustomEmoji = function (nameOrId) {
@@ -1439,28 +1476,32 @@ Actions.getSendTarget = function (type, varName, cache) {
       }
       break;
     case 100: {
-      const result = Bot.bot.users.cache.find((user) => user.username === varName);
+      const searchValue = this.evalMessage(varName, cache);
+      const result = Bot.bot.users.cache.find((user) => user.username === searchValue);
       if (result) {
         return result;
       }
       break;
     }
     case 101: {
-      const result = Bot.bot.users.cache.get(varName);
+      const searchValue = this.evalMessage(varName, cache);
+      const result = Bot.bot.users.cache.get(searchValue);
       if (result) {
         return result;
       }
       break;
     }
     case 102: {
-      const result = Bot.bot.channels.cache.find((channel) => channel.name === varName);
+      const searchValue = this.evalMessage(varName, cache);
+      const result = Bot.bot.channels.cache.find((channel) => channel.name === searchValue);
       if (result) {
         return result;
       }
       break;
     }
     case 103: {
-      const result = Bot.bot.channels.cache.get(varName);
+      const searchValue = this.evalMessage(varName, cache);
+      const result = Bot.bot.channels.cache.get(searchValue);
       if (result) {
         return result;
       }
@@ -1468,6 +1509,20 @@ Actions.getSendTarget = function (type, varName, cache) {
     }
     default:
       return this.getTargetFromVariableOrParameter(type - 5, varName, cache);
+  }
+};
+
+Actions.getSendReplyTarget = function (type, varName, cache) {
+  const { interaction, msg, server } = cache;
+  switch (type) {
+    case 13:
+      const msg = cache.getMessage();
+      if (msg) {
+        return msg;
+      }
+      break;
+    default:
+      return this.getSendTarget(type, varName, cache);
   }
 };
 
@@ -1494,14 +1549,16 @@ Actions.getMember = function (type, varName, cache) {
       }
       break;
     case 100: {
-      const result = Bot.bot.users.cache.find((user) => user.username === varName);
+      const searchValue = this.evalMessage(varName, cache);
+      const result = Bot.bot.users.cache.find((user) => user.username === searchValue);
       if (result) {
         return result;
       }
       break;
     }
     case 101: {
-      const result = Bot.bot.users.cache.get(varName);
+      const searchValue = this.evalMessage(varName, cache);
+      const result = Bot.bot.users.cache.get(searchValue);
       if (result) {
         return result;
       }
@@ -1513,17 +1570,11 @@ Actions.getMember = function (type, varName, cache) {
 };
 
 Actions.getMessage = function (type, varName, cache) {
-  const { interaction, msg } = cache;
   switch (type) {
     case 0:
+      const msg = cache.getMessage();
       if (msg) {
         return msg;
-      } else if (interaction) {
-        if (interaction.message) {
-          return interaction.message;
-        } else if (interaction._targetMessage) {
-          return interaction._targetMessage;
-        }
       }
       break;
     default:
@@ -1540,14 +1591,16 @@ Actions.getServer = function (type, varName, cache) {
       }
       break;
     case 100: {
-      const result = Bot.bot.guilds.cache.find((guild) => guild.name === varName);
+      const searchValue = this.evalMessage(varName, cache);
+      const result = Bot.bot.guilds.cache.find((guild) => guild.name === searchValue);
       if (result) {
         return result;
       }
       break;
     }
     case 101: {
-      const result = Bot.bot.guilds.cache.get(varName);
+      const searchValue = this.evalMessage(varName, cache);
+      const result = Bot.bot.guilds.cache.get(searchValue);
       if (result) {
         return result;
       }
@@ -1583,7 +1636,8 @@ Actions.getRole = function (type, varName, cache) {
     }
     case 100: {
       if (server) {
-        const result = server.roles.cache.find((role) => role.name === varName);
+        const searchValue = this.evalMessage(varName, cache);
+        const result = server.roles.cache.find((role) => role.name === searchValue);
         if (result) {
           return result;
         }
@@ -1592,7 +1646,8 @@ Actions.getRole = function (type, varName, cache) {
     }
     case 101: {
       if (server) {
-        const result = server.roles.cache.get(varName);
+        const searchValue = this.evalMessage(varName, cache);
+        const result = server.roles.cache.get(searchValue);
         if (result) {
           return result;
         }
@@ -1642,14 +1697,16 @@ Actions.getChannel = function (type, varName, cache) {
       }
       break;
     case 100: {
-      const result = Bot.bot.channels.cache.find((channel) => channel.name === varName);
+      const searchValue = this.evalMessage(varName, cache);
+      const result = Bot.bot.channels.cache.find((channel) => channel.name === searchValue);
       if (result) {
         return result;
       }
       break;
     }
     case 101: {
-      const result = Bot.bot.channels.cache.get(varName);
+      const searchValue = this.evalMessage(varName, cache);
+      const result = Bot.bot.channels.cache.get(searchValue);
       if (result) {
         return result;
       }
@@ -1691,14 +1748,16 @@ Actions.getVoiceChannel = function (type, varName, cache) {
       }
       break;
     case 100: {
-      const result = Bot.bot.channels.cache.find((channel) => channel.name === varName);
+      const searchValue = this.evalMessage(varName, cache);
+      const result = Bot.bot.channels.cache.find((channel) => channel.name === searchValue);
       if (result) {
         return result;
       }
       break;
     }
     case 101: {
-      const result = Bot.bot.channels.cache.get(varName);
+      const searchValue = this.evalMessage(varName, cache);
+      const result = Bot.bot.channels.cache.get(searchValue);
       if (result) {
         return result;
       }
@@ -2772,7 +2831,7 @@ Audio.connectToVoice = function (voiceChannel) {
       adapterCreator: voiceChannel.guild.voiceAdapterCreator,
       channelId: voiceChannel.id,
       guildId: voiceChannel.guildId,
-      setDeaf: Files.data.settings.autoDeafen ? Files.data.settings.autoDeafen === "true" : true,
+      selfDeaf: Files.data.settings.autoDeafen === "true",
     }),
   );
 

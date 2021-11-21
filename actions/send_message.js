@@ -39,7 +39,7 @@ module.exports = {
     if (data.dontSend) {
       return `Store Data: ${text}`;
     }
-    return `${presets.getSendTargetText(data.channel, data.varName)}: ${text}`;
+    return `${presets.getSendReplyTargetText(data.channel, data.varName)}: ${text}`;
   },
 
   //---------------------------------------------------------------------
@@ -99,7 +99,7 @@ module.exports = {
 
   html(isEvent, data) {
     return `
-<send-target-input selectId="channel" variableInputId="varName"></send-target-input>
+<send-reply-target-input selectId="channel" variableInputId="varName"></send-reply-target-input>
 
 <br><br><br>
 
@@ -557,7 +557,7 @@ module.exports = {
     const message = data.message;
     if (channel === undefined || message === undefined) return;
     const varName = this.evalMessage(data.varName, cache);
-    let target = this.getSendTarget(channel, varName, cache);
+    let target = this.getSendReplyTarget(channel, varName, cache);
 
     let messageOptions = {};
 
@@ -755,7 +755,10 @@ module.exports = {
       }
     };
 
+    const isMessageTarget = target instanceof this.getDBM().DiscordJS.Message;
+
     const canReply =
+      !isMessageTarget &&
       cache?.interaction?.replied === false &&
       target?.id?.length > 0 &&
       (target?.id ?? "") === cache?.interaction?.channel?.id;
@@ -770,6 +773,13 @@ module.exports = {
 
     else if (Array.isArray(target)) {
       this.callListFunc(target, "send", [messageOptions]).then(onComplete);
+    }
+
+    else if (isMessageTarget && target?.reply) {
+      target
+        .reply(messageOptions)
+        .then(onComplete)
+        .catch((err) => this.displayError(data, cache, err));
     }
 
     else if(isEdit && target?.edit) {

@@ -118,30 +118,19 @@ module.exports = {
         break;
       }
     }
+
     if (!actions) {
       this.callNextAction(cache);
       return;
     }
 
-    const act = actions[0];
-    if (act && this.exists(act.name)) {
-      const cache2 = {
-        actions,
-        index: 0,
-        temp: cache.temp,
-        server: cache.server,
-        msg: cache.msg || null,
-      };
-      if (data.type === "true") {
-        cache2.callback = function () {
-          this.callNextAction(cache);
-        }.bind(this);
-        this[act.name](cache2);
-      } else {
-        this[act.name](cache2);
-        this.callNextAction(cache);
-      }
-    } else {
+    const waitForCompletion = data.type === "true";
+    let callback = null;
+    if (waitForCompletion) {
+      callback = () => this.callNextAction(cache);
+    }
+    this.executeSubActions(actions, cache, callback);
+    if (!waitForCompletion) {
       this.callNextAction(cache);
     }
   },

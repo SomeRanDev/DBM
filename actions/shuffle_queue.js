@@ -22,7 +22,7 @@ module.exports = {
   //---------------------------------------------------------------------
 
   subtitle(data, presets) {
-    return "Shuffle Queue";
+    return "The queue is shuffled.";
   },
 
   //---------------------------------------------------------------------
@@ -76,9 +76,11 @@ module.exports = {
   action(cache) {
     const Audio = this.getDBM().Audio;
     const server = cache.server;
-    const subscription = Audio.subscriptions.get(server.id);
+    const subscription = Audio.getSubscription(server);
     const queue = subscription?.queue.slice();
+
     if (!queue?.length) return this.callNextAction(cache);
+
     subscription.queueLock = true;
     for (let i = queue.length - 1; i > 0; i--) {
       let j = Math.floor(Math.random() * (i + 1));
@@ -87,6 +89,7 @@ module.exports = {
     subscription.queue = queue;
     subscription.queueLock = false;
     subscription.processQueue();
+
     this.callNextAction(cache);
   },
 
