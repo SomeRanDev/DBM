@@ -94,6 +94,18 @@ module.exports = {
   },
 
   //---------------------------------------------------------------------
+  // Action Meta Data
+  //
+  // Helps check for updates and provides info if a custom mod.
+  // If this is a third-party mod, please set "author" and "authorUrl".
+  //
+  // It's highly recommended "preciseCheck" is set to false for third-party mods.
+  // This will make it so the patch version (0.0.X) is not checked.
+  //---------------------------------------------------------------------
+
+  meta: { version: "2.0.8", preciseCheck: true, author: null, authorUrl: null, downloadUrl: null },
+
+  //---------------------------------------------------------------------
   // Action Fields
   //
   // These are the fields for the action. These fields are customized
@@ -112,11 +124,6 @@ module.exports = {
   // The "isEvent" parameter will be true if this action is being used
   // for an event. Due to their nature, events lack certain information,
   // so edit the HTML to reflect this.
-  //
-  // The "data" parameter stores constants for select elements to use.
-  // Each is an array: index 0 for commands, index 1 for events.
-  // The names are: sendTargets, members, roles, channels,
-  //                messages, servers, variables
   //---------------------------------------------------------------------
 
   html(isEvent, data) {

@@ -5,7 +5,7 @@ module.exports = {
   // This is the name of the action displayed in the editor.
   //---------------------------------------------------------------------
 
-  name: "Action Anchor",
+  name: "Check Message Data",
 
   //---------------------------------------------------------------------
   // Action Section
@@ -13,7 +13,7 @@ module.exports = {
   // This is the section the action will fall into.
   //---------------------------------------------------------------------
 
-  section: "Other Stuff",
+  section: "Data",
 
   //---------------------------------------------------------------------
   // Action Subtitle
@@ -22,7 +22,7 @@ module.exports = {
   //---------------------------------------------------------------------
 
   subtitle(data, presets) {
-    return `${data.anchorName}`;
+    return `${presets.getConditionsText(data)}`;
   },
 
   //---------------------------------------------------------------------
@@ -45,7 +45,7 @@ module.exports = {
   // are also the names of the fields stored in the action's JSON data.
   //---------------------------------------------------------------------
 
-  fields: ["anchorName"],
+  fields: ["message", "varName", "dataName", "comparison", "value", "branch"],
 
   //---------------------------------------------------------------------
   // Command HTML
@@ -60,8 +60,41 @@ module.exports = {
 
   html(isEvent, data) {
     return `
-<span class="dbminputlabel">Anchor Name</span><br>
-<input id="anchorName" class="round" type="text">`;
+<message-input dropdownLabel="Message" selectId="message" variableContainerId="varNameContainer" variableInputId="varName"></message-input>
+
+<br><br><br>
+
+<div style="padding-top: 8px;">
+	<div style="float: left; width: calc(50% - 12px);">
+		<span class="dbminputlabel">Data Name</span><br>
+		<input id="dataName" class="round" type="text">
+	</div>
+	<div style="float: right; width: calc(50% - 12px);">
+		<span class="dbminputlabel">Comparison Type</span><br>
+		<select id="comparison" class="round">
+			<option value="0">Exists</option>
+			<option value="1" selected>Equals</option>
+			<option value="2">Equals Exactly</option>
+			<option value="3">Less Than</option>
+			<option value="4">Greater Than</option>
+			<option value="5">Includes</option>
+			<option value="6">Matches Regex</option>
+		</select>
+	</div>
+</div>
+
+<br><br><br>
+
+<div style="padding-top: 8px;">
+	<span class="dbminputlabel">Value to Compare to</span><br>
+	<input id="value" class="round" type="text" name="is-eval">
+</div>
+
+<br>
+
+<hr class="subtlebar">
+
+<conditional-input id="branch" style="padding-top: 16px;"></conditional-input>`;
   },
 
   //---------------------------------------------------------------------
@@ -83,7 +116,45 @@ module.exports = {
   //---------------------------------------------------------------------
 
   action(cache) {
-    this.callNextAction(cache);
+    const data = cache.actions[cache.index];
+    const type = parseInt(data.message, 10);
+    const varName = this.evalMessage(data.varName, cache);
+    const message = this.getMessage(type, varName, cache);
+    let result = false;
+    if (message?.data) {
+      const dataName = this.evalMessage(data.dataName, cache);
+      const val1 = message.data(dataName);
+      const compare = parseInt(data.comparison, 10);
+      let val2 = this.evalMessage(data.value, cache);
+      if (compare !== 6) val2 = this.eval(val2, cache);
+      if (val2 === false) val2 = this.evalMessage(data.value, cache);
+      switch (compare) {
+        case 0:
+          result = val1 !== undefined;
+          break;
+        case 1:
+          result = val1 == val2;
+          break;
+        case 2:
+          result = val1 === val2;
+          break;
+        case 3:
+          result = val1 < val2;
+          break;
+        case 4:
+          result = val1 > val2;
+          break;
+        case 5:
+          if (typeof val1.includes === "function") {
+            result = val1.includes(val2);
+          }
+          break;
+        case 6:
+          result = Boolean(val1.match(new RegExp("^" + val2 + "$", "i")));
+          break;
+      }
+    }
+    this.executeResults(result, data?.branch ?? data, cache);
   },
 
   //---------------------------------------------------------------------
@@ -99,11 +170,9 @@ module.exports = {
   // recursively iterated through.
   //---------------------------------------------------------------------
 
-  modInit(data, customData, index) {
-    if (!customData.anchors) {
-      customData.anchors = {};
-    }
-    customData.anchors[data.anchorName] = index;
+  modInit(data) {
+    this.prepareActions(data.branch?.iftrueActions);
+    this.prepareActions(data.branch?.iffalseActions);
   },
 
   //---------------------------------------------------------------------

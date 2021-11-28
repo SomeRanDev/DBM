@@ -1,11 +1,11 @@
 /******************************************************
  * Discord Bot Maker Bot
- * Version 2.0.7
+ * Version 2.0.8
  * Robert Borghese
  ******************************************************/
 
 const DBM = {};
-DBM.version = "2.0.7";
+DBM.version = "2.0.8";
 
 const DiscordJS = (DBM.DiscordJS = require("discord.js"));
 
@@ -2338,6 +2338,7 @@ Files.dataFiles = [
   "settings.json",
   "players.json",
   "servers.json",
+  "messages.json",
   "serverVars.json",
   "globalVars.json",
 ];
@@ -2366,22 +2367,30 @@ Files.readData = function (callback) {
   let cur = 0;
   for (let i = 0; i < max; i++) {
     const filePath = path.join(process.cwd(), "data", this.dataFiles[i]);
-    if (!fs.existsSync(filePath)) continue;
-    fs.readFile(filePath, (_error, content) => {
-      const filename = this.dataFiles[i].slice(0, -5);
-      let data;
-      try {
-        if (typeof content !== "string" && content.toString) content = content.toString();
-        data = JSON.parse(this.decrypt(content));
-      } catch {
-        PrintError(MsgType.DATA_PARSING_ERROR, this.dataFiles[i]);
-        return;
-      }
+    const filename = this.dataFiles[i].slice(0, -5);
+
+    const setData = (data) => {
       this.data[filename] = data;
       if (++cur === max) {
         callback();
       }
-    });
+    };
+
+    if (!fs.existsSync(filePath)) {
+      setData({});
+    } else {
+      fs.readFile(filePath, (_error, content) => {
+        let data;
+        try {
+          if (typeof content !== "string" && content.toString) content = content.toString();
+          data = JSON.parse(this.decrypt(content));
+        } catch {
+          PrintError(MsgType.DATA_PARSING_ERROR, this.dataFiles[i]);
+          return;
+        }
+        setData(data);
+      });
+    }
   }
 };
 
@@ -2954,46 +2963,25 @@ Reflect.defineProperty(DiscordJS.GuildMember.prototype, "unban", {
 
 Reflect.defineProperty(DiscordJS.GuildMember.prototype, "data", {
   value(name, defaultValue) {
-    const id = this.id;
-    const data = Files.data.players;
-    if (data[id] === undefined) {
-      if (defaultValue === undefined) {
-        return null;
-      } else {
-        data[id] = {};
-      }
-    }
-    if (data[id][name] === undefined && defaultValue !== undefined) {
-      data[id][name] = defaultValue;
-    }
-    return data[id][name];
+    return DiscordJS.User.prototype.data.apply(this, arguments);
   },
 });
 
 Reflect.defineProperty(DiscordJS.GuildMember.prototype, "setData", {
   value(name, value) {
-    const id = this.id;
-    const data = Files.data.players;
-    if (data[id] === undefined) {
-      data[id] = {};
-    }
-    data[id][name] = value;
-    Files.saveData("players");
+    return DiscordJS.User.prototype.setData.apply(this, arguments);
   },
 });
 
 Reflect.defineProperty(DiscordJS.GuildMember.prototype, "addData", {
   value(name, value) {
-    const id = this.id;
-    const data = Files.data.players;
-    if (data[id] === undefined) {
-      data[id] = {};
-    }
-    if (data[id][name] === undefined) {
-      this.setData(name, value);
-    } else {
-      this.setData(name, this.data(name) + value);
-    }
+    return DiscordJS.User.prototype.addData.apply(this, arguments);
+  },
+});
+
+Reflect.defineProperty(DiscordJS.GuildMember.prototype, "clearData", {
+  value(name) {
+    return DiscordJS.User.prototype.clearData.apply(this, arguments);
   },
 });
 
@@ -3048,6 +3036,24 @@ Reflect.defineProperty(DiscordJS.User.prototype, "addData", {
       this.setData(name, value);
     } else {
       this.setData(name, this.data(name) + value);
+    }
+  },
+});
+
+Reflect.defineProperty(DiscordJS.User.prototype, "clearData", {
+  value(name) {
+    const id = this.id;
+    const data = Files.data.players;
+    if (data[id] !== undefined) {
+      if (typeof name === "string") {
+        if (data[id][name] !== undefined) {
+          delete data[id][name];
+          Files.saveData("players");
+        }
+      } else {
+        delete data[id];
+        Files.saveData("players");
+      }
     }
   },
 });
@@ -3145,6 +3151,24 @@ Reflect.defineProperty(DiscordJS.Guild.prototype, "addData", {
   },
 });
 
+Reflect.defineProperty(DiscordJS.Guild.prototype, "clearData", {
+  value(name) {
+    const id = this.id;
+    const data = Files.data.servers;
+    if (data[id] !== undefined) {
+      if (typeof name === "string") {
+        if (data[id][name] !== undefined) {
+          delete data[id][name];
+          Files.saveData("servers");
+        }
+      } else {
+        delete data[id];
+        Files.saveData("servers");
+      }
+    }
+  },
+});
+
 Reflect.defineProperty(DiscordJS.Guild.prototype, "convertToString", {
   value() {
     return `s-${this.id}`;
@@ -3154,6 +3178,69 @@ Reflect.defineProperty(DiscordJS.Guild.prototype, "convertToString", {
 //---------------------------------------------------------------------
 // Message
 //---------------------------------------------------------------------
+
+Reflect.defineProperty(DiscordJS.Message.prototype, "data", {
+  value(name, defaultValue) {
+    const id = this.id;
+    const data = Files.data.messages;
+    if (data[id] === undefined) {
+      if (defaultValue === undefined) {
+        return null;
+      } else {
+        data[id] = {};
+      }
+    }
+    if (data[id][name] === undefined && defaultValue !== undefined) {
+      data[id][name] = defaultValue;
+    }
+    return data[id][name];
+  },
+});
+
+Reflect.defineProperty(DiscordJS.Message.prototype, "setData", {
+  value(name, value) {
+    const id = this.id;
+    const data = Files.data.messages;
+    if (data[id] === undefined) {
+      data[id] = {};
+    }
+    data[id][name] = value;
+    Files.saveData("messages");
+  },
+});
+
+Reflect.defineProperty(DiscordJS.Message.prototype, "addData", {
+  value(name, value) {
+    const id = this.id;
+    const data = Files.data.messages;
+    if (data[id] === undefined) {
+      data[id] = {};
+    }
+    if (data[id][name] === undefined) {
+      this.setData(name, value);
+    } else {
+      this.setData(name, this.data(name) + value);
+    }
+  },
+});
+
+Reflect.defineProperty(DiscordJS.Message.prototype, "clearData", {
+  value(name) {
+    const id = this.id;
+    const data = Files.data.messages;
+    if (data[id] !== undefined) {
+      if (typeof name === "string") {
+        if (data[id][name] !== undefined) {
+          delete data[id][name];
+          Files.saveData("messages");
+        }
+      } else {
+        delete data[id];
+        Files.saveData("messages");
+      }
+    }
+  },
+});
 
 Reflect.defineProperty(DiscordJS.Message.prototype, "convertToString", {
   value() {

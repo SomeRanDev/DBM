@@ -5,7 +5,7 @@ module.exports = {
   // This is the name of the action displayed in the editor.
   //---------------------------------------------------------------------
 
-  name: "Action Anchor",
+  name: "Store Message Data",
 
   //---------------------------------------------------------------------
   // Action Section
@@ -13,7 +13,7 @@ module.exports = {
   // This is the section the action will fall into.
   //---------------------------------------------------------------------
 
-  section: "Other Stuff",
+  section: "Data",
 
   //---------------------------------------------------------------------
   // Action Subtitle
@@ -22,7 +22,19 @@ module.exports = {
   //---------------------------------------------------------------------
 
   subtitle(data, presets) {
-    return `${data.anchorName}`;
+    return `${presets.getMessageText(data.message, data.varName)} -> ${presets.getVariableText(data.storage, data.varName2)}`;
+  },
+
+  //---------------------------------------------------------------------
+  // Action Storage Function
+  //
+  // Stores the relevant variable info for the editor.
+  //---------------------------------------------------------------------
+
+  variableStorage(data, varType) {
+    const type = parseInt(data.storage, 10);
+    if (type !== varType) return;
+    return [data.varName2, "Unknown Type"];
   },
 
   //---------------------------------------------------------------------
@@ -45,7 +57,7 @@ module.exports = {
   // are also the names of the fields stored in the action's JSON data.
   //---------------------------------------------------------------------
 
-  fields: ["anchorName"],
+  fields: ["message", "varName", "dataName", "defaultVal", "storage", "varName2"],
 
   //---------------------------------------------------------------------
   // Command HTML
@@ -60,8 +72,24 @@ module.exports = {
 
   html(isEvent, data) {
     return `
-<span class="dbminputlabel">Anchor Name</span><br>
-<input id="anchorName" class="round" type="text">`;
+<message-input dropdownLabel="Message" selectId="message" variableContainerId="varNameContainer" variableInputId="varName"></message-input>
+
+<br><br><br>
+
+<div style="padding-top: 8px;">
+	<div style="float: left; width: calc(50% - 12px);">
+		<span class="dbminputlabel">Data Name</span><br>
+		<input id="dataName" class="round" type="text">
+	</div>
+	<div style="float: right; width: calc(50% - 12px);">
+		<span class="dbminputlabel">Default Value (if data doesn't exist)</span><br>
+		<input id="defaultVal" class="round" type="text" value="0">
+	</div>
+</div>
+
+<br><br><br>
+
+<store-in-variable style="padding-top: 8px;" dropdownLabel="Store In" selectId="storage" variableContainerId="varNameContainer2" variableInputId="varName2"></store-in-variable>`;
   },
 
   //---------------------------------------------------------------------
@@ -83,27 +111,20 @@ module.exports = {
   //---------------------------------------------------------------------
 
   action(cache) {
-    this.callNextAction(cache);
-  },
-
-  //---------------------------------------------------------------------
-  // Action Bot Mod Init
-  //
-  // An optional function for action mods. Upon the bot's initialization,
-  // each command/event's actions are iterated through. This is to
-  // initialize responses to interactions created within actions
-  // (e.g. buttons and select menus for Send Message).
-  //
-  // If an action provides inputs for more actions within, be sure
-  // to call the `this.prepareActions` function to ensure all actions are
-  // recursively iterated through.
-  //---------------------------------------------------------------------
-
-  modInit(data, customData, index) {
-    if (!customData.anchors) {
-      customData.anchors = {};
+    const data = cache.actions[cache.index];
+    const message = this.getMessage(parseInt(data.message, 10), this.evalMessage(data.varName, cache), cache);
+    if (message?.data) {
+      const dataName = this.evalMessage(data.dataName, cache);
+      const defVal = this.eval(this.evalMessage(data.defaultVal, cache), cache);
+      let result;
+      if (defVal === undefined) {
+        result = message.data(dataName);
+      } else {
+        result = message.data(dataName, defVal);
+      }
+      this.storeValue(result, parseInt(data.storage, 10), this.evalMessage(data.varName2, cache), cache);
     }
-    customData.anchors[data.anchorName] = index;
+    this.callNextAction(cache);
   },
 
   //---------------------------------------------------------------------

@@ -55,6 +55,18 @@ module.exports = {
   },
 
   //---------------------------------------------------------------------
+  // Action Meta Data
+  //
+  // Helps check for updates and provides info if a custom mod.
+  // If this is a third-party mod, please set "author" and "authorUrl".
+  //
+  // It's highly recommended "preciseCheck" is set to false for third-party mods.
+  // This will make it so the patch version (0.0.X) is not checked.
+  //---------------------------------------------------------------------
+
+  meta: { version: "2.0.8", preciseCheck: true, author: null, authorUrl: null, downloadUrl: null },
+
+  //---------------------------------------------------------------------
   // Action Fields
   //
   // These are the fields for the action. These fields are customized
@@ -90,11 +102,6 @@ module.exports = {
   // The "isEvent" parameter will be true if this action is being used
   // for an event. Due to their nature, events lack certain information,
   // so edit the HTML to reflect this.
-  //
-  // The "data" parameter stores constants for select elements to use.
-  // Each is an array: index 0 for commands, index 1 for events.
-  // The names are: sendTargets, members, roles, channels,
-  //                messages, servers, variables
   //---------------------------------------------------------------------
 
   html(isEvent, data) {
@@ -454,7 +461,9 @@ module.exports = {
       <br>
 
       <div style="padding-bottom: 12px;">
-        <retrieve-from-variable allowNone dropdownLabel="Message/Data to Edit" selectId="editMessage" variableInputId="editMessageVarName" variableContainerId="editMessageVarNameContainer"></retrieve-from-variable>
+        <retrieve-from-variable allowNone dropdownLabel="Message/Data to Edit" selectId="editMessage" variableInputId="editMessageVarName" variableContainerId="editMessageVarNameContainer">
+          <option value="intUpdate">Interaction Update</option>
+        </retrieve-from-variable>
       </div>
 
       <br><br><br>
@@ -563,21 +572,26 @@ module.exports = {
 
     const overwrite = data.overwrite;
 
-    let isEdit = false;
-    const editMessage = parseInt(data.editMessage, 10);
-    if (typeof editMessage === "number" && editMessage >= 0) {
-      const editVarName = this.evalMessage(data.editMessageVarName, cache);
-      const editObject = this.getVariable(editMessage, editVarName, cache);
-      const { Message } = this.getDBM().DiscordJS;
-      if (editObject) {
-        if (editObject instanceof Message) {
-          target = editObject;
-          isEdit = true;
-        } else {
-          messageOptions = editObject;
+    let isEdit = 0;
+    if(data.editMessage === "intUpdate") {
+      isEdit = 2;
+    } else {
+      const editMessage = parseInt(data.editMessage, 10);
+      if (typeof editMessage === "number" && editMessage >= 0) {
+        const editVarName = this.evalMessage(data.editMessageVarName, cache);
+        const editObject = this.getVariable(editMessage, editVarName, cache);
+        const { Message } = this.getDBM().DiscordJS;
+        if (editObject) {
+          if (editObject instanceof Message) {
+            target = editObject;
+            isEdit = 1;
+          } else {
+            messageOptions = editObject;
+          }
         }
       }
     }
+    
 
     const content = this.evalMessage(message, cache);
     if (content) {
@@ -775,7 +789,14 @@ module.exports = {
       this.callListFunc(target, "send", [messageOptions]).then(onComplete);
     }
 
-    else if(isEdit && target?.edit) {
+    else if (isEdit === 2 && cache?.interaction?.update) {
+      cache.interaction
+        .update(messageOptions)
+        .then(onComplete)
+        .catch((err) => this.displayError(data, cache, err));
+    }
+
+    else if (isEdit === 1 && target?.edit) {
       target
         .edit(messageOptions)
         .then(onComplete)

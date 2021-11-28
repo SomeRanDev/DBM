@@ -5,7 +5,7 @@ module.exports = {
   // This is the name of the action displayed in the editor.
   //---------------------------------------------------------------------
 
-  name: "Action Anchor",
+  name: "Control Message Data",
 
   //---------------------------------------------------------------------
   // Action Section
@@ -13,7 +13,7 @@ module.exports = {
   // This is the section the action will fall into.
   //---------------------------------------------------------------------
 
-  section: "Other Stuff",
+  section: "Data",
 
   //---------------------------------------------------------------------
   // Action Subtitle
@@ -22,7 +22,9 @@ module.exports = {
   //---------------------------------------------------------------------
 
   subtitle(data, presets) {
-    return `${data.anchorName}`;
+    return `${presets.getMessageText(data.message, data.varName)} (${data.dataName}) ${
+      data.changeType === "1" ? "+=" : "="
+    } ${data.value}`;
   },
 
   //---------------------------------------------------------------------
@@ -45,7 +47,7 @@ module.exports = {
   // are also the names of the fields stored in the action's JSON data.
   //---------------------------------------------------------------------
 
-  fields: ["anchorName"],
+  fields: ["message", "varName", "dataName", "changeType", "value"],
 
   //---------------------------------------------------------------------
   // Command HTML
@@ -60,8 +62,30 @@ module.exports = {
 
   html(isEvent, data) {
     return `
-<span class="dbminputlabel">Anchor Name</span><br>
-<input id="anchorName" class="round" type="text">`;
+<message-input dropdownLabel="Message" selectId="message" variableContainerId="varNameContainer" variableInputId="varName"></message-input>
+
+<br><br><br>
+
+<div style="padding-top: 8px;">
+	<div style="float: left; width: calc(50% - 12px);">
+		<span class="dbminputlabel">Data Name</span><br>
+		<input id="dataName" class="round" type="text">
+	</div>
+	<div style="float: right; width: calc(50% - 12px);">
+		<span class="dbminputlabel">Control Type</span><br>
+		<select id="changeType" class="round">
+			<option value="0" selected>Set Value</option>
+			<option value="1">Add Value</option>
+		</select>
+	</div>
+</div>
+
+<br><br><br>
+
+<div style="padding-top: 8px;">
+	<span class="dbminputlabel">Value</span><br>
+	<input id="value" class="round" type="text" name="is-eval"><br>
+</div>`;
   },
 
   //---------------------------------------------------------------------
@@ -83,27 +107,28 @@ module.exports = {
   //---------------------------------------------------------------------
 
   action(cache) {
-    this.callNextAction(cache);
-  },
-
-  //---------------------------------------------------------------------
-  // Action Bot Mod Init
-  //
-  // An optional function for action mods. Upon the bot's initialization,
-  // each command/event's actions are iterated through. This is to
-  // initialize responses to interactions created within actions
-  // (e.g. buttons and select menus for Send Message).
-  //
-  // If an action provides inputs for more actions within, be sure
-  // to call the `this.prepareActions` function to ensure all actions are
-  // recursively iterated through.
-  //---------------------------------------------------------------------
-
-  modInit(data, customData, index) {
-    if (!customData.anchors) {
-      customData.anchors = {};
+    const data = cache.actions[cache.index];
+    const type = parseInt(data.message, 10);
+    const varName = this.evalMessage(data.varName, cache);
+    const message = this.getMessage(type, varName, cache);
+    if (message?.setData) {
+      const dataName = this.evalMessage(data.dataName, cache);
+      const isAdd = data.changeType === "1";
+      let val = this.evalMessage(data.value, cache);
+      try {
+        val = this.eval(val, cache);
+      } catch (e) {
+        this.displayError(data, cache, e);
+      }
+      if (val !== undefined) {
+        if (isAdd) {
+          message.addData(dataName, val);
+        } else {
+          message.setData(dataName, val);
+        }
+      }
     }
-    customData.anchors[data.anchorName] = index;
+    this.callNextAction(cache);
   },
 
   //---------------------------------------------------------------------

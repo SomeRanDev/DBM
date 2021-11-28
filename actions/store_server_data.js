@@ -23,9 +23,7 @@ module.exports = {
 
   subtitle(data, presets) {
     const storage = presets.variables;
-    return `${presets.getServerText(data.server, data.varName)} - ${storage[parseInt(data.storage, 10)]} (${
-      data.varName2
-    })`;
+    return `${presets.getServerText(data.server, data.varName)} -> ${presets.getVariableText(data.storage, data.varName2)}`;
   },
 
   //---------------------------------------------------------------------
@@ -39,6 +37,18 @@ module.exports = {
     if (type !== varType) return;
     return [data.varName2, "Unknown Type"];
   },
+
+  //---------------------------------------------------------------------
+  // Action Meta Data
+  //
+  // Helps check for updates and provides info if a custom mod.
+  // If this is a third-party mod, please set "author" and "authorUrl".
+  //
+  // It's highly recommended "preciseCheck" is set to false for third-party mods.
+  // This will make it so the patch version (0.0.X) is not checked.
+  //---------------------------------------------------------------------
+
+  meta: { version: "2.0.8", preciseCheck: true, author: null, authorUrl: null, downloadUrl: null },
 
   //---------------------------------------------------------------------
   // Action Fields
@@ -59,11 +69,6 @@ module.exports = {
   // The "isEvent" parameter will be true if this action is being used
   // for an event. Due to their nature, events lack certain information,
   // so edit the HTML to reflect this.
-  //
-  // The "data" parameter stores constants for select elements to use.
-  // Each is an array: index 0 for commands, index 1 for events.
-  // The names are: sendTargets, members, roles, channels,
-  //                messages, servers, variables
   //---------------------------------------------------------------------
 
   html(isEvent, data) {
