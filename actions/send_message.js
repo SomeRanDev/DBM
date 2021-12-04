@@ -771,11 +771,9 @@ module.exports = {
 
     const isMessageTarget = target instanceof this.getDBM().DiscordJS.Message;
 
-    const canReply =
-      !isMessageTarget &&
-      cache?.interaction?.replied === false &&
-      target?.id?.length > 0 &&
-      (target?.id ?? "") === cache?.interaction?.channel?.id;
+    const sameId = target?.id?.length > 0 && (target?.id ?? "") === cache?.interaction?.channel?.id;
+    const sameChannel = channel === 0 || sameId;
+    const canReply = !isMessageTarget && cache?.interaction?.replied === false && sameChannel;
 
     if (data.dontSend) {
       const varName2 = this.evalMessage(data.varName2, cache);

@@ -140,6 +140,7 @@ module.exports = {
 
     } else if (message?.components) {
 
+      const { MessageActionRow } = this.getDBM().DiscordJS;
       const oldComponents = message.components;
       const newComponents = [];
 
@@ -150,17 +151,18 @@ module.exports = {
 
         for (let j = 0; j < comps.components.length; j++) {
 
-          const comp = comps.components[j];
+          const compData = oldComponents[i];
+          const comps = (compData instanceof MessageActionRow) ? compData.toJSON() : compData;
           let deleted = false;
 
           switch (type) {
             case "allButtons": {
-              if (comp.type !== 2) newComps.push(comp);
+              if (comp.type !== 2 || comp.type === "BUTTON") newComps.push(comp);
               else deleted = true;
               break;
             }
             case "allSelects": {
-              if (comp.type !== 3) newComps.push(comp);
+              if (comp.type !== 3 || comp.type === "SELECT_MENU") newComps.push(comp);
               else deleted = true;
               break;
             }
@@ -204,6 +206,9 @@ module.exports = {
           .then(() => this.callNextAction(cache))
           .catch((err) => this.displayError(data, cache, err));
       } else {
+        if (message.components) {
+          message.components = components;
+        }
         this.callNextAction(cache);
       }
     } else {

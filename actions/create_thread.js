@@ -22,7 +22,11 @@ module.exports = {
   //---------------------------------------------------------------------
 
   subtitle(data, presets) {
-    return `Create Thread Named "${data.threadName}" from ${presets.getMessageText(data.storage, data.storageVarName)}`;
+    return `Create Thread Named "${data.threadName}" from ${
+      data.fromTarget._index === 0 ?
+        presets.getChannelText(data.fromTarget?.channel ?? 0, data.fromTarget?.channelVarName) :
+        presets.getMessageText(data.fromTarget?.message ?? 0, data.fromTarget?.messageVarName)
+      }`;
   },
 
   //---------------------------------------------------------------------
@@ -57,7 +61,7 @@ module.exports = {
   // are also the names of the fields stored in the action's JSON data.
   //---------------------------------------------------------------------
 
-  fields: ["message", "messageVarName", "threadName", "autoArchiveDuration", "reason", "storage", "storageVarName"],
+  fields: ["fromTarget", "threadName", "autoArchiveDuration", "reason", "storage", "storageVarName"],
 
   //---------------------------------------------------------------------
   // Command HTML
@@ -72,9 +76,22 @@ module.exports = {
 
   html(isEvent, data) {
     return `
-<message-input dropdownLabel="Source Message" selectId="message" variableContainerId="varNameContainer" variableInputId="messageVarName"></message-input>
+<tab-system exclusiveTabData retainElementIds spreadOut id="fromTarget">
+  <tab label="Create on Channel" icon="plus" fields='["channel", "channelVarName"]'>
+    <div style="padding: 8px; margin-bottom: 25px;">
+      <channel-input dropdownLabel="Source Channel" selectId="channel" variableContainerId="varNameContainerChannel" variableInputId="channelVarName"></channel-input>
+    </div>
+    <br>
+  </tab>
+  <tab label="Create from Message" icon="plus" fields='["message", "messageVarName"]'>
+    <div style="padding: 8px; margin-bottom: 25px;">
+      <message-input dropdownLabel="Source Message" selectId="message" variableContainerId="varNameContainerMessage" variableInputId="messageVarName"></message-input>
+    </div>
+    <br>
+  </tab>
+</tab-system>
 
-<br><br><br><br>
+<br><br><br><br><br><br><br>
 
 <div style="float: left; width: calc(50% - 12px);">
 
@@ -131,9 +148,19 @@ module.exports = {
 
   action(cache) {
     const data = cache.actions[cache.index];
-    const messageVar = parseInt(data.message, 10);
-    const messageVarName = this.evalMessage(data.messageVarName, cache);
-    const message = this.getMessage(messageVar, messageVarName, cache);
+
+    let messageOrChannel = null;
+
+    if(data.fromTarget._index === 0) {
+      const channelVar = parseInt(data.fromTarget.channel, 10);
+      const channelVarName = this.evalMessage(data.fromTarget.channelVarName, cache);
+      messageOrChannel = this.getChannel(channelVar, channelVarName, cache);
+    } else {
+      const messageVar = parseInt(data.fromTarget.message, 10);
+      const messageVarName = this.evalMessage(data.fromTarget.messageVarName, cache);
+      messageOrChannel = this.getMessage(messageVar, messageVarName, cache);
+    }
+    
 
     const threadOptions = {
       name: this.evalMessage(data.threadName, cache),
@@ -145,18 +172,20 @@ module.exports = {
       threadOptions.reason = reason;
     }
 
-    if (Array.isArray(message)) {
-      this.callListFunc(message, "startThread", [threadOptions]).then(() => this.callNextAction(cache));
-    } else if (message?.startThread) {
-      message
-        .startThread(threadOptions)
-        .then((threadChannel) => {
-          const storage = parseInt(data.storage, 10);
-          const storageVarName = this.evalMessage(data.storageVarName, cache);
-          this.storeValue(threadChannel, storage, storageVarName, cache);
-          this.callNextAction(cache);
-        })
-        .catch((err) => this.displayError(data, cache, err));
+    if (messageOrChannel !== null) {
+      if (Array.isArray(messageOrChannel)) {
+        this.callListFunc(messageOrChannel, "startThread", [threadOptions]).then(() => this.callNextAction(cache));
+      } else if (messageOrChannel?.startThread) {
+        messageOrChannel
+          .startThread(threadOptions)
+          .then((threadChannel) => {
+            const storage = parseInt(data.storage, 10);
+            const storageVarName = this.evalMessage(data.storageVarName, cache);
+            this.storeValue(threadChannel, storage, storageVarName, cache);
+            this.callNextAction(cache);
+          })
+          .catch((err) => this.displayError(data, cache, err));
+      }
     } else {
       this.callNextAction(cache);
     }

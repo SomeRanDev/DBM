@@ -3252,6 +3252,12 @@ Reflect.defineProperty(DiscordJS.Message.prototype, "convertToString", {
 // TextChannel
 //---------------------------------------------------------------------
 
+Reflect.defineProperty(DiscordJS.TextChannel.prototype, "startThread", {
+  value(options) {
+    return this.threads.create(options);
+  },
+});
+
 Reflect.defineProperty(DiscordJS.TextChannel.prototype, "convertToString", {
   value() {
     return `tc-${this.id}`;
