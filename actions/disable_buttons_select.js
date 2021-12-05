@@ -156,6 +156,7 @@ module.exports = {
         for (let j = 0; j < comps.components.length; j++) {
 
           const comp = comps.components[j];
+          const id = comp.custom_id ?? comp.customId;
 
           switch (type) {
             case "all": {
@@ -171,17 +172,17 @@ module.exports = {
               break;
             }
             case "sourceButton": {
-              if (comp.custom_id === sourceButton) comp.disabled = disable;
+              if (id === sourceButton) comp.disabled = disable;
               break;
             }
             case "sourceSelect": {
-              if (comp.custom_id === sourceSelect) comp.disabled = disable;
+              if (id === sourceSelect) comp.disabled = disable;
               break;
             }
             case "findButton":
             case "findSelect": {
               if (searchValue === null) searchValue = this.evalMessage(data.searchValue, cache);
-              if (comp.custom_id === searchValue || comp.label === searchValue) comp.disabled = disable;
+              if (id === searchValue || comp.label === searchValue) comp.disabled = disable;
               break;
             }
           }

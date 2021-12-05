@@ -154,6 +154,7 @@ module.exports = {
           const compData = oldComponents[i];
           const comps = (compData instanceof MessageActionRow) ? compData.toJSON() : compData;
           let deleted = false;
+          const id = comp.custom_id ?? comp.customId;
 
           switch (type) {
             case "allButtons": {
@@ -167,26 +168,26 @@ module.exports = {
               break;
             }
             case "sourceButton": {
-              if (comp.custom_id !== sourceButton) newComps.push(comp);
+              if (id !== sourceButton) newComps.push(comp);
               else deleted = true;
               break;
             }
             case "sourceSelect": {
-              if (comp.custom_id !== sourceSelect) newComps.push(comp);
+              if (id !== sourceSelect) newComps.push(comp);
               else deleted = true;
               break;
             }
             case "findButton":
             case "findSelect": {
               if (searchValue === null) searchValue = this.evalMessage(data.searchValue, cache);
-              if (comp.custom_id !== searchValue && comp.label !== searchValue) newComps.push(comp);
+              if (id !== searchValue && comp.label !== searchValue) newComps.push(comp);
               else deleted = true;
               break;
             }
           }
 
           if (deleted) {
-            this.clearTemporaryInteraction(messageId, comp.custom_id);
+            this.clearTemporaryInteraction(messageId, id);
           }
         }
 

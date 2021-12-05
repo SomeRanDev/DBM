@@ -250,7 +250,7 @@ module.exports = {
               if (searchValue === null) {
                 searchValue = this.evalMessage(data.searchValue, cache);
               }
-              if (comp.custom_id === searchValue || comp.label === searchValue) {
+              if (comp.custom_id === searchValue || comp.customId === searchValue || comp.label === searchValue) {
                 onSelectMenuFound(comp);
               }
               break;
