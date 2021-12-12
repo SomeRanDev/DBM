@@ -146,13 +146,13 @@ module.exports = {
 
       for (let i = 0; i < oldComponents.length; i++) {
 
-        const comps = oldComponents[i].toJSON();
+        const compData = oldComponents[i];
+        const comps = (compData instanceof MessageActionRow) ? compData.toJSON() : compData;
         const newComps = [];
 
         for (let j = 0; j < comps.components.length; j++) {
 
-          const compData = oldComponents[i];
-          const comps = (compData instanceof MessageActionRow) ? compData.toJSON() : compData;
+          const comp = comps.components[j];
           let deleted = false;
           const id = comp.custom_id ?? comp.customId;
 

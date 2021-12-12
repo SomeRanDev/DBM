@@ -32,7 +32,7 @@ module.exports = {
     } else if (data.buttons?.length > 0 || data.selectMenus?.length > 0) {
       text = `${data.buttons.length} Buttons and ${data.selectMenus.length} Select Menus`;
     } else if (data.editMessage && data.editMessage !== "0") {
-      text = `Message Data - ${presets.getVariableText(data.editMessage, data.editMessageVarName)}`;
+      text = `Message Options - ${presets.getVariableText(data.editMessage, data.editMessageVarName)}`;
     } else {
       text = `Nothing (might cause error)`;
     }
@@ -51,7 +51,7 @@ module.exports = {
   variableStorage(data, varType) {
     const type = parseInt(data.storage, 10);
     if (type !== varType) return;
-    return [data.varName2, data.dontSend ? "Message Data" : "Message"];
+    return [data.varName2, data.dontSend ? "Message Options" : "Message"];
   },
 
   //---------------------------------------------------------------------
@@ -461,7 +461,7 @@ module.exports = {
       <br>
 
       <div style="padding-bottom: 12px;">
-        <retrieve-from-variable allowNone dropdownLabel="Message/Data to Edit" selectId="editMessage" variableInputId="editMessageVarName" variableContainerId="editMessageVarNameContainer">
+        <retrieve-from-variable allowNone dropdownLabel="Message/Options to Edit" selectId="editMessage" variableInputId="editMessageVarName" variableContainerId="editMessageVarNameContainer">
           <option value="intUpdate">Interaction Update</option>
         </retrieve-from-variable>
       </div>
