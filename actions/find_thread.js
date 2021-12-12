@@ -5,7 +5,7 @@ module.exports = {
   // This is the name of the action displayed in the editor.
   //---------------------------------------------------------------------
 
-  name: "Create List",
+  name: "Find Thread",
 
   //---------------------------------------------------------------------
   // Action Section
@@ -13,7 +13,7 @@ module.exports = {
   // This is the section the action will fall into.
   //---------------------------------------------------------------------
 
-  section: "Lists and Loops",
+  section: "Channel Control",
 
   //---------------------------------------------------------------------
   // Action Subtitle
@@ -22,8 +22,8 @@ module.exports = {
   //---------------------------------------------------------------------
 
   subtitle(data, presets) {
-    const storage = presets.variables;
-    return `${storage[parseInt(data.storage, 10)]} (${data.varName})`;
+    const info = ["Thread ID", "Thread Name"];
+    return `Find Thread by ${info[parseInt(data.info, 10)]}`;
   },
 
   //---------------------------------------------------------------------
@@ -35,7 +35,7 @@ module.exports = {
   variableStorage(data, varType) {
     const type = parseInt(data.storage, 10);
     if (type !== varType) return;
-    return [data.varName, "List"];
+    return [data.varName, "Thread Channel"];
   },
 
   //---------------------------------------------------------------------
@@ -58,7 +58,7 @@ module.exports = {
   // are also the names of the fields stored in the action's JSON data.
   //---------------------------------------------------------------------
 
-  fields: ["storage", "varName"],
+  fields: ["channel", "channelVarName", "info", "find", "storage", "varName"],
 
   //---------------------------------------------------------------------
   // Command HTML
@@ -72,7 +72,28 @@ module.exports = {
   //---------------------------------------------------------------------
 
   html(isEvent, data) {
-    return `<store-in-variable dropdownLabel="Store In" selectId="storage" variableContainerId="varNameContainer" variableInputId="varName"></store-in-variable>`;
+    return `
+<channel-input dropdownLabel="Source Channel" selectId="channel" variableContainerId="channelVarNameContainer" variableInputId="channelVarName"></channel-input>
+
+<br><br><br>
+
+<div style="padding-top: 8px;">
+	<div style="float: left; width: 40%;">
+		<span class="dbminputlabel">Source Field</span><br>
+		<select id="info" class="round">
+			<option value="0" selected>Thread ID</option>
+			<option value="1">Thread Name</option>
+		</select>
+	</div>
+	<div style="float: right; width: 55%;">
+		<span class="dbminputlabel">Search Value</span><br>
+		<input id="find" class="round" type="text">
+	</div>
+</div>
+
+<br><br><br>
+
+<store-in-variable style="padding-top: 8px;" dropdownLabel="Store In" selectId="storage" variableContainerId="varNameContainer" variableInputId="varName" selectWidth="40%" variableInputWidth="55%"></store-in-variable>`;
   },
 
   //---------------------------------------------------------------------
@@ -94,10 +115,38 @@ module.exports = {
   //---------------------------------------------------------------------
 
   action(cache) {
+    const server = cache.server;
+    if (!server?.channels) {
+      this.callNextAction(cache);
+      return;
+    }
+
     const data = cache.actions[cache.index];
-    const varName = this.evalMessage(data.varName, cache);
-    const storage = parseInt(data.storage, 10);
-    this.storeValue([], storage, varName, cache);
+    const info = parseInt(data.info, 10);
+    const find = this.evalMessage(data.find, cache);
+
+    const channelVar = parseInt(data.channel, 10);
+    const channelVarName = this.evalMessage(data.channelVarName, cache);
+    const channel = this.getChannel(channelVar, channelVarName, cache);
+
+    const threads = channel.threads.cache;
+    let result;
+    switch (info) {
+      case 0:
+        result = threads.get(find);
+        break;
+      case 1:
+        result = threads.find((c) => c.name === find);
+        break;
+      default:
+        break;
+    }
+
+    if (result !== undefined) {
+      const storage = parseInt(data.storage, 10);
+      const varName = this.evalMessage(data.varName, cache);
+      this.storeValue(result, storage, varName, cache);
+    }
     this.callNextAction(cache);
   },
 
