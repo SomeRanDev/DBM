@@ -9,11 +9,12 @@ DBM.version = "2.0.8";
 
 const DiscordJS = (DBM.DiscordJS = require("discord.js"));
 
-if (DiscordJS.version < "13.3.0") {
+const requiredDjsVersion = "13.4.0";
+if (DiscordJS.version < requiredDjsVersion) {
   console.log(
-    'This version of Discord Bot Maker requires discord.js v13.3.0+.\nPlease use "Project > Module Manager" and "Project > Reinstall Node Modules" to update to discord.js v13.3.\n',
+    `This version of Discord Bot Maker requires discord.js ${requiredDjsVersion}+.\nPlease use "Project > Module Manager" and "Project > Reinstall Node Modules" to update to discord.js ${requiredDjsVersion}.\n`,
   );
-  throw new Error("Need discord.js v13.3 to run!!!");
+  throw new Error(`Need discord.js ${requiredDjsVersion} to run!!!`);
 }
 
 const noop = () => void 0;

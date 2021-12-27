@@ -54,7 +54,9 @@ module.exports = {
       "Member Flags List",
       "Member Client Status",
       "Member Custom Status",
-      "Member Server Avatar URL"
+      "Member Server Avatar URL",
+      "Member Timed Out At",
+      "Member Timed Out Timestamp",
     ];
     return `${presets.getMemberText(data.member, data.varName)} - ${info[parseInt(data.info, 10)]}`;
   },
@@ -141,6 +143,12 @@ module.exports = {
       case 30:
         dataType = "Text";
         break;
+      case 31:
+        dataType = "Date";
+        break;
+      case 32:
+        dataType = "Timestamp";
+        break;
     }
     return [data.varName2, dataType];
   },
@@ -220,6 +228,8 @@ module.exports = {
 		<option value="27">Member Permission List</option>
 		<option value="28">Member Flags List</option>
 		<option value="29">Member Client Status</option>
+		<option value="22">Member Timed Out At</option>
+		<option value="23">Member Timed Out Timestamp</option>
 	</select>
 </div>
 
@@ -359,6 +369,12 @@ module.exports = {
         break;
       case 31:
         result = member.displayAvatarURL({ dynamic: true, format: "png", size: 4096 });
+        break;
+      case 32:
+        result = member.communicationDisabledUntil;
+        break;
+      case 33:
+        result = member.communicationDisabledUntilTimestamp;
         break;
       default:
         break;
