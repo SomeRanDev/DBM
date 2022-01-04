@@ -591,7 +591,7 @@ module.exports = {
         }
       }
     }
-    
+
 
     const content = this.evalMessage(message, cache);
     if (content) {
@@ -632,18 +632,18 @@ module.exports = {
         }
 
         if (embedData.author) {
-          embed.setAuthor(
-            this.evalMessage(embedData.author, cache),
-            embedData.authorIcon ? this.evalMessage(embedData.authorIcon, cache) : null,
-            embedData.authorUrl ? this.evalMessage(embedData.authorUrl, cache) : null
-          );
+          embed.setAuthor({
+            name: this.evalMessage(embedData.author, cache),
+            iconURL: embedData.authorIcon ? this.evalMessage(embedData.authorIcon, cache) : null,
+            url: embedData.authorUrl ? this.evalMessage(embedData.authorUrl, cache) : null,
+          });
         }
 
         if (embedData.footerText) {
-          embed.setFooter(
-            this.evalMessage(embedData.footerText, cache),
-            embedData.footerIconUrl ? this.evalMessage(embedData.footerIconUrl, cache) : null
-          );
+          embed.setFooter({
+            text: this.evalMessage(embedData.footerText, cache),
+            iconURL: embedData.footerIconUrl ? this.evalMessage(embedData.footerIconUrl, cache) : null,
+          });
         }
 
         messageOptions.embeds.push(embed);

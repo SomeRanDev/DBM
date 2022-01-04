@@ -97,7 +97,10 @@ module.exports = {
     const storage = parseInt(data.storage, 10);
     const varName = this.evalMessage(data.varName, cache);
     const embed = this.getVariable(storage, varName, cache);
-    embed?.setFooter?.(this.evalMessage(data.message, cache), this.evalMessage(data.footerIcon, cache));
+    embed?.setFooter?.({
+      text: this.evalMessage(data.message, cache),
+      iconURL: this.evalMessage(data.footerIcon, cache),
+    });
     this.callNextAction(cache);
   },
 

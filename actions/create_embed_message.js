@@ -135,7 +135,10 @@ module.exports = {
       embed.setURL(this.evalMessage(data.url, cache));
     }
     if (data.author && data.authorIcon) {
-      embed.setAuthor(this.evalMessage(data.author, cache), this.evalMessage(data.authorIcon, cache));
+      embed.setAuthor({
+        name: this.evalMessage(data.author, cache),
+        iconURL: this.evalMessage(data.authorIcon, cache),
+      });
     }
     if (data.color) {
       embed.setColor(this.evalMessage(data.color, cache));
