@@ -790,10 +790,19 @@ module.exports = {
     }
 
     else if (isEdit === 2 && cache?.interaction?.update) {
-      cache.interaction
-        .update(messageOptions)
-        .then(onComplete)
-        .catch((err) => this.displayError(data, cache, err));
+      let promise = null;
+
+      if (cache.interaction?.replied && cache.interaction?.message?.edit) {
+        promise = cache.interaction.message.edit(messageOptions)
+      } else {
+        promise = cache.interaction.update(messageOptions);
+      }
+      
+      if (promise) {
+        promise
+          .then(onComplete)
+          .catch((err) => this.displayError(data, cache, err));
+      }
     }
 
     else if (isEdit === 1 && target?.edit) {

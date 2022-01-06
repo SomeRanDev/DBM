@@ -201,6 +201,11 @@ module.exports = {
     if (components) {
       if (Array.isArray(message)) {
         this.callListFunc(message, "edit", [{ components }]).then(() => this.callNextAction(cache));
+      } else if (cache.interaction?.message === message && cache.interaction?.update && !cache.interaction?.replied) {
+        cache.interaction
+          .update({ components })
+          .then(() => this.callNextAction(cache))
+          .catch((err) => this.displayError(data, cache, err));
       } else if (message?.edit) {
         message
           .edit({ components })
