@@ -1,11 +1,11 @@
 /******************************************************
  * Discord Bot Maker Bot
- * Version 2.0.10
+ * Version 2.0.11
  * Robert Borghese
  ******************************************************/
 
 const DBM = {};
-DBM.version = "2.0.10";
+DBM.version = "2.0.11";
 
 const DiscordJS = (DBM.DiscordJS = require("discord.js"));
 
@@ -38,6 +38,9 @@ const MsgType = {
   INVALID_SLASH_COMMAND_SERVER_ID: 9,
   DUPLICATE_BUTTON_ID: 10,
   DUPLICATE_SELECT_ID: 11,
+  TOO_MANY_SPACES_SLASH_NAME: 12,
+  SUB_COMMAND_ALREADY_EXISTS: 13,
+  SUB_COMMAND_GROUP_ALREADY_EXISTS: 14,
 
   MISSING_APPLICATION_COMMAND_ACCESS: 100,
   MISSING_MUSIC_MODULES: 101,
@@ -73,6 +76,18 @@ function PrintError(type) {
 
     case MsgType.DUPLICATE_SLASH_COMMAND: {
       warn(format('Slash command with name "%s" already exists!\nThis duplicate will be ignored.\n', arguments[1]));
+      break;
+    }
+    case MsgType.TOO_MANY_SPACES_SLASH_NAME: {
+      warn(format('Slash command with name "%s" has too many spaces!\nSlash command names may only contain a maximum of three different words.\n', arguments[1]));
+      break;
+    }
+    case MsgType.SUB_COMMAND_ALREADY_EXISTS: {
+      warn(format('Slash command with name "%s" cannot exist.\nIt requires the creation of a "sub-command group" called "%s",\nbut there\'s already a command with that name.', arguments[1], arguments[2]));
+      break;
+    }
+    case MsgType.SUB_COMMAND_GROUP_ALREADY_EXISTS: {
+      warn(format('Slash command with name "%s" cannot exist.\nThere is already a "sub-command group" with that name.\nThe "sub-command group" exists because of a command named something like: "%s _____"', arguments[1], arguments[1]));
       break;
     }
     case MsgType.INVALID_SLASH_NAME: {
@@ -332,13 +347,22 @@ Bot.reformatCommands = function () {
           break;
         }
         case "4": {
-          const name = this.validateSlashCommandName(com.name);
-          if (name) {
-            if (this.$slash[name]) {
-              PrintError(MsgType.DUPLICATE_SLASH_COMMAND, name);
+          const names = this.validateSlashCommandName(com.name);
+          if (names) {
+            if (names.length > 3) {
+              PrintError(MsgType.TOO_MANY_SPACES_SLASH_NAME, com.name);
             } else {
-              this.$slash[name] = com;
-              this.applicationCommandData.push(this.createApiJsonFromCommand(com, name));
+              const keyName = names.join(" ");
+              if (this.$slash[keyName]) {
+                PrintError(MsgType.DUPLICATE_SLASH_COMMAND, keyName);
+              } else {
+                this.$slash[keyName] = com;
+                if (names.length === 1) {
+                  this.applicationCommandData.push(this.createApiJsonFromCommand(com, keyName));
+                } else {
+                  this.mergeSubCommandIntoCommandData(names, this.createApiJsonFromCommand(com, names[names.length - 1]));
+                }
+              }
             }
           } else {
             PrintError(MsgType.INVALID_SLASH_NAME, com.name);
@@ -399,7 +423,64 @@ Bot.createApiJsonFromCommand = function (com, name) {
   return result;
 };
 
+Bot.mergeSubCommandIntoCommandData = function (names, data) {
+  data.type = "SUB_COMMAND";
+
+  const baseName = names[0];
+  let baseCommand = this.applicationCommandData.find(data => data.name === baseName) ?? null;
+  if (baseCommand === null) {
+    baseCommand = {
+      name: baseName,
+      description: this.getNoDescriptionText(),
+      options: [],
+    };
+    this.applicationCommandData.push(baseCommand);
+  }
+
+  if (names.length === 2) {
+    if (baseCommand.options.find(d => d.name === data.name && d.type === "SUB_COMMAND_GROUP")) {
+      PrintError(MsgType.SUB_COMMAND_GROUP_ALREADY_EXISTS, names.join(" "));
+    } else {
+      baseCommand.options.push(data);
+    }
+  } else if (names.length >= 3) {
+    if (!baseCommand.options) {
+      baseCommand.options = [];
+    }
+
+    const groupName = names[1];
+    let baseGroup = baseCommand.options.find(option => option.name === groupName) ?? null;
+    if (baseGroup === null) {
+      baseGroup = {
+        name: groupName,
+        description: this.getNoDescriptionText(),
+        type: "SUB_COMMAND_GROUP",
+        options: [],
+      }
+      baseCommand.options.push(baseGroup);
+    } else if (baseGroup.type === "SUB_COMMAND") {
+      PrintError(MsgType.SUB_COMMAND_ALREADY_EXISTS, names.join(" "), `${names[0]} ${names[1]}`);
+      return;
+    }
+
+    baseGroup.options.push(data);
+  }
+};
+
 Bot.validateSlashCommandName = function (name) {
+  if (!name) {
+    return false;
+  }
+
+  const names = name
+    .split(/\s+/)
+    .map(name => this.validateSlashCommandParameterName(name))
+    .filter(name => typeof name === "string");
+
+  return names.length > 0 ? names : false;
+};
+
+Bot.validateSlashCommandParameterName = function (name) {
   if (!name) {
     return false;
   }
@@ -437,7 +518,7 @@ Bot.validateSlashCommandParameters = function (parameters, commandName) {
   const existingNames = {};
   for (let i = 0; i < parameters.length; i++) {
     const paramsData = parameters[i];
-    const name = this.validateSlashCommandName(paramsData.name);
+    const name = this.validateSlashCommandParameterName(paramsData.name);
     if (name) {
       if (!existingNames[name]) {
         existingNames[name] = true;
@@ -795,9 +876,36 @@ Bot.onInteraction = function (interaction) {
 };
 
 Bot.onSlashCommandInteraction = function (interaction) {
-  const interactionName = interaction.commandName;
+  let interactionName = interaction.commandName;
+
+  const group = interaction.options.getSubcommandGroup(false);
+  if (group) {
+    interactionName += " " + group;
+  }
+
+  const sub = interaction.options.getSubcommand(false);
+  if (sub) {
+    interactionName += " " + sub;
+  }
+
   if (this.$slash[interactionName]) {
     Actions.preformActionsFromInteraction(interaction, this.$slash[interactionName], true);
+  }
+};
+
+Bot.onUserContextMenuInteraction = function (interaction) {
+  const interactionName = interaction.commandName;
+  if (this.$user[interactionName]) {
+    interaction._targetMember = interaction.targetUser;
+    Actions.preformActionsFromInteraction(interaction, this.$user[interactionName], true);
+  }
+};
+
+Bot.onUserContextMenuInteraction = function (interaction) {
+  const interactionName = interaction.commandName;
+  if (this.$user[interactionName]) {
+    interaction._targetMember = interaction.targetUser;
+    Actions.preformActionsFromInteraction(interaction, this.$user[interactionName], true);
   }
 };
 
@@ -816,6 +924,45 @@ Bot.onContextMenuInteraction = function (interaction) {
         interaction._targetMessage = message;
         Actions.preformActionsFromInteraction(interaction, this.$msge[interactionName], true);
       }).catch(console.error);
+    }
+  }
+};
+
+Bot.onContextMenuInteraction = function (interaction) {
+  if (interaction.isUserContextMenu()) {
+    this.onUserContextMenuInteraction(interaction);
+  } else if (interaction.isMessageContextMenu()) {
+    this.onMessageContextMenuInteraction(interaction);
+  }
+};
+
+Bot.onUserContextMenuInteraction = function (interaction) {
+  const interactionName = interaction.commandName;
+  if (this.$user[interactionName]) {
+    if (interaction.guild) {
+      interaction.guild.members.fetch(interaction.targetId).then((member) => {
+        interaction._targetMember = member;
+        Actions.preformActionsFromInteraction(interaction, this.$user[interactionName], true);
+      }).catch(console.error);
+    } else {
+      interaction._targetMember = interaction.targetUser;
+      Actions.preformActionsFromInteraction(interaction, this.$user[interactionName], true);
+    }
+  }
+};
+
+Bot.onMessageContextMenuInteraction = function (interaction) {
+  const interactionName = interaction.commandName;
+  if (this.$msge[interactionName]) {
+    const msg = interaction.targetMessage;
+    if (!(msg instanceof DiscordJS.Message) && interaction.channel) {
+      interaction.channel.messages.fetch(interaction.targetId).then((message) => {
+        interaction._targetMessage = message;
+        Actions.preformActionsFromInteraction(interaction, this.$msge[interactionName], true);
+      }).catch(console.error);
+    } else {
+      interaction._targetMessage = msg;
+      Actions.preformActionsFromInteraction(interaction, this.$msge[interactionName], true);
     }
   }
 };

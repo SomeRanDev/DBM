@@ -766,6 +766,8 @@ module.exports = {
             }
           });
         }
+      } else {
+        this.callNextAction(cache);
       }
     };
 

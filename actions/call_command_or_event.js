@@ -61,12 +61,12 @@ module.exports = {
   html(isEvent, data) {
     return `
 <div style="width: 85%;">
-	Command/Event:<br>
+	<span class="dbminputlabel">Command/Event</span><br>
 	<select id="source" class="round">
 		<optgroup id="commands" label="Commands"></optgroup>
 		<optgroup id="events" label="Events"></optgroup>
 	</select><br>
-	Call Type:<br>
+	<span class="dbminputlabel">Call Type</span><br>
 	<select id="type" class="round">
 		<option value="true" selected>Wait for Completion</option>
 		<option value="false">Run Simultaneously</option>
