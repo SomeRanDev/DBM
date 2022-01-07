@@ -45,7 +45,7 @@ module.exports = {
 	// are also the names of the fields stored in the action's JSON data.
 	//---------------------------------------------------------------------
 
-	fields: ["source", "type"],
+	fields: ["fromTarget", "command", "disable"],
 
 	//---------------------------------------------------------------------
 	// Command HTML
@@ -107,7 +107,7 @@ module.exports = {
 
 		const $cmds = glob.$cmds;
 		const coms = document.getElementById("command");
-		let innerHTML = `<option value=""><b> - Current Command - </b></option>\n`;
+		let innerHTML = "";
 		for (let i = 0; i < $cmds.length; i++) {
 			if ($cmds[i] && $cmds[i].comType >= 4 && $cmds[i].comType <= 6) {
 				innerHTML += `<option value="${$cmds[i]._id}">${$cmds[i].name}</option>\n`;
@@ -125,36 +125,71 @@ module.exports = {
 	//---------------------------------------------------------------------
 
 	action(cache) {
-		// TODO
-		/*
 		const data = cache.actions[cache.index];
-		const Files = this.getDBM().Files;
+		const { Bot, Files } = this.getDBM();
 
-		const id = data.source;
-		let actions;
-		const allData = Files.data.commands.concat(Files.data.events);
+		const id = data.command;
+
+		let name;
+		const allData = Files.data.commands;
 		for (let i = 0; i < allData.length; i++) {
 			if (allData[i]?._id === id) {
-				actions = allData[i].actions;
+				name = allData[i].name;
 				break;
 			}
 		}
 
-		if (!actions) {
+		const names = Bot.validateSlashCommandName(name);
+		if (!names || names.length < 1 || !names[0]) {
 			this.callNextAction(cache);
 			return;
 		}
 
-		const waitForCompletion = data.type === "true";
-		let callback = null;
-		if (waitForCompletion) {
-			callback = () => this.callNextAction(cache);
+		name = names[0];
+
+		let memberOrRole = null;
+		let resolvedType = "";
+    if(data.fromTarget._index === 0) {
+      const memberVar = parseInt(data.fromTarget.member, 10);
+      const memberVarName = this.evalMessage(data.fromTarget.memberVarName, cache);
+      memberOrRole = this.getMember(memberVar, memberVarName, cache);
+      resolvedType = "USER";
+    } else {
+      const roleVar = parseInt(data.fromTarget.role, 10);
+      const roleVarName = this.evalMessage(data.fromTarget.roleVarName, cache);
+      memberOrRole = this.getRole(roleVar, roleVarName, cache);
+      resolvedType = "ROLE";
+    }
+
+    if (!memberOrRole) {
+    	this.callNextAction(cache);
+			return;
+    }
+
+    resolvedId = memberOrRole?.id;
+
+    const disable = data.disable === "disable";
+
+		let command = Bot.bot.application.commands.cache.find(com => com.name === name);
+		if (!command) {
+			command = cache.server.commands.cache.find(com => com.name === name);
 		}
-		this.executeSubActions(actions, cache, callback);
-		if (!waitForCompletion) {
+
+		if (command) {
+			const permissions = [
+				{
+					id: resolvedId,
+					type: resolvedType,
+					permission: !disable,
+				},
+			];
+
+			const promise = command.permissions.add({ permissions })
+				.then(() => this.callNextAction(cache))
+				.catch((err) => this.displayError(data, cache, err));
+		} else {
 			this.callNextAction(cache);
 		}
-		*/
 	},
 
 	//---------------------------------------------------------------------

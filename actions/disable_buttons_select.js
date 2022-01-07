@@ -199,7 +199,7 @@ module.exports = {
     if (components) {
       if (Array.isArray(message)) {
         this.callListFunc(message, "edit", [{ components }]).then(() => this.callNextAction(cache));
-      } else if (cache.interaction?.message === message && cache.interaction?.update && !cache.interaction?.replied) {
+      } else if (cache.interaction?.message?.id === message?.id && cache.interaction?.update && !cache.interaction?.replied) {
         cache.interaction
           .update({ components })
           .then(() => this.callNextAction(cache))
