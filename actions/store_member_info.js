@@ -262,10 +262,12 @@ module.exports = {
     const varName = this.evalMessage(data.varName, cache);
     const info = parseInt(data.info, 10);
     const member = this.getMember(memberStorage, varName, cache);
+
     if (!member) {
       this.callNextAction(cache);
       return;
     }
+
     let result;
     switch (info) {
       case 0:
@@ -316,10 +318,12 @@ module.exports = {
       case 15:
         if (member.presence?.status) {
           const status = member.presence.status;
-          if (status === "online") result = "Online";
-          else if (status === "offline") result = "Offline";
-          else if (status === "idle") result = "Idle";
-          else if (status === "dnd") result = "Do Not Disturb";
+          switch(status) {
+            case "online": { result = "Online"; break; }
+            case "offline": { result = "Offline"; break; }
+            case "idle": { result = "Idle"; break; }
+            case "dnd": { result = "Do Not Disturb"; break; }
+          }
         }
         break;
       case 16:
@@ -379,11 +383,13 @@ module.exports = {
       default:
         break;
     }
+
     if (result !== undefined) {
       const storage = parseInt(data.storage, 10);
       const varName2 = this.evalMessage(data.varName2, cache);
       this.storeValue(result, storage, varName2, cache);
     }
+
     this.callNextAction(cache);
   },
 

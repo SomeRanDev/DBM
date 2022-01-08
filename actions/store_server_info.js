@@ -418,19 +418,19 @@ module.exports = {
         break;
       case 26:
         await fetchMembers(true);
-        result = targetServer.members.cache.filter((m) => m.user?.presence?.status === "dnd").size;
+        result = targetServer.members.cache.filter((m) => m.presence?.status === "dnd").size;
         break;
       case 27:
         await fetchMembers(true);
-        result = targetServer.members.cache.filter((m) => m.user?.presence?.status === "online").size;
+        result = targetServer.members.cache.filter((m) => m.presence?.status === "online").size;
         break;
       case 28:
         await fetchMembers(true);
-        result = targetServer.members.cache.filter((m) => m.user?.presence?.status === "offline").size;
+        result = targetServer.members.cache.filter((m) => m.presence?.status === "offline").size;
         break;
       case 29:
         await fetchMembers(true);
-        result = targetServer.members.cache.filter((m) => m.user?.presence?.status === "idle").size;
+        result = targetServer.members.cache.filter((m) => m.presence?.status === "idle").size;
         break;
       case 30:
         result = targetServer.members.cache.filter((m) => m.user?.bot).size;
