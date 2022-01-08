@@ -145,37 +145,39 @@ module.exports = {
     const varName = this.evalMessage(data.varName, cache);
     const variable = this.getVariable(type, varName, cache);
     let result = false;
-    if (variable) {
-      const val1 = variable;
-      const compare = parseInt(data.comparison, 10);
-      let val2 = data.value;
-      if (compare !== 6) val2 = this.evalIfPossible(val2, cache);
-      switch (compare) {
-        case 0:
-          result = val1 !== undefined;
-          break;
-        case 1:
-          result = val1 == val2;
-          break;
-        case 2:
-          result = val1 === val2;
-          break;
-        case 3:
-          result = val1 < val2;
-          break;
-        case 4:
-          result = val1 > val2;
-          break;
-        case 5:
-          if (typeof val1.includes === "function") {
-            result = val1.includes(val2);
-          }
-          break;
-        case 6:
+
+    const val1 = variable;
+    const compare = parseInt(data.comparison, 10);
+    let val2 = data.value;
+    if (compare !== 6) val2 = this.evalIfPossible(val2, cache);
+    switch (compare) {
+      case 0:
+        result = val1 !== undefined;
+        break;
+      case 1:
+        result = val1 == val2;
+        break;
+      case 2:
+        result = val1 === val2;
+        break;
+      case 3:
+        result = val1 < val2;
+        break;
+      case 4:
+        result = val1 > val2;
+        break;
+      case 5:
+        if (typeof val1?.includes === "function") {
+          result = val1.includes(val2);
+        }
+        break;
+      case 6:
+        if (typeof val1?.match === "function") {
           result = Boolean(val1.match(new RegExp("^" + val2 + "$", "i")));
-          break;
-      }
+        }
+        break;
     }
+
     this.executeResults(result, data?.branch ?? data, cache);
   },
 

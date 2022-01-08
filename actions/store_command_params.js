@@ -176,23 +176,55 @@ module.exports = {
   action(cache) {
     const data = cache.actions[cache.index];
     const msg = cache.msg;
-    if (!msg) return this.callNextAction(cache);
+    const interactionOptions = cache.interaction?.options ?? null;
+    if (!msg && !interactionOptions) {
+      return this.callNextAction(cache);
+    }
+
     const { Bot, Files } = this.getDBM();
     const infoType = parseInt(data.info, 10);
     const index = parseInt(this.evalMessage(data.infoIndex, cache), 10) - 1;
-    const separator = Files.data.settings.separator || "\\s+";
-    Bot.populateTagRegex();
-    const content = msg.content?.replace(Bot.tagRegex, "").replace(Bot.checkTag(msg.content), "").trimStart();
+    
+    let separator;
+    let content = null;
+    const getContent = () => {
+      if (content === null) {
+        separator = Files.data.settings.separator || "\\s+";
+        Bot.populateTagRegex();
+        content = msg.content?.replace(Bot.tagRegex, "").replace(Bot.checkTag(msg.content), "").trimStart();
+      }
+      return content;
+    }
+
     let source;
     switch (infoType) {
-      case 0:
-        if (content) {
+
+      case 0: {
+        if (interactionOptions) {
+          const result = this.getParameterFromParameterData(interactionOptions.data[index]);
+          if (result) {
+            source = result;
+          }
+        } else if (msg && getContent()) {
           const params = content.split(new RegExp(separator));
           source = params[index] || "";
         }
         break;
-      case 1:
-        if (content) {
+      }
+
+      case 1: {
+        if (interactionOptions) {
+          const result = [];
+          for (let i = 0; i < index; i++) {
+            const r = this.getParameterFromParameterData(interactionOptions.data[i]);
+            if (r) {
+              result.push(r);
+            }
+          }
+          if (result.length > 0) {
+            source = result;
+          }
+        } else if (msg && getContent()) {
           const params = content.split(new RegExp(separator));
           source = "";
           for (let i = 0; i < index; i++) {
@@ -204,38 +236,64 @@ module.exports = {
           }
         }
         break;
-      case 2:
-        if (msg.mentions.members.size) {
+      }
+
+      case 2: {
+        if (interactionOptions) {
+          const options = interactionOptions.data.filter(option => option.type === "USER");
+          if (options[index]) {
+            source = options[index].member ?? options[index].user;
+          }
+        } else if (msg.mentions.members.size) {
           const members = [...msg.mentions.members.values()];
-          if (members[index - 1]) {
-            source = members[index - 1];
+          if (members[index]) {
+            source = members[index];
           }
         }
         break;
-      case 3:
-        if (msg.mentions.roles.size) {
+      }
+
+      case 3: {
+        if (interactionOptions) {
+          const options = interactionOptions.data.filter(option => option.type === "ROLE");
+          if (options[index]) {
+            source = options[index].role;
+          }
+        } else if (msg.mentions.roles.size) {
           const roles = [...msg.mentions.roles.values()];
-          if (roles[index - 1]) {
-            source = roles[index - 1];
+          if (roles[index]) {
+            source = roles[index];
           }
         }
         break;
-      case 4:
-        if (msg.mentions.channels.size) {
+      }
+
+      case 4: {
+        if (interactionOptions) {
+          const options = interactionOptions.data.filter(option => option.type === "CHANNEL");
+          if (options[index]) {
+            source = options[index].channel;
+          }
+        } else if (msg.mentions.channels.size) {
           const channels = [...msg.mentions.channels.values()];
-          if (channels[index - 1]) {
-            source = channels[index - 1];
+          if (channels[index]) {
+            source = channels[index];
           }
         }
         break;
-      default:
+      }
+
+      default: {
         break;
+      }
     }
+
     if (source) {
       const storage = parseInt(data.storage, 10);
       const varName = this.evalMessage(data.varName, cache);
       this.storeValue(source, storage, varName, cache);
     }
+
     this.callNextAction(cache);
   },
 
