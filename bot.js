@@ -1518,6 +1518,13 @@ Actions.displayError = function (data, cache, err) {
 Actions.getParameterFromInteraction = function (interaction, name) {
   if (interaction?.options?.get) {
     const option = interaction.options.get(name.toLowerCase());
+    return this.getParameterFromParameterData(option);
+  }
+  return null;
+};
+
+Actions.getParameterFromParameterData = function (option) {
+  if (typeof option === "object") {
     switch (option?.type) {
       case "STRING":
       case "INTEGER":
