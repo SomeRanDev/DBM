@@ -744,7 +744,12 @@ module.exports = {
       }
     }
 
+    let defaultResultMsg = null;
     const onComplete = (resultMsg) => {
+      if (defaultResultMsg) {
+        resultMsg ??= defaultResultMsg;
+      }
+
       if (resultMsg) {
         const varName2 = this.evalMessage(data.varName2, cache);
         const storage = parseInt(data.storage, 10);
@@ -793,9 +798,10 @@ module.exports = {
       let promise = null;
 
       if (cache.interaction?.replied && cache.interaction?.message?.edit) {
-        promise = cache.interaction.message.edit(messageOptions)
+        promise = cache.interaction.message.edit(messageOptions);
       } else {
         promise = cache.interaction.update(messageOptions);
+        defaultResultMsg = cache.interaction.message;
       }
       
       if (promise) {
