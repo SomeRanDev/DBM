@@ -893,41 +893,6 @@ Bot.onSlashCommandInteraction = function (interaction) {
   }
 };
 
-Bot.onUserContextMenuInteraction = function (interaction) {
-  const interactionName = interaction.commandName;
-  if (this.$user[interactionName]) {
-    interaction._targetMember = interaction.targetUser;
-    Actions.preformActionsFromInteraction(interaction, this.$user[interactionName], true);
-  }
-};
-
-Bot.onUserContextMenuInteraction = function (interaction) {
-  const interactionName = interaction.commandName;
-  if (this.$user[interactionName]) {
-    interaction._targetMember = interaction.targetUser;
-    Actions.preformActionsFromInteraction(interaction, this.$user[interactionName], true);
-  }
-};
-
-Bot.onContextMenuInteraction = function (interaction) {
-  const interactionName = interaction.commandName;
-  if (this.$user[interactionName]) {
-    if (interaction.guild) {
-      interaction.guild.members.fetch(interaction.targetId).then((member) => {
-        interaction._targetMember = member;
-        Actions.preformActionsFromInteraction(interaction, this.$user[interactionName], true);
-      }).catch(console.error);
-    }
-  } else if (this.$msge[interactionName]) {
-    if (interaction.channel) {
-      interaction.channel.messages.fetch(interaction.targetId).then((message) => {
-        interaction._targetMessage = message;
-        Actions.preformActionsFromInteraction(interaction, this.$msge[interactionName], true);
-      }).catch(console.error);
-    }
-  }
-};
-
 Bot.onContextMenuInteraction = function (interaction) {
   if (interaction.isUserContextMenu()) {
     this.onUserContextMenuInteraction(interaction);
