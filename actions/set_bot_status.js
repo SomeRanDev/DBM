@@ -95,10 +95,7 @@ module.exports = {
     const data = cache.actions[cache.index];
     const status = ["online", "idle", "invisible", "dnd"][parseInt(data.status, 10)];
     if (status) {
-      botClient
-        .setStatus(status)
-        .then(() => this.callNextAction(cache))
-        .catch((err) => this.displayError(data, cache, err));
+      botClient.setStatus(status);
     } else {
       this.callNextAction(cache);
     }
