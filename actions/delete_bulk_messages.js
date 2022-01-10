@@ -116,12 +116,10 @@ module.exports = {
   // so be sure to provide checks for variable existence.
   //---------------------------------------------------------------------
 
-  action(cache) {
+  async action(cache) {
     const data = cache.actions[cache.index];
     const server = cache.server;
-    const channel = parseInt(data.channel, 10);
-    const varName = this.evalMessage(data.varName, cache);
-    const source = this.getChannel(channel, varName, cache);
+    const source = await this.getChannelFromData(data.channel, data.varName, cache);
 
     if (!source?.messages) return this.callNextAction(cache);
 

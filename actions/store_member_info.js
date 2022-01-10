@@ -258,15 +258,14 @@ module.exports = {
 
   async action(cache) {
     const data = cache.actions[cache.index];
-    const memberStorage = parseInt(data.member, 10);
-    const varName = this.evalMessage(data.varName, cache);
-    const info = parseInt(data.info, 10);
-    const member = this.getMember(memberStorage, varName, cache);
+    const member = await this.getMemberFromData(data.member, data.varName, cache);
 
     if (!member) {
       this.callNextAction(cache);
       return;
     }
+
+    const info = parseInt(data.info, 10);
 
     let result;
     switch (info) {

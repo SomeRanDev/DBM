@@ -147,12 +147,10 @@ module.exports = {
   // so be sure to provide checks for variable existence.
   //---------------------------------------------------------------------
 
-  action(cache) {
+  async action(cache) {
     const data = cache.actions[cache.index];
 
-    const threadVar = parseInt(data.thread, 10);
-    const threadVarName = this.evalMessage(data.threadVarName, cache);
-    const targetChannel = this.getChannel(threadVar, threadVarName, cache);
+    const targetChannel = await this.getChannelFromData(data.thread, data.threadVarName, cache);
 
     if (!targetChannel) {
       this.callNextAction(cache);

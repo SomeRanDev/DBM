@@ -108,9 +108,10 @@ module.exports = {
   // so be sure to provide checks for variable existence.
   //---------------------------------------------------------------------
 
-  action(cache) {
+  async action(cache) {
     const data = cache.actions[cache.index];
     const { DiscordJS, Images } = this.getDBM();
+
     const storage = parseInt(data.storage, 10);
     const varName = this.evalMessage(data.varName, cache);
     const image = this.getVariable(storage, varName, cache);
@@ -118,11 +119,12 @@ module.exports = {
       this.callNextAction(cache);
       return;
     }
-    const channel = parseInt(data.channel, 10);
-    const varName2 = this.evalMessage(data.varName2, cache);
+
+    const target = await this.getSendTargetFromData(data.channel, data.varName2, cache);
+
     const varName3 = this.evalMessage(data.varName3, cache);
     const storage2 = parseInt(data.storage2, 10);
-    const target = this.getSendTarget(channel, varName2, cache);
+
     if (!Array.isArray(target) && !target?.send) return this.callNextAction(cache);
     Images.createBuffer(image)
       .then((buffer) => {

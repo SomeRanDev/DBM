@@ -110,9 +110,10 @@ module.exports = {
   // so be sure to provide checks for variable existence.
   //---------------------------------------------------------------------
 
-  action(cache) {
+  async action(cache) {
     const data = cache.actions[cache.index];
-    const message = this.getMessage(parseInt(data.message, 10), this.evalMessage(data.varName, cache), cache);
+    const message = await this.getMessageFromData(data.message, data.varName, cache);
+
     if (message?.data) {
       const dataName = this.evalMessage(data.dataName, cache);
       const defVal = this.eval(this.evalMessage(data.defaultVal, cache), cache);

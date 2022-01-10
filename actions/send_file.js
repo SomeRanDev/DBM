@@ -94,16 +94,19 @@ module.exports = {
   // so be sure to provide checks for variable existence.
   //---------------------------------------------------------------------
 
-  action(cache) {
+  async action(cache) {
     const data = cache.actions[cache.index];
     const { DiscordJS } = this.getDBM();
-    const channel = parseInt(data.channel, 10);
     const message = data.message;
-    if (!channel || !message) return this.callNextAction(cache);
-    const varName = this.evalMessage(data.varName, cache);
-    const target = this.getSendTarget(channel, varName, cache);
+    if (!data.channel || !message) {
+      return this.callNextAction(cache);
+    }
+
+    const target = await this.getSendTargetFromData(data.channel, data.varName, cache);
+
     const file = new DiscordJS.MessageAttachment(this.getLocalFile(this.evalMessage(data.file, cache)));
     const options = { content: this.evalMessage(message, cache), files: [file] };
+
     if (Array.isArray(target)) {
       this.callListFunc(target, "send", [options]).then(() => this.callNextAction(cache));
     } else if (target?.send) {

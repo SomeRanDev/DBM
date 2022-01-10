@@ -560,13 +560,16 @@ module.exports = {
   // so be sure to provide checks for variable existence.
   //---------------------------------------------------------------------
 
-  action(cache) {
+  async action(cache) {
     const data = cache.actions[cache.index];
+
     const channel = parseInt(data.channel, 10);
     const message = data.message;
-    if (channel === undefined || message === undefined) return;
-    const varName = this.evalMessage(data.varName, cache);
-    let target = this.getSendReplyTarget(channel, varName, cache);
+    if (data.channel === undefined || message === undefined) {
+      return;
+    }
+
+    let target = await this.getSendReplyTarget(channel, this.evalMessage(data.varName, cache), cache);
 
     let messageOptions = {};
 

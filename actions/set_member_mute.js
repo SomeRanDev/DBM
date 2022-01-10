@@ -98,11 +98,9 @@ module.exports = {
   // so be sure to provide checks for variable existence.
   //---------------------------------------------------------------------
 
-  action(cache) {
+  async action(cache) {
     const data = cache.actions[cache.index];
-    const type = parseInt(data.member, 10);
-    const varName = this.evalMessage(data.varName, cache);
-    const member = this.getMember(type, varName, cache);
+    const member = await this.getMemberFromData(data.member, data.varName, cache);
     const reason = this.evalMessage(data.reason, cache);
     if (Array.isArray(member)) {
       this.callListFunc(

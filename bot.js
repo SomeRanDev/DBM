@@ -48,6 +48,8 @@ const MsgType = {
   MUTABLE_VOLUME_DISABLED: 200,
   ERROR_GETTING_YT_INFO: 201,
   ERROR_CREATING_AUDIO: 202,
+
+  MISSING_MEMBER_INTENT_FIND_USER_ID: 300,
 };
 
 function PrintError(type) {
@@ -185,6 +187,11 @@ function PrintError(type) {
     case MsgType.ERROR_CREATING_AUDIO: {
       warn(format('Error creating audio resource.\n%s', arguments[1]));
     }
+
+
+    case MsgType.MISSING_MEMBER_INTENT_FIND_USER_ID: {
+      warn(' - DBM Warning - \nFind User (by Name/ID) may freeze or error because\nthe bot has not enabled the Server Member Events Intent.')
+    }
   }
 }
 
@@ -253,6 +260,7 @@ Bot.initBot = function () {
   if (this.usePartials()) {
     options.partials = this.partials();
   }
+  this.hasMemberIntents = (options.intents & DiscordJS.Intents.FLAGS.GUILD_MEMBERS) !== 0;
   this.bot = new DiscordJS.Client(options);
 };
 
@@ -1510,6 +1518,37 @@ Actions.getParameterFromParameterData = function (option) {
   return null;
 };
 
+Actions.findMemberOrUserFromName = async function (name, server) {
+  if (!Bot.bot.hasMemberIntents) {
+    PrintError(MsgType.MISSING_MEMBER_INTENT_FIND_USER_ID);
+  }
+  const user = Bot.bot.users.cache.find((user) => user.username === name);
+  if (user) {
+    const result = await server.members.fetch(user);
+    if (result) {
+      return result;
+    }
+  } else if (server) {
+    const allMembers = await server.members.fetch();
+    const member = allMembers.find((user) => user.username === name);
+    if (member) {
+      return member;
+    }
+  }
+  return null;
+};
+
+Actions.findMemberOrUserFromID = async function (id, server) {
+  if (!Bot.bot.hasMemberIntents) {
+    PrintError(MsgType.MISSING_MEMBER_INTENT_FIND_USER_ID);
+  }
+  const result = await Bot.bot.users.fetch(id);
+  if (result) {
+    return result;
+  }
+  return null;
+};
+
 Actions.getTargetFromVariableOrParameter = function (varType, varName, cache) {
   switch (varType) {
     case 0:
@@ -1532,10 +1571,14 @@ Actions.getTargetFromVariableOrParameter = function (varType, varName, cache) {
     default:
       break;
   }
-  return false;
+  return null;
 };
 
-Actions.getSendTarget = function (type, varName, cache) {
+Actions.getSendTargetFromData = async function (typeData, varNameData, cache) {
+  return await this.getSendTarget(parseInt(typeData, 10), this.evalMessage(varNameData, cache), cache);
+};
+
+Actions.getSendTarget = async function (type, varName, cache) {
   const { interaction, msg, server } = cache;
   switch (type) {
     case 0:
@@ -1593,7 +1636,7 @@ Actions.getSendTarget = function (type, varName, cache) {
       break;
     case 100: {
       const searchValue = this.evalMessage(varName, cache);
-      const result = Bot.bot.users.cache.find((user) => user.username === searchValue);
+      const result = await this.findMemberOrUserFromName(searchValue, cache);
       if (result) {
         return result;
       }
@@ -1601,7 +1644,7 @@ Actions.getSendTarget = function (type, varName, cache) {
     }
     case 101: {
       const searchValue = this.evalMessage(varName, cache);
-      const result = Bot.bot.users.cache.get(searchValue);
+      const result = await this.findMemberOrUserFromID(searchValue, cache.server);
       if (result) {
         return result;
       }
@@ -1626,9 +1669,10 @@ Actions.getSendTarget = function (type, varName, cache) {
     default:
       return this.getTargetFromVariableOrParameter(type - 5, varName, cache);
   }
+  return null;
 };
 
-Actions.getSendReplyTarget = function (type, varName, cache) {
+Actions.getSendReplyTarget = async function (type, varName, cache) {
   const { interaction, msg, server } = cache;
   switch (type) {
     case 13:
@@ -1638,11 +1682,16 @@ Actions.getSendReplyTarget = function (type, varName, cache) {
       }
       break;
     default:
-      return this.getSendTarget(type, varName, cache);
+      return await this.getSendTarget(type, varName, cache);
   }
+  return null;
 };
 
-Actions.getMember = function (type, varName, cache) {
+Actions.getMemberFromData = async function (typeData, varNameData, cache) {
+  return await this.getMember(parseInt(typeData, 10), this.evalMessage(varNameData, cache), cache);
+};
+
+Actions.getMember = async function (type, varName, cache) {
   const { interaction, msg } = cache;
   switch (type) {
     case 0: {
@@ -1666,7 +1715,7 @@ Actions.getMember = function (type, varName, cache) {
       break;
     case 100: {
       const searchValue = this.evalMessage(varName, cache);
-      const result = Bot.bot.users.cache.find((user) => user.username === searchValue);
+      const result = await this.findMemberOrUserFromName(searchValue, cache.server);
       if (result) {
         return result;
       }
@@ -1674,7 +1723,7 @@ Actions.getMember = function (type, varName, cache) {
     }
     case 101: {
       const searchValue = this.evalMessage(varName, cache);
-      const result = Bot.bot.users.cache.get(searchValue);
+      const result = await this.findMemberOrUserFromID(searchValue, cache.server);
       if (result) {
         return result;
       }
@@ -1683,9 +1732,14 @@ Actions.getMember = function (type, varName, cache) {
     default:
       return this.getTargetFromVariableOrParameter(type - 2, varName, cache);
   }
+  return null;
 };
 
-Actions.getMessage = function (type, varName, cache) {
+Actions.getMessageFromData = async function (typeData, varNameData, cache) {
+  return await this.getMessage(parseInt(typeData, 10), this.evalMessage(varNameData, cache), cache);
+};
+
+Actions.getMessage = async function (type, varName, cache) {
   switch (type) {
     case 0:
       const msg = cache.getMessage();
@@ -1696,9 +1750,14 @@ Actions.getMessage = function (type, varName, cache) {
     default:
       return this.getTargetFromVariableOrParameter(type - 1, varName, cache);
   }
+  return null;
 };
 
-Actions.getServer = function (type, varName, cache) {
+Actions.getServerFromData = async function (typeData, varNameData, cache) {
+  return await this.getServer(parseInt(typeData, 10), this.evalMessage(varNameData, cache), cache);
+};
+
+Actions.getServer = async function (type, varName, cache) {
   const server = cache.server;
   switch (type) {
     case 0:
@@ -1725,9 +1784,14 @@ Actions.getServer = function (type, varName, cache) {
     default:
       return this.getTargetFromVariableOrParameter(type - 1, varName, cache);
   }
+  return null;
 };
 
-Actions.getRole = function (type, varName, cache) {
+Actions.getRoleFromData = async function (typeData, varNameData, cache) {
+  return await this.getRole(parseInt(typeData, 10), this.evalMessage(varNameData, cache), cache);
+};
+
+Actions.getRole = async function (type, varName, cache) {
   const { interaction, msg, server } = cache;
   switch (type) {
     case 0: {
@@ -1773,9 +1837,14 @@ Actions.getRole = function (type, varName, cache) {
     default:
       return this.getTargetFromVariableOrParameter(type - 3, varName, cache);
   }
+  return null;
 };
 
-Actions.getChannel = function (type, varName, cache) {
+Actions.getChannelFromData = async function (typeData, varNameData, cache) {
+  return await this.getChannel(parseInt(typeData, 10), this.evalMessage(varNameData, cache), cache);
+};
+
+Actions.getChannel = async function (type, varName, cache) {
   const { interaction, msg, server } = cache;
   switch (type) {
     case 0:
@@ -1831,9 +1900,14 @@ Actions.getChannel = function (type, varName, cache) {
     default:
       return this.getTargetFromVariableOrParameter(type - 3, varName, cache);
   }
+  return null;
 };
 
-Actions.getVoiceChannel = function (type, varName, cache) {
+Actions.getVoiceChannelFromData = async function (typeData, varNameData, cache) {
+  return await this.getVoiceChannel(parseInt(typeData, 10), this.evalMessage(varNameData, cache), cache);
+};
+
+Actions.getVoiceChannel = async function (type, varName, cache) {
   const { interaction, msg, server } = cache;
   switch (type) {
     case 0: {
@@ -1882,6 +1956,7 @@ Actions.getVoiceChannel = function (type, varName, cache) {
     default:
       return this.getTargetFromVariableOrParameter(type - 3, varName, cache);
   }
+  return null;
 };
 
 Actions.getAnyChannel = function (type, varName, cache) {

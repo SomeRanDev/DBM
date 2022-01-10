@@ -107,16 +107,14 @@ module.exports = {
   // so be sure to provide checks for variable existence.
   //---------------------------------------------------------------------
 
-  action(cache) {
+  async action(cache) {
     const data = cache.actions[cache.index];
     const server = cache.server;
     if (!server) {
       this.callNextAction(cache);
       return;
     }
-    const storage = parseInt(data.storage, 10);
-    const varName = this.evalMessage(data.varName, cache);
-    const channel = this.getChannel(storage, varName, cache);
+    const channel = await this.getChannelFromData(data.storage, data.varName, cache);
     const reason = this.evalMessage(data.reason, cache);
     const options = { [data.permission]: [true, false, null][parseInt(data.state, 10)] };
 

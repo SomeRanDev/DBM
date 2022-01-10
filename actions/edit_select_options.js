@@ -164,11 +164,9 @@ module.exports = {
   // so be sure to provide checks for variable existence.
   //---------------------------------------------------------------------
 
-  action(cache) {
+  async action(cache) {
     const data = cache.actions[cache.index];
-    const messageVar = parseInt(data.message, 10);
-    const messageVarName = this.evalMessage(data.messageVarName, cache);
-    const message = this.getMessage(messageVar, messageVarName, cache);
+    const message = await this.getMessageFromData(data.message, data.messageVarName, cache);
 
     const type = data.type;
 

@@ -175,12 +175,10 @@ module.exports = {
   // so be sure to provide checks for variable existence.
   //---------------------------------------------------------------------
 
-  action(cache) {
+  async action(cache) {
     const data = cache.actions[cache.index];
-    const role = parseInt(data.role, 10);
-    const varName = this.evalMessage(data.varName, cache);
+    const targetRole = await this.getRoleFromData(data.role, data.varName, cache);
     const info = parseInt(data.info, 10);
-    const targetRole = this.getRole(role, varName, cache);
     if (!targetRole) {
       this.callNextAction(cache);
       return;

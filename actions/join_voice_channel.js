@@ -80,13 +80,15 @@ module.exports = {
   // so be sure to provide checks for variable existence.
   //---------------------------------------------------------------------
 
-  action(cache) {
+  async action(cache) {
     const data = cache.actions[cache.index];
     const Audio = this.getDBM().Audio;
-    const type = parseInt(data.channel, 10);
-    const varName = this.evalMessage(data.varName, cache);
-    const channel = this.getVoiceChannel(type, varName, cache);
-    if (channel) Audio.connectToVoice(channel);
+
+    const channel = await this.getVoiceChannelFromData(data.channel, data.varName, cache);
+    if (channel) {
+      Audio.connectToVoice(channel);
+    }
+
     this.callNextAction(cache);
   },
 

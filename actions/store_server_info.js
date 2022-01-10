@@ -327,15 +327,20 @@ module.exports = {
 
   async action(cache) {
     const data = cache.actions[cache.index];
-    const server = parseInt(data.server, 10);
-    const varName = this.evalMessage(data.varName, cache);
+    const targetServer = await this.getServerFromData(data.server, data.varName, cache);
+
+    if (!targetServer) {
+      return this.callNextAction(cache);
+    }
+
+    const fetchMembers = async (withPresences = false) => {
+      if (targetServer.memberCount !== targetServer.members.cache.size) {
+        await targetServer.members.fetch({ withPresences });
+      }
+    }
+
     const info = parseInt(data.info, 10);
-    const targetServer = this.getServer(server, varName, cache);
-    if (!targetServer) return this.callNextAction(cache);
-    const fetchMembers = async (withPresences = false) =>
-      targetServer.memberCount !== targetServer.members.cache.size
-        ? await targetServer.members.fetch({ withPresences })
-        : null;
+
     let result;
     switch (info) {
       case 0:
@@ -496,11 +501,13 @@ module.exports = {
       default:
         break;
     }
+
     if (result !== undefined) {
       const storage = parseInt(data.storage, 10);
       const varName2 = this.evalMessage(data.varName2, cache);
       this.storeValue(result, storage, varName2, cache);
     }
+
     this.callNextAction(cache);
   },
 

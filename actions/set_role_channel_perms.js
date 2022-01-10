@@ -111,15 +111,10 @@ module.exports = {
   // so be sure to provide checks for variable existence.
   //---------------------------------------------------------------------
 
-  action(cache) {
+  async action(cache) {
     const data = cache.actions[cache.index];
-    const storage = parseInt(data.channel, 10);
-    const varName = this.evalMessage(data.varName, cache);
-    const channel = this.getChannel(storage, varName, cache);
-
-    const storage2 = parseInt(data.role, 10);
-    const varName2 = this.evalMessage(data.varName2, cache);
-    const role = this.getRole(storage2, varName2, cache);
+    const channel = await this.getChannelFromData(data.channel, data.varName, cache);
+    const role = await this.getRoleFromData(data.role, data.varName2, cache);
     const reason = this.evalMessage(data.reason, cache);
 
     const options = { [data.permission]: [true, null, false][parseInt(data.state, 10)] };

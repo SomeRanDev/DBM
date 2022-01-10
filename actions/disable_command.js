@@ -124,7 +124,7 @@ module.exports = {
 	// so be sure to provide checks for variable existence.
 	//---------------------------------------------------------------------
 
-	action(cache) {
+	async action(cache) {
 		const data = cache.actions[cache.index];
 		const { Bot, Files } = this.getDBM();
 
@@ -150,14 +150,10 @@ module.exports = {
 		let memberOrRole = null;
 		let resolvedType = "";
     if(data.fromTarget._index === 0) {
-      const memberVar = parseInt(data.fromTarget.member, 10);
-      const memberVarName = this.evalMessage(data.fromTarget.memberVarName, cache);
-      memberOrRole = this.getMember(memberVar, memberVarName, cache);
+      memberOrRole = await this.getMemberFromData(data.fromTarget.member, data.fromTarget.memberVarName, cache);
       resolvedType = "USER";
     } else {
-      const roleVar = parseInt(data.fromTarget.role, 10);
-      const roleVarName = this.evalMessage(data.fromTarget.roleVarName, cache);
-      memberOrRole = this.getRole(roleVar, roleVarName, cache);
+      memberOrRole = await this.getRoleFromData(data.fromTarget.role, data.fromTarget.roleVarName, cache);
       resolvedType = "ROLE";
     }
 

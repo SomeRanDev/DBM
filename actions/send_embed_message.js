@@ -105,17 +105,21 @@ module.exports = {
   // so be sure to provide checks for variable existence.
   //---------------------------------------------------------------------
 
-  action(cache) {
+  async action(cache) {
     const data = cache.actions[cache.index];
+
     const storage = parseInt(data.storage, 10);
     const varName = this.evalMessage(data.varName, cache);
     const embed = this.getVariable(storage, varName, cache);
-    if (!embed) return this.callNextAction(cache);
-    const channel = parseInt(data.channel, 10);
-    const varName2 = this.evalMessage(data.varName2, cache);
+    if (!embed) {
+      return this.callNextAction(cache);
+    }
+
+    const target = await this.getSendTargetFromData(data.channel, data.varName2, cache);
+
     const varName3 = this.evalMessage(data.varName3, cache);
     const storage3 = parseInt(data.storage3, 10);
-    const target = this.getSendTarget(channel, varName2, cache);
+
     if (Array.isArray(target)) {
       this.callListFunc(target, "send", [{ embeds: [embed] }]).then(() => this.callNextAction(cache));
     } else if (target?.send) {

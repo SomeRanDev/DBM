@@ -131,13 +131,11 @@ module.exports = {
   // so be sure to provide checks for variable existence.
   //---------------------------------------------------------------------
 
-  action(cache) {
+  async action(cache) {
     const data = cache.actions[cache.index];
-    const storage = parseInt(data.channel, 10);
-    const varName = this.evalMessage(data.varName, cache);
-    const channel = this.getChannel(storage, varName, cache);
+    const channel = await this.getChannelFromData(data.channel, data.varName, cache);
     const reason = this.evalMessage(data.reason, cache);
-    /** @type {import('discord.js').CreateInviteOptions} */
+
     const options = {};
     if (data.maxUses) {
       options.maxUses = parseInt(this.evalMessage(data.maxUses, cache), 10);
@@ -153,6 +151,7 @@ module.exports = {
     if (reason) options.reason = reason;
     options.temporary = data.temporary === "true";
     options.unique = data.unique === "true";
+
     if (Array.isArray(channel)) {
       this.callListFunc(channel, "createInvite", [options]).then((invite) => {
         const varName2 = this.evalMessage(data.varName2, cache);

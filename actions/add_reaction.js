@@ -126,11 +126,9 @@ module.exports = {
   // so be sure to provide checks for variable existence.
   //---------------------------------------------------------------------
 
-  action(cache) {
+  async action(cache) {
     const data = cache.actions[cache.index];
-    const storage = parseInt(data.storage, 10);
-    const varName = this.evalMessage(data.varName, cache);
-    const message = this.getMessage(storage, varName, cache);
+    const message = await this.getMessageFromData(data.storage, data.varName, cache);
 
     const type = parseInt(data.emoji, 10);
     let emoji;

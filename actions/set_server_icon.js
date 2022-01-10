@@ -99,13 +99,16 @@ module.exports = {
   // so be sure to provide checks for variable existence.
   //---------------------------------------------------------------------
 
-  action(cache) {
+  async action(cache) {
     const data = cache.actions[cache.index];
     const { Images } = this.getDBM();
-    const varName = this.evalMessage(data.varName, cache);
-    const server = this.getServer(parseInt(data.server, 10), varName, cache);
+    const server = await this.getServerFromData(data.server, data.varName, cache);
     const reason = this.evalMessage(data.reason, cache);
-    if (!Array.isArray(server) && !server?.setIcon) return this.callNextAction(cache);
+
+    if (!Array.isArray(server) && !server?.setIcon) {
+      return this.callNextAction(cache);
+    }
+
     const varName2 = this.evalMessage(data.varName2, cache);
     const image = this.getVariable(parseInt(data.storage, 10), varName2, cache);
     Images.createBuffer(image)
