@@ -1286,7 +1286,7 @@ Actions.modDirectories = function () {
 };
 
 Actions.preformActionsFromMessage = function (msg, cmd) {
-  if (this.checkConditions(msg.guild, msg.member, msg.author, cmd) && this.checkTimeRestriction(msg.author, cmd)) {
+  if (this.checkConditions(msg.guild, msg.member, msg.author, cmd) && this.checkTimeRestriction(msg.author, msg, cmd)) {
     this.invokeActions(msg, cmd.actions, cmd);
   }
 };
@@ -1295,7 +1295,7 @@ Actions.preformActionsFromInteraction = function (interaction, cmd, meta = null,
   const invalidPermissions = this.getInvalidPermissionsResponse();
   const invalidCooldown = this.getInvalidCooldownResponse();
   if (this.checkConditions(interaction.guild, interaction.member, interaction.user, cmd)) {
-    const timeRestriction = this.checkTimeRestriction(interaction.user, cmd, true);
+    const timeRestriction = this.checkTimeRestriction(interaction.user, interaction, cmd, true);
     if (timeRestriction === true) {
       this.invokeInteraction(interaction, cmd.actions, initialTempVars, meta === true ? cmd : meta);
     } else if (invalidCooldown) {
@@ -1339,7 +1339,7 @@ Actions.checkConditions = function (guild, member, user, cmd) {
   }
 };
 
-Actions.checkTimeRestriction = function (user, cmd, returnTimeString = false) {
+Actions.checkTimeRestriction = function (user, msgOrInteraction, cmd, returnTimeString = false) {
   if (!cmd._timeRestriction) return true;
   if (!user) return false;
   const mid = user.id;
@@ -1360,7 +1360,7 @@ Actions.checkTimeRestriction = function (user, cmd, returnTimeString = false) {
     } else {
       const remaining = cmd._timeRestriction - Math.floor(diff / 1000);
       const timeString = this.generateTimeString(remaining);
-      Events.callEvents("38", 1, 3, 2, false, "", cmd?.msg?.member, timeString);
+      Events.callEvents("38", 1, 3, 2, false, "", msgOrInteraction?.member, timeString);
       return returnTimeString ? timeString : false;
     }
   }
