@@ -9,7 +9,7 @@ DBM.version = "2.0.11";
 
 const DiscordJS = (DBM.DiscordJS = require("discord.js"));
 
-const requiredDjsVersion = "13.5.0";
+const requiredDjsVersion = "13.5.1";
 if (DiscordJS.version < requiredDjsVersion) {
   console.log(
     `This version of Discord Bot Maker requires discord.js ${requiredDjsVersion}+.\nPlease use "Project > Module Manager" and "Project > Reinstall Node Modules" to update to discord.js ${requiredDjsVersion}.\n`,
@@ -2269,8 +2269,8 @@ Events.generateData = function () {
     ["channelDelete", 1, 0, 2, true, (arg1) => arg1.type === "GUILD_TEXT"],
     ["roleCreate", 1, 0, 2],
     ["roleDelete", 1, 0, 2],
-    ["guildBanAdd", 3, 0, 1],
-    ["guildBanRemove", 3, 0, 1],
+    ["guildBanAdd", 200, 0, 2],
+    ["guildBanRemove", 200, 0, 2],
     ["channelCreate", 1, 0, 2, true, (arg1) => arg1.type === "GUILD_VOICE"],
     ["channelDelete", 1, 0, 2, true, (arg1) => arg1.type === "GUILD_VOICE"],
     ["emojiCreate", 1, 0, 2],
@@ -2350,6 +2350,8 @@ Events.getObject = function (id, arg1, arg2) {
       return arg2.guild;
     case 100:
       return arg1.guildMember.guild;
+    case 200:
+      return arg1.user;
   }
 };
 
