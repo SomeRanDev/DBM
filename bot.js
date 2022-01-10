@@ -816,17 +816,13 @@ Bot.checkIncludes = function (msg) {
   const icds_len = icds.length;
   for (let i = 0; i < icds_len; i++) {
     if (!icds[i]?.name) continue;
-    if (text.match(new RegExp("\\b" + icds[i].name + "\\b", "i"))) {
-      Actions.preformActionsFromMessage(msg, icds[i]);
-    } else if (icds[i]._aliases) {
-      const aliases = icds[i]._aliases;
-      const aliases_len = aliases.length;
-      for (let j = 0; j < aliases_len; j++) {
-        if (text.match(new RegExp("\\b" + aliases[j] + "\\b", "i"))) {
-          Actions.preformActionsFromMessage(msg, icds[i]);
-          break;
-        }
+    if (icds[i]._aliases) {
+      const words = [icds[i].name].concat(icds[i]._aliases);
+      if (text.match(new RegExp("\\b(?:" + words.join("|") + ")\\b", "i"))) {
+        Actions.preformActionsFromMessage(msg, icds[i]);
       }
+    } else if (text.match(new RegExp("\\b" + icds[i].name + "\\b", "i"))) {
+      Actions.preformActionsFromMessage(msg, icds[i]);
     }
   }
 };
