@@ -96,9 +96,8 @@ module.exports = {
     const status = ["online", "idle", "invisible", "dnd"][parseInt(data.status, 10)];
     if (status) {
       botClient.setStatus(status);
-    } else {
-      this.callNextAction(cache);
     }
+    this.callNextAction(cache);
   },
 
   //---------------------------------------------------------------------
