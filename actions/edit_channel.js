@@ -211,7 +211,7 @@ module.exports = {
   // so be sure to provide checks for variable existence.
   //---------------------------------------------------------------------
 
-  action(cache) {
+  async action(cache) {
     const data = cache.actions[cache.index];
     const reason = this.evalMessage(data.reason, cache);
 
@@ -277,7 +277,7 @@ module.exports = {
 
     const channelStorage = parseInt(data.channel, 10);
     const channelVarName = this.evalMessage(data.channelVarName, cache);
-    const channel = this.getAnyChannel(channelStorage, channelVarName, cache);
+    const channel = await this.getAnyChannel(channelStorage, channelVarName, cache);
 
     if (Array.isArray(channel)) {
       this.callListFunc(channel, "edit", [channelData, reason]).then(() => this.callNextAction(cache));

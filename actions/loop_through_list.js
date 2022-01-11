@@ -185,7 +185,7 @@ module.exports = {
   // so be sure to provide checks for variable existence.
   //---------------------------------------------------------------------
 
-  action(cache) {
+  async action(cache) {
     const data = cache.actions[cache.index];
 
     const actions = data.actions;
@@ -194,9 +194,7 @@ module.exports = {
       return;
     }
 
-    const storage = parseInt(data.list, 10);
-    const varName = this.evalMessage(data.varName, cache);
-    const list = this.getList(storage, varName, cache);
+    const list = await this.getListFromData(data.list, data.varName, cache);
 
     const waitForCompletion = data.type === "true";
 

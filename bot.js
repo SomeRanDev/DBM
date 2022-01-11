@@ -1959,17 +1959,22 @@ Actions.getVoiceChannel = async function (type, varName, cache) {
   return null;
 };
 
-Actions.getAnyChannel = function (type, varName, cache) {
+Actions.getAnyChannel = async function (type, varName, cache) {
   switch (type) {
-    case 10: return this.getVoiceChannel(0, varName, cache);
-    case 11: return this.getVoiceChannel(1, varName, cache);
-    case 12: return this.getVoiceChannel(7, varName, cache);
-    case 13: return this.getVoiceChannel(2, varName, cache);
-    default: return this.getChannel(type, varName, cache);
+    case 10: return await this.getVoiceChannel(0, varName, cache);
+    case 11: return await this.getVoiceChannel(1, varName, cache);
+    case 12: return await this.getVoiceChannel(7, varName, cache);
+    case 13: return await this.getVoiceChannel(2, varName, cache);
+    default: return await this.getChannel(type, varName, cache);
   }
+  return null;
 };
 
-Actions.getList = function (type, varName, cache) {
+Actions.getListFromData = async function (typeData, varNameData, cache) {
+  return await this.getList(parseInt(typeData, 10), this.evalMessage(varNameData, cache), cache);
+};
+
+Actions.getList = async function (type, varName, cache) {
   const { interaction, msg, server } = cache;
   switch (type) {
     case 0:
