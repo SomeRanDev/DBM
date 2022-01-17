@@ -598,6 +598,7 @@ Bot.registerSelectMenuInteraction = function (interactionId, data) {
 
 Bot.initEvents = function () {
   this.bot.on("ready", this.onReady.bind(this));
+  this.bot.on("guildCreate", this.onServerJoin.bind(this));
   this.bot.on("messageCreate", this.onMessage.bind(this));
   this.bot.on("interactionCreate", this.onInteraction.bind(this));
   Events.registerEvents(this.bot);
@@ -632,6 +633,9 @@ Bot.registerApplicationCommands = function () {
     }
   }
 
+  this._slashCommandCreateType = slashType;
+  this._slashCommandServerList = Files.data.settings?.slashServers?.split?.(/[\n\r]+/) ?? [];
+
   switch (slashType) {
     case "all": {
       this.setAllServerCommands(this.applicationCommandData);
@@ -644,15 +648,30 @@ Bot.registerApplicationCommands = function () {
       break;
     }
     case "manual": {
-      const serverList = Files.data.settings?.slashServers?.split?.(/[\n\r]+/) ?? [];
-      this.setCertainServerCommands(this.applicationCommandData, serverList);
+      this.setCertainServerCommands(this.applicationCommandData, this._slashCommandServerList);
       this.setGlobalCommands([]);
       break;
     }
     case "manualglobal": {
-      const serverList = Files.data.settings?.slashServers?.split?.(/[\n\r]+/) ?? [];
-      this.setCertainServerCommands(this.applicationCommandData, serverList);
+      this.setCertainServerCommands(this.applicationCommandData, this._slashCommandServerList);
       this.setGlobalCommands(this.applicationCommandData);
+      break;
+    }
+  }
+};
+
+Bot.onServerJoin = function (guild) {
+  this.initializeCommandsForNewServer(guild);
+};
+
+Bot.initializeCommandsForNewServer = function (guild) {
+  switch (this._slashCommandCreateType) {
+    case "all":
+    case "manual":
+    case "manualglobal": {
+      if (this._slashCommandCreateType === "all" || this._slashCommandServerList.includes(guild.id)) {
+        this.setCommandsForServer(guild, this.applicationCommandData, true);
+      }
       break;
     }
   }
