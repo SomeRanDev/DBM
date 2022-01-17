@@ -1,6 +1,6 @@
 /******************************************************
  * Discord Bot Maker Bot
- * Version 2.0.11
+ * Version 2.1.0
  * Robert Borghese
  ******************************************************/
 
@@ -50,6 +50,7 @@ const MsgType = {
   ERROR_CREATING_AUDIO: 202,
 
   MISSING_MEMBER_INTENT_FIND_USER_ID: 300,
+  CANNOT_FIND_USER_BY_ID: 301,
 };
 
 function PrintError(type) {
@@ -191,6 +192,9 @@ function PrintError(type) {
 
     case MsgType.MISSING_MEMBER_INTENT_FIND_USER_ID: {
       warn(' - DBM Warning - \nFind User (by Name/ID) may freeze or error because\nthe bot has not enabled the Server Member Events Intent.')
+    }
+    case MsgType.CANNOT_FIND_USER_BY_ID: {
+      warn(format('Cannot find user by id: %s', arguments[1]));
     }
   }
 }
@@ -1538,7 +1542,7 @@ Actions.getParameterFromParameterData = function (option) {
 };
 
 Actions.findMemberOrUserFromName = async function (name, server) {
-  if (!Bot.hasMemberIntents) {
+  if (!Bot.bot.hasMemberIntents) {
     PrintError(MsgType.MISSING_MEMBER_INTENT_FIND_USER_ID);
   }
   const user = Bot.bot.users.cache.find((user) => user.username === name);
@@ -1558,12 +1562,16 @@ Actions.findMemberOrUserFromName = async function (name, server) {
 };
 
 Actions.findMemberOrUserFromID = async function (id, server) {
-  if (!Bot.hasMemberIntents) {
+  if (!Bot.bot.hasMemberIntents) {
     PrintError(MsgType.MISSING_MEMBER_INTENT_FIND_USER_ID);
   }
-  const result = await Bot.bot.users.fetch(id);
-  if (result) {
-    return result;
+  if (id) {
+    const result = await Bot.bot.users.fetch(id);
+    if (result) {
+      return result;
+    }
+  } else {
+    PrintError(MsgType.CANNOT_FIND_USER_BY_ID, id);
   }
   return null;
 };
@@ -1655,7 +1663,7 @@ Actions.getSendTarget = async function (type, varName, cache) {
       break;
     case 100: {
       const searchValue = this.evalMessage(varName, cache);
-      const result = await this.findMemberOrUserFromName(searchValue, cache.server);
+      const result = await this.findMemberOrUserFromName(searchValue, cache);
       if (result) {
         return result;
       }
