@@ -800,11 +800,12 @@ module.exports = {
     else if (isEdit === 2 && cache?.interaction?.update) {
       let promise = null;
 
-      if (cache.interaction?.replied && cache.interaction?.message?.edit) {
-        promise = cache.interaction.message.edit(messageOptions);
+      defaultResultMsg = cache.interaction?.message;
+
+      if (cache.interaction?.replied && cache.interaction?.editReply) {
+        promise = cache.interaction.editReply(messageOptions);
       } else {
         promise = cache.interaction.update(messageOptions);
-        defaultResultMsg = cache.interaction.message;
       }
       
       if (promise) {
