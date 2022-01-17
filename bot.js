@@ -1176,14 +1176,14 @@ Actions.eval = function (content, cache, logError = true) {
   if (msg) {
     user = msg.author;
     member = msg.member;
-    channel = msg.member;
+    channel = msg.channel;
     mentionedUser = msg.mentions.users.first() ?? "";
     mentionedChannel = msg.mentions.channels.first() ?? "";
   }
   if (interaction) {
     user = interaction.user;
     member = interaction.member;
-    channel = interaction.member;
+    channel = interaction.channel;
     if (interaction.options) {
       mentionedUser = interaction.options.resolved?.users?.first?.() ?? "";
       mentionedChannel = interaction.options.resolved?.channels?.first?.() ?? "";
