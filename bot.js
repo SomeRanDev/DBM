@@ -1538,7 +1538,7 @@ Actions.getParameterFromParameterData = function (option) {
 };
 
 Actions.findMemberOrUserFromName = async function (name, server) {
-  if (!Bot.bot.hasMemberIntents) {
+  if (!Bot.hasMemberIntents) {
     PrintError(MsgType.MISSING_MEMBER_INTENT_FIND_USER_ID);
   }
   const user = Bot.bot.users.cache.find((user) => user.username === name);
@@ -1558,7 +1558,7 @@ Actions.findMemberOrUserFromName = async function (name, server) {
 };
 
 Actions.findMemberOrUserFromID = async function (id, server) {
-  if (!Bot.bot.hasMemberIntents) {
+  if (!Bot.hasMemberIntents) {
     PrintError(MsgType.MISSING_MEMBER_INTENT_FIND_USER_ID);
   }
   const result = await Bot.bot.users.fetch(id);
@@ -1655,7 +1655,7 @@ Actions.getSendTarget = async function (type, varName, cache) {
       break;
     case 100: {
       const searchValue = this.evalMessage(varName, cache);
-      const result = await this.findMemberOrUserFromName(searchValue, cache);
+      const result = await this.findMemberOrUserFromName(searchValue, cache.server);
       if (result) {
         return result;
       }
