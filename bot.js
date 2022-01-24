@@ -2850,7 +2850,7 @@ try {
 
 Audio.rawYtdl = null;
 try {
-  Audio.rawYtdl = require("youtube-dl-exec").raw;
+  Audio.rawYtdl = require("youtube-dl-exec").exec;
 } catch {}
 
 Audio.Subscription = class {
