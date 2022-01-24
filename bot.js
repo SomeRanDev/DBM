@@ -2841,17 +2841,26 @@ const { setTimeout } = require("node:timers/promises");
 Audio.ytdl = null;
 try {
   Audio.ytdl = require("ytdl-core");
-} catch {}
+} catch(e) {
+  Audio.ytdl = null;
+  console.error(e);
+}
 
 Audio.voice = null;
 try {
   Audio.voice = require("@discordjs/voice");
-} catch {}
+} catch(e) {
+  Audio.voice = null;
+  console.error(e);
+}
 
 Audio.rawYtdl = null;
 try {
   Audio.rawYtdl = require("youtube-dl-exec").exec;
-} catch {}
+} catch(e) {
+  Audio.rawYtdl = null;
+  console.error(e);
+}
 
 Audio.Subscription = class {
   /** @param {import('@discordjs/voice').VoiceConnection} voiceConnection */
