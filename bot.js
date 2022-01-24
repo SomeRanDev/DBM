@@ -499,7 +499,7 @@ Bot.validateSlashCommandParameterName = function (name) {
   if (name.length > 32) {
     name = name.substring(0, 32);
   }
-  if (name.match(/^[\w-]{1,32}$/)) {
+  if (name.match(/^[\w-]{1,32}$/ui)) {
     return name.toLowerCase();
   }
   return false;
