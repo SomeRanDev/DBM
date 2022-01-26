@@ -2974,11 +2974,22 @@ Audio.Subscription = class {
     const nextTrack = this.queue.shift();
     try {
       const resource = await nextTrack.createAudioResource();
-      if (Audio.inlineVolume) resource.volume.volume = this.volume;
+      if (Audio.inlineVolume && typeof resource?.volume?.volume === "number") {
+        resource.volume.volume = this.volume ?? 0.5;
+      }
       // resource.encoder.setBitrate(this.bitrate * 1e3);
       this.audioPlayer.play(resource);
       this.queueLock = false;
-    } catch {
+    } catch(e) {
+      if(e.toString().includes("opus.node")) {
+        console.warn(`-- DBM Error Note --
+If you're seeing an error here, it's likely that the version of
+NodeJS/NPM or the operating system used to install @discordjs/opus
+is different from the NodeJS/NPM/OS running this bot.
+Try deleting "node_modules" and running "npm install" to resolve the issue.
+`);
+      }
+      console.error(e);
       this.queueLock = false;
       return this.processQueue();
     }
@@ -3026,7 +3037,7 @@ Audio.Track = class {
               resolve(
                 Audio.voice.createAudioResource(probe.stream, {
                   metadata: this,
-                  inlineVolume: Audio.inlineVolume,
+                  inlineVolume: !!Audio.inlineVolume,
                   inputType: probe.type,
                 }),
               ),
@@ -3059,7 +3070,7 @@ Audio.BasicTrack = class {
 
   createAudioResource() {
     return Audio.voice.createAudioResource(this.url, {
-      inlineVolume: Audio.inlineVolume,
+      inlineVolume: !!Audio.inlineVolume,
       inputType: Audio.voice.StreamType.Arbitrary,
     });
   }
