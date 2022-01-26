@@ -1,11 +1,11 @@
 /******************************************************
  * Discord Bot Maker Bot
- * Version 2.1.0
+ * Version 2.1.1
  * Robert Borghese
  ******************************************************/
 
 const DBM = {};
-DBM.version = "2.1.0";
+DBM.version = "2.1.1";
 
 const DiscordJS = (DBM.DiscordJS = require("discord.js"));
 
@@ -46,8 +46,9 @@ const MsgType = {
   MISSING_MUSIC_MODULES: 101,
 
   MUTABLE_VOLUME_DISABLED: 200,
-  ERROR_GETTING_YT_INFO: 201,
-  ERROR_CREATING_AUDIO: 202,
+  MUTABLE_VOLUME_NOT_IN_CHANNEL: 201,
+  ERROR_GETTING_YT_INFO: 202,
+  ERROR_CREATING_AUDIO: 203,
 
   MISSING_MEMBER_INTENT_FIND_USER_ID: 300,
   CANNOT_FIND_USER_BY_ID: 301,
@@ -178,6 +179,10 @@ function PrintError(type) {
 
     case MsgType.MUTABLE_VOLUME_DISABLED: {
       warn(format('Tried setting volume but "Mutable Volume" is disabled.'));
+      break;
+    }
+    case MsgType.MUTABLE_VOLUME_NOT_IN_CHANNEL: {
+      warn(format('Tried setting volume but the bot is not in a voice channel.'));
       break;
     }
 
@@ -3067,14 +3072,14 @@ Audio.connectToVoice = function (voiceChannel) {
     return PrintError(MsgType.MISSING_MUSIC_MODULES);
   }
 
-  Audio.inlineVolume ??= Files.data.settings.mutableVolume === "true";
+  Audio.inlineVolume ??= (Files.data.settings.mutableVolume ?? "true") === "true";
 
   const subscription = new this.Subscription(
     this.voice.joinVoiceChannel({
       adapterCreator: voiceChannel.guild.voiceAdapterCreator,
       channelId: voiceChannel.id,
       guildId: voiceChannel.guildId,
-      selfDeaf: Files.data.settings.autoDeafen === "true",
+      selfDeaf: (Files.data.settings.autoDeafen ?? "true") === "true",
     }),
   );
 
@@ -3106,10 +3111,10 @@ Audio.disconnectFromVoice = function (guild) {
 };
 
 Audio.setVolume = function (volume, guild) {
-  if (!this.inlineVolume) return PrintError(MsgType.MUTABLE_VOLUME_DISABLED);
+  if (Audio.inlineVolume === false) return PrintError(MsgType.MUTABLE_VOLUME_DISABLED);
   if (!guild) return;
   const subscription = this.getSubscription(guild);
-  if (!subscription) return;
+  if (!subscription) return PrintError(MsgType.MUTABLE_VOLUME_NOT_IN_CHANNEL);
   subscription.volume = volume;
   if (subscription.audioPlayer.state.status === this.voice.AudioPlayerStatus.Playing) {
     subscription.audioPlayer.state.resource.volume.volume = volume;
