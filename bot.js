@@ -1,11 +1,11 @@
 /******************************************************
  * Discord Bot Maker Bot
- * Version 2.1.1
+ * Version 2.1.2
  * Robert Borghese
  ******************************************************/
 
 const DBM = {};
-DBM.version = "2.1.1";
+DBM.version = "2.1.2";
 
 const DiscordJS = (DBM.DiscordJS = require("discord.js"));
 
@@ -3084,6 +3084,13 @@ Audio.connectToVoice = function (voiceChannel) {
   }
 
   Audio.inlineVolume ??= (Files.data.settings.mutableVolume ?? "true") === "true";
+
+  const existingSubscription = this.subscriptions.get(voiceChannel?.guild?.id);
+  if (existingSubscription) {
+    if (existingSubscription.voiceConnection?.joinConfig?.channelId === voiceChannel.id) {
+      return;
+    }
+  }
 
   const subscription = new this.Subscription(
     this.voice.joinVoiceChannel({
