@@ -455,6 +455,9 @@ Bot.mergeSubCommandIntoCommandData = function (names, data) {
   }
 
   if (names.length === 2) {
+    if (!baseCommand.options) {
+      baseCommand.options = [];
+    }
     if (baseCommand.options.find(d => d.name === data.name && d.type === "SUB_COMMAND_GROUP")) {
       PrintError(MsgType.SUB_COMMAND_GROUP_ALREADY_EXISTS, names.join(" "));
     } else {
@@ -2843,12 +2846,29 @@ Files.initEncryption();
 const Audio = (DBM.Audio = {});
 const { setTimeout } = require("node:timers/promises");
 
+Audio.checkIfHasDependency = function(key) {
+  if(!Audio.packageJson) {
+    const path = require("node:path");
+    Audio.packageJson = require("node:fs").readFileSync(path.join(__dirname, "package.json"));
+    Audio.packageJson = JSON.parse(Audio.packageJson).dependencies;
+    if(!Audio.packageJson) {
+      Audio.packageJson = 1;
+    }
+  }
+  if(Audio.packageJson !== 1) {
+    return !!Audio.packageJson[key];
+  }
+  return false;
+}
+
 Audio.ytdl = null;
 try {
   Audio.ytdl = require("ytdl-core");
 } catch(e) {
   Audio.ytdl = null;
-  console.error(e);
+  if(Audio.checkIfHasDependency("ytdl-core")) {
+    console.error(e);
+  }
 }
 
 Audio.voice = null;
@@ -2856,7 +2876,9 @@ try {
   Audio.voice = require("@discordjs/voice");
 } catch(e) {
   Audio.voice = null;
-  console.error(e);
+  if(Audio.checkIfHasDependency("@discordjs/voice")) {
+    console.error(e);
+  }
 }
 
 Audio.rawYtdl = null;
@@ -2864,7 +2886,9 @@ try {
   Audio.rawYtdl = require("youtube-dl-exec").exec;
 } catch(e) {
   Audio.rawYtdl = null;
-  console.error(e);
+  if(Audio.checkIfHasDependency("youtube-dl-exec")) {
+    console.error(e);
+  }
 }
 
 Audio.Subscription = class {
