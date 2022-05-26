@@ -87,7 +87,7 @@ module.exports = {
 
 <br><br>
 
-<dialog-list id="textInputs" fields='["name", "placeholder", "minLength", "maxLength", "id", "row", "style", "required"]' dialogTitle="Text Input Info" dialogWidth="600" dialogHeight="500" listLabel="Text Inputs" listStyle="height: calc(100vh - 300px);" itemName="Text Input" itemCols="1" itemHeight="40px;" itemTextFunction="data.name + ' (' + (data.style === 'PARAGRAPH' ? 'Paragraph)' : 'One-Line)')" itemStyle="line-height: 40px;">
+<dialog-list id="textInputs" fields='["name", "placeholder", "minLength", "maxLength", "id", "row", "style", "required"]' dialogTitle="Text Input Info" dialogWidth="600" dialogHeight="370" listLabel="Text Inputs" listStyle="height: calc(100vh - 300px);" itemName="Text Input" itemCols="1" itemHeight="40px;" itemTextFunction="data.name + ' (' + (data.style === 'PARAGRAPH' ? 'Paragraph)' : 'One-Line)')" itemStyle="line-height: 40px;">
   <div style="padding: 16px;">
     <div style="width: calc(50% - 12px); float: left;">
       <span class="dbminputlabel">Name</span>
@@ -101,18 +101,18 @@ module.exports = {
       <br>
 
       <span class="dbminputlabel">Minimum Length</span>
-      <input id="minLength" class="round" type="text" value="0">
+      <input id="minLength" placeholder="0" class="round" type="text" value="0">
 
       <br>
 
       <span class="dbminputlabel">Maximum Length</span>
-      <input id="maxLength" class="round" type="text" value="1000">
+      <input id="maxLength" placeholder="1000" class="round" type="text" value="1000">
 
       <br>
     </div>
     <div style="width: calc(50% - 12px); float: right;">
       <span class="dbminputlabel">Temp Var ID</span>
-      <input id="id" class="round" type="text">
+      <input id="id" placeholder="Leave blank to disallow..." class="round" type="text">
 
       <br>
 
