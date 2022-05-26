@@ -178,7 +178,7 @@ module.exports = {
 
         const textInputData = this.generateTextInput(textInput, unusedName, cache);
         this.addTextInputToActionRowArray(componentsArr, this.evalMessage(textInput.row, cache), textInputData, cache);
-        existingTempVars.push(textInput.id);
+        existingTempVars.push(textInputData.customId);
         if(textInput.id) {
           tempVariableNames.push(textInputData.customId);
         }
