@@ -1,15 +1,15 @@
 /******************************************************
  * Discord Bot Maker Bot
- * Version 2.1.2
+ * Version 2.1.3
  * Robert Borghese
  ******************************************************/
 
 const DBM = {};
-DBM.version = "2.1.2";
+DBM.version = "2.1.3";
 
 const DiscordJS = (DBM.DiscordJS = require("discord.js"));
 
-const requiredDjsVersion = "13.6.0";
+const requiredDjsVersion = "13.7.0";
 if (DiscordJS.version < requiredDjsVersion) {
   console.log(
     `This version of Discord Bot Maker requires discord.js ${requiredDjsVersion}+.\nPlease use "Project > Module Manager" and "Project > Reinstall Node Modules" to update to discord.js ${requiredDjsVersion}.\n`,
@@ -894,6 +894,8 @@ Bot.onInteraction = function (interaction) {
     this.onSlashCommandInteraction(interaction);
   } else if (interaction.isContextMenu()) {
     this.onContextMenuInteraction(interaction);
+  } else if (interaction.isModalSubmit()) {
+    Actions.checkModalSubmitResponses(interaction);
   } else {
     if (interaction.component?.type === "BUTTON") {
       interaction._button = interaction.component;
@@ -2174,6 +2176,20 @@ Actions.generateSelectMenu = function (select, cache) {
   return selectData;
 };
 
+Actions.generateTextInput = function (textInput, defaultCustomId, cache) {
+  const inputTextData = {
+    type: "TEXT_INPUT",
+    customId: !!textInput.id ? textInput.id : defaultCustomId,
+    label: this.evalMessage(textInput.name, cache),
+    placeholder: this.evalMessage(textInput.placeholder, cache),
+    minLength: parseInt(this.evalMessage(textInput.minLength, cache), 10) ?? 0,
+    maxLength: parseInt(this.evalMessage(textInput.maxLength, cache), 10) ?? 100,
+    style: textInput.style,
+    required: textInput.required === "true"
+  };
+  return inputTextData;
+};
+
 Actions.addButtonToActionRowArray = function (array, rowText, buttonData, cache) {
   let row = 0;
   if (!rowText) {
@@ -2240,9 +2256,39 @@ Actions.addSelectToActionRowArray = function (array, rowText, selectData, cache)
   }
 };
 
+Actions.addTextInputToActionRowArray = function (array, rowText, textInput, cache) {
+  let row = 0;
+  if (!rowText) {
+    if (array.length !== 0) {
+      row = array.length - 1;
+      if (array[row].length >= 5) {
+        row++;
+      }
+    }
+  } else {
+    row = parseInt(rowText, 10) - 1;
+  }
+  if (row >= 0 && row < 5) {
+    while (array.length <= row + 1) {
+      array.push([]);
+    }
+    if (array[row].length >= 1) {
+      this.displayError(
+        null,
+        cache,
+        `Action row #${row} cannot have a text input when there are any buttons on it!`,
+      );
+    } else {
+      array[row].push(textInput);
+    }
+  } else {
+    this.displayError(null, cache, `Invalid action row: '${rowText}'.`);
+  }
+};
+
 Actions.checkTemporaryInteractionResponses = function (interaction) {
   const customId = interaction.customId;
-  const messageId = interaction.message.id;
+  const messageId = interaction.message?.id;
   if (this._temporaryInteractions?.[messageId]) {
     const interactions = this._temporaryInteractions[messageId];
     for (let i = 0; i < interactions.length; i++) {
@@ -2317,6 +2363,24 @@ Actions.clearAllTemporaryInteractions = function (messageId) {
   if (this._temporaryInteractions?.[messageId]) {
     this._temporaryInteractions[messageId] = null;
     delete this._temporaryInteractions[messageId];
+  }
+};
+
+Actions.registerModalSubmitResponses = function (interactionId, callback) {
+  this._temporaryInteractions ??= {};
+  this._temporaryInteractions[interactionId] = callback;
+
+  // clear up interaction after a while
+  require("node:timers").setTimeout(() => {
+    this.clearAllTemporaryInteractions(interactionId);
+  }, 60 * 60 * 1000).unref();
+};
+
+Actions.checkModalSubmitResponses = function (interaction) {
+  const interactionId = interaction.customId;
+  if (this._temporaryInteractions?.[interactionId]) {
+    this._temporaryInteractions[interactionId](interaction);
+    this.clearAllTemporaryInteractions(interactionId);
   }
 };
 
