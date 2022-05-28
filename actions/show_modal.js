@@ -215,7 +215,7 @@ module.exports = {
 
         const modalData = {
           customId: cache.interaction.id,
-          title: data.title,
+          title: this.evalMessage(data.title, cache),
           components: componentsArr
         };
 
