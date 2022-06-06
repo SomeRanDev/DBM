@@ -220,6 +220,7 @@ module.exports = {
         };
 
         this.registerModalSubmitResponses(cache.interaction.id, (newInteraction) => {
+          newInteraction.__originalInteraction = cache.interaction;
           cache.interaction = newInteraction;
 
           for (let i = 0; i < tempVariableNames.length; i++) {
