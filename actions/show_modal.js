@@ -64,10 +64,7 @@ module.exports = {
   // are also the names of the fields stored in the action's JSON data.
   //---------------------------------------------------------------------
 
-  fields: [
-    "title",
-    "textInputs"
-  ],
+  fields: ["title", "textInputs"],
 
   //---------------------------------------------------------------------
   // Command HTML
@@ -238,7 +235,7 @@ module.exports = {
 
       } else {
 
-        this.displayError(data, cache, "Cannot show modal multiple times.");
+        this.displayError(data, cache, "Cannot show modal from current interaction, perhaps attempting to show modal multiple times?");
         this.callNextAction(cache);
 
       }

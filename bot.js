@@ -1518,6 +1518,12 @@ Actions.displayError = function (data, cache, err) {
 };
 
 Actions.getParameterFromInteraction = function (interaction, name) {
+  if (interaction.__originalInteraction) {
+    const result = this.getParameterFromInteraction(interaction.__originalInteraction, name);
+    if (result !== null) {
+      return result;
+    }
+  }
   if (interaction?.options?.get) {
     const option = interaction.options.get(name.toLowerCase());
     return this.getParameterFromParameterData(option);
