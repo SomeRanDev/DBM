@@ -797,15 +797,17 @@ module.exports = {
       this.callListFunc(target, "send", [messageOptions]).then(onComplete);
     }
 
-    else if (isEdit === 2 && cache?.interaction?.update) {
+    else if (isEdit === 2) {
       let promise = null;
 
       defaultResultMsg = cache.interaction?.message;
 
       if (cache.interaction?.replied && cache.interaction?.editReply) {
         promise = cache.interaction.editReply(messageOptions);
-      } else {
+      } else if(cache?.interaction?.update) {
         promise = cache.interaction.update(messageOptions);
+      } else {
+        this.displayError(data, cache, "Send Message -> Message/Options to Edit -> Interaction Update / Could not find interaction to edit");
       }
       
       if (promise) {

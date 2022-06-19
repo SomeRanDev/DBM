@@ -1,11 +1,11 @@
 /******************************************************
  * Discord Bot Maker Bot
- * Version 2.1.4
+ * Version 2.1.5
  * Robert Borghese
  ******************************************************/
 
 const DBM = {};
-DBM.version = "2.1.4";
+DBM.version = "2.1.5";
 
 const DiscordJS = (DBM.DiscordJS = require("discord.js"));
 
@@ -2981,7 +2981,9 @@ Audio.Subscription = class {
             await Audio.voice.entersState(this.voiceConnection, Audio.voice.VoiceConnectionStatus.Connecting, 5_000);
           } catch {
             // Probably removed from voice channel
-            this.voiceConnection.destroy();
+            if (this.voiceConnection.state.status !== Audio.voice.VoiceConnectionStatus.Destroyed) {
+              this.voiceConnection.destroy();
+            }
           }
         } else if (this.voiceConnection.rejoinAttempts < 5) {
           await setTimeout((this.voiceConnection.rejoinAttempts + 1) * 5_000);
@@ -3179,9 +3181,18 @@ Audio.connectToVoice = function (voiceChannel) {
 
   Audio.inlineVolume ??= (Files.data.settings.mutableVolume ?? "true") === "true";
 
-  const existingSubscription = this.subscriptions.get(voiceChannel?.guild?.id);
+  var existingSubscription = this.subscriptions.get(voiceChannel?.guild?.id);
   if (existingSubscription) {
-    if (existingSubscription.voiceConnection?.joinConfig?.channelId === voiceChannel.id) {
+
+    const status = existingSubscription.voiceConnection?.state?.status;
+    if (status === Audio.voice.VoiceConnectionStatus.Disconnected) {
+      existingSubscription.voiceConnection.destroy();
+      existingSubscription = null;
+    } else if (status === Audio.voice.VoiceConnectionStatus.Destroyed) {
+      existingSubscription = null;
+    }
+
+    if (existingSubscription?.voiceConnection?.joinConfig?.channelId === voiceChannel.id) {
       return;
     }
   }
