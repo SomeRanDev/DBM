@@ -77,7 +77,7 @@ module.exports = {
 
 <br><br><br><br>
 
-<retrieve-from-variable dropdownLabel="Source Image" selectId="image" variableContainerId="varNameContainer2" variableInputId="imageVarName"></retrieve-from-variable>
+<retrieve-from-variable dropdownLabel="Source Image/Emoji" selectId="image" variableContainerId="varNameContainer2" variableInputId="imageVarName"></retrieve-from-variable>
 
 <br><br><br><br>
 
@@ -110,24 +110,30 @@ module.exports = {
 
     const imageStorage = parseInt(data.image, 10);
     const imageVarName = this.evalMessage(data.imageVarName, cache);
-    const image = this.getVariable(imageStorage, imageVarName, cache);
+    var image = this.getVariable(imageStorage, imageVarName, cache);
 
     const Images = this.getDBM().Images;
-    Images.createBuffer(image)
-      .then((buffer) => {
-        if (Array.isArray(role)) {
-          this.callListFunc(role, "setIcon", [buffer, reason])
-            .then(() => this.callNextAction(cache));
-        } else if (role?.edit) {
-          role
-            .setIcon(buffer, reason)
-            .then(() => this.callNextAction(cache))
-            .catch((err) => this.displayError(data, cache, err));
-        } else {
-          this.callNextAction(cache);
-        }
-      })
-      .catch((err) => this.displayError(data, cache, err));
+
+    if (typeof image === "string" && image.startsWith("http")) {
+    	image = await Images.getImage(image);
+    }
+
+    var imageOrEmoji = image;
+    if (typeof imageOrEmoji !== "string") {
+    	imageOrEmoji = await Images.createBuffer(imageOrEmoji);
+    }
+    
+    if (Array.isArray(role)) {
+      this.callListFunc(role, "setIcon", [imageOrEmoji, reason])
+        .then(() => this.callNextAction(cache));
+    } else if (role?.setIcon) {
+      role
+        .setIcon(imageOrEmoji, reason)
+        .then(() => this.callNextAction(cache))
+        .catch((err) => this.displayError(data, cache, err));
+    } else {
+      this.callNextAction(cache);
+    }
   },
 
   //---------------------------------------------------------------------
