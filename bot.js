@@ -1552,7 +1552,11 @@ Actions.getParameterFromParameterData = function (option) {
       case "MENTIONABLE": {
         return option.member ?? option.channel ?? option.role ?? option.user;
       }
+      case "ATTACHMENT": {
+        return option.attachment?.url ?? "";
+      }
     }
+    return option.value;
   }
   return null;
 };
