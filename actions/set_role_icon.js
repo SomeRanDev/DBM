@@ -110,17 +110,21 @@ module.exports = {
 
     const imageStorage = parseInt(data.image, 10);
     const imageVarName = this.evalMessage(data.imageVarName, cache);
-    var image = this.getVariable(imageStorage, imageVarName, cache);
+    var imageOrEmoji = this.getVariable(imageStorage, imageVarName, cache);
 
     const Images = this.getDBM().Images;
+    const DiscordJS = this.getDBM().DiscordJS;
 
-    if (typeof image === "string" && image.startsWith("http")) {
-    	image = await Images.getImage(image);
-    }
-
-    var imageOrEmoji = image;
-    if (typeof imageOrEmoji !== "string") {
-    	imageOrEmoji = await Images.createBuffer(imageOrEmoji);
+    if (Images.isImage(imageOrEmoji)) {
+      imageOrEmoji = await Images.createBuffer(imageOrEmoji);
+    } else if (imageOrEmoji instanceof DiscordJS.Emoji) {
+      // do nothing, setIcon accepts Emoji class
+    } else if (typeof imageOrEmoji === "string") {
+      if (imageOrEmoji.startsWith("http")) {
+        imageOrEmoji = await Images.getImage(image);
+      } else {
+        // otherwise, the string could be Emoji-resolvable, so do nothing
+      }
     }
     
     if (Array.isArray(role)) {

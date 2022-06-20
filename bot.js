@@ -2597,9 +2597,16 @@ Images.getFont = function (url) {
   return this.JIMP.loadFont(Actions.getLocalFile(url));
 };
 
+Images.isImage = function(obj) {
+  if (!Images.JIMP) {
+    return false;
+  }
+  return obj instanceof Images.JIMP;
+}
+
 Images.createBuffer = function (image) {
   return new Promise((resolve, reject) => {
-    image.getBuffer(this.JIMP.MIME_PNG, function (err, buffer) {
+    image.getBuffer(this.JIMP.AUTO, function (err, buffer) {
       if (err) {
         reject(err);
       } else {
