@@ -1556,7 +1556,6 @@ Actions.getParameterFromParameterData = function (option) {
         return option.attachment?.url ?? "";
       }
     }
-    return option.value;
   }
   return null;
 };
