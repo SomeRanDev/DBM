@@ -5,7 +5,7 @@ module.exports = {
   // This is the name of the action displayed in the editor.
   //---------------------------------------------------------------------
 
-  name: "Find Voice Channel",
+  name: "Await Message from Member",
 
   //---------------------------------------------------------------------
   // Action Section
@@ -13,7 +13,7 @@ module.exports = {
   // This is the section the action will fall into.
   //---------------------------------------------------------------------
 
-  section: "Channel Control",
+  section: "Messaging",
 
   //---------------------------------------------------------------------
   // Action Subtitle
@@ -22,15 +22,7 @@ module.exports = {
   //---------------------------------------------------------------------
 
   subtitle(data, presets) {
-    const info = [
-      "Voice Channel ID",
-      "Voice Channel Name",
-      "Voice Channel Position",
-      "Voice Channel User Limit",
-      "Voice Channel Bitrate",
-      "Voice Channel Category ID",
-    ];
-    return `Find Voice Channel by ${info[parseInt(data.info, 10)]}`;
+    return `Await message in ${presets.getChannelText(data.channel, data.channelVarName)} from ${presets.getMemberText(data.member, data.memberVarName)}`;
   },
 
   //---------------------------------------------------------------------
@@ -42,7 +34,7 @@ module.exports = {
   variableStorage(data, varType) {
     const type = parseInt(data.storage, 10);
     if (type !== varType) return;
-    return [data.varName, "Voice Channel"];
+    return [data.storeInVarName, "Message"];
   },
 
   //---------------------------------------------------------------------
@@ -65,7 +57,7 @@ module.exports = {
   // are also the names of the fields stored in the action's JSON data.
   //---------------------------------------------------------------------
 
-  fields: ["info", "find", "storage", "varName"],
+  fields: ["channel", "channelVarName", "member", "memberVarName", "time", "count", "storage", "storeInVarName"],
 
   //---------------------------------------------------------------------
   // Command HTML
@@ -80,27 +72,29 @@ module.exports = {
 
   html(isEvent, data) {
     return `
-<div>
-	<div style="float: left; width: 40%;">
-		<span class="dbminputlabel">Source Field</span><br>
-		<select id="info" class="round">
-			<option value="0" selected>Voice Channel ID</option>
-			<option value="1">Voice Channel Name</option>
-			<option value="2">Voice Channel Position</option>
-			<option value="3">Voice Channel User Limit</option>
-      <option value="4">Voice Channel Bitrate (kbps)</option>
-      <option value="5">Voice Channel Category ID</option>
-		</select>
-	</div>
-	<div style="float: right; width: 55%;">
-		<span class="dbminputlabel">Search Value</span><br>
-		<input id="find" class="round" type="text">
-	</div>
+<channel-input dropdownLabel="Source Channel" selectId="channel" variableContainerId="channelVarNameContainer" variableInputId="channelVarName"></channel-input>
+
+<br><br><br><br>
+
+<member-input dropdownLabel="Member" selectId="member" variableContainerId="memberVarNameContainer" variableInputId="memberVarName"></member-input>
+
+<br><br><br><br>
+
+<div style="padding-top: 8px;">
+  <div style="width: calc(50% - 12px); float: left;">
+  	<span class="dbminputlabel">Await Time (in Seconds)</span><br>
+  	<input id="time" class="round" type="text" style="width: 100%;" value="5"><br>
+  </div>
+  <div style="width: calc(50% - 12px); float: right;">
+    <span class="dbminputlabel">Number of Messages to Check</span><br>
+    <input id="count" class="round" type="text" style="width: 100%;" value="20"><br>
+  </div>
 </div>
 
-<br><br><br>
+<br><br><br><br>
 
-<store-in-variable style="padding-top: 8px;" dropdownLabel="Store In" selectId="storage" variableContainerId="varNameContainer" variableInputId="varName" selectWidth="40%" variableInputWidth="55%"></store-in-variable>`;
+<store-in-variable dropdownLabel="Store In" selectId="storage" variableContainerId="storeInVarNameContainer" variableInputId="storeInVarName"></store-in-variable>
+`;
   },
 
   //---------------------------------------------------------------------
@@ -111,7 +105,8 @@ module.exports = {
   // functions for the DOM elements.
   //---------------------------------------------------------------------
 
-  init() {},
+  init() {
+  },
 
   //---------------------------------------------------------------------
   // Action Bot Function
@@ -121,48 +116,34 @@ module.exports = {
   // so be sure to provide checks for variable existence.
   //---------------------------------------------------------------------
 
-  action(cache) {
-    const server = cache.server;
-    if (!server?.channels) {
-      this.callNextAction(cache);
-      return;
-    }
+  async action(cache) {
     const data = cache.actions[cache.index];
-    const info = parseInt(data.info, 10);
-    const find = this.evalMessage(data.find, cache);
-    const channels = server.channels.cache.filter((c) => c.type === "GUILD_VOICE");
-    let result;
-    switch (info) {
-      case 0:
-        result = channels.get(find);
-        break;
-      case 1:
-        result = channels.find((c) => c.name === find);
-        break;
-      case 2:
-        const position = parseInt(find, 10);
-        result = channels.find((c) => c.position === position);
-        break;
-      case 3:
-        const userLimit = parseInt(find, 10);
-        result = channels.find((c) => c.userLimit === userLimit);
-        break;
-      case 4:
-        const bitrate = parseInt(find, 10) / 1000;
-        result = channels.find((c) => c.bitrate === bitrate);
-        break;
-      case 5:
-        result = channels.find((c) => c.parentId === find);
-        break;
-      default:
-        break;
-    }
-    if (result !== undefined) {
-      const storage = parseInt(data.storage, 10);
-      const varName = this.evalMessage(data.varName, cache);
-      this.storeValue(result, storage, varName, cache);
-    }
-    this.callNextAction(cache);
+    const server = cache.server;
+    const channel = await this.getChannelFromData(data.channel, data.channelVarName, cache);
+    const member = await this.getMemberFromData(data.member, data.memberVarName, cache);
+
+    if (!member || !channel?.createMessageCollector) return this.callNextAction(cache);
+
+    const maxProcessed = Math.min(parseInt(this.evalMessage(data.count, cache), 10), 200);
+    const time = parseInt(this.evalMessage(data.time, cache) || "5", 10) * 1000;
+    const filter = (m) => m?.author?.id === member.id;
+
+    const collector = channel.createMessageCollector({
+      max: 1,
+      time,
+      filter,
+      maxProcessed
+    });
+
+    collector.on('end', (collected) => {
+      if(collected && collected.size > 0) {
+        const varName = this.evalMessage(data.storeInVarName, cache);
+        const storage = parseInt(data.storage, 10);
+        this.storeValue(collected.values().next(), storage, varName, cache);
+      }
+
+      this.callNextAction(cache);
+    });
   },
 
   //---------------------------------------------------------------------
@@ -174,5 +155,5 @@ module.exports = {
   // functions you wish to overwrite.
   //---------------------------------------------------------------------
 
-  mod() {},
+  mod(DBM) {},
 };

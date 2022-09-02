@@ -35,7 +35,7 @@ module.exports = {
   // This will make it so the patch version (0.0.X) is not checked.
   //---------------------------------------------------------------------
 
-  meta: { version: "2.1.5", preciseCheck: true, author: null, authorUrl: null, downloadUrl: null },
+  meta: { version: "2.1.6", preciseCheck: true, author: null, authorUrl: null, downloadUrl: null },
 
   //---------------------------------------------------------------------
   // Action Fields
@@ -75,6 +75,11 @@ module.exports = {
 			<option value="4">Greater Than</option>
 			<option value="5">Includes</option>
 			<option value="6">Matches Regex</option>
+			<option value="7">Starts With</option>
+			<option value="8">Ends With</option>
+			<option value="9">Length Equals</option>
+			<option value="10">Length is Greater Than</option>
+			<option value="11">Length is Less Than</option>
 		</select>
 	</div>
 	<div style="float: right; width: 60%;" id="directValue">
@@ -174,6 +179,31 @@ module.exports = {
       case 6:
         if (typeof val1?.match === "function") {
           result = Boolean(val1.match(new RegExp("^" + val2 + "$", "i")));
+        }
+        break;
+      case 7:
+        if (typeof val1?.startsWith === "function") {
+          result = Boolean(val1.startsWith(val2));
+        }
+        break;
+      case 8:
+        if (typeof val1?.endsWith === "function") {
+          result = Boolean(val1.endsWith(val2));
+        }
+        break;
+      case 9:
+        if (typeof val1?.length === "number") {
+          result = Boolean(val1.length === val2);
+        }
+        break;
+      case 10:
+        if (typeof val1?.length === "number") {
+          result = Boolean(val1.length > val2);
+        }
+        break;
+      case 11:
+        if (typeof val1?.length === "number") {
+          result = Boolean(val1.length < val2);
         }
         break;
     }
