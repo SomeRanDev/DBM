@@ -290,7 +290,7 @@ Bot.initBot = function () {
     options.partials = this.partials();
   }
   this.hasMemberIntents = (options.intents & DiscordJS.Intents.FLAGS.GUILD_MEMBERS) !== 0;
-  this.hasMessageIntents = (options.intents & DiscordJS.Intents.FLAGS.MESSAGE_CONTENT) !== 0;
+  this.hasMessageContentIntents = (options.intents & DiscordJS.Intents.FLAGS.MESSAGE_CONTENT) !== 0;
   this.bot = new DiscordJS.Client(options);
 };
 
@@ -345,7 +345,7 @@ Bot.reformatCommands = function () {
   const data = Files.data.commands;
   if (!data) return;
   this._hasTextCommands = false;
-  this._serverTextCommandCount = 0;
+  this._textCommandCount = 0;
   this._dmTextCommandCount = 0;
   this._caseSensitive = Files.data.settings.case === "true";
   for (let i = 0; i < data.length; i++) {
@@ -354,9 +354,8 @@ Bot.reformatCommands = function () {
       this.prepareActions(com.actions);
 
       if(com.comType <= "3") {
-        if(com.restriction !== "3") {
-          this._serverTextCommandCount++;
-        } else {
+        this._textCommandCount++;
+        if(com.restriction === "3") {
           this._dmTextCommandCount++;
         }
       }
@@ -641,8 +640,8 @@ Bot.registerSelectMenuInteraction = function (interactionId, data) {
 };
 
 Bot.checkForCommandErrors = function () {
-  if (this._serverTextCommandCount > 0 && !this.hasMessageIntents) {
-    PrintError(MsgType.SERVER_MESSAGE_INTENT_REQUIRED, this._serverTextCommandCount);
+  if (this._textCommandCount > 0 && !this.hasMessageContentIntents) {
+    PrintError(MsgType.SERVER_MESSAGE_INTENT_REQUIRED, this._textCommandCount);
   }
   if (this._dmTextCommandCount > 0 && (!this.usePartials() || !this.partials().includes("CHANNEL"))) {
     PrintError(MsgType.CHANNEL_PARTIAL_REQUIRED, this._dmTextCommandCount);
