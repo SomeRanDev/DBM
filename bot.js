@@ -206,7 +206,7 @@ function PrintError(type) {
     }
 
     case MsgType.SERVER_MESSAGE_INTENT_REQUIRED: {
-      warn(format('[Message Content Intent Required]\n%s commands found that require the "Server Message Events" intent.\nThese commands require the bot to be able to read messages from Discord servers.\nTo enable this behavior, first ensure the "MESSAGE CONTENT INTENT" is enabled in the "Bot" section on the Discord Developer Portal (the same page you got your bot token from).\nSecondly, in Discord Bot Maker, select Extensions -> Bot Intents from the title menu bar, and in this dialog, make sure "Server Message Events" is checked.', arguments[1]));
+      warn(format('[Message Content Intent Required]\n%s commands found that require the "Message Content" intent.\nThese commands require the bot to be able to read messages from Discord servers.\nTo enable this behavior, first ensure the "MESSAGE CONTENT INTENT" is enabled in the "Bot" section on the Discord Developer Portal (the same page you got your bot token from).\nSecondly, in Discord Bot Maker, select Extensions -> Bot Intents from the title menu bar, and in this dialog, make sure "Message Content" is checked.', arguments[1]));
       break;
     }
     case MsgType.CHANNEL_PARTIAL_REQUIRED: {
@@ -247,10 +247,15 @@ Bot.$evts = {}; // Events
 Bot.bot = null;
 Bot.applicationCommandData = [];
 
+// Intents.FLAGS.MESSAGE_CONTENT not defined in v13
+if(typeof DiscordJS.Intents.FLAGS.MESSAGE_CONTENT === "undefined") {
+  DiscordJS.Intents.FLAGS.MESSAGE_CONTENT = (1 << 15);
+}
+
 Bot.PRIVILEGED_INTENTS =
   DiscordJS.Intents.FLAGS.GUILD_MEMBERS |
   DiscordJS.Intents.FLAGS.GUILD_PRESENCES |
-  DiscordJS.Intents.FLAGS.GUILD_MESSAGES;
+  DiscordJS.Intents.FLAGS.MESSAGE_CONTENT;
 
 Bot.NON_PRIVILEGED_INTENTS =
   DiscordJS.Intents.FLAGS.GUILDS |
@@ -260,6 +265,7 @@ Bot.NON_PRIVILEGED_INTENTS =
   DiscordJS.Intents.FLAGS.GUILD_WEBHOOKS |
   DiscordJS.Intents.FLAGS.GUILD_INVITES |
   DiscordJS.Intents.FLAGS.GUILD_VOICE_STATES |
+  DiscordJS.Intents.FLAGS.GUILD_MESSAGES |
   DiscordJS.Intents.FLAGS.GUILD_MESSAGE_REACTIONS |
   DiscordJS.Intents.FLAGS.GUILD_MESSAGE_TYPING |
   DiscordJS.Intents.FLAGS.DIRECT_MESSAGES |
@@ -284,7 +290,7 @@ Bot.initBot = function () {
     options.partials = this.partials();
   }
   this.hasMemberIntents = (options.intents & DiscordJS.Intents.FLAGS.GUILD_MEMBERS) !== 0;
-  this.hasMessageIntents = (options.intents & DiscordJS.Intents.FLAGS.GUILD_MESSAGES) !== 0;
+  this.hasMessageIntents = (options.intents & DiscordJS.Intents.FLAGS.MESSAGE_CONTENT) !== 0;
   this.bot = new DiscordJS.Client(options);
 };
 

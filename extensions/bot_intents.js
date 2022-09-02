@@ -17,6 +17,7 @@ const INTENTS = [
   "DIRECT_MESSAGES",
   "DIRECT_MESSAGE_REACTIONS",
   "DIRECT_MESSAGE_TYPING",
+  "MESSAGE_CONTENT"
 ];
 
 module.exports = {
@@ -91,7 +92,7 @@ module.exports = {
   //---------------------------------------------------------------------
 
   size: function () {
-    return { width: 340, height: 560 };
+    return { width: 340, height: 575 };
   },
 
   //---------------------------------------------------------------------
@@ -172,7 +173,7 @@ module.exports = {
 			<input type="checkbox" id="GUILD_MESSAGES" name="GUILD_MESSAGES" value="GUILD_MESSAGES" ${
         intents & (1 << 9) ? "checked" : ""
       }>
-			<label for="GUILD_MESSAGES">Server Message Events ***</label><br>
+			<label for="GUILD_MESSAGES">Server Message Events</label><br>
 
 			<input type="checkbox" id="GUILD_MESSAGE_REACTIONS" name="GUILD_MESSAGE_REACTIONS" value="GUILD_MESSAGE_REACTIONS" ${
         intents & (1 << 10) ? "checked" : ""
@@ -199,6 +200,11 @@ module.exports = {
       }>
 			<label for="DIRECT_MESSAGE_TYPING">DM Typing Events</label><br>
 
+      <input type="checkbox" id="MESSAGE_CONTENT" name="MESSAGE_CONTENT" value="MESSAGE_CONTENT" ${
+        intents & (1 << 15) ? "checked" : ""
+      }>
+      <label for="MESSAGE_CONTENT">Message Content ***</label><br>
+
       <br>
 
 			<hr>
@@ -218,7 +224,7 @@ module.exports = {
   //---------------------------------------------------------------------
 
   init: function (document, globalObject) {
-    const PRIVILEGED = ["GUILD_PRESENCES", "GUILD_MEMBERS", "GUILD_MESSAGES"];
+    const PRIVILEGED = ["GUILD_PRESENCES", "GUILD_MEMBERS", "MESSAGE_CONTENT"];
     function EnableAll(enable) {
       for (let i = 0; i < INTENTS.length; i++) {
         const val = document.getElementById(INTENTS[i]);
