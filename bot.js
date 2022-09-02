@@ -1,11 +1,11 @@
 /******************************************************
  * Discord Bot Maker Bot
- * Version 2.1.5
+ * Version 2.1.6
  * Robert Borghese
  ******************************************************/
 
 const DBM = {};
-DBM.version = "2.1.5";
+DBM.version = "2.1.6";
 
 const DiscordJS = (DBM.DiscordJS = require("discord.js"));
 
@@ -52,6 +52,9 @@ const MsgType = {
 
   MISSING_MEMBER_INTENT_FIND_USER_ID: 300,
   CANNOT_FIND_USER_BY_ID: 301,
+
+  SERVER_MESSAGE_INTENT_REQUIRED: 400,
+  CHANNEL_PARTIAL_REQUIRED: 401,
 };
 
 function PrintError(type) {
@@ -70,7 +73,7 @@ function PrintError(type) {
     case MsgType.MISSING_ACTIONS: {
       error(
         format(
-          'Please copy the "Actions" folder from the Discord Bot Maker directory to this bot\'s directory: \n%s',
+          '[Missing Actions]\nPlease copy the "Actions" folder from the Discord Bot Maker directory to this bot\'s directory: \n%s',
           arguments[1],
         ),
       );
@@ -79,42 +82,42 @@ function PrintError(type) {
 
 
     case MsgType.DUPLICATE_SLASH_COMMAND: {
-      warn(format('Slash command with name "%s" already exists!\nThis duplicate will be ignored.\n', arguments[1]));
+      warn(format('[Duplicate Slash Command]\nSlash command with name "%s" already exists!\nThis duplicate will be ignored.\n', arguments[1]));
       break;
     }
     case MsgType.TOO_MANY_SPACES_SLASH_NAME: {
-      warn(format('Slash command with name "%s" has too many spaces!\nSlash command names may only contain a maximum of three different words.\n', arguments[1]));
+      warn(format('[Too Many Spaces in Slash Name]\nSlash command with name "%s" has too many spaces!\nSlash command names may only contain a maximum of three different words.\n', arguments[1]));
       break;
     }
     case MsgType.SUB_COMMAND_ALREADY_EXISTS: {
-      warn(format('Slash command with name "%s" cannot exist.\nIt requires the creation of a "sub-command group" called "%s",\nbut there\'s already a command with that name.', arguments[1], arguments[2]));
+      warn(format('[Sub-Command Already Exists]\nSlash command with name "%s" cannot exist.\nIt requires the creation of a "sub-command group" called "%s",\nbut there\'s already a command with that name.', arguments[1], arguments[2]));
       break;
     }
     case MsgType.SUB_COMMAND_GROUP_ALREADY_EXISTS: {
-      warn(format('Slash command with name "%s" cannot exist.\nThere is already a "sub-command group" with that name.\nThe "sub-command group" exists because of a command named something like: "%s _____"', arguments[1], arguments[1]));
+      warn(format('[Sub-Command Group Already Exists]\nSlash command with name "%s" cannot exist.\nThere is already a "sub-command group" with that name.\nThe "sub-command group" exists because of a command named something like: "%s _____"', arguments[1], arguments[1]));
       break;
     }
     case MsgType.INVALID_SLASH_NAME: {
       error(
         format(
-          'Slash command has invalid name: "%s".\nSlash command names cannot have spaces and must only contain letters, numbers, underscores, and dashes!\nThis command will be ignored.',
+          '[Invalid Slash Command Name]\nSlash command has invalid name: "%s".\nSlash command names cannot have spaces and must only contain letters, numbers, underscores, and dashes!\nThis command will be ignored.',
           arguments[1],
         ),
       );
       break;
     }
     case MsgType.DUPLICATE_USER_COMMAND: {
-      warn(format('User command with name "%s" already exists!\nThis duplicate will be ignored.\n', arguments[1]));
+      warn(format('[Duplicate User Command]\nUser command with name "%s" already exists!\nThis duplicate will be ignored.\n', arguments[1]));
       break;
     }
     case MsgType.DUPLICATE_MESSAGE_COMMAND: {
-      warn(format('Message command with name "%s" already exists!\nThis duplicate will be ignored.\n', arguments[1]));
+      warn(format('[Duplicate Message Command]\nMessage command with name "%s" already exists!\nThis duplicate will be ignored.\n', arguments[1]));
       break;
     }
     case MsgType.DUPLICATE_SLASH_PARAMETER: {
       warn(
         format(
-          'Slash command "%s" parameter #%d ("%s") has a name that\'s already being used!\nThis duplicate will be ignored.\n',
+          '[Duplicate Slash Command]\nSlash command "%s" parameter #%d ("%s") has a name that\'s already being used!\nThis duplicate will be ignored.\n',
           arguments[1],
           arguments[2],
           arguments[3],
@@ -125,7 +128,7 @@ function PrintError(type) {
     case MsgType.INVALID_SLASH_PARAMETER_NAME: {
       error(
         format(
-          'Slash command "%s" parameter #%d has invalid name: "%s".\nSlash command parameter names cannot have spaces and must only contain letters, numbers, underscores, and dashes!\nThis parameter will be ignored.\n',
+          '[Invalid Slash Parameter Name]\nSlash command "%s" parameter #%d has invalid name: "%s".\nSlash command parameter names cannot have spaces and must only contain letters, numbers, underscores, and dashes!\nThis parameter will be ignored.\n',
           arguments[1],
           arguments[2],
           arguments[3],
@@ -178,11 +181,11 @@ function PrintError(type) {
 
 
     case MsgType.MUTABLE_VOLUME_DISABLED: {
-      warn(format('Tried setting volume but "Mutable Volume" is disabled.'));
+      warn(format('[Mutable Volume Disabled]\nTried setting volume but "Mutable Volume" is disabled.'));
       break;
     }
     case MsgType.MUTABLE_VOLUME_NOT_IN_CHANNEL: {
-      warn(format('Tried setting volume but the bot is not in a voice channel.'));
+      warn(format('[Mutable Volume Not in Channel]\nTried setting volume but the bot is not in a voice channel.'));
       break;
     }
 
@@ -199,7 +202,15 @@ function PrintError(type) {
       warn(' - DBM Warning - \nFind User (by Name/ID) may freeze or error because\nthe bot has not enabled the Server Member Events Intent.')
     }
     case MsgType.CANNOT_FIND_USER_BY_ID: {
-      warn(format('Cannot find user by id: %s', arguments[1]));
+      warn(format('[Cannot Find User by ID]\nCannot find user by id: %s', arguments[1]));
+    }
+
+    case MsgType.SERVER_MESSAGE_INTENT_REQUIRED: {
+      warn(format('[Message Content Intent Required]\n%s commands found that require the "Server Message Events" intent.\nThese commands require the bot to be able to read messages from Discord servers.\nTo enable this behavior, first ensure the "MESSAGE CONTENT INTENT" is enabled in the "Bot" section on the Discord Developer Portal (the same page you got your bot token from).\nSecondly, in Discord Bot Maker, select Extensions -> Bot Intents from the title menu bar, and in this dialog, make sure "Server Message Events" is checked.', arguments[1]));
+      break;
+    }
+    case MsgType.CHANNEL_PARTIAL_REQUIRED: {
+      warn(format('[Channel Partial Required]\n%s commands are set to "DMs Only", but the Channel partial is not enabled.\nTo allow the bot to read messages from DMs, do the following: In Discord Bot Maker, on the title menu bar, go to Extensions -> Bot Partials.\nIn the dialog that appears, select "Custom" and then make sure "Channel (Enables DMs)" is checked.', arguments[1]))
     }
   }
 }
@@ -236,7 +247,10 @@ Bot.$evts = {}; // Events
 Bot.bot = null;
 Bot.applicationCommandData = [];
 
-Bot.PRIVILEGED_INTENTS = DiscordJS.Intents.FLAGS.GUILD_MEMBERS | DiscordJS.Intents.FLAGS.GUILD_PRESENCES;
+Bot.PRIVILEGED_INTENTS =
+  DiscordJS.Intents.FLAGS.GUILD_MEMBERS |
+  DiscordJS.Intents.FLAGS.GUILD_PRESENCES |
+  DiscordJS.Intents.FLAGS.GUILD_MESSAGES;
 
 Bot.NON_PRIVILEGED_INTENTS =
   DiscordJS.Intents.FLAGS.GUILDS |
@@ -246,7 +260,6 @@ Bot.NON_PRIVILEGED_INTENTS =
   DiscordJS.Intents.FLAGS.GUILD_WEBHOOKS |
   DiscordJS.Intents.FLAGS.GUILD_INVITES |
   DiscordJS.Intents.FLAGS.GUILD_VOICE_STATES |
-  DiscordJS.Intents.FLAGS.GUILD_MESSAGES |
   DiscordJS.Intents.FLAGS.GUILD_MESSAGE_REACTIONS |
   DiscordJS.Intents.FLAGS.GUILD_MESSAGE_TYPING |
   DiscordJS.Intents.FLAGS.DIRECT_MESSAGES |
@@ -259,6 +272,7 @@ Bot.init = function () {
   this.initBot();
   this.setupBot();
   this.reformatData();
+  this.checkForCommandErrors();
   this.initEvents();
   this.login();
 };
@@ -270,6 +284,7 @@ Bot.initBot = function () {
     options.partials = this.partials();
   }
   this.hasMemberIntents = (options.intents & DiscordJS.Intents.FLAGS.GUILD_MEMBERS) !== 0;
+  this.hasMessageIntents = (options.intents & DiscordJS.Intents.FLAGS.GUILD_MESSAGES) !== 0;
   this.bot = new DiscordJS.Client(options);
 };
 
@@ -324,11 +339,22 @@ Bot.reformatCommands = function () {
   const data = Files.data.commands;
   if (!data) return;
   this._hasTextCommands = false;
+  this._serverTextCommandCount = 0;
+  this._dmTextCommandCount = 0;
   this._caseSensitive = Files.data.settings.case === "true";
   for (let i = 0; i < data.length; i++) {
     const com = data[i];
     if (com) {
       this.prepareActions(com.actions);
+
+      if(com.comType <= "3") {
+        if(com.restriction !== "3") {
+          this._serverTextCommandCount++;
+        } else {
+          this._dmTextCommandCount++;
+        }
+      }
+
       switch (com.comType) {
         case "0": {
           this._hasTextCommands = true;
@@ -605,6 +631,15 @@ Bot.registerSelectMenuInteraction = function (interactionId, data) {
     } else {
       PrintError(MsgType.DUPLICATE_SELECT_ID, interactionId);
     }
+  }
+};
+
+Bot.checkForCommandErrors = function () {
+  if (this._serverTextCommandCount > 0 && !this.hasMessageIntents) {
+    PrintError(MsgType.SERVER_MESSAGE_INTENT_REQUIRED, this._serverTextCommandCount);
+  }
+  if (this._dmTextCommandCount > 0 && (!this.usePartials() || !this.partials().includes("CHANNEL"))) {
+    PrintError(MsgType.CHANNEL_PARTIAL_REQUIRED, this._dmTextCommandCount);
   }
 };
 
