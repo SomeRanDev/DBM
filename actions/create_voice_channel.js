@@ -146,7 +146,7 @@ module.exports = {
     server.channels
       .create(name, {
         ...channelData,
-        type: "GUILD_VOICE",
+        type: this.getDBM().DiscordJS.ChannelType.GuildVoice,
       })
       .then((channel) => {
         const varName = this.evalMessage(data.varName, cache);

@@ -200,7 +200,7 @@ module.exports = {
         result = targetChannel.nsfw;
         break;
       case 7:
-        result = targetChannel.type === "DM";
+        result = targetChannel.type === DiscordJS.ChannelType.DM;
         break;
       case 8:
         result = targetChannel.deletable;

@@ -2479,14 +2479,14 @@ Events.generateData = function () {
     ["guildDelete", 0, 0, 1],
     ["guildMemberAdd", 1, 0, 2],
     ["guildMemberRemove", 1, 0, 2],
-    ["channelCreate", 1, 0, 2, true, (arg1) => arg1.type === "GUILD_TEXT"],
-    ["channelDelete", 1, 0, 2, true, (arg1) => arg1.type === "GUILD_TEXT"],
+    ["channelCreate", 1, 0, 2, true, (arg1) => arg1.type === DiscordJS.ChannelType.GuildText],
+    ["channelDelete", 1, 0, 2, true, (arg1) => arg1.type === DiscordJS.ChannelType.GuildText],
     ["roleCreate", 1, 0, 2],
     ["roleDelete", 1, 0, 2],
     ["guildBanAdd", 200, 0, 2],
     ["guildBanRemove", 200, 0, 2],
-    ["channelCreate", 1, 0, 2, true, (arg1) => arg1.type === "GUILD_VOICE"],
-    ["channelDelete", 1, 0, 2, true, (arg1) => arg1.type === "GUILD_VOICE"],
+    ["channelCreate", 1, 0, 2, true, (arg1) => arg1.type === DiscordJS.ChannelType.GuildVoice],
+    ["channelDelete", 1, 0, 2, true, (arg1) => arg1.type === DiscordJS.ChannelType.GuildVoice],
     ["emojiCreate", 1, 0, 2],
     ["emojiDelete", 1, 0, 2],
     ["messageDelete", 1, 0, 2, true],
@@ -2510,8 +2510,8 @@ Events.generateData = function () {
     ["guildUnavailable", 1, 0, 1],
     ["inviteCreate", 1, 0, 2],
     ["inviteDelete", 1, 0, 2],
-    ["channelCreate", 1, 0, 2, true, (arg1) => arg1.type !== "GUILD_TEXT" && arg1.type !== "GUILD_VOICE"],
-    ["channelDelete", 1, 0, 2, true, (arg1) => arg1.type !== "GUILD_TEXT" && arg1.type !== "GUILD_VOICE"],
+    ["channelCreate", 1, 0, 2, true, (arg1) => arg1.type !== DiscordJS.ChannelType.GuildText && arg1.type !== DiscordJS.ChannelType.GuildVoice],
+    ["channelDelete", 1, 0, 2, true, (arg1) => arg1.type !== DiscordJS.ChannelType.GuildText && arg1.type !== DiscordJS.ChannelType.GuildVoice],
     ["stickerCreate", 1, 0, 2, true],
     ["stickerDelete", 1, 0, 2, true],
     ["threadCreate", 1, 0, 2, true],
@@ -3512,7 +3512,7 @@ Reflect.defineProperty(DiscordJS.Guild.prototype, "getDefaultChannel", {
       [...this.channels.cache.values()].forEach((c) => {
         if (
           c.permissionsFor(DBM.Bot.bot.user)?.has(DiscordJS.Permissions.FLAGS.SEND_MESSAGES) &&
-          (c.type === "GUILD_TEXT" || c.type === "GUILD_NEWS")
+          (c.type === DiscordJS.ChannelType.GuildText || c.type === DiscordJS.ChannelType.GuildAnnouncement)
         ) {
           if (!channel || channel.position > c.position) {
             channel = c;
@@ -3531,7 +3531,7 @@ Reflect.defineProperty(DiscordJS.Guild.prototype, "getDefaultVoiceChannel", {
       [...this.channels.cache.values()].forEach((c) => {
         if (
           c.permissionsFor(DBM.Bot.bot.user)?.has(DiscordJS.Permissions.FLAGS.SEND_MESSAGES) &&
-          c.type === "GUILD_VOICE"
+          c.type === DiscordJS.ChannelType.GuildVoice
         ) {
           if (!channel || channel.position > c.position) {
             channel = c;

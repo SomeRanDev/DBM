@@ -457,12 +457,16 @@ module.exports = {
       case 37:
         result = targetServer.roles.cache.size;
         break;
-      case 38:
-        result = targetServer.channels.cache.filter((c) => c.type === "GUILD_TEXT" || c.type === "GUILD_NEWS").size;
+      case 38: {
+        const { ChannelType } = this.getDBM().DiscordJS;
+        result = targetServer.channels.cache.filter((c) => c.type === ChannelType.GuildText || c.type === ChannelType.GuildAnnouncement).size;
         break;
-      case 39:
-        result = targetServer.channels.cache.filter((c) => c.type === "GUILD_VOICE").size;
+      }
+      case 39: {
+        const { ChannelType } = this.getDBM().DiscordJS;
+        result = targetServer.channels.cache.filter((c) => c.type === ChannelType.GuildVoice).size;
         break;
+      }
       case 40:
         result = targetServer.verified;
         break;
