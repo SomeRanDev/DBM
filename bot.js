@@ -2258,10 +2258,18 @@ Actions.generateTextInput = function (textInput, defaultCustomId, cache) {
     placeholder: this.evalMessage(textInput.placeholder, cache),
     minLength: parseInt(this.evalMessage(textInput.minLength, cache), 10) ?? 0,
     maxLength: parseInt(this.evalMessage(textInput.maxLength, cache), 10) ?? 100,
-    style: textInput.style,
+    style: this.convertStringTextInputStyleToEnum(textInput.style),
     required: textInput.required === "true"
   };
   return inputTextData;
+};
+
+Actions.convertStringTextInputStyleToEnum = function (style) {
+  switch (style) {
+    case "PARAGRAPH": return DiscordJS.TextInputStyle.Paragraph
+    case "SHORT": return DiscordJS.TextInputStyle.Short;
+  }
+  return DiscordJS.TextInputStyle.Short;
 };
 
 Actions.addButtonToActionRowArray = function (array, rowText, buttonData, cache) {
