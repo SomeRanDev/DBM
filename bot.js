@@ -1,15 +1,15 @@
 /******************************************************
  * Discord Bot Maker Bot
- * Version 2.1.6
+ * Version 2.2.0
  * Robert Borghese
  ******************************************************/
 
 const DBM = {};
-DBM.version = "2.1.6";
+DBM.version = "2.2.0";
 
 const DiscordJS = (DBM.DiscordJS = require("discord.js"));
 
-const requiredDjsVersion = "13.7.0";
+const requiredDjsVersion = "14.5.0";
 if (DiscordJS.version < requiredDjsVersion) {
   console.log(
     `This version of Discord Bot Maker requires discord.js ${requiredDjsVersion}+.\nPlease use "Project > Module Manager" and "Project > Reinstall Node Modules" to update to discord.js ${requiredDjsVersion}.\n`,
@@ -247,30 +247,25 @@ Bot.$evts = {}; // Events
 Bot.bot = null;
 Bot.applicationCommandData = [];
 
-// Intents.FLAGS.MESSAGE_CONTENT not defined in v13
-if(typeof DiscordJS.Intents.FLAGS.MESSAGE_CONTENT === "undefined") {
-  DiscordJS.Intents.FLAGS.MESSAGE_CONTENT = (1 << 15);
-}
-
 Bot.PRIVILEGED_INTENTS =
-  DiscordJS.Intents.FLAGS.GUILD_MEMBERS |
-  DiscordJS.Intents.FLAGS.GUILD_PRESENCES |
-  DiscordJS.Intents.FLAGS.MESSAGE_CONTENT;
+  DiscordJS.IntentsBitField.Flags.GuildMembers |
+  DiscordJS.IntentsBitField.Flags.GuildPresences |
+  DiscordJS.IntentsBitField.Flags.MessageContent;
 
 Bot.NON_PRIVILEGED_INTENTS =
-  DiscordJS.Intents.FLAGS.GUILDS |
-  DiscordJS.Intents.FLAGS.GUILD_BANS |
-  DiscordJS.Intents.FLAGS.GUILD_EMOJIS_AND_STICKERS |
-  DiscordJS.Intents.FLAGS.GUILD_INTEGRATIONS |
-  DiscordJS.Intents.FLAGS.GUILD_WEBHOOKS |
-  DiscordJS.Intents.FLAGS.GUILD_INVITES |
-  DiscordJS.Intents.FLAGS.GUILD_VOICE_STATES |
-  DiscordJS.Intents.FLAGS.GUILD_MESSAGES |
-  DiscordJS.Intents.FLAGS.GUILD_MESSAGE_REACTIONS |
-  DiscordJS.Intents.FLAGS.GUILD_MESSAGE_TYPING |
-  DiscordJS.Intents.FLAGS.DIRECT_MESSAGES |
-  DiscordJS.Intents.FLAGS.DIRECT_MESSAGE_REACTIONS |
-  DiscordJS.Intents.FLAGS.DIRECT_MESSAGE_TYPING;
+  DiscordJS.IntentsBitField.Flags.Guilds |
+  DiscordJS.IntentsBitField.Flags.GuildBans |
+  DiscordJS.IntentsBitField.Flags.GuildEmojisAndStickers |
+  DiscordJS.IntentsBitField.Flags.GuildIntegrations |
+  DiscordJS.IntentsBitField.Flags.GuildWebhooks |
+  DiscordJS.IntentsBitField.Flags.GuildInvites |
+  DiscordJS.IntentsBitField.Flags.GuildVoiceStates |
+  DiscordJS.IntentsBitField.Flags.GuildMessages |
+  DiscordJS.IntentsBitField.Flags.GuildMessageReactions |
+  DiscordJS.IntentsBitField.Flags.GuildMessageTyping |
+  DiscordJS.IntentsBitField.Flags.DirectMessages |
+  DiscordJS.IntentsBitField.Flags.DirectMessageReactions |
+  DiscordJS.IntentsBitField.Flags.DirectMessageTyping;
 
 Bot.ALL_INTENTS = Bot.PRIVILEGED_INTENTS | Bot.NON_PRIVILEGED_INTENTS;
 
@@ -289,8 +284,8 @@ Bot.initBot = function () {
   if (this.usePartials()) {
     options.partials = this.partials();
   }
-  this.hasMemberIntents = (options.intents & DiscordJS.Intents.FLAGS.GUILD_MEMBERS) !== 0;
-  this.hasMessageContentIntents = (options.intents & DiscordJS.Intents.FLAGS.MESSAGE_CONTENT) !== 0;
+  this.hasMemberIntents = (options.intents & DiscordJS.IntentsBitField.Flags.GuildMembers) !== 0;
+  this.hasMessageContentIntents = (options.intents & DiscordJS.IntentsBitField.Flags.MessageContent) !== 0;
   this.bot = new DiscordJS.Client(options);
 };
 
@@ -453,15 +448,15 @@ Bot.createApiJsonFromCommand = function (com, name) {
   };
   switch (com.comType) {
     case "4": {
-      result.type = "CHAT_INPUT";
+      result.type = DiscordJS.ApplicationCommandType.ChatInput;
       break;
     }
     case "5": {
-      result.type = "USER";
+      result.type = DiscordJS.ApplicationCommandType.User;
       break;
     }
     case "6": {
-      result.type = "MESSAGE";
+      result.type = DiscordJS.ApplicationCommandType.Message;
       break;
     }
   }
@@ -472,7 +467,7 @@ Bot.createApiJsonFromCommand = function (com, name) {
 };
 
 Bot.mergeSubCommandIntoCommandData = function (names, data) {
-  data.type = "SUB_COMMAND";
+  data.type = DiscordJS.ApplicationCommandOptionType.Subcommand;
 
   const baseName = names[0];
   let baseCommand = this.applicationCommandData.find(data => data.name === baseName) ?? null;
@@ -489,7 +484,7 @@ Bot.mergeSubCommandIntoCommandData = function (names, data) {
     if (!baseCommand.options) {
       baseCommand.options = [];
     }
-    if (baseCommand.options.find(d => d.name === data.name && d.type === "SUB_COMMAND_GROUP")) {
+    if (baseCommand.options.find(d => d.name === data.name && d.type === DiscordJS.ApplicationCommandOptionType.SubcommandGroup)) {
       PrintError(MsgType.SUB_COMMAND_GROUP_ALREADY_EXISTS, names.join(" "));
     } else {
       baseCommand.options.push(data);
@@ -505,11 +500,11 @@ Bot.mergeSubCommandIntoCommandData = function (names, data) {
       baseGroup = {
         name: groupName,
         description: this.getNoDescriptionText(),
-        type: "SUB_COMMAND_GROUP",
+        type: DiscordJS.ApplicationCommandOptionType.SubcommandGroup,
         options: [],
       }
       baseCommand.options.push(baseGroup);
-    } else if (baseGroup.type === "SUB_COMMAND") {
+    } else if (baseGroup.type === DiscordJS.ApplicationCommandOptionType.Subcommand) {
       PrintError(MsgType.SUB_COMMAND_ALREADY_EXISTS, names.join(" "), `${names[0]} ${names[1]}`);
       return;
     }
@@ -575,6 +570,7 @@ Bot.validateSlashCommandParameters = function (parameters, commandName) {
         existingNames[name] = true;
         paramsData.name = name;
         paramsData.description = this.validateSlashCommandDescription(paramsData.description);
+        paramsData.type = this.convertStringCommandParamTypeToEnum(paramsData.type);
         if (paramsData.required) {
           requireParams.push(paramsData);
         } else {
@@ -588,6 +584,24 @@ Bot.validateSlashCommandParameters = function (parameters, commandName) {
     }
   }
   return requireParams.concat(optionalParams);
+};
+
+Bot.convertStringCommandParamTypeToEnum = function (paramTypeStr) {
+  const optionType = DiscordJS.ApplicationCommandOptionType;
+  switch(paramTypeStr) {
+    case "SUB_COMMAND":       return optionType.Subcommand;
+    case "SUB_COMMAND_GROUP": return optionType.SubcommandGroup;
+    case "INTEGER":           return optionType.Integer;
+    case "STRING":            return optionType.String;
+    case "BOOLEAN":           return optionType.Boolean;
+    case "USER":              return optionType.User;
+    case "CHANNEL":           return optionType.Channel;
+    case "ROLE":              return optionType.Role;
+    case "MENTIONABLE":       return optionType.Mentionable;
+    case "NUMBER":            return optionType.Number;
+    case "ATTACHMENT":        return optionType.Attachment;
+  }
+  return 0;
 };
 
 Bot.reformatEvents = function () {
