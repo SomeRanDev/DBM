@@ -711,11 +711,12 @@ module.exports = {
     }
 
     if (componentsArr.length > 0) {
+      const { ComponentType } = this.getDBM().DiscordJS;
       const newComponents = componentsArr
         .filter((comps) => comps.length > 0)
         .map(function (comps) {
           return {
-            type: "ACTION_ROW",
+            type: ComponentType.ActionRow,
             components: comps,
           };
         });
