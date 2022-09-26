@@ -147,24 +147,26 @@ module.exports = {
 
 		name = names[0];
 
+		const { ApplicationCommandPermissionType } = this.getDBM().DiscordJS;
+
 		let memberOrRole = null;
-		let resolvedType = "";
-    if(data.fromTarget._index === 0) {
-      memberOrRole = await this.getMemberFromData(data.fromTarget.member, data.fromTarget.memberVarName, cache);
-      resolvedType = "USER";
-    } else {
-      memberOrRole = await this.getRoleFromData(data.fromTarget.role, data.fromTarget.roleVarName, cache);
-      resolvedType = "ROLE";
-    }
+		let resolvedType;
+		if(data.fromTarget._index === 0) {
+			memberOrRole = await this.getMemberFromData(data.fromTarget.member, data.fromTarget.memberVarName, cache);
+			resolvedType = ApplicationCommandPermissionType.User;
+		} else {
+			memberOrRole = await this.getRoleFromData(data.fromTarget.role, data.fromTarget.roleVarName, cache);
+			resolvedType = ApplicationCommandPermissionType.Role;
+		}
 
-    if (!memberOrRole) {
-    	this.callNextAction(cache);
-			return;
-    }
+		if (!memberOrRole) {
+			this.callNextAction(cache);
+				return;
+		}
 
-    resolvedId = memberOrRole?.id;
+		resolvedId = memberOrRole?.id;
 
-    const disable = data.disable === "disable";
+		const disable = data.disable === "disable";
 
 		let command = Bot.bot.application.commands.cache.find(com => com.name === name);
 		if (!command) {

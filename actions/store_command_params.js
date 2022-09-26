@@ -182,6 +182,7 @@ module.exports = {
     }
 
     const { Bot, Files } = this.getDBM();
+    const { ApplicationCommandOptionType } = this.getDBM().DiscordJS;
     const infoType = parseInt(data.info, 10);
     const index = parseInt(this.evalMessage(data.infoIndex, cache), 10) - 1;
     
@@ -240,7 +241,7 @@ module.exports = {
 
       case 2: {
         if (interactionOptions) {
-          const options = interactionOptions.data.filter(option => option.type === "USER");
+          const options = interactionOptions.data.filter(option => option.type === ApplicationCommandOptionType.User);
           if (options[index]) {
             source = options[index].member ?? options[index].user;
           }
@@ -255,7 +256,7 @@ module.exports = {
 
       case 3: {
         if (interactionOptions) {
-          const options = interactionOptions.data.filter(option => option.type === "ROLE");
+          const options = interactionOptions.data.filter(option => option.type === ApplicationCommandOptionType.Role);
           if (options[index]) {
             source = options[index].role;
           }
@@ -270,7 +271,7 @@ module.exports = {
 
       case 4: {
         if (interactionOptions) {
-          const options = interactionOptions.data.filter(option => option.type === "CHANNEL");
+          const options = interactionOptions.data.filter(option => option.type === ApplicationCommandOptionType.Channel);
           if (options[index]) {
             source = options[index].channel;
           }
