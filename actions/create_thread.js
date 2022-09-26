@@ -160,7 +160,7 @@ module.exports = {
 
     const threadOptions = {
       name: this.evalMessage(data.threadName, cache),
-      autoArchiveDuration: data.autoArchiveDuration === "max" ? "MAX" : parseInt(data.autoArchiveDuration, 10),
+      autoArchiveDuration: data.autoArchiveDuration === "max" ? 10080 : parseInt(data.autoArchiveDuration, 10),
     };
 
     if (data.reason) {
