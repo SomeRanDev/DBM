@@ -119,10 +119,22 @@ module.exports = {
     const data = cache.actions[cache.index];
     const name = this.evalMessage(data.gameName, cache);
     const url = this.evalMessage(data.gameLink, cache);
+
+    const { ActivityType } = this.getDBM().DiscordJS;
+
     if (url) {
-      botClient.setActivity(name, { type: "STREAMING", url });
+      botClient.setActivity(name, { type: ActivityType.Streaming, url });
     } else {
-      botClient.setActivity(name, { type: data.activityType });
+      let type = ActivityType.Playing;
+      switch(data.activityType) {
+        case "PLAYING":   type = ActivityType.Playing;
+        case "STREAMING": type = ActivityType.Streaming;
+        case "LISTENING": type = ActivityType.Listening;
+        case "WATCHING":  type = ActivityType.Watching;
+        case "COMPETING": type = ActivityType.Competing;
+      }
+
+      botClient.setActivity(name, { type });
     }
     this.callNextAction(cache);
   },
