@@ -142,7 +142,7 @@ module.exports = {
 
     if (message?.components) {
 
-      const { MessageActionRow } = this.getDBM().DiscordJS;
+      const { MessageActionRow, ComponentType } = this.getDBM().DiscordJS;
       const oldComponents = message.components;
       const newComponents = [];
 
@@ -162,11 +162,11 @@ module.exports = {
               break;
             }
             case "allButtons": {
-              if (comp.type === 2 || comp.type === "BUTTON") comp.disabled = disable;
+              if (comp.type === 2 || comp.type === ComponentType.Button) comp.disabled = disable;
               break;
             }
             case "allSelects": {
-              if (comp.type === 3 || comp.type === "SELECT_MENU") comp.disabled = disable;
+              if (comp.type === 3 || comp.type === ComponentType.SelectMenu) comp.disabled = disable;
               break;
             }
             case "sourceButton": {

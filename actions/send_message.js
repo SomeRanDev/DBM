@@ -672,7 +672,7 @@ module.exports = {
 
         if (button.mode !== "PERSISTENT") {
           awaitResponses.push({
-            type: "BUTTON",
+            type: "DBM_AWAIT_RESPONSE_BUTTON",
             time: button.time ? parseInt(this.evalMessage(button.time, cache)) || defaultTime : defaultTime,
             id: this.evalMessage(button.id, cache),
             user: button.mode.endsWith("PERSONAL") ? cache.getUser()?.id : null,
@@ -691,7 +691,7 @@ module.exports = {
 
         if (select.mode !== "PERSISTENT") {
           awaitResponses.push({
-            type: "SELECT",
+            type: "DBM_AWAIT_RESPONSE_SELECT",
             time: select.time ? parseInt(this.evalMessage(select.time, cache)) || defaultTime : defaultTime,
             id: this.evalMessage(select.id, cache),
             user: select.mode.endsWith("PERSONAL") ? cache.getUser()?.id : null,
@@ -766,7 +766,7 @@ module.exports = {
           this.registerTemporaryInteraction(resultMsg.id, response.time, response.id, response.user, response.multi, (interaction) => {
             if (response.data) {
               interaction.__originalInteraction = originalInteraction;
-              if (response.type === "BUTTON") {
+              if (response.type === "DBM_AWAIT_RESPONSE_BUTTON") {
                 this.preformActionsFromInteraction(interaction, response.data, cache.meta, tempVariables);
               } else {
                 this.preformActionsFromSelectInteraction(interaction, response.data, cache.meta, tempVariables);

@@ -218,7 +218,7 @@ module.exports = {
 
     if (message?.components) {
 
-      const { MessageActionRow } = this.getDBM().DiscordJS;
+      const { MessageActionRow, ComponentType } = this.getDBM().DiscordJS;
       const oldComponents = message.components;
       const newComponents = [];
 
@@ -233,7 +233,7 @@ module.exports = {
 
           switch (type) {
             case "allSelects": {
-              if (comp.type === 3 || comp.type === "SELECT_MENU") {
+              if (comp.type === 3 || comp.type === ComponentType.SelectMenu) {
                 onSelectMenuFound(comp);
               }
               break;

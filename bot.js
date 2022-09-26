@@ -951,9 +951,9 @@ Bot.onInteraction = function (interaction) {
   } else if (interaction.isModalSubmit()) {
     Actions.checkModalSubmitResponses(interaction);
   } else {
-    if (interaction.component?.type === "BUTTON") {
+    if (interaction.component?.type === DiscordJS.ComponentType.Button) {
       interaction._button = interaction.component;
-    } else if (interaction.component?.type === "SELECT_MENU") {
+    } else if (interaction.component?.type === DiscordJS.ComponentType.SelectMenu) {
       interaction._select = interaction.component;
     }
     if (!Actions.checkTemporaryInteractionResponses(interaction)) {
@@ -2205,9 +2205,9 @@ Actions.generateSubCache = function (cache, actions) {
 };
 
 Actions.generateButton = function (button, cache) {
-  const style = button.url ? "LINK" : button.type;
+  const style = button.url ? DiscordJS.ButtonStyle.Link : this.convertStringButtonStyleToEnum(button.type);
   const buttonData = {
-    type: "BUTTON",
+    type: DiscordJS.ComponentType.Button,
     label: this.evalMessage(button.name, cache),
     style,
   };
@@ -2222,9 +2222,20 @@ Actions.generateButton = function (button, cache) {
   return buttonData;
 };
 
+Actions.convertStringButtonStyleToEnum = function (style) {
+  switch (style) {
+    case "PRIMARY": return DiscordJS.ButtonStyle.Primary;
+    case "SECONDARY": return DiscordJS.ButtonStyle.Secondary;
+    case "SUCCESS": return DiscordJS.ButtonStyle.Success;
+    case "DANGER": return DiscordJS.ButtonStyle.Danger;
+    case "LINK": return DiscordJS.ButtonStyle.Link;
+  }
+  return DiscordJS.ButtonStyle.Primary;
+};
+
 Actions.generateSelectMenu = function (select, cache) {
   const selectData = {
-    type: "SELECT_MENU",
+    type: DiscordJS.ComponentType.SelectMenu,
     customId: this.evalMessage(select.id, cache),
     placeholder: this.evalMessage(select.placeholder, cache),
     minValues: parseInt(this.evalMessage(select.min, cache), 10) ?? 1,
@@ -2241,7 +2252,7 @@ Actions.generateSelectMenu = function (select, cache) {
 
 Actions.generateTextInput = function (textInput, defaultCustomId, cache) {
   const inputTextData = {
-    type: "TEXT_INPUT",
+    type: DiscordJS.ComponentType.TextInput,
     customId: !!textInput.id ? textInput.id : defaultCustomId,
     label: this.evalMessage(textInput.name, cache),
     placeholder: this.evalMessage(textInput.placeholder, cache),
@@ -2259,7 +2270,7 @@ Actions.addButtonToActionRowArray = function (array, rowText, buttonData, cache)
     let found = false;
     for (let i = 0; i < array.length; i++) {
       if (array[i].length < 5) {
-        if (array[i].length === 0 || array[i][0]?.type === "BUTTON") {
+        if (array[i].length === 0 || array[i][0]?.type === DiscordJS.ComponentType.Button) {
           found = true;
           row = i;
           break;
