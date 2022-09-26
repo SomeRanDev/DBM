@@ -310,7 +310,8 @@ module.exports = {
         break;
       case 14:
         if (member.presence?.activities.length) {
-          const status = member.presence.activities.filter((s) => s.type !== "CUSTOM");
+          const { ActivityType } = this.getDBM().DiscordJS;
+          const status = member.presence.activities.filter((s) => s.type !== ActivityType.Custom);
           result = status[0]?.name;
         }
         break;
@@ -367,9 +368,11 @@ module.exports = {
         const status = member.presence?.clientStatus;
         result = status && Object.keys(status);
         break;
-      case 30:
-        result = member.presence?.activities.find((s) => s.type === "CUSTOM")?.state;
+      case 30: {
+        const { ActivityType } = this.getDBM().DiscordJS;
+        result = member.presence?.activities.find((s) => s.type === ActivityType.Custom)?.state;
         break;
+      }
       case 31:
         result = member.displayAvatarURL({ dynamic: true, format: "png", size: 4096 });
         break;
