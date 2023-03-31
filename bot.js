@@ -10,9 +10,11 @@ DBM.version = "2.2.0";
 const DiscordJS = (DBM.DiscordJS = require("discord.js"));
 
 const requiredDjsVersion = "14.5.0";
-if (DiscordJS.version < requiredDjsVersion) {
+if (requiredDjsVersion.localeCompare(DiscordJS.version, { numeric: true, sensitivity: "base" }) > 0) {
   console.log(
-    `This version of Discord Bot Maker requires discord.js ${requiredDjsVersion}+.\nPlease use "Project > Module Manager" and "Project > Reinstall Node Modules" to update to discord.js ${requiredDjsVersion}.\n`,
+    `This version of Discord Bot Maker requires discord.js ${requiredDjsVersion}+.
+It is currently ${DiscordJS.version}.
+Please use "Project > Module Manager" and "Project > Reinstall Node Modules" to update to discord.js ${requiredDjsVersion}.\n\n`,
   );
   throw new Error(`Need discord.js ${requiredDjsVersion} to run!!!`);
 }
@@ -2487,14 +2489,14 @@ Events.generateData = function () {
     ["guildDelete", 0, 0, 1],
     ["guildMemberAdd", 1, 0, 2],
     ["guildMemberRemove", 1, 0, 2],
-    ["channelCreate", 1, 0, 2, true, (arg1) => arg1.type === DiscordJS.ChannelType.GuildText],
-    ["channelDelete", 1, 0, 2, true, (arg1) => arg1.type === DiscordJS.ChannelType.GuildText],
+    ["channelCreate", 1, 0, 2, true, (arg1) => arg1.type === "GUILD_TEXT"],
+    ["channelDelete", 1, 0, 2, true, (arg1) => arg1.type === "GUILD_TEXT"],
     ["roleCreate", 1, 0, 2],
     ["roleDelete", 1, 0, 2],
     ["guildBanAdd", 200, 0, 2],
     ["guildBanRemove", 200, 0, 2],
-    ["channelCreate", 1, 0, 2, true, (arg1) => arg1.type === DiscordJS.ChannelType.GuildVoice],
-    ["channelDelete", 1, 0, 2, true, (arg1) => arg1.type === DiscordJS.ChannelType.GuildVoice],
+    ["channelCreate", 1, 0, 2, true, (arg1) => arg1.type === "GUILD_VOICE"],
+    ["channelDelete", 1, 0, 2, true, (arg1) => arg1.type === "GUILD_VOICE"],
     ["emojiCreate", 1, 0, 2],
     ["emojiDelete", 1, 0, 2],
     ["messageDelete", 1, 0, 2, true],
@@ -2516,10 +2518,10 @@ Events.generateData = function () {
     [],
     [],
     ["guildUnavailable", 1, 0, 1],
-    ["inviteCreate", 1, 0, 2],
-    ["inviteDelete", 1, 0, 2],
-    ["channelCreate", 1, 0, 2, true, (arg1) => arg1.type !== DiscordJS.ChannelType.GuildText && arg1.type !== DiscordJS.ChannelType.GuildVoice],
-    ["channelDelete", 1, 0, 2, true, (arg1) => arg1.type !== DiscordJS.ChannelType.GuildText && arg1.type !== DiscordJS.ChannelType.GuildVoice],
+    [],
+    [],
+    ["channelCreate", 1, 0, 2, true, (arg1) => arg1.type !== "GUILD_TEXT" && arg1.type !== "GUILD_VOICE"],
+    ["channelDelete", 1, 0, 2, true, (arg1) => arg1.type !== "GUILD_TEXT" && arg1.type !== "GUILD_VOICE"],
     ["stickerCreate", 1, 0, 2, true],
     ["stickerDelete", 1, 0, 2, true],
     ["threadCreate", 1, 0, 2, true],
@@ -2528,6 +2530,8 @@ Events.generateData = function () {
     ["threadUpdate", 1, 3, 4, true],
     ["threadMemberUpdate", 1, 3, 100, true],
     [],
+    ["inviteCreate", 1, 0, 2],
+    ["inviteDelete", 1, 0, 2],
   ];
 };
 
