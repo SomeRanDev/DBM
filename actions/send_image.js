@@ -126,15 +126,19 @@ module.exports = {
     const storage2 = parseInt(data.storage2, 10);
 
     if (!Array.isArray(target) && !target?.send) return this.callNextAction(cache);
+    
     Images.createBuffer(image)
       .then((buffer) => {
+        const obj = {
+          files: [new DiscordJS.MessageAttachment(buffer, "image.png")],
+        };
+
+        if (data.message) {
+          obj.content = this.evalMessage(data.message, cache);
+        }
+
         if (Array.isArray(target)) {
-          this.callListFunc(target, "send", [
-            {
-              content: this.evalMessage(data.message, cache),
-              files: [new DiscordJS.MessageAttachment(buffer, "image.png")],
-            },
-          ])
+          this.callListFunc(target, "send", [obj])
             .then((msg) => {
               this.storeValue(msg, storage2, varName3, cache);
               this.callNextAction(cache);
@@ -142,10 +146,7 @@ module.exports = {
             .catch((err) => this.displayError(data, cache, err));
         } else if (target?.send) {
           target
-            .send({
-              content: this.evalMessage(data.message, cache),
-              files: [new DiscordJS.MessageAttachment(buffer, "image.png")],
-            })
+            .send(obj)
             .then((msg) => {
               this.storeValue(msg, storage2, varName3, cache);
               this.callNextAction(cache);
