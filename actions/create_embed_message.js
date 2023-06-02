@@ -126,8 +126,8 @@ module.exports = {
 
   action(cache) {
     const data = cache.actions[cache.index];
-    const { MessageEmbed } = this.getDBM().DiscordJS;
-    const embed = new MessageEmbed();
+    const { EmbedBuilder } = this.getDBM().DiscordJS;
+    const embed = new EmbedBuilder();
     if (data.title) {
       embed.setTitle(this.evalMessage(data.title, cache));
     }

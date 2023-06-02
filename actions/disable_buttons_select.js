@@ -132,7 +132,7 @@ module.exports = {
     }
 
     let sourceSelect = null;
-    if (cache.interaction.isSelectMenu()) {
+    if (cache.interaction.isStringSelectMenu()) {
       sourceSelect = cache.interaction.customId;
     }
 
