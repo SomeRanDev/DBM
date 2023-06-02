@@ -9,7 +9,7 @@ DBM.version = "2.2.0";
 
 const DiscordJS = (DBM.DiscordJS = require("discord.js"));
 
-const requiredDjsVersion = "14.5.0";
+const requiredDjsVersion = "14.11.0";
 if (requiredDjsVersion.localeCompare(DiscordJS.version, { numeric: true, sensitivity: "base" }) > 0) {
   console.log(
     `This version of Discord Bot Maker requires discord.js ${requiredDjsVersion}+.
@@ -961,7 +961,7 @@ Bot.onInteraction = function (interaction) {
     if (!Actions.checkTemporaryInteractionResponses(interaction)) {
       if (interaction.isButton()) {
         this.onButtonInteraction(interaction);
-      } else if (interaction.isSelectMenu()) {
+      } else if (interaction.isStringSelectMenu()) {
         this.onSelectMenuInteraction(interaction);
       }
     }
@@ -1133,7 +1133,7 @@ const ActionsCache = (Actions.ActionsCache = class ActionsCache {
     let result = `${this.meta.isEvent ? "Event" : "Command"} "${this.meta.name}"`;
     if (this.interaction?.isButton()) {
       result += ", Button" + (this.interaction._button ? ` "${this.interaction._button.label}"` : "");
-    } else if (this.interaction?.isSelectMenu()) {
+    } else if (this.interaction?.isStringSelectMenu()) {
       result += ", Select Menu" + (this.interaction._select ? ` "${this.interaction._select.placeholder}"` : "");
     }
     return result;
@@ -3523,7 +3523,7 @@ Reflect.defineProperty(DiscordJS.Guild.prototype, "getDefaultChannel", {
     if (!channel) {
       [...this.channels.cache.values()].forEach((c) => {
         if (
-          c.permissionsFor(DBM.Bot.bot.user)?.has(DiscordJS.Permissions.FLAGS.SEND_MESSAGES) &&
+          c.permissionsFor(DBM.Bot.bot.user)?.has(DiscordJS.PermissionsBitField.Flags.SendMessages) &&
           (c.type === DiscordJS.ChannelType.GuildText || c.type === DiscordJS.ChannelType.GuildAnnouncement)
         ) {
           if (!channel || channel.position > c.position) {
@@ -3542,7 +3542,7 @@ Reflect.defineProperty(DiscordJS.Guild.prototype, "getDefaultVoiceChannel", {
     if (!channel) {
       [...this.channels.cache.values()].forEach((c) => {
         if (
-          c.permissionsFor(DBM.Bot.bot.user)?.has(DiscordJS.Permissions.FLAGS.SEND_MESSAGES) &&
+          c.permissionsFor(DBM.Bot.bot.user)?.has(DiscordJS.PermissionsBitField.Flags.SendMessages) &&
           c.type === DiscordJS.ChannelType.GuildVoice
         ) {
           if (!channel || channel.position > c.position) {
