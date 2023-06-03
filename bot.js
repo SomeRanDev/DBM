@@ -3504,6 +3504,12 @@ Reflect.defineProperty(DiscordJS.GuildMember.prototype, "addData", {
   },
 });
 
+Reflect.defineProperty(DiscordJS.GuildMember.prototype, "subData", {
+  value(name, value) {
+    return DiscordJS.User.prototype.subData.apply(this, arguments);
+  },
+});
+
 Reflect.defineProperty(DiscordJS.GuildMember.prototype, "clearData", {
   value(name) {
     return DiscordJS.User.prototype.clearData.apply(this, arguments);
@@ -3561,6 +3567,21 @@ Reflect.defineProperty(DiscordJS.User.prototype, "addData", {
       this.setData(name, value);
     } else {
       this.setData(name, this.data(name) + value);
+    }
+  },
+});
+
+Reflect.defineProperty(DiscordJS.User.prototype, "subData", {
+  value(name, value) {
+    const id = this.id;
+    const data = Files.data.players;
+    if (data[id] === undefined) {
+      data[id] = {};
+    }
+    if (data[id][name] === undefined) {
+      this.setData(name, value);
+    } else {
+      this.setData(name, this.data(name) - value);
     }
   },
 });
@@ -3676,6 +3697,21 @@ Reflect.defineProperty(DiscordJS.Guild.prototype, "addData", {
   },
 });
 
+Reflect.defineProperty(DiscordJS.Guild.prototype, "subData", {
+  value(name, value) {
+    const id = this.id;
+    const data = Files.data.servers;
+    if (data[id] === undefined) {
+      data[id] = {};
+    }
+    if (data[id][name] === undefined) {
+      this.setData(name, value);
+    } else {
+      this.setData(name, this.data(name) - value);
+    }
+  },
+});
+
 Reflect.defineProperty(DiscordJS.Guild.prototype, "clearData", {
   value(name) {
     const id = this.id;
@@ -3745,6 +3781,21 @@ Reflect.defineProperty(DiscordJS.Message.prototype, "addData", {
       this.setData(name, value);
     } else {
       this.setData(name, this.data(name) + value);
+    }
+  },
+});
+
+Reflect.defineProperty(DiscordJS.Message.prototype, "subData", {
+  value(name, value) {
+    const id = this.id;
+    const data = Files.data.messages;
+    if (data[id] === undefined) {
+      data[id] = {};
+    }
+    if (data[id][name] === undefined) {
+      this.setData(name, value);
+    } else {
+      this.setData(name, this.data(name) - value);
     }
   },
 });

@@ -74,17 +74,15 @@ module.exports = {
     return `
 <span class="dbminputlabel">Name</span><br>
 <input id="channelName" class="round" type="text">
-
 <br>
 
 <span class="dbminputlabel">Category ID</span><br>
 <input id= "categoryID" class="round" type="text" placeholder="Leave blank for default!">
-
 <br>
 
 <div style="float: left; width: calc(50% - 12px);">
 	<span class="dbminputlabel">Topic</span><br>
-	<input id="topic" class="round" type="text"><br>
+  <input id="topic" class="round" type="text"><br>
 </div>
 <div style="float: right; width: calc(50% - 12px);">
 	<span class="dbminputlabel">Position</span><br>
@@ -94,14 +92,12 @@ module.exports = {
 <br><br><br><br>
 
 <hr class="subtlebar" style="margin-top: 0px;">
-
 <br>
 
 <div>
   <span class="dbminputlabel">Reason</span>
   <input id="reason" placeholder="Optional" class="round" type="text">
 </div>
-
 <br>
 
 <store-in-variable allowNone selectId="storage" variableInputId="varName" variableContainerId="varNameContainer"></store-in-variable>`;
@@ -128,9 +124,7 @@ module.exports = {
   action(cache) {
     const data = cache.actions[cache.index];
     const server = cache.server;
-    if (!server?.channels?.create) {
-      this.callNextAction(cache);
-    }
+    if (!server?.channels?.create) return this.callNextAction(cache);
 
     const channelData = {
       reason: this.evalMessage(data.reason, cache),

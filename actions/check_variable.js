@@ -80,6 +80,10 @@ module.exports = {
 			<option value="9">Length Equals</option>
 			<option value="10">Length is Greater Than</option>
 			<option value="11">Length is Less Than</option>
+      <option value="12">Length is Greater Than or Equal To</option>
+      <option value="13">Length is Less Than or Equal To</option>
+      <option value="14">Greater Than or Equal To</option>
+      <option value="15">Less Than or Equal To</option>
 		</select>
 	</div>
 	<div style="float: right; width: 60%;" id="directValue">
@@ -205,6 +209,22 @@ module.exports = {
         if (typeof val1?.length === "number") {
           result = Boolean(val1.length < val2);
         }
+        break;
+      case 12:
+        if (typeof val1?.length === "number") {
+          result = Boolean(val1.length >= val2);
+        }
+        break;
+      case 13:
+        if (typeof val1?.length === "number") {
+          result = Boolean(val1.length <= val2);
+        }
+        break;
+      case 14:
+        result = val1 >= val2;
+        break;
+      case 15:
+        result = val1 <= val2;
         break;
     }
 

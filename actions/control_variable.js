@@ -85,6 +85,7 @@ module.exports = {
 		<select id="changeType" class="round">
 			<option value="0" selected>Set Value</option>
 			<option value="1">Add Value</option>
+      <option value="2">Subtract Value</option>
 		</select>
 	</div>
 	<div style="float: right; width: 60%;">
@@ -118,12 +119,15 @@ module.exports = {
     const varName = this.evalMessage(data.varName, cache);
     const storage = this.getVariable(type, varName, cache);
     const isAdd = data.changeType === "1";
+    const isSub = data.changeType === "2";
     let val = this.evalMessage(data.value, cache);
+
     try {
       val = this.eval(val, cache);
     } catch (e) {
       this.displayError(data, cache, e);
     }
+
     if (val !== undefined) {
       if (isAdd) {
         let result;
@@ -133,10 +137,19 @@ module.exports = {
           result = storage + val;
         }
         this.storeValue(result, type, varName, cache);
+      } else if (isSub) {
+        let result;
+        if (storage === undefined) {
+          result = val;
+        } else {
+          result = storage - val;
+        }
+        this.storeValue(result, type, varName, cache);
       } else {
         this.storeValue(val, type, varName, cache);
       }
     }
+
     this.callNextAction(cache);
   },
 
