@@ -576,7 +576,7 @@ module.exports = {
     const overwrite = data.overwrite;
 
     let isEdit = 0;
-    if(data.editMessage === "intUpdate") {
+    if (data.editMessage === "intUpdate") {
       isEdit = 2;
     } else {
       const editMessage = parseInt(data.editMessage, 10);
@@ -595,7 +595,6 @@ module.exports = {
       }
     }
 
-
     const content = this.evalMessage(message, cache);
     if (content) {
       if (messageOptions.content && !overwrite) {
@@ -606,7 +605,7 @@ module.exports = {
     }
 
     if (data.embeds?.length > 0) {
-      const { MessageEmbed } = this.getDBM().DiscordJS;
+      const { EmbedBuilder } = this.getDBM().DiscordJS;
 
       if (!Array.isArray(messageOptions.embeds) || overwrite) {
         messageOptions.embeds = [];
@@ -615,7 +614,7 @@ module.exports = {
       const embedDatas = data.embeds;
       for (let i = 0; i < embedDatas.length; i++) {
         const embedData = embedDatas[i];
-        const embed = new MessageEmbed();
+        const embed = new EmbedBuilder();
 
         if (embedData.title) embed.setTitle(this.evalMessage(embedData.title, cache));
         if (embedData.url) embed.setURL(this.evalMessage(embedData.url, cache));
@@ -729,7 +728,7 @@ module.exports = {
     }
 
     if (data.attachments?.length > 0) {
-      const { Util, MessageAttachment } = this.getDBM().DiscordJS;
+      const { Util, AttachmentBuilder } = this.getDBM().DiscordJS;
       if (!Array.isArray(messageOptions.files) || overwrite) {
         messageOptions.files = [];
       }
@@ -739,7 +738,7 @@ module.exports = {
         if (url) {
           const spoiler = !!attachment?.spoiler;
           const name = attachment?.name || (spoiler ? Util.basename(url) : undefined);
-          const msgAttachment = new MessageAttachment(url, name);
+          const msgAttachment = new AttachmentBuilder(url, name);
           if (spoiler) {
             msgAttachment.setSpoiler(true);
           }
@@ -764,16 +763,23 @@ module.exports = {
           const response = awaitResponses[i];
           const originalInteraction = cache.interaction?.__originalInteraction ?? cache.interaction;
           const tempVariables = cache.temp || {};
-          this.registerTemporaryInteraction(resultMsg.id, response.time, response.id, response.user, response.multi, (interaction) => {
-            if (response.data) {
-              interaction.__originalInteraction = originalInteraction;
-              if (response.type === "DBM_AWAIT_RESPONSE_BUTTON") {
-                this.preformActionsFromInteraction(interaction, response.data, cache.meta, tempVariables);
-              } else {
-                this.preformActionsFromSelectInteraction(interaction, response.data, cache.meta, tempVariables);
+          this.registerTemporaryInteraction(
+            resultMsg.id,
+            response.time,
+            response.id,
+            response.user,
+            response.multi,
+            (interaction) => {
+              if (response.data) {
+                interaction.__originalInteraction = originalInteraction;
+                if (response.type === "DBM_AWAIT_RESPONSE_BUTTON") {
+                  this.preformActionsFromInteraction(interaction, response.data, cache.meta, tempVariables);
+                } else {
+                  this.preformActionsFromSelectInteraction(interaction, response.data, cache.meta, tempVariables);
+                }
               }
-            }
-          });
+            },
+          );
         }
       } else {
         this.callNextAction(cache);
@@ -792,47 +798,39 @@ module.exports = {
       messageOptions._awaitResponses = awaitResponses;
       this.storeValue(messageOptions, storage, varName2, cache);
       this.callNextAction(cache);
-    }
-
-    else if (Array.isArray(target)) {
+    } else if (Array.isArray(target)) {
       this.callListFunc(target, "send", [messageOptions]).then(onComplete);
-    }
-
-    else if (isEdit === 2) {
+    } else if (isEdit === 2) {
       let promise = null;
 
       defaultResultMsg = cache.interaction?.message;
 
       if (cache.interaction?.replied && cache.interaction?.editReply) {
         promise = cache.interaction.editReply(messageOptions);
-      } else if(cache?.interaction?.update) {
+      } else if (cache?.interaction?.update) {
         promise = cache.interaction.update(messageOptions);
       } else {
-        this.displayError(data, cache, "Send Message -> Message/Options to Edit -> Interaction Update / Could not find interaction to edit");
+        this.displayError(
+          data,
+          cache,
+          "Send Message -> Message/Options to Edit -> Interaction Update / Could not find interaction to edit",
+        );
       }
-      
-      if (promise) {
-        promise
-          .then(onComplete)
-          .catch((err) => this.displayError(data, cache, err));
-      }
-    }
 
-    else if (isEdit === 1 && target?.edit) {
+      if (promise) {
+        promise.then(onComplete).catch((err) => this.displayError(data, cache, err));
+      }
+    } else if (isEdit === 1 && target?.edit) {
       target
         .edit(messageOptions)
         .then(onComplete)
         .catch((err) => this.displayError(data, cache, err));
-    }
-
-    else if (isMessageTarget && target?.reply) {
+    } else if (isMessageTarget && target?.reply) {
       target
         .reply(messageOptions)
         .then(onComplete)
         .catch((err) => this.displayError(data, cache, err));
-    }
-
-    else if (data.reply === true && canReply) {
+    } else if (data.reply === true && canReply) {
       messageOptions.fetchReply = true;
       if (data.ephemeral === true) {
         messageOptions.ephemeral = true;
@@ -844,16 +842,12 @@ module.exports = {
         promise = cache.interaction.reply(messageOptions);
       }
       promise.then(onComplete).catch((err) => this.displayError(data, cache, err));
-    }
-
-    else if (target?.send) {
+    } else if (target?.send) {
       target
         .send(messageOptions)
         .then(onComplete)
         .catch((err) => this.displayError(data, cache, err));
-    }
-
-    else {
+    } else {
       this.callNextAction(cache);
     }
   },

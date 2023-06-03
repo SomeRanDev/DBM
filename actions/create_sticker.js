@@ -125,6 +125,7 @@ module.exports = {
     const data = cache.actions[cache.index];
     const server = cache.server;
     if (!server) return this.callNextAction(cache);
+    const stickerData = { name: this.evalMessage(data.stickerName, cache) };
 
     const varName = this.evalMessage(data.varName, cache);
     const image = this.getVariable(parseInt(data.storage, 10), varName, cache);
@@ -132,16 +133,16 @@ module.exports = {
 
     let buffer;
     try {
-      buffer = Images.createBuffer(image);
+      stickerData.file = Images.createBuffer(image);
     } catch {
       return this.displayError(data, cache);
     }
 
-    const tag = this.evalMessage(data.tag, cache);
-    const description = this.evalMessage(data.description, cache);
+    stickerData.tag = this.evalMessage(data.tag, cache);
+    stickerData.description = this.evalMessage(data.description, cache);
 
     server.stickers
-      .create(buffer, this.evalMessage(data.stickerName, cache), tag, { description })
+      .create({ stickerData })
       .then((sticker) => {
         const varName2 = this.evalMessage(data.varName2, cache);
         const storage = parseInt(data.storage, 10);

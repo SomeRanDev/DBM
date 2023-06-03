@@ -23,7 +23,10 @@ module.exports = {
 
   subtitle(data, presets) {
     const storage = presets.variables;
-    return `${presets.getServerText(data.server, data.varName)} -> ${presets.getVariableText(data.storage, data.varName2)}`;
+    return `${presets.getServerText(data.server, data.varName)} -> ${presets.getVariableText(
+      data.storage,
+      data.varName2,
+    )}`;
   },
 
   //---------------------------------------------------------------------

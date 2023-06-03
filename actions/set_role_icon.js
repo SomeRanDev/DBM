@@ -22,7 +22,10 @@ module.exports = {
   //---------------------------------------------------------------------
 
   subtitle(data, presets) {
-    return `Set Icon of ${presets.getRoleText(data.role, data.roleVarName)} to ${presets.getVariableText(data.image, data.imageVarName)}`;
+    return `Set Icon of ${presets.getRoleText(data.role, data.roleVarName)} to ${presets.getVariableText(
+      data.image,
+      data.imageVarName,
+    )}`;
   },
 
   //---------------------------------------------------------------------
@@ -126,10 +129,9 @@ module.exports = {
         // otherwise, the string could be Emoji-resolvable, so do nothing
       }
     }
-    
+
     if (Array.isArray(role)) {
-      this.callListFunc(role, "setIcon", [imageOrEmoji, reason])
-        .then(() => this.callNextAction(cache));
+      this.callListFunc(role, "setIcon", [imageOrEmoji, reason]).then(() => this.callNextAction(cache));
     } else if (role?.setIcon) {
       role
         .setIcon(imageOrEmoji, reason)

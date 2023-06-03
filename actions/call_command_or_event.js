@@ -65,8 +65,10 @@ module.exports = {
 	<select id="source" class="round">
 		<optgroup id="commands" label="Commands"></optgroup>
 		<optgroup id="events" label="Events"></optgroup>
-	</select><br>
-	<span class="dbminputlabel">Call Type</span><br>
+	</select>
+  <br>
+	
+  <span class="dbminputlabel">Call Type</span><br>
 	<select id="type" class="round">
 		<option value="true" selected>Wait for Completion</option>
 		<option value="false">Run Simultaneously</option>
@@ -126,10 +128,7 @@ module.exports = {
       }
     }
 
-    if (!actions) {
-      this.callNextAction(cache);
-      return;
-    }
+    if (!actions) return this.callNextAction(cache);
 
     const waitForCompletion = data.type === "true";
     let callback = null;

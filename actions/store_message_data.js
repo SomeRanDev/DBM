@@ -22,7 +22,10 @@ module.exports = {
   //---------------------------------------------------------------------
 
   subtitle(data, presets) {
-    return `${presets.getMessageText(data.message, data.varName)} -> ${presets.getVariableText(data.storage, data.varName2)}`;
+    return `${presets.getMessageText(data.message, data.varName)} -> ${presets.getVariableText(
+      data.storage,
+      data.varName2,
+    )}`;
   },
 
   //---------------------------------------------------------------------

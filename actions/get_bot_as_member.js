@@ -108,10 +108,11 @@ module.exports = {
       this.callNextAction(cache);
     };
 
-    if (server?.me) {
-      callback(server.me);
+    if (server?.members?.me) {
+      callback(server.members.me);
     } else {
-      server?.members?.fetch?.(this.getDBM().Bot.bot.user.id)
+      server?.members
+        ?.fetch?.(this.getDBM().Bot.bot.user.id)
         .then(callback)
         .catch((err) => this.displayError(data, cache, err));
     }

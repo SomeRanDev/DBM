@@ -169,14 +169,14 @@ module.exports = {
         const unusedNameTemplate = "unusedTempVarName";
         let j = 0;
         let unusedName = unusedNameTemplate + "0";
-        while(existingTempVars.includes(unusedName)) {
-          unusedName = unusedNameTemplate + (++j);
+        while (existingTempVars.includes(unusedName)) {
+          unusedName = unusedNameTemplate + ++j;
         }
 
         const textInputData = this.generateTextInput(textInput, unusedName, cache);
         this.addTextInputToActionRowArray(componentsArr, this.evalMessage(textInput.row, cache), textInputData, cache);
         existingTempVars.push(textInputData.customId);
-        if(textInput.id) {
+        if (textInput.id) {
           tempVariableNames.push(textInputData.customId);
         }
       }
@@ -208,13 +208,11 @@ module.exports = {
     }
 
     if (cache.interaction) {
-
       if (cache.interaction.showModal) {
-
         const modalData = {
           customId: cache.interaction.id,
           title: this.evalMessage(data.title, cache),
-          components: componentsArr
+          components: componentsArr,
         };
 
         this.registerModalSubmitResponses(cache.interaction.id, (newInteraction) => {
@@ -224,7 +222,7 @@ module.exports = {
           for (let i = 0; i < tempVariableNames.length; i++) {
             const name = tempVariableNames[i];
             const val = newInteraction.fields.getTextInputValue(name);
-            if(typeof val === "string") {
+            if (typeof val === "string") {
               this.storeValue(val, 1, name, cache);
             }
           }
@@ -233,12 +231,13 @@ module.exports = {
         });
 
         cache.interaction.showModal(modalData);
-
       } else {
-
-        this.displayError(data, cache, "Cannot show modal from current interaction, perhaps attempting to show modal multiple times?");
+        this.displayError(
+          data,
+          cache,
+          "Cannot show modal from current interaction, perhaps attempting to show modal multiple times?",
+        );
         this.callNextAction(cache);
-
       }
     } else {
       this.callNextAction(cache);

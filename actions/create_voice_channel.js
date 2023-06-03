@@ -129,11 +129,13 @@ module.exports = {
     const data = cache.actions[cache.index];
     const server = cache.server;
     if (!server?.channels) return this.callNextAction(cache);
+
     const name = this.evalMessage(data.channelName, cache);
     const storage = parseInt(data.storage, 10);
     const reason = this.evalMessage(data.reason, cache);
+
     /** @type {import('discord.js').GuildChannelCreateOptions} */
-    const channelData = { reason };
+    const channelData = { name, reason, type: this.getDBM().DiscordJS.ChannelType.GuildVoice };
     if (data.bitrate) {
       channelData.bitrate = parseInt(this.evalMessage(data.bitrate, cache), 10) * 1000;
     }
@@ -141,13 +143,11 @@ module.exports = {
       channelData.userLimit = parseInt(this.evalMessage(data.userLimit, cache), 10);
     }
     if (data.categoryID) {
-      channelData.parent = this.evalMessage(data.categoryID, cache);
+      channelData.parent = server.channels.cache.get(this.evalMessage(data.categoryID, cache));
     }
+
     server.channels
-      .create(name, {
-        ...channelData,
-        type: this.getDBM().DiscordJS.ChannelType.GuildVoice,
-      })
+      .create({ channelData })
       .then((channel) => {
         const varName = this.evalMessage(data.varName, cache);
         this.storeValue(channel, storage, varName, cache);

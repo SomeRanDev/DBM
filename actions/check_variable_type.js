@@ -152,10 +152,7 @@ module.exports = {
           result = variable instanceof DiscordJS.Message;
           break;
         case 5:
-          result =
-            variable instanceof DiscordJS.TextChannel ||
-            variable instanceof DiscordJS.NewsChannel ||
-            variable instanceof DiscordJS.StoreChannel;
+          result = variable instanceof DiscordJS.TextChannel || variable instanceof DiscordJS.NewsChannel;
           break;
         case 6:
           result = variable instanceof DiscordJS.VoiceChannel;
@@ -177,6 +174,7 @@ module.exports = {
           break;
       }
     }
+
     this.executeResults(result, data?.branch ?? data, cache);
   },
 

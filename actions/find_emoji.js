@@ -30,12 +30,7 @@ module.exports = {
   //---------------------------------------------------------------------
 
   subtitle(data, presets) {
-    const infoTexts = [
-      "Emoji ID",
-      "Emoji Name",
-      "Sticker ID",
-      "Sticker Name",
-    ];
+    const infoTexts = ["Emoji ID", "Emoji Name", "Sticker ID", "Sticker Name"];
     const info = parseInt(data.info, 10);
     return `Find ${info >= 2 ? "Sticker" : "Emoji"} by ${infoTexts[info]} (${data.find})`;
   },
@@ -150,7 +145,7 @@ module.exports = {
         if (result === undefined) {
           try {
             result = await bot.fetchSticker(find);
-          } catch(err) {
+          } catch (err) {
             this.displayError(data, cache, err);
           }
         }

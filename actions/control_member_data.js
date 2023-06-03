@@ -23,9 +23,19 @@ module.exports = {
 
   subtitle(data, presets) {
     const members = presets.members;
-    return `${presets.getMemberText(data.member, data.varName)} (${data.dataName}) ${
-      data.changeType === "1" ? "+=" : "="
-    } ${data.value}`;
+    let type;
+    switch (data.changeType) {
+      case "0":
+        type = "=";
+        break;
+      case "1":
+        type = "+=";
+        break;
+      case "2":
+        type = "-";
+        break;
+    }
+    return `${presets.getMemberText(data.member, data.varName)} (${data.dataName}) ${type} ${data.value}`;
   },
 
   //---------------------------------------------------------------------
@@ -77,6 +87,7 @@ module.exports = {
 		<select id="changeType" class="round">
 			<option value="0" selected>Set Value</option>
 			<option value="1">Add Value</option>
+      <option value="2">Subtract Value</option>
 		</select>
 	</div>
 </div>
@@ -110,20 +121,28 @@ module.exports = {
   async action(cache) {
     const data = cache.actions[cache.index];
     const member = await this.getMemberFromData(data.member, data.varName, cache);
+
     if (member?.setData) {
       const dataName = this.evalMessage(data.dataName, cache);
       const isAdd = data.changeType === "1";
+      const isSub = data.changeType === "2";
       let val = this.evalMessage(data.value, cache);
+
       try {
         val = this.eval(val, cache);
       } catch (e) {
         this.displayError(data, cache, e);
       }
+
       if (val !== undefined) {
         if (Array.isArray(member)) {
           if (isAdd) {
             member.forEach(function (mem) {
               if (mem?.addData) mem.addData(dataName, val);
+            });
+          } else if (isSub) {
+            member.forEach(function (mem) {
+              if (mem?.subData) mem.subData(dataName, val);
             });
           } else {
             member.forEach(function (mem) {
@@ -133,12 +152,15 @@ module.exports = {
         } else {
           if (isAdd) {
             member.addData(dataName, val);
+          } else if (isSub) {
+            member.subData(dataName, val);
           } else {
             member.setData(dataName, val);
           }
         }
       }
     }
+
     this.callNextAction(cache);
   },
 

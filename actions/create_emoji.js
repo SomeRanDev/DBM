@@ -126,7 +126,7 @@ module.exports = {
     }
 
     server.emojis
-      .create(buffer, this.evalMessage(data.emojiName, cache))
+      .create({ attachment: buffer, name: this.evalMessage(data.emojiName, cache) })
       .then((emoji) => {
         const varName2 = this.evalMessage(data.varName2, cache);
         const storage = parseInt(data.storage, 10);

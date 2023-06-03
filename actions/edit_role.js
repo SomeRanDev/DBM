@@ -125,7 +125,6 @@ module.exports = {
 
   async action(cache) {
     const data = cache.actions[cache.index];
-    const reason = this.evalMessage(data.reason, cache);
 
     const roleData = {};
     if (data.roleName) {
@@ -143,14 +142,15 @@ module.exports = {
     if (data.mentionable !== "none") {
       roleData.mentionable = data.mentionable === "true";
     }
+    roleData.reason = this.evalMessage(data.reason, cache);
 
     const role = await this.getRoleFromData(data.storage, data.varName, cache);
 
     if (Array.isArray(role)) {
-      this.callListFunc(role, "edit", [roleData, reason]).then(() => this.callNextAction(cache));
+      this.callListFunc(role, "edit", [{ roleData }]).then(() => this.callNextAction(cache));
     } else if (role?.edit) {
       role
-        .edit(roleData, reason)
+        .edit({ roleData })
         .then(() => this.callNextAction(cache))
         .catch((err) => this.displayError(data, cache, err));
     } else {

@@ -1,13 +1,7 @@
 //---------------------------------------------------------------------
 // Defining global array of partials so they are not repeated later on.
 //---------------------------------------------------------------------
-const PARTIALS = [
-  "USER",
-  "GUILD_MEMBER",
-  "MESSAGE",
-  "REACTION",
-  "CHANNEL",
-];
+const PARTIALS = ["USER", "GUILD_MEMBER", "MESSAGE", "REACTION", "CHANNEL"];
 
 module.exports = {
   //---------------------------------------------------------------------
@@ -82,12 +76,16 @@ module.exports = {
       <div style="padding: 24px 16px 16px 16px;">
         <div style="padding: 0px 24px 0px 24px; text-align: left;">
           <div style="width: 50%; float: left;">
-            <input type="radio" id="None" name="RatioButton" value="None" ${data.partials.length === 0 ? "checked" : ""}>
+            <input type="radio" id="None" name="RatioButton" value="None" ${
+              data.partials.length === 0 ? "checked" : ""
+            }>
             <label for="None">No Partials</label>
           </div>
 
           <div style="width: 50%; float: left;">
-            <input type="radio" id="Custom" name="RatioButton" value="Custom" ${data.partials.length > 0 ? "checked" : ""}>
+            <input type="radio" id="Custom" name="RatioButton" value="Custom" ${
+              data.partials.length > 0 ? "checked" : ""
+            }>
             <label for="Custom">Custom</label>
           </div>
         </div>
@@ -101,18 +99,14 @@ module.exports = {
         <div style="padding: 0px 24px 0px 24px;">
     `;
 
-    const partialNames = [
-      "User", 
-      "Guild Member",
-      "Message",
-      "Reaction",
-      "Channel (Enables DMs)",
-    ];
-    for(let i = 0; i < PARTIALS.length; i++) {
+    const partialNames = ["User", "Guild Member", "Message", "Reaction", "Channel (Enables DMs)"];
+    for (let i = 0; i < PARTIALS.length; i++) {
       const partial = PARTIALS[i];
       result += `
         <div style="${i === 4 ? "width: 100%" : "width: 50%"}; float: left">
-          <input type="checkbox" id="${partial}" name="${partial}" value="${partial}" ${data.partials.includes(partial) ? "checked" : ""}>
+          <input type="checkbox" id="${partial}" name="${partial}" value="${partial}" ${
+        data.partials.includes(partial) ? "checked" : ""
+      }>
           <label for="${partial}">${partialNames[i]}</label>
         </div>
         ${i % 2 === 1 ? `<div style="height: 24px;"><br></div>` : ""}

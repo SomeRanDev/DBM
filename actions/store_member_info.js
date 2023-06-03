@@ -318,17 +318,29 @@ module.exports = {
       case 15:
         if (member.presence?.status) {
           const status = member.presence.status;
-          switch(status) {
-            case "online": { result = "Online"; break; }
-            case "offline": { result = "Offline"; break; }
-            case "idle": { result = "Idle"; break; }
-            case "dnd": { result = "Do Not Disturb"; break; }
+          switch (status) {
+            case "online": {
+              result = "Online";
+              break;
+            }
+            case "offline": {
+              result = "Offline";
+              break;
+            }
+            case "idle": {
+              result = "Idle";
+              break;
+            }
+            case "dnd": {
+              result = "Do Not Disturb";
+              break;
+            }
           }
         }
         break;
       case 16:
         if (member.user) {
-          result = member.user.displayAvatarURL({ dynamic: true, format: "png", size: 4096 });
+          result = member.user.displayAvatarURL({ extension: "png", size: 4096 });
         }
         break;
       case 17:
@@ -374,7 +386,7 @@ module.exports = {
         break;
       }
       case 31:
-        result = member.displayAvatarURL({ dynamic: true, format: "png", size: 4096 });
+        result = member.displayAvatarURL({ extension: "png", size: 4096 });
         break;
       case 32:
         result = member.communicationDisabledUntil;

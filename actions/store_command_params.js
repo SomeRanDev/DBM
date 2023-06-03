@@ -185,7 +185,7 @@ module.exports = {
     const { ApplicationCommandOptionType } = this.getDBM().DiscordJS;
     const infoType = parseInt(data.info, 10);
     const index = parseInt(this.evalMessage(data.infoIndex, cache), 10) - 1;
-    
+
     let separator;
     let content = null;
     const getContent = () => {
@@ -195,11 +195,10 @@ module.exports = {
         content = msg.content?.replace(Bot.tagRegex, "").replace(Bot.checkTag(msg.content), "").trimStart();
       }
       return content;
-    }
+    };
 
     let source;
     switch (infoType) {
-
       case 0: {
         if (interactionOptions) {
           const result = this.getParameterFromParameterData(interactionOptions.data[index]);
@@ -241,7 +240,7 @@ module.exports = {
 
       case 2: {
         if (interactionOptions) {
-          const options = interactionOptions.data.filter(option => option.type === ApplicationCommandOptionType.User);
+          const options = interactionOptions.data.filter((option) => option.type === ApplicationCommandOptionType.User);
           if (options[index]) {
             source = options[index].member ?? options[index].user;
           }
@@ -256,7 +255,7 @@ module.exports = {
 
       case 3: {
         if (interactionOptions) {
-          const options = interactionOptions.data.filter(option => option.type === ApplicationCommandOptionType.Role);
+          const options = interactionOptions.data.filter((option) => option.type === ApplicationCommandOptionType.Role);
           if (options[index]) {
             source = options[index].role;
           }
@@ -271,7 +270,9 @@ module.exports = {
 
       case 4: {
         if (interactionOptions) {
-          const options = interactionOptions.data.filter(option => option.type === ApplicationCommandOptionType.Channel);
+          const options = interactionOptions.data.filter(
+            (option) => option.type === ApplicationCommandOptionType.Channel,
+          );
           if (options[index]) {
             source = options[index].channel;
           }

@@ -126,11 +126,11 @@ module.exports = {
     const storage2 = parseInt(data.storage2, 10);
 
     if (!Array.isArray(target) && !target?.send) return this.callNextAction(cache);
-    
+
     Images.createBuffer(image)
       .then((buffer) => {
         const obj = {
-          files: [new DiscordJS.MessageAttachment(buffer, "image.png")],
+          files: [new DiscordJS.AttachmentBuilder(buffer, "image.png")],
         };
 
         if (data.message) {

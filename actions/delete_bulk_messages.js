@@ -118,14 +118,14 @@ module.exports = {
 
   async action(cache) {
     const data = cache.actions[cache.index];
-    const server = cache.server;
+    const { server } = cache;
     const source = await this.getChannelFromData(data.channel, data.varName, cache);
 
     if (!source?.messages) return this.callNextAction(cache);
 
     const count = Math.min(parseInt(this.evalMessage(data.count, cache), 10), 100);
     const options = {
-      limit: count
+      limit: count,
     };
 
     if (cache.msg) {
@@ -153,7 +153,7 @@ module.exports = {
             let result = false;
             try {
               result = !!this.eval(cond, cache);
-            } catch(e) {
+            } catch (e) {
               this.displayError(data, cache, "Error with custom eval:\n" + e.stack);
             }
             return result;

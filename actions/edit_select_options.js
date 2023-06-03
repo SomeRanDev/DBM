@@ -217,18 +217,15 @@ module.exports = {
     let searchValue = null;
 
     if (message?.components) {
-
-      const { MessageActionRow, ComponentType } = this.getDBM().DiscordJS;
+      const { ActionRowBuilder, ComponentType } = this.getDBM().DiscordJS;
       const oldComponents = message.components;
       const newComponents = [];
 
       for (let i = 0; i < oldComponents.length; i++) {
-
         const compData = oldComponents[i];
-        const comps = (compData instanceof MessageActionRow) ? compData.toJSON() : compData;
+        const comps = compData instanceof ActionRowBuilder ? compData.toJSON() : compData;
 
         for (let j = 0; j < comps.components.length; j++) {
-
           const comp = comps.components[j];
 
           switch (type) {
@@ -257,11 +254,9 @@ module.exports = {
         }
 
         newComponents.push(comps);
-
       }
 
       components = newComponents;
-
     }
 
     if (components) {

@@ -82,21 +82,42 @@ function PrintError(type) {
       break;
     }
 
-
     case MsgType.DUPLICATE_SLASH_COMMAND: {
-      warn(format('[Duplicate Slash Command]\nSlash command with name "%s" already exists!\nThis duplicate will be ignored.\n', arguments[1]));
+      warn(
+        format(
+          '[Duplicate Slash Command]\nSlash command with name "%s" already exists!\nThis duplicate will be ignored.\n',
+          arguments[1],
+        ),
+      );
       break;
     }
     case MsgType.TOO_MANY_SPACES_SLASH_NAME: {
-      warn(format('[Too Many Spaces in Slash Name]\nSlash command with name "%s" has too many spaces!\nSlash command names may only contain a maximum of three different words.\n', arguments[1]));
+      warn(
+        format(
+          '[Too Many Spaces in Slash Name]\nSlash command with name "%s" has too many spaces!\nSlash command names may only contain a maximum of three different words.\n',
+          arguments[1],
+        ),
+      );
       break;
     }
     case MsgType.SUB_COMMAND_ALREADY_EXISTS: {
-      warn(format('[Sub-Command Already Exists]\nSlash command with name "%s" cannot exist.\nIt requires the creation of a "sub-command group" called "%s",\nbut there\'s already a command with that name.', arguments[1], arguments[2]));
+      warn(
+        format(
+          '[Sub-Command Already Exists]\nSlash command with name "%s" cannot exist.\nIt requires the creation of a "sub-command group" called "%s",\nbut there\'s already a command with that name.',
+          arguments[1],
+          arguments[2],
+        ),
+      );
       break;
     }
     case MsgType.SUB_COMMAND_GROUP_ALREADY_EXISTS: {
-      warn(format('[Sub-Command Group Already Exists]\nSlash command with name "%s" cannot exist.\nThere is already a "sub-command group" with that name.\nThe "sub-command group" exists because of a command named something like: "%s _____"', arguments[1], arguments[1]));
+      warn(
+        format(
+          '[Sub-Command Group Already Exists]\nSlash command with name "%s" cannot exist.\nThere is already a "sub-command group" with that name.\nThe "sub-command group" exists because of a command named something like: "%s _____"',
+          arguments[1],
+          arguments[1],
+        ),
+      );
       break;
     }
     case MsgType.INVALID_SLASH_NAME: {
@@ -109,11 +130,21 @@ function PrintError(type) {
       break;
     }
     case MsgType.DUPLICATE_USER_COMMAND: {
-      warn(format('[Duplicate User Command]\nUser command with name "%s" already exists!\nThis duplicate will be ignored.\n', arguments[1]));
+      warn(
+        format(
+          '[Duplicate User Command]\nUser command with name "%s" already exists!\nThis duplicate will be ignored.\n',
+          arguments[1],
+        ),
+      );
       break;
     }
     case MsgType.DUPLICATE_MESSAGE_COMMAND: {
-      warn(format('[Duplicate Message Command]\nMessage command with name "%s" already exists!\nThis duplicate will be ignored.\n', arguments[1]));
+      warn(
+        format(
+          '[Duplicate Message Command]\nMessage command with name "%s" already exists!\nThis duplicate will be ignored.\n',
+          arguments[1],
+        ),
+      );
       break;
     }
     case MsgType.DUPLICATE_SLASH_PARAMETER: {
@@ -164,7 +195,6 @@ function PrintError(type) {
       break;
     }
 
-
     case MsgType.MISSING_APPLICATION_COMMAND_ACCESS: {
       warn(
         format(
@@ -177,42 +207,56 @@ function PrintError(type) {
     }
 
     case MsgType.MISSING_MUSIC_MODULES: {
-      warn(format('Could not load audio-related Node modules.\nPlease run "File -> Music Capabilities -> Update Music Libraries" to ensure they are installed.'));
+      warn(
+        format(
+          'Could not load audio-related Node modules.\nPlease run "File -> Music Capabilities -> Update Music Libraries" to ensure they are installed.',
+        ),
+      );
       break;
     }
-
 
     case MsgType.MUTABLE_VOLUME_DISABLED: {
       warn(format('[Mutable Volume Disabled]\nTried setting volume but "Mutable Volume" is disabled.'));
       break;
     }
     case MsgType.MUTABLE_VOLUME_NOT_IN_CHANNEL: {
-      warn(format('[Mutable Volume Not in Channel]\nTried setting volume but the bot is not in a voice channel.'));
+      warn(format("[Mutable Volume Not in Channel]\nTried setting volume but the bot is not in a voice channel."));
       break;
     }
 
     case MsgType.ERROR_GETTING_YT_INFO: {
-      warn(format('Error getting YouTube info.\n%s', arguments[1]));
+      warn(format("Error getting YouTube info.\n%s", arguments[1]));
     }
 
     case MsgType.ERROR_CREATING_AUDIO: {
-      warn(format('Error creating audio resource.\n%s', arguments[1]));
+      warn(format("Error creating audio resource.\n%s", arguments[1]));
     }
-
 
     case MsgType.MISSING_MEMBER_INTENT_FIND_USER_ID: {
-      warn(' - DBM Warning - \nFind User (by Name/ID) may freeze or error because\nthe bot has not enabled the Server Member Events Intent.')
+      warn(
+        " - DBM Warning - \nFind User (by Name/ID) may freeze or error because\nthe bot has not enabled the Server Member Events Intent.",
+      );
     }
     case MsgType.CANNOT_FIND_USER_BY_ID: {
-      warn(format('[Cannot Find User by ID]\nCannot find user by id: %s', arguments[1]));
+      warn(format("[Cannot Find User by ID]\nCannot find user by id: %s", arguments[1]));
     }
 
     case MsgType.SERVER_MESSAGE_INTENT_REQUIRED: {
-      warn(format('[Message Content Intent Required]\n%s commands found that require the "Message Content" intent.\nThese commands require the bot to be able to read messages from Discord servers.\nTo enable this behavior, first ensure the "MESSAGE CONTENT INTENT" is enabled in the "Bot" section on the Discord Developer Portal (the same page you got your bot token from).\nSecondly, in Discord Bot Maker, select Extensions -> Bot Intents from the title menu bar, and in this dialog, make sure "Message Content" is checked.', arguments[1]));
+      warn(
+        format(
+          '[Message Content Intent Required]\n%s commands found that require the "Message Content" intent.\nThese commands require the bot to be able to read messages from Discord servers.\nTo enable this behavior, first ensure the "MESSAGE CONTENT INTENT" is enabled in the "Bot" section on the Discord Developer Portal (the same page you got your bot token from).\nSecondly, in Discord Bot Maker, select Extensions -> Bot Intents from the title menu bar, and in this dialog, make sure "Message Content" is checked.',
+          arguments[1],
+        ),
+      );
       break;
     }
     case MsgType.CHANNEL_PARTIAL_REQUIRED: {
-      warn(format('[Channel Partial Required]\n%s commands are set to "DMs Only", but the Channel partial is not enabled.\nTo allow the bot to read messages from DMs, do the following: In Discord Bot Maker, on the title menu bar, go to Extensions -> Bot Partials.\nIn the dialog that appears, select "Custom" and then make sure "Channel (Enables DMs)" is checked.', arguments[1]))
+      warn(
+        format(
+          '[Channel Partial Required]\n%s commands are set to "DMs Only", but the Channel partial is not enabled.\nTo allow the bot to read messages from DMs, do the following: In Discord Bot Maker, on the title menu bar, go to Extensions -> Bot Partials.\nIn the dialog that appears, select "Custom" and then make sure "Channel (Enables DMs)" is checked.',
+          arguments[1],
+        ),
+      );
     }
   }
 }
@@ -350,9 +394,9 @@ Bot.reformatCommands = function () {
     if (com) {
       this.prepareActions(com.actions);
 
-      if(com.comType <= "3") {
+      if (com.comType <= "3") {
         this._textCommandCount++;
-        if(com.restriction === "3") {
+        if (com.restriction === "3") {
           this._dmTextCommandCount++;
         }
       }
@@ -405,7 +449,10 @@ Bot.reformatCommands = function () {
                 if (names.length === 1) {
                   this.applicationCommandData.push(this.createApiJsonFromCommand(com, keyName));
                 } else {
-                  this.mergeSubCommandIntoCommandData(names, this.createApiJsonFromCommand(com, names[names.length - 1]));
+                  this.mergeSubCommandIntoCommandData(
+                    names,
+                    this.createApiJsonFromCommand(com, names[names.length - 1]),
+                  );
                 }
               }
             }
@@ -472,7 +519,7 @@ Bot.mergeSubCommandIntoCommandData = function (names, data) {
   data.type = DiscordJS.ApplicationCommandOptionType.Subcommand;
 
   const baseName = names[0];
-  let baseCommand = this.applicationCommandData.find(data => data.name === baseName) ?? null;
+  let baseCommand = this.applicationCommandData.find((data) => data.name === baseName) ?? null;
   if (baseCommand === null) {
     baseCommand = {
       name: baseName,
@@ -486,7 +533,11 @@ Bot.mergeSubCommandIntoCommandData = function (names, data) {
     if (!baseCommand.options) {
       baseCommand.options = [];
     }
-    if (baseCommand.options.find(d => d.name === data.name && d.type === DiscordJS.ApplicationCommandOptionType.SubcommandGroup)) {
+    if (
+      baseCommand.options.find(
+        (d) => d.name === data.name && d.type === DiscordJS.ApplicationCommandOptionType.SubcommandGroup,
+      )
+    ) {
       PrintError(MsgType.SUB_COMMAND_GROUP_ALREADY_EXISTS, names.join(" "));
     } else {
       baseCommand.options.push(data);
@@ -497,14 +548,14 @@ Bot.mergeSubCommandIntoCommandData = function (names, data) {
     }
 
     const groupName = names[1];
-    let baseGroup = baseCommand.options.find(option => option.name === groupName) ?? null;
+    let baseGroup = baseCommand.options.find((option) => option.name === groupName) ?? null;
     if (baseGroup === null) {
       baseGroup = {
         name: groupName,
         description: this.getNoDescriptionText(),
         type: DiscordJS.ApplicationCommandOptionType.SubcommandGroup,
         options: [],
-      }
+      };
       baseCommand.options.push(baseGroup);
     } else if (baseGroup.type === DiscordJS.ApplicationCommandOptionType.Subcommand) {
       PrintError(MsgType.SUB_COMMAND_ALREADY_EXISTS, names.join(" "), `${names[0]} ${names[1]}`);
@@ -522,8 +573,8 @@ Bot.validateSlashCommandName = function (name) {
 
   const names = name
     .split(/\s+/)
-    .map(name => this.validateSlashCommandParameterName(name))
-    .filter(name => typeof name === "string");
+    .map((name) => this.validateSlashCommandParameterName(name))
+    .filter((name) => typeof name === "string");
 
   return names.length > 0 ? names : false;
 };
@@ -535,7 +586,7 @@ Bot.validateSlashCommandParameterName = function (name) {
   if (name.length > 32) {
     name = name.substring(0, 32);
   }
-  if (name.match(/^[\p{L}\w-]{1,32}$/ui)) {
+  if (name.match(/^[\p{L}\w-]{1,32}$/iu)) {
     return name.toLowerCase();
   }
   return false;
@@ -590,18 +641,29 @@ Bot.validateSlashCommandParameters = function (parameters, commandName) {
 
 Bot.convertStringCommandParamTypeToEnum = function (paramTypeStr) {
   const optionType = DiscordJS.ApplicationCommandOptionType;
-  switch(paramTypeStr) {
-    case "SUB_COMMAND":       return optionType.Subcommand;
-    case "SUB_COMMAND_GROUP": return optionType.SubcommandGroup;
-    case "INTEGER":           return optionType.Integer;
-    case "STRING":            return optionType.String;
-    case "BOOLEAN":           return optionType.Boolean;
-    case "USER":              return optionType.User;
-    case "CHANNEL":           return optionType.Channel;
-    case "ROLE":              return optionType.Role;
-    case "MENTIONABLE":       return optionType.Mentionable;
-    case "NUMBER":            return optionType.Number;
-    case "ATTACHMENT":        return optionType.Attachment;
+  switch (paramTypeStr) {
+    case "SUB_COMMAND":
+      return optionType.Subcommand;
+    case "SUB_COMMAND_GROUP":
+      return optionType.SubcommandGroup;
+    case "INTEGER":
+      return optionType.Integer;
+    case "STRING":
+      return optionType.String;
+    case "BOOLEAN":
+      return optionType.Boolean;
+    case "USER":
+      return optionType.User;
+    case "CHANNEL":
+      return optionType.Channel;
+    case "ROLE":
+      return optionType.Role;
+    case "MENTIONABLE":
+      return optionType.Mentionable;
+    case "NUMBER":
+      return optionType.Number;
+    case "ATTACHMENT":
+      return optionType.Attachment;
   }
   return 0;
 };
@@ -754,22 +816,28 @@ Bot.clearUnspecifiedServerCommands = function () {
 };
 
 Bot.setGlobalCommands = function (commands) {
-  this.bot.application?.commands?.set?.(commands).then(function() {}).catch(function(err) {
-    console.error(err);
-  })
+  this.bot.application?.commands
+    ?.set?.(commands)
+    .then(function () {})
+    .catch(function (err) {
+      console.error(err);
+    });
 };
 
-Bot.setCommandsForServer = function(guild, commands, printMissingAccessError) {
-  if(guild?.commands?.set) {
-    guild.commands.set(commands).then(function() {}).catch((err) => {
-      if (err.code === 50001) {
-        if (this.shouldPrintAnyMissingAccessError() && printMissingAccessError) {
-          PrintError(MsgType.MISSING_APPLICATION_COMMAND_ACCESS, guild.name, guild.id);
+Bot.setCommandsForServer = function (guild, commands, printMissingAccessError) {
+  if (guild?.commands?.set) {
+    guild.commands
+      .set(commands)
+      .then(function () {})
+      .catch((err) => {
+        if (err.code === 50001) {
+          if (this.shouldPrintAnyMissingAccessError() && printMissingAccessError) {
+            PrintError(MsgType.MISSING_APPLICATION_COMMAND_ACCESS, guild.name, guild.id);
+          }
+        } else {
+          console.error(err);
         }
-      } else {
-        console.error(err);
-      }
-    });
+      });
   }
 };
 
@@ -998,10 +1066,13 @@ Bot.onUserContextMenuInteraction = function (interaction) {
   const interactionName = interaction.commandName;
   if (this.$user[interactionName]) {
     if (interaction.guild) {
-      interaction.guild.members.fetch(interaction.targetId).then((member) => {
-        interaction._targetMember = member;
-        Actions.preformActionsFromInteraction(interaction, this.$user[interactionName], true);
-      }).catch(console.error);
+      interaction.guild.members
+        .fetch(interaction.targetId)
+        .then((member) => {
+          interaction._targetMember = member;
+          Actions.preformActionsFromInteraction(interaction, this.$user[interactionName], true);
+        })
+        .catch(console.error);
     } else {
       interaction._targetMember = interaction.targetUser;
       Actions.preformActionsFromInteraction(interaction, this.$user[interactionName], true);
@@ -1014,10 +1085,13 @@ Bot.onMessageContextMenuInteraction = function (interaction) {
   if (this.$msge[interactionName]) {
     const msg = interaction.targetMessage;
     if (!(msg instanceof DiscordJS.Message) && interaction.channel) {
-      interaction.channel.messages.fetch(interaction.targetId).then((message) => {
-        interaction._targetMessage = message;
-        Actions.preformActionsFromInteraction(interaction, this.$msge[interactionName], true);
-      }).catch(console.error);
+      interaction.channel.messages
+        .fetch(interaction.targetId)
+        .then((message) => {
+          interaction._targetMessage = message;
+          Actions.preformActionsFromInteraction(interaction, this.$msge[interactionName], true);
+        })
+        .catch(console.error);
     } else {
       interaction._targetMessage = msg;
       Actions.preformActionsFromInteraction(interaction, this.$msge[interactionName], true);
@@ -1093,11 +1167,9 @@ const ActionsCache = (Actions.ActionsCache = class ActionsCache {
           content: Actions.getDefaultResponseText(),
         };
         if (this.interaction.deferred) {
-          this.interaction.editReply(replyData)
-            .catch((err) => Actions.displayError(null, this, err));
+          this.interaction.editReply(replyData).catch((err) => Actions.displayError(null, this, err));
         } else {
-          this.interaction.reply(replyData)
-            .catch((err) => Actions.displayError(null, this, err));
+          this.interaction.reply(replyData).catch((err) => Actions.displayError(null, this, err));
         }
       }
     }
@@ -1195,7 +1267,7 @@ Actions.getSlashParameter = function (interaction, name, defaultValue) {
     return defaultValue ?? null;
   }
 
-  if(interaction.__originalInteraction) {
+  if (interaction.__originalInteraction) {
     const result = this.getParameterFromInteraction(interaction.__originalInteraction, name);
     if (result !== null) {
       return result;
@@ -1217,7 +1289,7 @@ Actions.convertTextToEmojis = function (text, useRegional = true) {
   for (let i = 0; i < text.length; i++) {
     const code = text.toUpperCase().charCodeAt(i) - 65;
     if (code >= 0 && code <= 26) {
-      result += useRegional ? (":regional_indicator_" + text[i].toLowerCase() + ":") : ("\\" + this._letterEmojis[code]);
+      result += useRegional ? ":regional_indicator_" + text[i].toLowerCase() + ":" : "\\" + this._letterEmojis[code];
     } else {
       result += text[i];
     }
@@ -1472,20 +1544,22 @@ Actions.checkPermissions = function (member, permissions) {
 
 Actions.invokeActions = function (msg, actions, cmd = null) {
   if (actions.length > 0) {
-    this.callNextAction(new ActionsCache(actions, msg.guild, {
-      msg,
-      meta: {
-        name: cmd?.name,
-        isEvent: false
-      }
-    }));
+    this.callNextAction(
+      new ActionsCache(actions, msg.guild, {
+        msg,
+        meta: {
+          name: cmd?.name,
+          isEvent: false,
+        },
+      }),
+    );
   }
 };
 
 Actions.invokeInteraction = function (interaction, actions, initialTempVars, meta = null) {
   const cacheData = {
     interaction,
-    temp: (initialTempVars || {}),
+    temp: initialTempVars || {},
   };
   if (meta) {
     cacheData.meta = {
@@ -1504,8 +1578,8 @@ Actions.invokeEvent = function (event, server, temp) {
       temp: { ...temp },
       meta: {
         name: event.name,
-        isEvent: true
-      }
+        isEvent: true,
+      },
     });
     this.callNextAction(cache);
   }
@@ -2063,11 +2137,16 @@ Actions.getVoiceChannel = async function (type, varName, cache) {
 
 Actions.getAnyChannel = async function (type, varName, cache) {
   switch (type) {
-    case 10: return await this.getVoiceChannel(0, varName, cache);
-    case 11: return await this.getVoiceChannel(1, varName, cache);
-    case 12: return await this.getVoiceChannel(7, varName, cache);
-    case 13: return await this.getVoiceChannel(2, varName, cache);
-    default: return await this.getChannel(type, varName, cache);
+    case 10:
+      return await this.getVoiceChannel(0, varName, cache);
+    case 11:
+      return await this.getVoiceChannel(1, varName, cache);
+    case 12:
+      return await this.getVoiceChannel(7, varName, cache);
+    case 13:
+      return await this.getVoiceChannel(2, varName, cache);
+    default:
+      return await this.getChannel(type, varName, cache);
   }
   return null;
 };
@@ -2226,11 +2305,16 @@ Actions.generateButton = function (button, cache) {
 
 Actions.convertStringButtonStyleToEnum = function (style) {
   switch (style) {
-    case "PRIMARY": return DiscordJS.ButtonStyle.Primary;
-    case "SECONDARY": return DiscordJS.ButtonStyle.Secondary;
-    case "SUCCESS": return DiscordJS.ButtonStyle.Success;
-    case "DANGER": return DiscordJS.ButtonStyle.Danger;
-    case "LINK": return DiscordJS.ButtonStyle.Link;
+    case "PRIMARY":
+      return DiscordJS.ButtonStyle.Primary;
+    case "SECONDARY":
+      return DiscordJS.ButtonStyle.Secondary;
+    case "SUCCESS":
+      return DiscordJS.ButtonStyle.Success;
+    case "DANGER":
+      return DiscordJS.ButtonStyle.Danger;
+    case "LINK":
+      return DiscordJS.ButtonStyle.Link;
   }
   return DiscordJS.ButtonStyle.Primary;
 };
@@ -2261,15 +2345,17 @@ Actions.generateTextInput = function (textInput, defaultCustomId, cache) {
     minLength: parseInt(this.evalMessage(textInput.minLength, cache), 10) ?? 0,
     maxLength: parseInt(this.evalMessage(textInput.maxLength, cache), 10) ?? 100,
     style: this.convertStringTextInputStyleToEnum(textInput.style),
-    required: textInput.required === "true"
+    required: textInput.required === "true",
   };
   return inputTextData;
 };
 
 Actions.convertStringTextInputStyleToEnum = function (style) {
   switch (style) {
-    case "PARAGRAPH": return DiscordJS.TextInputStyle.Paragraph
-    case "SHORT": return DiscordJS.TextInputStyle.Short;
+    case "PARAGRAPH":
+      return DiscordJS.TextInputStyle.Paragraph;
+    case "SHORT":
+      return DiscordJS.TextInputStyle.Short;
   }
   return DiscordJS.TextInputStyle.Short;
 };
@@ -2327,11 +2413,7 @@ Actions.addSelectToActionRowArray = function (array, rowText, selectData, cache)
       array.push([]);
     }
     if (array[row].length >= 1) {
-      this.displayError(
-        null,
-        cache,
-        `Action row #${row} cannot have a select menu when there are any buttons on it!`,
-      );
+      this.displayError(null, cache, `Action row #${row} cannot have a select menu when there are any buttons on it!`);
     } else {
       array[row].push(selectData);
     }
@@ -2357,11 +2439,7 @@ Actions.addTextInputToActionRowArray = function (array, rowText, textInput, cach
       array.push([]);
     }
     if (array[row].length >= 1) {
-      this.displayError(
-        null,
-        cache,
-        `Action row #${row} cannot have a text input when there are any buttons on it!`,
-      );
+      this.displayError(null, cache, `Action row #${row} cannot have a text input when there are any buttons on it!`);
     } else {
       array[row].push(textInput);
     }
@@ -2455,9 +2533,11 @@ Actions.registerModalSubmitResponses = function (interactionId, callback) {
   this._temporaryInteractions[interactionId] = callback;
 
   // clear up interaction after a while
-  require("node:timers").setTimeout(() => {
-    this.clearAllTemporaryInteractions(interactionId);
-  }, 60 * 60 * 1000).unref();
+  require("node:timers")
+    .setTimeout(() => {
+      this.clearAllTemporaryInteractions(interactionId);
+    }, 60 * 60 * 1000)
+    .unref();
 };
 
 Actions.checkModalSubmitResponses = function (interaction) {
@@ -2677,12 +2757,12 @@ Images.getFont = function (url) {
   return this.JIMP.loadFont(Actions.getLocalFile(url));
 };
 
-Images.isImage = function(obj) {
+Images.isImage = function (obj) {
   if (!Images.JIMP) {
     return false;
   }
   return obj instanceof Images.JIMP;
-}
+};
 
 Images.createBuffer = function (image) {
   return new Promise((resolve, reject) => {
@@ -3003,27 +3083,27 @@ Files.initEncryption();
 const Audio = (DBM.Audio = {});
 const { setTimeout } = require("node:timers/promises");
 
-Audio.checkIfHasDependency = function(key) {
-  if(!Audio.packageJson) {
+Audio.checkIfHasDependency = function (key) {
+  if (!Audio.packageJson) {
     const path = require("node:path");
     Audio.packageJson = require("node:fs").readFileSync(path.join(__dirname, "package.json"));
     Audio.packageJson = JSON.parse(Audio.packageJson).dependencies;
-    if(!Audio.packageJson) {
+    if (!Audio.packageJson) {
       Audio.packageJson = 1;
     }
   }
-  if(Audio.packageJson !== 1) {
+  if (Audio.packageJson !== 1) {
     return !!Audio.packageJson[key];
   }
   return false;
-}
+};
 
 Audio.ytdl = null;
 try {
   Audio.ytdl = require("ytdl-core");
-} catch(e) {
+} catch (e) {
   Audio.ytdl = null;
-  if(Audio.checkIfHasDependency("ytdl-core")) {
+  if (Audio.checkIfHasDependency("ytdl-core")) {
     console.error(e);
   }
 }
@@ -3031,9 +3111,9 @@ try {
 Audio.voice = null;
 try {
   Audio.voice = require("@discordjs/voice");
-} catch(e) {
+} catch (e) {
   Audio.voice = null;
-  if(Audio.checkIfHasDependency("@discordjs/voice")) {
+  if (Audio.checkIfHasDependency("@discordjs/voice")) {
     console.error(e);
   }
 }
@@ -3041,9 +3121,9 @@ try {
 Audio.rawYtdl = null;
 try {
   Audio.rawYtdl = require("youtube-dl-exec").exec;
-} catch(e) {
+} catch (e) {
   Audio.rawYtdl = null;
-  if(Audio.checkIfHasDependency("youtube-dl-exec")) {
+  if (Audio.checkIfHasDependency("youtube-dl-exec")) {
     console.error(e);
   }
 }
@@ -3141,7 +3221,7 @@ Audio.Subscription = class {
           let guild = null;
           try {
             guild = await Bot.bot.guilds.resolve(this.voiceConnection.joinConfig.guildId);
-          } catch(e) {
+          } catch (e) {
             console.error(e);
           }
           if (guild) {
@@ -3163,8 +3243,8 @@ Audio.Subscription = class {
       // resource.encoder.setBitrate(this.bitrate * 1e3);
       this.audioPlayer.play(resource);
       this.queueLock = false;
-    } catch(e) {
-      if(e.toString().includes("opus.node")) {
+    } catch (e) {
+      if (e.toString().includes("opus.node")) {
         console.warn(`-- DBM Error Note --
 If you're seeing an error here, it's likely that the version of
 NodeJS/NPM or the operating system used to install @discordjs/opus
@@ -3235,7 +3315,7 @@ Audio.Track = class {
     let info = null;
     try {
       info = await Audio.ytdl.getInfo(url);
-    } catch(e) {
+    } catch (e) {
       PrintError(MsgType.ERROR_GETTING_YT_INFO, e.stack.toString());
     }
     return new Audio.Track({ title: info?.videoDetails?.title ?? "", url });
@@ -3270,7 +3350,6 @@ Audio.connectToVoice = function (voiceChannel) {
 
   var existingSubscription = this.subscriptions.get(voiceChannel?.guild?.id);
   if (existingSubscription) {
-
     const status = existingSubscription.voiceConnection?.state?.status;
     if (status === Audio.voice.VoiceConnectionStatus.Disconnected) {
       existingSubscription.voiceConnection.destroy();
@@ -3293,10 +3372,7 @@ Audio.connectToVoice = function (voiceChannel) {
     }),
   );
 
-  this.subscriptions.set(
-    voiceChannel.guildId,
-    subscription,
-  );
+  this.subscriptions.set(voiceChannel.guildId, subscription);
 
   return subscription;
 };
@@ -3350,7 +3426,7 @@ Audio.addToQueue = async function ([type, options, url], guild) {
   let track = null;
   try {
     track = await this.getTrack(url, type);
-  } catch(e) {
+  } catch (e) {
     PrintError(MsgType.ERROR_CREATING_AUDIO, e.stack.toString());
   }
   if (track !== null) {
@@ -3367,7 +3443,7 @@ Audio.playImmediately = async function ([type, options, url], guild) {
   let track = null;
   try {
     track = await this.getTrack(url, type);
-  } catch(e) {
+  } catch (e) {
     PrintError(MsgType.ERROR_CREATING_AUDIO, e.stack.toString());
   }
   if (track !== null) {
@@ -3428,6 +3504,12 @@ Reflect.defineProperty(DiscordJS.GuildMember.prototype, "addData", {
   },
 });
 
+Reflect.defineProperty(DiscordJS.GuildMember.prototype, "subData", {
+  value(name, value) {
+    return DiscordJS.User.prototype.subData.apply(this, arguments);
+  },
+});
+
 Reflect.defineProperty(DiscordJS.GuildMember.prototype, "clearData", {
   value(name) {
     return DiscordJS.User.prototype.clearData.apply(this, arguments);
@@ -3485,6 +3567,21 @@ Reflect.defineProperty(DiscordJS.User.prototype, "addData", {
       this.setData(name, value);
     } else {
       this.setData(name, this.data(name) + value);
+    }
+  },
+});
+
+Reflect.defineProperty(DiscordJS.User.prototype, "subData", {
+  value(name, value) {
+    const id = this.id;
+    const data = Files.data.players;
+    if (data[id] === undefined) {
+      data[id] = {};
+    }
+    if (data[id][name] === undefined) {
+      this.setData(name, value);
+    } else {
+      this.setData(name, this.data(name) - value);
     }
   },
 });
@@ -3600,6 +3697,21 @@ Reflect.defineProperty(DiscordJS.Guild.prototype, "addData", {
   },
 });
 
+Reflect.defineProperty(DiscordJS.Guild.prototype, "subData", {
+  value(name, value) {
+    const id = this.id;
+    const data = Files.data.servers;
+    if (data[id] === undefined) {
+      data[id] = {};
+    }
+    if (data[id][name] === undefined) {
+      this.setData(name, value);
+    } else {
+      this.setData(name, this.data(name) - value);
+    }
+  },
+});
+
 Reflect.defineProperty(DiscordJS.Guild.prototype, "clearData", {
   value(name) {
     const id = this.id;
@@ -3669,6 +3781,21 @@ Reflect.defineProperty(DiscordJS.Message.prototype, "addData", {
       this.setData(name, value);
     } else {
       this.setData(name, this.data(name) + value);
+    }
+  },
+});
+
+Reflect.defineProperty(DiscordJS.Message.prototype, "subData", {
+  value(name, value) {
+    const id = this.id;
+    const data = Files.data.messages;
+    if (data[id] === undefined) {
+      data[id] = {};
+    }
+    if (data[id][name] === undefined) {
+      this.setData(name, value);
+    } else {
+      this.setData(name, this.data(name) - value);
     }
   },
 });

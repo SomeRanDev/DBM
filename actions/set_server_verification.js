@@ -109,12 +109,17 @@ module.exports = {
 
     const { GuildVerificationLevel } = this.getDBM().DiscordJS;
     let level = GuildVerificationLevel.None;
-    switch(data.verification) {
-      case "0": level = GuildVerificationLevel.None;
-      case "1": level = GuildVerificationLevel.Low;
-      case "2": level = GuildVerificationLevel.Medium;
-      case "3": level = GuildVerificationLevel.High;
-      case "4": level = GuildVerificationLevel.VeryHigh;
+    switch (data.verification) {
+      case "0":
+        level = GuildVerificationLevel.None;
+      case "1":
+        level = GuildVerificationLevel.Low;
+      case "2":
+        level = GuildVerificationLevel.Medium;
+      case "3":
+        level = GuildVerificationLevel.High;
+      case "4":
+        level = GuildVerificationLevel.VeryHigh;
     }
 
     if (Array.isArray(server)) {

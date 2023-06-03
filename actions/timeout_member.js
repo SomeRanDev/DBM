@@ -106,7 +106,8 @@ module.exports = {
         .then(() => this.callNextAction(cache))
         .catch((err) => this.displayError(data, cache, err));
     } else if (member?.disableCommunicationUntil) {
-      member.disableCommunicationUntil(time, reason)
+      member
+        .disableCommunicationUntil(time, reason)
         .then(() => this.callNextAction(cache))
         .catch((err) => this.displayError(data, cache, err));
     } else {

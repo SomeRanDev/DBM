@@ -81,7 +81,6 @@ module.exports = {
 			<option value="1">Member Username</option>
 			<option value="2">Member Display Name</option>
       <option value="3">Member Color</option>
-      <option value="4">Member Tag</option>
 		</select>
 	</div>
 	<div style="float: right; width: 55%;">
@@ -137,9 +136,6 @@ module.exports = {
         break;
       case 3:
         result = members.find((m) => m.displayHexColor === find);
-        break;
-      case 4:
-        result = members.find((m) => m.user?.tag === find);
         break;
       default:
         break;

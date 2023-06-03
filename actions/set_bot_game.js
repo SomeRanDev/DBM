@@ -126,12 +126,17 @@ module.exports = {
       botClient.setActivity(name, { type: ActivityType.Streaming, url });
     } else {
       let type = ActivityType.Playing;
-      switch(data.activityType) {
-        case "PLAYING":   type = ActivityType.Playing;
-        case "STREAMING": type = ActivityType.Streaming;
-        case "LISTENING": type = ActivityType.Listening;
-        case "WATCHING":  type = ActivityType.Watching;
-        case "COMPETING": type = ActivityType.Competing;
+      switch (data.activityType) {
+        case "PLAYING":
+          type = ActivityType.Playing;
+        case "STREAMING":
+          type = ActivityType.Streaming;
+        case "LISTENING":
+          type = ActivityType.Listening;
+        case "WATCHING":
+          type = ActivityType.Watching;
+        case "COMPETING":
+          type = ActivityType.Competing;
       }
 
       botClient.setActivity(name, { type });

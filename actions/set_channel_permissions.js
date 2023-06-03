@@ -110,21 +110,20 @@ module.exports = {
   async action(cache) {
     const data = cache.actions[cache.index];
     const server = cache.server;
-    if (!server) {
-      this.callNextAction(cache);
-      return;
-    }
+    if (!server) return this.callNextAction(cache);
+
     const channel = await this.getChannelFromData(data.storage, data.varName, cache);
     const reason = this.evalMessage(data.reason, cache);
     const options = { [data.permission]: [true, false, null][parseInt(data.state, 10)] };
+    const role = server.roles.cache.get(server.id);
 
     if (Array.isArray(channel)) {
-      this.callListFunc(channel.permissionOverwrites, "edit", [server.id, options, { reason, type: 0 }]).then(() =>
+      this.callListFunc(channel.permissionOverwrites, "edit", [role, options, { reason, type: 0 }]).then(() =>
         this.callNextAction(cache),
       );
     } else if (channel?.permissionOverwrites) {
       channel.permissionOverwrites
-        .edit(server.id, options, { reason, type: 0 })
+        .edit(role, options, { reason, type: 0 })
         .then(() => this.callNextAction(cache))
         .catch((err) => this.displayError(data, cache, err));
     } else {

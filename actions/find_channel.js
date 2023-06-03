@@ -123,7 +123,9 @@ module.exports = {
     const info = parseInt(data.info, 10);
     const find = this.evalMessage(data.find, cache);
     const { ChannelType } = this.getDBM().DiscordJS;
-    const channels = server.channels.cache.filter((c) => c.type === ChannelType.GuildText || c.type === ChannelType.GuildAnnouncement);
+    const channels = server.channels.cache.filter(
+      (c) => c.type === ChannelType.GuildText || c.type === ChannelType.GuildAnnouncement,
+    );
     let result;
     switch (info) {
       case 0:

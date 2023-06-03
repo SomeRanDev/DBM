@@ -109,15 +109,14 @@ module.exports = {
     const storage = parseInt(data.storage, 10);
     const varName = this.evalMessage(data.varName, cache);
     const image = this.getVariable(storage, varName, cache);
-    if (!image) {
-      this.callNextAction(cache);
-      return;
-    }
+    if (!image) return this.callNextAction(cache);
+
     const fontName = this.evalMessage(data.font, cache);
     const x = parseInt(this.evalMessage(data.x, cache), 10);
     const y = parseInt(this.evalMessage(data.y, cache), 10);
     const width = data.width ? parseInt(this.evalMessage(data.width, cache), 10) : null;
     const text = this.evalMessage(data.text, cache);
+
     Images.getFont(fontName)
       .then(
         function (font) {
