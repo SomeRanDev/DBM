@@ -4,8 +4,8 @@
   "description": "for dbm development",
   "main": "bot.js",
   "scripts": {
-    "prettier:check": "prettier --check **/*.js",
-    "prettier:fix": "prettier --write **/*.js"
+    "prettier:check": "npx prettier --check **/*.js",
+    "prettier:fix": "npx prettier --write **/*.js"
   },
   "dependencies": {
     "@discordjs/opus": "^0.6.0",
