@@ -1,71 +1,71 @@
 module.exports = {
-  //---------------------------------------------------------------------
-  // Action Name
-  //
-  // This is the name of the action displayed in the editor.
-  //---------------------------------------------------------------------
+	//---------------------------------------------------------------------
+	// Action Name
+	//
+	// This is the name of the action displayed in the editor.
+	//---------------------------------------------------------------------
 
-  name: "Edit Select Menu Options",
+	name: "Edit Select Menu Options",
 
-  //---------------------------------------------------------------------
-  // Action Section
-  //
-  // This is the section the action will fall into.
-  //---------------------------------------------------------------------
+	//---------------------------------------------------------------------
+	// Action Section
+	//
+	// This is the section the action will fall into.
+	//---------------------------------------------------------------------
 
-  section: "Messaging",
+	section: "Messaging",
 
-  //---------------------------------------------------------------------
-  // Action Subtitle
-  //
-  // This function generates the subtitle displayed next to the name.
-  //---------------------------------------------------------------------
+	//---------------------------------------------------------------------
+	// Action Subtitle
+	//
+	// This function generates the subtitle displayed next to the name.
+	//---------------------------------------------------------------------
 
-  subtitle(data, presets) {
-    const optionChange = data.optionChange ?? {};
-    if (optionChange._index === 0) {
-      return `Add Option Labeled "${optionChange.label}"`;
-    } else if (optionChange.type === "value") {
-      return `Remove Option with Value "${optionChange.value}"`;
-    }
-    return `Remove Option with Label "${optionChange.value}"`;
-  },
+	subtitle(data, presets) {
+		const optionChange = data.optionChange ?? {};
+		if (optionChange._index === 0) {
+			return `Add Option Labeled "${optionChange.label}"`;
+		} else if (optionChange.type === "value") {
+			return `Remove Option with Value "${optionChange.value}"`;
+		}
+		return `Remove Option with Label "${optionChange.value}"`;
+	},
 
-  //---------------------------------------------------------------------
-  // Action Meta Data
-  //
-  // Helps check for updates and provides info if a custom mod.
-  // If this is a third-party mod, please set "author" and "authorUrl".
-  //
-  // It's highly recommended "preciseCheck" is set to false for third-party mods.
-  // This will make it so the patch version (0.0.X) is not checked.
-  //---------------------------------------------------------------------
+	//---------------------------------------------------------------------
+	// Action Meta Data
+	//
+	// Helps check for updates and provides info if a custom mod.
+	// If this is a third-party mod, please set "author" and "authorUrl".
+	//
+	// It's highly recommended "preciseCheck" is set to false for third-party mods.
+	// This will make it so the patch version (0.0.X) is not checked.
+	//---------------------------------------------------------------------
 
-  meta: { version: "2.2.0", preciseCheck: true, author: null, authorUrl: null, downloadUrl: null },
+	meta: { version: "2.2.0", preciseCheck: true, author: null, authorUrl: null, downloadUrl: null },
 
-  //---------------------------------------------------------------------
-  // Action Fields
-  //
-  // These are the fields for the action. These fields are customized
-  // by creating elements with corresponding IDs in the HTML. These
-  // are also the names of the fields stored in the action's JSON data.
-  //---------------------------------------------------------------------
+	//---------------------------------------------------------------------
+	// Action Fields
+	//
+	// These are the fields for the action. These fields are customized
+	// by creating elements with corresponding IDs in the HTML. These
+	// are also the names of the fields stored in the action's JSON data.
+	//---------------------------------------------------------------------
 
-  fields: ["message", "messageVarName", "type", "searchValue", "optionChange"],
+	fields: ["message", "messageVarName", "type", "searchValue", "optionChange"],
 
-  //---------------------------------------------------------------------
-  // Command HTML
-  //
-  // This function returns a string containing the HTML used for
-  // editing actions.
-  //
-  // The "isEvent" parameter will be true if this action is being used
-  // for an event. Due to their nature, events lack certain information,
-  // so edit the HTML to reflect this.
-  //---------------------------------------------------------------------
+	//---------------------------------------------------------------------
+	// Command HTML
+	//
+	// This function returns a string containing the HTML used for
+	// editing actions.
+	//
+	// The "isEvent" parameter will be true if this action is being used
+	// for an event. Due to their nature, events lack certain information,
+	// so edit the HTML to reflect this.
+	//---------------------------------------------------------------------
 
-  html(isEvent, data) {
-    return `
+	html(isEvent, data) {
+		return `
 <message-input dropdownLabel="Source Message" selectId="message" variableContainerId="varNameContainer" variableInputId="messageVarName"></message-input>
 
 <br><br><br><br>
@@ -135,157 +135,161 @@ module.exports = {
 
 </tab-system>
 `;
-  },
+	},
 
-  //---------------------------------------------------------------------
-  // Action Editor Init Code
-  //
-  // When the HTML is first applied to the action editor, this code
-  // is also run. This helps add modifications or setup reactionary
-  // functions for the DOM elements.
-  //---------------------------------------------------------------------
+	//---------------------------------------------------------------------
+	// Action Editor Init Code
+	//
+	// When the HTML is first applied to the action editor, this code
+	// is also run. This helps add modifications or setup reactionary
+	// functions for the DOM elements.
+	//---------------------------------------------------------------------
 
-  init() {
-    const { glob } = this;
+	init() {
+		const { glob } = this;
 
-    glob.onButtonSelectTypeChange = function (event) {
-      const input = document.getElementById("nameContainer");
-      input.style.display = event.value === "findSelect" ? null : "none";
-    };
+		glob.onButtonSelectTypeChange = function (event) {
+			const input = document.getElementById("nameContainer");
+			input.style.display = event.value === "findSelect" ? null : "none";
+		};
 
-    glob.onButtonSelectTypeChange(document.getElementById("type"));
-  },
+		glob.onButtonSelectTypeChange(document.getElementById("type"));
+	},
 
-  //---------------------------------------------------------------------
-  // Action Bot Function
-  //
-  // This is the function for the action within the Bot's Action class.
-  // Keep in mind event calls won't have access to the "msg" parameter,
-  // so be sure to provide checks for variable existence.
-  //---------------------------------------------------------------------
+	//---------------------------------------------------------------------
+	// Action Bot Function
+	//
+	// This is the function for the action within the Bot's Action class.
+	// Keep in mind event calls won't have access to the "msg" parameter,
+	// so be sure to provide checks for variable existence.
+	//---------------------------------------------------------------------
 
-  async action(cache) {
-    const data = cache.actions[cache.index];
-    const message = await this.getMessageFromData(data.message, data.messageVarName, cache);
+	async action(cache) {
+		const data = cache.actions[cache.index];
+		const message = await this.getMessageFromData(data.message, data.messageVarName, cache);
 
-    const type = data.type;
+		const type = data.type;
 
-    let sourceSelect = null;
-    if (cache.interaction.isStringSelectMenu()) {
-      sourceSelect = cache.interaction.customId;
-    }
+		let sourceSelect = null;
+		if (cache.interaction.isStringSelectMenu()) {
+			sourceSelect = cache.interaction.customId;
+		}
 
-    const optionChange = data.optionChange;
+		const optionChange = data.optionChange;
 
-    let newOptionData = null;
-    let removeOptionValue = null;
-    let removeOptionLabel = null;
-    if (optionChange._index === 0) {
-      newOptionData = {
-        label: this.evalMessage(optionChange.label, cache),
-        value: this.evalMessage(optionChange.value, cache),
-        default: false,
-      };
-      if (optionChange.description) {
-        newOptionData.description = this.evalMessage(optionChange.description, cache);
-      }
-      if (optionChange.emoji) {
-        newOptionData.emoji = this.evalMessage(optionChange.emoji, cache);
-      }
-    } else if (optionChange._index === 1) {
-      if (optionChange.type === "value") {
-        removeOptionValue = this.evalMessage(optionChange.value, cache);
-      } else if (optionChange.type === "label") {
-        removeOptionLabel = this.evalMessage(optionChange.value, cache);
-      }
-    }
+		let newOptionData = null;
+		let removeOptionValue = null;
+		let removeOptionLabel = null;
+		if (optionChange._index === 0) {
+			newOptionData = {
+				label: this.evalMessage(optionChange.label, cache),
+				value: this.evalMessage(optionChange.value, cache),
+				default: false,
+			};
+			if (optionChange.description) {
+				newOptionData.description = this.evalMessage(optionChange.description, cache);
+			}
+			if (optionChange.emoji) {
+				newOptionData.emoji = this.evalMessage(optionChange.emoji, cache);
+			}
+		} else if (optionChange._index === 1) {
+			if (optionChange.type === "value") {
+				removeOptionValue = this.evalMessage(optionChange.value, cache);
+			} else if (optionChange.type === "label") {
+				removeOptionLabel = this.evalMessage(optionChange.value, cache);
+			}
+		}
 
-    const onSelectMenuFound = (select) => {
-      if (select) {
-        if (!select.options) select.options = [];
-        if (newOptionData) {
-          select.options.push({ ...newOptionData });
-        } else if (removeOptionValue) {
-          select.options = select.options.filter((o) => o.value !== removeOptionValue);
-        } else if (removeOptionLabel) {
-          select.options = select.options.filter((o) => o.label !== removeOptionLabel);
-        }
-      }
-    };
+		const onSelectMenuFound = (select) => {
+			if (select) {
+				if (!select.options) select.options = [];
+				if (newOptionData) {
+					select.options.push({ ...newOptionData });
+				} else if (removeOptionValue) {
+					select.options = select.options.filter((o) => o.value !== removeOptionValue);
+				} else if (removeOptionLabel) {
+					select.options = select.options.filter((o) => o.label !== removeOptionLabel);
+				}
+			}
+		};
 
-    let components = null;
-    let searchValue = null;
+		let components = null;
+		let searchValue = null;
 
-    if (message?.components) {
-      const { ActionRowBuilder, ComponentType } = this.getDBM().DiscordJS;
-      const oldComponents = message.components;
-      const newComponents = [];
+		if (message?.components) {
+			const { ActionRowBuilder, ComponentType } = this.getDBM().DiscordJS;
+			const oldComponents = message.components;
+			const newComponents = [];
 
-      for (let i = 0; i < oldComponents.length; i++) {
-        const compData = oldComponents[i];
-        const comps = compData instanceof ActionRowBuilder ? compData.toJSON() : compData;
+			for (let i = 0; i < oldComponents.length; i++) {
+				const compData = oldComponents[i];
+				const comps = compData instanceof ActionRowBuilder ? compData.toJSON() : compData;
 
-        for (let j = 0; j < comps.components.length; j++) {
-          const comp = comps.components[j];
+				for (let j = 0; j < comps.components.length; j++) {
+					const comp = comps.components[j];
 
-          switch (type) {
-            case "allSelects": {
-              if (comp.type === 3 || comp.type === ComponentType.SelectMenu) {
-                onSelectMenuFound(comp);
-              }
-              break;
-            }
-            case "sourceSelect": {
-              if (comp.custom_id === sourceSelect) {
-                onSelectMenuFound(comp);
-              }
-              break;
-            }
-            case "findSelect": {
-              if (searchValue === null) {
-                searchValue = this.evalMessage(data.searchValue, cache);
-              }
-              if (comp.custom_id === searchValue || comp.customId === searchValue || comp.label === searchValue) {
-                onSelectMenuFound(comp);
-              }
-              break;
-            }
-          }
-        }
+					switch (type) {
+						case "allSelects": {
+							if (comp.type === 3 || comp.type === ComponentType.SelectMenu) {
+								onSelectMenuFound(comp);
+							}
+							break;
+						}
+						case "sourceSelect": {
+							if (comp.custom_id === sourceSelect) {
+								onSelectMenuFound(comp);
+							}
+							break;
+						}
+						case "findSelect": {
+							if (searchValue === null) {
+								searchValue = this.evalMessage(data.searchValue, cache);
+							}
+							if (
+								comp.custom_id === searchValue ||
+								comp.customId === searchValue ||
+								comp.label === searchValue
+							) {
+								onSelectMenuFound(comp);
+							}
+							break;
+						}
+					}
+				}
 
-        newComponents.push(comps);
-      }
+				newComponents.push(comps);
+			}
 
-      components = newComponents;
-    }
+			components = newComponents;
+		}
 
-    if (components) {
-      if (Array.isArray(message)) {
-        this.callListFunc(message, "edit", [{ components }]).then(() => this.callNextAction(cache));
-      } else if (message?.edit) {
-        message
-          .edit({ components })
-          .then(() => this.callNextAction(cache))
-          .catch((err) => this.displayError(data, cache, err));
-      } else {
-        if (message.components) {
-          message.components = components;
-        }
-        this.callNextAction(cache);
-      }
-    } else {
-      this.callNextAction(cache);
-    }
-  },
+		if (components) {
+			if (Array.isArray(message)) {
+				this.callListFunc(message, "edit", [{ components }]).then(() => this.callNextAction(cache));
+			} else if (message?.edit) {
+				message
+					.edit({ components })
+					.then(() => this.callNextAction(cache))
+					.catch((err) => this.displayError(data, cache, err));
+			} else {
+				if (message.components) {
+					message.components = components;
+				}
+				this.callNextAction(cache);
+			}
+		} else {
+			this.callNextAction(cache);
+		}
+	},
 
-  //---------------------------------------------------------------------
-  // Action Bot Mod
-  //
-  // Upon initialization of the bot, this code is run. Using the bot's
-  // DBM namespace, one can add/modify existing functions if necessary.
-  // In order to reduce conflicts between mods, be sure to alias
-  // functions you wish to overwrite.
-  //---------------------------------------------------------------------
+	//---------------------------------------------------------------------
+	// Action Bot Mod
+	//
+	// Upon initialization of the bot, this code is run. Using the bot's
+	// DBM namespace, one can add/modify existing functions if necessary.
+	// In order to reduce conflicts between mods, be sure to alias
+	// functions you wish to overwrite.
+	//---------------------------------------------------------------------
 
-  mod() {},
+	mod() {},
 };

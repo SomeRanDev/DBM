@@ -1,73 +1,73 @@
 module.exports = {
-  //---------------------------------------------------------------------
-  // Action Name
-  //
-  // This is the name of the action displayed in the editor.
-  //---------------------------------------------------------------------
+	//---------------------------------------------------------------------
+	// Action Name
+	//
+	// This is the name of the action displayed in the editor.
+	//---------------------------------------------------------------------
 
-  name: "Play URL",
+	name: "Play URL",
 
-  //---------------------------------------------------------------------
-  // Action Section
-  //
-  // This is the section the action will fall into.
-  //---------------------------------------------------------------------
+	//---------------------------------------------------------------------
+	// Action Section
+	//
+	// This is the section the action will fall into.
+	//---------------------------------------------------------------------
 
-  section: "Audio Control",
+	section: "Audio Control",
 
-  //---------------------------------------------------------------------
-  // Requires Audio Libraries
-  //
-  // If 'true', this action requires audio libraries to run.
-  //---------------------------------------------------------------------
+	//---------------------------------------------------------------------
+	// Requires Audio Libraries
+	//
+	// If 'true', this action requires audio libraries to run.
+	//---------------------------------------------------------------------
 
-  requiresAudioLibraries: true,
+	requiresAudioLibraries: true,
 
-  //---------------------------------------------------------------------
-  // Action Subtitle
-  //
-  // This function generates the subtitle displayed next to the name.
-  //---------------------------------------------------------------------
+	//---------------------------------------------------------------------
+	// Action Subtitle
+	//
+	// This function generates the subtitle displayed next to the name.
+	//---------------------------------------------------------------------
 
-  subtitle(data, presets) {
-    return `${data.url}`;
-  },
+	subtitle(data, presets) {
+		return `${data.url}`;
+	},
 
-  //---------------------------------------------------------------------
-  // Action Meta Data
-  //
-  // Helps check for updates and provides info if a custom mod.
-  // If this is a third-party mod, please set "author" and "authorUrl".
-  //
-  // It's highly recommended "preciseCheck" is set to false for third-party mods.
-  // This will make it so the patch version (0.0.X) is not checked.
-  //---------------------------------------------------------------------
+	//---------------------------------------------------------------------
+	// Action Meta Data
+	//
+	// Helps check for updates and provides info if a custom mod.
+	// If this is a third-party mod, please set "author" and "authorUrl".
+	//
+	// It's highly recommended "preciseCheck" is set to false for third-party mods.
+	// This will make it so the patch version (0.0.X) is not checked.
+	//---------------------------------------------------------------------
 
-  meta: { version: "2.2.0", preciseCheck: true, author: null, authorUrl: null, downloadUrl: null },
+	meta: { version: "2.2.0", preciseCheck: true, author: null, authorUrl: null, downloadUrl: null },
 
-  //---------------------------------------------------------------------
-  // Action Fields
-  //
-  // These are the fields for the action. These fields are customized
-  // by creating elements with corresponding IDs in the HTML. These
-  // are also the names of the fields stored in the action's JSON data.
-  //---------------------------------------------------------------------
+	//---------------------------------------------------------------------
+	// Action Fields
+	//
+	// These are the fields for the action. These fields are customized
+	// by creating elements with corresponding IDs in the HTML. These
+	// are also the names of the fields stored in the action's JSON data.
+	//---------------------------------------------------------------------
 
-  fields: ["url", "seek", "volume", "bitrate", "type"],
+	fields: ["url", "seek", "volume", "bitrate", "type"],
 
-  //---------------------------------------------------------------------
-  // Command HTML
-  //
-  // This function returns a string containing the HTML used for
-  // editing actions.
-  //
-  // The "isEvent" parameter will be true if this action is being used
-  // for an event. Due to their nature, events lack certain information,
-  // so edit the HTML to reflect this.
-  //---------------------------------------------------------------------
+	//---------------------------------------------------------------------
+	// Command HTML
+	//
+	// This function returns a string containing the HTML used for
+	// editing actions.
+	//
+	// The "isEvent" parameter will be true if this action is being used
+	// for an event. Due to their nature, events lack certain information,
+	// so edit the HTML to reflect this.
+	//---------------------------------------------------------------------
 
-  html(isEvent, data) {
-    return `
+	html(isEvent, data) {
+		return `
 <div>
 	<span class="dbminputlabel">Web URL</span><br>
 	<input id="url" class="round" type="text" value="http://"><br>
@@ -92,55 +92,55 @@ module.exports = {
 		<option value="1">Play Immediately</option>
 	</select>
 </div>`;
-  },
+	},
 
-  //---------------------------------------------------------------------
-  // Action Editor Init Code
-  //
-  // When the HTML is first applied to the action editor, this code
-  // is also run. This helps add modifications or setup reactionary
-  // functions for the DOM elements.
-  //---------------------------------------------------------------------
+	//---------------------------------------------------------------------
+	// Action Editor Init Code
+	//
+	// When the HTML is first applied to the action editor, this code
+	// is also run. This helps add modifications or setup reactionary
+	// functions for the DOM elements.
+	//---------------------------------------------------------------------
 
-  init() {},
+	init() {},
 
-  //---------------------------------------------------------------------
-  // Action Bot Function
-  //
-  // This is the function for the action within the Bot's Action class.
-  // Keep in mind event calls won't have access to the "msg" parameter,
-  // so be sure to provide checks for variable existence.
-  //---------------------------------------------------------------------
+	//---------------------------------------------------------------------
+	// Action Bot Function
+	//
+	// This is the function for the action within the Bot's Action class.
+	// Keep in mind event calls won't have access to the "msg" parameter,
+	// so be sure to provide checks for variable existence.
+	//---------------------------------------------------------------------
 
-  action(cache) {
-    const data = cache.actions[cache.index];
-    const Audio = this.getDBM().Audio;
-    const options = {};
-    if (data.seek) {
-      options.seek = parseInt(this.evalMessage(data.seek, cache), 10);
-    }
-    if (data.volume) {
-      options.volume = parseInt(this.evalMessage(data.volume, cache), 10) / 100;
-    }
-    if (data.bitrate) {
-      options.bitrate = parseInt(this.evalMessage(data.bitrate, cache), 10);
-    }
-    const url = this.evalMessage(data.url, cache);
-    if (url) {
-      const info = ["url", options, url];
-      Audio.addAudio(info, cache.server, data.type === "0");
-    }
-    this.callNextAction(cache);
-  },
+	action(cache) {
+		const data = cache.actions[cache.index];
+		const Audio = this.getDBM().Audio;
+		const options = {};
+		if (data.seek) {
+			options.seek = parseInt(this.evalMessage(data.seek, cache), 10);
+		}
+		if (data.volume) {
+			options.volume = parseInt(this.evalMessage(data.volume, cache), 10) / 100;
+		}
+		if (data.bitrate) {
+			options.bitrate = parseInt(this.evalMessage(data.bitrate, cache), 10);
+		}
+		const url = this.evalMessage(data.url, cache);
+		if (url) {
+			const info = ["url", options, url];
+			Audio.addAudio(info, cache.server, data.type === "0");
+		}
+		this.callNextAction(cache);
+	},
 
-  //---------------------------------------------------------------------
-  // Action Bot Mod
-  //
-  // Upon initialization of the bot, this code is run. Using the bot's
-  // DBM namespace, one can add/modify existing functions if necessary.
-  // In order to reduce conflicts between mods, be sure to alias
-  // functions you wish to overwrite.
-  //---------------------------------------------------------------------
+	//---------------------------------------------------------------------
+	// Action Bot Mod
+	//
+	// Upon initialization of the bot, this code is run. Using the bot's
+	// DBM namespace, one can add/modify existing functions if necessary.
+	// In order to reduce conflicts between mods, be sure to alias
+	// functions you wish to overwrite.
+	//---------------------------------------------------------------------
 
-  mod() {},
+	mod() {},
 };
