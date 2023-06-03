@@ -337,7 +337,7 @@ module.exports = {
       if (targetServer.memberCount !== targetServer.members.cache.size) {
         await targetServer.members.fetch({ withPresences });
       }
-    }
+    };
 
     const info = parseInt(data.info, 10);
 
@@ -459,7 +459,9 @@ module.exports = {
         break;
       case 38: {
         const { ChannelType } = this.getDBM().DiscordJS;
-        result = targetServer.channels.cache.filter((c) => c.type === ChannelType.GuildText || c.type === ChannelType.GuildAnnouncement).size;
+        result = targetServer.channels.cache.filter(
+          (c) => c.type === ChannelType.GuildText || c.type === ChannelType.GuildAnnouncement,
+        ).size;
         break;
       }
       case 39: {

@@ -318,11 +318,23 @@ module.exports = {
       case 15:
         if (member.presence?.status) {
           const status = member.presence.status;
-          switch(status) {
-            case "online": { result = "Online"; break; }
-            case "offline": { result = "Offline"; break; }
-            case "idle": { result = "Idle"; break; }
-            case "dnd": { result = "Do Not Disturb"; break; }
+          switch (status) {
+            case "online": {
+              result = "Online";
+              break;
+            }
+            case "offline": {
+              result = "Offline";
+              break;
+            }
+            case "idle": {
+              result = "Idle";
+              break;
+            }
+            case "dnd": {
+              result = "Do Not Disturb";
+              break;
+            }
           }
         }
         break;

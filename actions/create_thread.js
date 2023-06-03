@@ -23,10 +23,10 @@ module.exports = {
 
   subtitle(data, presets) {
     return `Create Thread Named "${data.threadName}" from ${
-      data.fromTarget._index === 0 ?
-        presets.getChannelText(data.fromTarget?.channel ?? 0, data.fromTarget?.channelVarName) :
-        presets.getMessageText(data.fromTarget?.message ?? 0, data.fromTarget?.messageVarName)
-      }`;
+      data.fromTarget._index === 0
+        ? presets.getChannelText(data.fromTarget?.channel ?? 0, data.fromTarget?.channelVarName)
+        : presets.getMessageText(data.fromTarget?.message ?? 0, data.fromTarget?.messageVarName)
+    }`;
   },
 
   //---------------------------------------------------------------------
@@ -151,12 +151,11 @@ module.exports = {
 
     let messageOrChannel = null;
 
-    if(data.fromTarget._index === 0) {
+    if (data.fromTarget._index === 0) {
       messageOrChannel = await this.getChannelFromData(data.fromTarget.channel, data.fromTarget.channelVarName, cache);
     } else {
       messageOrChannel = await this.getMessageFromData(data.fromTarget.message, data.fromTarget.messageVarName, cache);
     }
-    
 
     const threadOptions = {
       name: this.evalMessage(data.threadName, cache),

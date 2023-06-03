@@ -139,7 +139,7 @@ module.exports = {
     const data = cache.actions[cache.index];
     const server = cache.server;
     if (!server) return this.callNextAction(cache);
-    const reason = this.evalMessage(data.reason, cache);
+
     /** @type {import('discord.js').CreateRoleOptions} */
     const roleData = {};
     if (data.roleName) {
@@ -151,12 +151,16 @@ module.exports = {
     if (data.position) {
       roleData.position = parseInt(this.evalMessage(data.position, cache), 10);
     }
+    if (data.reason) {
+      roleData.reason = this.evalMessage(data.reason, cache);
+    }
     roleData.hoist = data.hoist === "true";
     roleData.mentionable = data.mentionable === "true";
-    const storage = parseInt(data.storage, 10);
+
     server.roles
-      .create({ ...roleData, reason })
+      .create({ ...roleData })
       .then((role) => {
+        const storage = parseInt(data.storage, 10);
         const varName = this.evalMessage(data.varName, cache);
         this.storeValue(role, storage, varName, cache);
         this.callNextAction(cache);

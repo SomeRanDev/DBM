@@ -140,7 +140,7 @@ module.exports = {
   async action(cache) {
     const data = cache.actions[cache.index];
     const targetChannel = await this.getVoiceChannelFromData(data.channel, data.varName, cache);
-    
+
     if (!targetChannel) {
       this.callNextAction(cache);
       return;

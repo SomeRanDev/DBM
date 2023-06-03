@@ -22,12 +22,10 @@ module.exports = {
   //---------------------------------------------------------------------
 
   subtitle(data, presets) {
-    const channelTypes = [
-      "Text Channel",
-      "Voice Channel",
-      "Thread Channel",
-    ];
-    return `Edit ${presets.getChannelText(data.channel, data.channelVarName)} as a ${channelTypes[data.channelEdits._index ?? 0]}`;
+    const channelTypes = ["Text Channel", "Voice Channel", "Thread Channel"];
+    return `Edit ${presets.getChannelText(data.channel, data.channelVarName)} as a ${
+      channelTypes[data.channelEdits._index ?? 0]
+    }`;
   },
 
   //---------------------------------------------------------------------
@@ -260,7 +258,8 @@ module.exports = {
       // thread
       case 2: {
         if (channelEditData.autoArchiveDuration !== "none") {
-          channelData.autoArchiveDuration = channelEditData.autoArchiveDuration === "max" ? "max" : parseInt(channelEditData.autoArchiveDuration, 10);
+          channelData.autoArchiveDuration =
+            channelEditData.autoArchiveDuration === "max" ? "max" : parseInt(channelEditData.autoArchiveDuration, 10);
         }
         if (channelEditData.invitable !== "none") {
           channelData.invitable = channelEditData.invitable === "true";

@@ -125,7 +125,7 @@ module.exports = {
 
     const count = Math.min(parseInt(this.evalMessage(data.count, cache), 10), 100);
     const options = {
-      limit: count
+      limit: count,
     };
 
     if (cache.msg) {
@@ -153,7 +153,7 @@ module.exports = {
             let result = false;
             try {
               result = !!this.eval(cond, cache);
-            } catch(e) {
+            } catch (e) {
               this.displayError(data, cache, "Error with custom eval:\n" + e.stack);
             }
             return result;

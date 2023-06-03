@@ -22,7 +22,10 @@ module.exports = {
   //---------------------------------------------------------------------
 
   subtitle(data, presets) {
-    return `${data.archive === "true" ? "Archive" : "Unarchive"} Thread: "${presets.getChannelText(data.thread, data.threadVarName)}"`;
+    return `${data.archive === "true" ? "Archive" : "Unarchive"} Thread: "${presets.getChannelText(
+      data.thread,
+      data.threadVarName,
+    )}"`;
   },
 
   //---------------------------------------------------------------------

@@ -22,7 +22,10 @@ module.exports = {
   //---------------------------------------------------------------------
 
   subtitle(data, presets) {
-    return `Await message in ${presets.getChannelText(data.channel, data.channelVarName)} from ${presets.getMemberText(data.member, data.memberVarName)}`;
+    return `Await message in ${presets.getChannelText(data.channel, data.channelVarName)} from ${presets.getMemberText(
+      data.member,
+      data.memberVarName,
+    )}`;
   },
 
   //---------------------------------------------------------------------
@@ -105,8 +108,7 @@ module.exports = {
   // functions for the DOM elements.
   //---------------------------------------------------------------------
 
-  init() {
-  },
+  init() {},
 
   //---------------------------------------------------------------------
   // Action Bot Function
@@ -132,11 +134,11 @@ module.exports = {
       max: 1,
       time,
       filter,
-      maxProcessed
+      maxProcessed,
     });
 
-    collector.on('end', (collected) => {
-      if(collected && collected.size > 0) {
+    collector.on("end", (collected) => {
+      if (collected && collected.size > 0) {
         const varName = this.evalMessage(data.storeInVarName, cache);
         const storage = parseInt(data.storage, 10);
         this.storeValue(collected.values().next(), storage, varName, cache);
