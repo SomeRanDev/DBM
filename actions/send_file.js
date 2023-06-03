@@ -104,7 +104,7 @@ module.exports = {
 
     const target = await this.getSendTargetFromData(data.channel, data.varName, cache);
 
-    const file = new DiscordJS.MessageAttachment(this.getLocalFile(this.evalMessage(data.file, cache)));
+    const file = new DiscordJS.AttachmentBuilder(this.getLocalFile(this.evalMessage(data.file, cache)));
     const options = { content: this.evalMessage(message, cache), files: [file] };
 
     if (Array.isArray(target)) {

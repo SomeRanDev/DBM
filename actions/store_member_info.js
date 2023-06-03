@@ -340,7 +340,7 @@ module.exports = {
         break;
       case 16:
         if (member.user) {
-          result = member.user.displayAvatarURL({ dynamic: true, format: "png", size: 4096 });
+          result = member.user.displayAvatarURL({ extension: "png", size: 4096 });
         }
         break;
       case 17:
@@ -386,7 +386,7 @@ module.exports = {
         break;
       }
       case 31:
-        result = member.displayAvatarURL({ dynamic: true, format: "png", size: 4096 });
+        result = member.displayAvatarURL({ extension: "png", size: 4096 });
         break;
       case 32:
         result = member.communicationDisabledUntil;

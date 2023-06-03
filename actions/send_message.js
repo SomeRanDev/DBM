@@ -605,7 +605,7 @@ module.exports = {
     }
 
     if (data.embeds?.length > 0) {
-      const { MessageEmbed } = this.getDBM().DiscordJS;
+      const { EmbedBuilder } = this.getDBM().DiscordJS;
 
       if (!Array.isArray(messageOptions.embeds) || overwrite) {
         messageOptions.embeds = [];
@@ -614,7 +614,7 @@ module.exports = {
       const embedDatas = data.embeds;
       for (let i = 0; i < embedDatas.length; i++) {
         const embedData = embedDatas[i];
-        const embed = new MessageEmbed();
+        const embed = new EmbedBuilder();
 
         if (embedData.title) embed.setTitle(this.evalMessage(embedData.title, cache));
         if (embedData.url) embed.setURL(this.evalMessage(embedData.url, cache));
@@ -728,7 +728,7 @@ module.exports = {
     }
 
     if (data.attachments?.length > 0) {
-      const { Util, MessageAttachment } = this.getDBM().DiscordJS;
+      const { Util, AttachmentBuilder } = this.getDBM().DiscordJS;
       if (!Array.isArray(messageOptions.files) || overwrite) {
         messageOptions.files = [];
       }
@@ -738,7 +738,7 @@ module.exports = {
         if (url) {
           const spoiler = !!attachment?.spoiler;
           const name = attachment?.name || (spoiler ? Util.basename(url) : undefined);
-          const msgAttachment = new MessageAttachment(url, name);
+          const msgAttachment = new AttachmentBuilder(url, name);
           if (spoiler) {
             msgAttachment.setSpoiler(true);
           }

@@ -130,7 +130,7 @@ module.exports = {
     Images.createBuffer(image)
       .then((buffer) => {
         const obj = {
-          files: [new DiscordJS.MessageAttachment(buffer, "image.png")],
+          files: [new DiscordJS.AttachmentBuilder(buffer, "image.png")],
         };
 
         if (data.message) {

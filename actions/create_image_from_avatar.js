@@ -101,7 +101,7 @@ module.exports = {
     const data = cache.actions[cache.index];
     const member = await this.getMemberFromData(data.member, data.varName, cache);
     const Images = this.getDBM().Images;
-    Images.getImage(member.user.displayAvatarURL({ format: "png" }))
+    Images.getImage(member.user.displayAvatarURL({ extension: "png" }))
       .then((image) => {
         const varName2 = this.evalMessage(data.varName2, cache);
         const storage = parseInt(data.storage, 10);
