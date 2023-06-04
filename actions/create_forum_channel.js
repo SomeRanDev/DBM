@@ -134,6 +134,11 @@ module.exports = {
 		const data = cache.actions[cache.index];
 		const { server } = cache;
 
+		if (!server) {
+			this.callNextAction();
+			return;
+		}
+
 		const channelData = {
 			reason: this.evalMessage(data.reason, cache),
 			name: this.evalMessage(data.channelName, cache),
