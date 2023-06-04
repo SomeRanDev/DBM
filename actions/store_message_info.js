@@ -208,7 +208,10 @@ module.exports = {
 		const data = cache.actions[cache.index];
 		const msg = await this.getMessageFromData(data.message, data.varName, cache);
 
-		if (!msg) return this.callNextAction(cache);
+		if (!msg) {
+			this.callNextAction(cache);
+			return;
+		}
 
 		const info = parseInt(data.info, 10);
 

@@ -177,7 +177,10 @@ module.exports = {
 		const data = cache.actions[cache.index];
 		const msg = cache.msg;
 		const interactionOptions = cache.interaction?.options ?? null;
-		if (!msg && !interactionOptions) return this.callNextAction(cache);
+		if (!msg && !interactionOptions) {
+			this.callNextAction(cache);
+			return;
+		}
 
 		const { Bot, Files } = this.getDBM();
 		const { ApplicationCommandOptionType } = this.getDBM().DiscordJS;

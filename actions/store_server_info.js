@@ -329,7 +329,10 @@ module.exports = {
 		const data = cache.actions[cache.index];
 		const targetServer = await this.getServerFromData(data.server, data.varName, cache);
 
-		if (!targetServer) return this.callNextAction(cache);
+		if (!targetServer) {
+			this.callNextAction(cache);
+			return;
+		}
 
 		const fetchMembers = async (withPresences = false) => {
 			if (targetServer.memberCount !== targetServer.members.cache.size) {

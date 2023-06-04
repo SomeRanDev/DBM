@@ -124,7 +124,11 @@ module.exports = {
 	async action(cache) {
 		const data = cache.actions[cache.index];
 		const server = cache.server;
-		if (!server) return this.callNextAction(cache);
+		if (!server) {
+			this.callNextAction(cache);
+			return;
+		}
+		
 		const stickerData = { name: this.evalMessage(data.stickerName, cache) };
 
 		const varName = this.evalMessage(data.varName, cache);

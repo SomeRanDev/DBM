@@ -111,7 +111,10 @@ module.exports = {
 		const bot = this.getDBM().Bot.bot;
 
 		const actions = data.actions;
-		if (!actions || actions.length <= 0) return this.callNextAction(cache);
+		if (!actions || actions.length <= 0) {
+			this.callNextAction(cache);
+			return;
+		}
 
 		const waitForCompletion = data.type === "true";
 

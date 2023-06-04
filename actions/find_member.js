@@ -115,7 +115,10 @@ module.exports = {
 
 	action(cache) {
 		const server = cache.server;
-		if (!server?.members) return this.callNextAction(cache);
+		if (!server?.members) {
+			this.callNextAction(cache);
+			return;
+		}
 
 		const data = cache.actions[cache.index];
 		const info = parseInt(data.info, 10);

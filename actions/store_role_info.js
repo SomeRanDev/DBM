@@ -179,7 +179,10 @@ module.exports = {
 		const data = cache.actions[cache.index];
 		const targetRole = await this.getRoleFromData(data.role, data.varName, cache);
 		const info = parseInt(data.info, 10);
-		if (!targetRole) return this.callNextAction(cache);
+		if (!targetRole) {
+			this.callNextAction(cache);
+			return;
+		}
 
 		let result;
 		switch (info) {

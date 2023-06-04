@@ -94,12 +94,18 @@ module.exports = {
 		const storage = parseInt(data.storage, 10);
 		const varName = this.evalMessage(data.varName, cache);
 		const var1 = this.getVariable(storage, varName, cache);
-		if (!var1) return this.callNextAction(cache);
+		if (!var1) {
+			this.callNextAction(cache);
+			return;
+		}
 
 		const storage2 = parseInt(data.storage2, 10);
 		const varName2 = this.evalMessage(data.varName2, cache);
 		const var2 = this.getVariable(storage2, varName2, cache);
-		if (!var2) return this.callNextAction(cache);
+		if (!var2) {
+			this.callNextAction(cache);
+			return;
+		}
 
 		this.storeValue(var1, storage2, varName2, cache);
 		this.callNextAction(cache);
