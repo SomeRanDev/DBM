@@ -125,7 +125,10 @@ module.exports = {
 		const varName3 = this.evalMessage(data.varName3, cache);
 		const storage2 = parseInt(data.storage2, 10);
 
-		if (!Array.isArray(target) && !target?.send) return this.callNextAction(cache);
+		if (!Array.isArray(target) && !target?.send) {
+			this.callNextAction(cache);
+			return;
+		}
 
 		Images.createBuffer(image)
 			.then((buffer) => {

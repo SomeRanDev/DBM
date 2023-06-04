@@ -89,7 +89,11 @@ module.exports = {
 		const Audio = this.getDBM().Audio;
 		const server = cache.server;
 		const subscription = Audio.subscriptions.get(server.id);
-		if (!subscription) return this.callNextAction(cache);
+		if (!subscription) {
+			this.callNextAction(cache);
+			return;
+		}
+
 		const amount = parseInt(this.evalMessage(data.amount, cache), 10);
 		for (let i = 0; i < amount; i++) subscription.audioPlayer.stop();
 		this.callNextAction(cache);

@@ -109,7 +109,10 @@ module.exports = {
 		const storage = parseInt(data.storage, 10);
 		const varName = this.evalMessage(data.varName, cache);
 		const image = this.getVariable(storage, varName, cache);
-		if (!image) return this.callNextAction(cache);
+		if (!image) {
+			this.callNextAction(cache);
+			return;
+		}
 
 		const fontName = this.evalMessage(data.font, cache);
 		const x = parseInt(this.evalMessage(data.x, cache), 10);

@@ -128,7 +128,10 @@ module.exports = {
 			}
 		}
 
-		if (!actions) return this.callNextAction(cache);
+		if (!actions) {
+			this.callNextAction(cache);
+			return;
+		}
 
 		const waitForCompletion = data.type === "true";
 		let callback = null;

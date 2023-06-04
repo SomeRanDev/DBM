@@ -94,7 +94,11 @@ module.exports = {
 		const { Audio } = this.getDBM();
 		const server = cache.server;
 		const subscription = server && Audio.subscriptions.get(server.id);
-		if (!subscription) return this.callNextAction(cache);
+		if (!subscription) {
+			this.callNextAction(cache);
+			return;
+		}
+
 		const action = parseInt(data.action, 10);
 		switch (action) {
 			case 0:

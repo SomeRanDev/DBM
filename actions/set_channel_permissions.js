@@ -110,7 +110,11 @@ module.exports = {
 	async action(cache) {
 		const data = cache.actions[cache.index];
 		const server = cache.server;
-		if (!server) return this.callNextAction(cache);
+		if (!server) {
+			this.callNextAction(cache);
+			return;
+		}
+
 
 		const channel = await this.getChannelFromData(data.storage, data.varName, cache);
 		const reason = this.evalMessage(data.reason, cache);

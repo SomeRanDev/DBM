@@ -86,7 +86,10 @@ module.exports = {
 		const subscription = Audio.getSubscription(server);
 		const queue = subscription?.queue.slice();
 
-		if (!queue?.length) return this.callNextAction(cache);
+		if (!queue?.length) {
+			this.callNextAction(cache);
+			return;
+		}
 
 		subscription.queueLock = true;
 		for (let i = queue.length - 1; i > 0; i--) {
