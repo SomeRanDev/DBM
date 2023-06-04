@@ -1,168 +1,158 @@
 module.exports = {
-	//---------------------------------------------------------------------
-	// Action Name
-	//
-	// This is the name of the action displayed in the editor.
-	//---------------------------------------------------------------------
+  //---------------------------------------------------------------------
+  // Action Name
+  //
+  // This is the name of the action displayed in the editor.
+  //---------------------------------------------------------------------
 
-	name: "Loop Through All Servers",
+  name: "Loop Through All Servers",
 
-	//---------------------------------------------------------------------
-	// Action Section
-	//
-	// This is the section the action will fall into.
-	//---------------------------------------------------------------------
+  //---------------------------------------------------------------------
+  // Action Section
+  //
+  // This is the section the action will fall into.
+  //---------------------------------------------------------------------
 
-	section: "Lists and Loops",
+  section: "Lists and Loops",
 
-	//---------------------------------------------------------------------
-	// Action Subtitle
-	//
-	// This function generates the subtitle displayed next to the name.
-	//---------------------------------------------------------------------
+  //---------------------------------------------------------------------
+  // Action Subtitle
+  //
+  // This function generates the subtitle displayed next to the name.
+  //---------------------------------------------------------------------
 
-	subtitle(data, presets) {
-		return `Loop through every server and run ${data.actions?.length ?? 0} actions.`;
-	},
+  subtitle: function (data, presets) {
+    return `Loop Servers through Event Id "${data.source}"`;
+  },
 
-	//---------------------------------------------------------------------
-	// Action Meta Data
-	//
-	// Helps check for updates and provides info if a custom mod.
-	// If this is a third-party mod, please set "author" and "authorUrl".
-	//
-	// It's highly recommended "preciseCheck" is set to false for third-party mods.
-	// This will make it so the patch version (0.0.X) is not checked.
-	//---------------------------------------------------------------------
+  //---------------------------------------------------------------------
+  // Action Fields
+  //
+  // These are the fields for the action. These fields are customized
+  // by creating elements with corresponding Ids in the HTML. These
+  // are also the names of the fields stored in the action's JSON data.
+  //---------------------------------------------------------------------
 
-	meta: { version: "2.2.0", preciseCheck: true, author: null, authorUrl: null, downloadUrl: null },
+  fields: ["source", "type"],
 
-	//---------------------------------------------------------------------
-	// Action Fields
-	//
-	// These are the fields for the action. These fields are customized
-	// by creating elements with corresponding IDs in the HTML. These
-	// are also the names of the fields stored in the action's JSON data.
-	//---------------------------------------------------------------------
+  //---------------------------------------------------------------------
+  // Command HTML
+  //
+  // This function returns a string containing the HTML used for
+  // editing actions.
+  //
+  // The "isEvent" parameter will be true if this action is being used
+  // for an event. Due to their nature, events lack certain information,
+  // so edit the HTML to reflect this.
+  //
+  // The "data" parameter stores constants for select elements to use.
+  // Each is an array: index 0 for commands, index 1 for events.
+  // The names are: sendTargets, members, roles, channels,
+  //                messages, servers, variables
+  //---------------------------------------------------------------------
 
-	fields: ["type", "actions"],
+  html: function (isEvent, data) {
+    return `
+<div style="width: 85%;">
+	<span class="dbminputlabel">Event</span><br>
+	<select id="source" class="round">
+	</select>
+</div>
 
-	//---------------------------------------------------------------------
-	// Command HTML
-	//
-	// This function returns a string containing the HTML used for
-	// editing actions.
-	//
-	// The "isEvent" parameter will be true if this action is being used
-	// for an event. Due to their nature, events lack certain information,
-	// so edit the HTML to reflect this.
-	//---------------------------------------------------------------------
+<br>
 
-	html(isEvent, data) {
-		return `
-<span class="dbminputlabel">Call Type</span><br>
-<select id="type" class="round">
-  <option value="true" selected>Wait for Completion</option>
-  <option value="false">Process Simultaneously</option>
-</select>
+<div style="width: 85%;">
+	<span class="dbminputlabel">Call Type</span><br>
+	<select id="type" class="round">
+		<option value="true" selected>Wait for Completion</option>
+		<option value="false">Process Simultaneously</option>
+	</select>
+</div>`;
+  },
 
-<br><br>
+  //---------------------------------------------------------------------
+  // Action Editor Init Code
+  //
+  // When the HTML is first applied to the action editor, this code
+  // is also run. This helps add modifications or setup reactionary
+  // functions for the DOM elements.
+  //---------------------------------------------------------------------
 
-<action-list-input id="actions" height="calc(100vh - 300px)"></action-list-input>`;
-	},
+  init: function () {
+    const { glob, document } = this;
 
-	//---------------------------------------------------------------------
-	// Action Editor Pre-Init Code
-	//
-	// Before the fields from existing data in this action are applied
-	// to the user interface, this function is called if it exists.
-	// The existing data is provided, and a modified version can be
-	// returned. The returned version will be used if provided.
-	// This is to help provide compatibility with older versions of the action.
-	//
-	// The "formatters" argument contains built-in functions for formatting
-	// the data required for official DBM action compatibility.
-	//---------------------------------------------------------------------
+    const $evts = glob.$evts;
+    const source = document.getElementById("source");
+    source.innerHTML = "";
+    for (let i = 0; i < $evts.length; i++) {
+      if ($evts[i]) {
+        source.innerHTML += `<option value="${i}">${$evts[i].name}</option>\n`;
+      }
+    }
+  },
 
-	preInit(data, formatters) {
-		return formatters.compatibility_2_0_3_loopevent_to_actions(data);
-	},
+  //---------------------------------------------------------------------
+  // Action Bot Function
+  //
+  // This is the function for the action within the Bot's Action class.
+  // Keep in mind event calls won't have access to the "msg" parameter,
+  // so be sure to provide checks for variable existence.
+  //---------------------------------------------------------------------
 
-	//---------------------------------------------------------------------
-	// Action Editor Init Code
-	//
-	// When the HTML is first applied to the action editor, this code
-	// is also run. This helps add modifications or setup reactionary
-	// functions for the DOM elements.
-	//---------------------------------------------------------------------
+  action: function (cache) {
+    const data = cache.actions[cache.index];
+    const Files = this.getDBM().Files;
+    const bot = this.getDBM().Bot.bot;
 
-	init() {},
+    const id = data.source;
+    let actions;
+    const allData = Files.data.events;
+    for (let i = 0; i < allData.length; i++) {
+      if (allData[i] && allData[i]._id === id) {
+        actions = allData[i].actions;
+        break;
+      }
+    }
+    if (!actions) {
+      this.callNextAction(cache);
+      return;
+    }
 
-	//---------------------------------------------------------------------
-	// Action Bot Function
-	//
-	// This is the function for the action within the Bot's Action class.
-	// Keep in mind event calls won't have access to the "msg" parameter,
-	// so be sure to provide checks for variable existence.
-	//---------------------------------------------------------------------
+    const servers = [...bot.guilds.cache.values()];
+    const act = actions[0];
+    if (act && this.exists(act.name)) {
+      const looper = function (i) {
+        if (!servers[i]) {
+          if (data.type === "true") this.callNextAction(cache);
+          return;
+        }
+        const cache2 = {
+          actions: actions,
+          index: 0,
+          temp: cache.temp,
+          server: servers[i],
+          msg: cache.msg || null,
+        };
+        cache2.callback = function () {
+          looper(i + 1);
+        }.bind(this);
+        this[act.name](cache2);
+      }.bind(this);
+      looper(0);
+      if (data.type === "false") this.callNextAction(cache);
+    } else {
+      this.callNextAction(cache);
+    }
+  },
 
-	action(cache) {
-		const data = cache.actions[cache.index];
-		const bot = this.getDBM().Bot.bot;
+  //---------------------------------------------------------------------
+  // Action Bot Mod
+  //
+  // Upon initialization of the bot, this code is run. Using the bot's
+  // DBM namespace, one can add/modify existing functions if necessary.
+  // In order to reduce conflicts between mods, be sure to alias
+  // functions you wish to overwrite.
+  //---------------------------------------------------------------------
 
-		const actions = data.actions;
-		if (!actions || actions.length <= 0) {
-			this.callNextAction(cache);
-			return;
-		}
-
-		const waitForCompletion = data.type === "true";
-
-		const servers = [...bot.guilds.cache.values()];
-		const act = actions[0];
-		if (act && this.exists(act.name)) {
-			const looper = (i) => {
-				if (!servers[i]) {
-					if (waitForCompletion) this.callNextAction(cache);
-					return;
-				}
-
-				this.executeSubActions(actions, cache, () => looper(i + 1));
-			};
-
-			looper(0);
-
-			if (!waitForCompletion) this.callNextAction(cache);
-		} else {
-			this.callNextAction(cache);
-		}
-	},
-
-	//---------------------------------------------------------------------
-	// Action Bot Mod Init
-	//
-	// An optional function for action mods. Upon the bot's initialization,
-	// each command/event's actions are iterated through. This is to
-	// initialize responses to interactions created within actions
-	// (e.g. buttons and select menus for Send Message).
-	//
-	// If an action provides inputs for more actions within, be sure
-	// to call the `this.prepareActions` function to ensure all actions are
-	// recursively iterated through.
-	//---------------------------------------------------------------------
-
-	modInit(data) {
-		this.prepareActions(data.actions);
-	},
-
-	//---------------------------------------------------------------------
-	// Action Bot Mod
-	//
-	// Upon initialization of the bot, this code is run. Using the bot's
-	// DBM namespace, one can add/modify existing functions if necessary.
-	// In order to reduce conflicts between mods, be sure to alias
-	// functions you wish to overwrite.
-	//---------------------------------------------------------------------
-
-	mod() {},
+  mod: function () {},
 };

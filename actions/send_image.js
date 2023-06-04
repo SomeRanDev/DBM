@@ -1,170 +1,179 @@
 module.exports = {
-	//---------------------------------------------------------------------
-	// Action Name
-	//
-	// This is the name of the action displayed in the editor.
-	//---------------------------------------------------------------------
+  //---------------------------------------------------------------------
+  // Action Name
+  //
+  // This is the name of the action displayed in the editor.
+  //---------------------------------------------------------------------
 
-	name: "Send Image",
+  name: "Send Image",
 
-	//---------------------------------------------------------------------
-	// Action Section
-	//
-	// This is the section the action will fall into.
-	//---------------------------------------------------------------------
+  //---------------------------------------------------------------------
+  // Action Section
+  //
+  // This is the section the action will fall into.
+  //---------------------------------------------------------------------
 
-	section: "Image Editing",
+  section: "Image Editing",
 
-	//---------------------------------------------------------------------
-	// Action Subtitle
-	//
-	// This function generates the subtitle displayed next to the name.
-	//---------------------------------------------------------------------
+  //---------------------------------------------------------------------
+  // Action Subtitle
+  //
+  // This function generates the subtitle displayed next to the name.
+  //---------------------------------------------------------------------
 
-	subtitle(data, presets) {
-		return `${presets.getSendTargetText(data.channel, data.varName2)}: ${data.varName}`;
-	},
+  subtitle: function (data, presets) {
+    return `${presets.getSendTargetText(data.channel, data.varName2)}: ${data.varName}`;
+  },
 
-	//---------------------------------------------------------------------
-	// Action Meta Data
-	//
-	// Helps check for updates and provides info if a custom mod.
-	// If this is a third-party mod, please set "author" and "authorUrl".
-	//
-	// It's highly recommended "preciseCheck" is set to false for third-party mods.
-	// This will make it so the patch version (0.0.X) is not checked.
-	//---------------------------------------------------------------------
+  //---------------------------------------------------------------------
+  // Action Fields
+  //
+  // These are the fields for the action. These fields are customized
+  // by creating elements with corresponding Ids in the HTML. These
+  // are also the names of the fields stored in the action's JSON data.
+  //---------------------------------------------------------------------
 
-	meta: { version: "2.2.0", preciseCheck: true, author: null, authorUrl: null, downloadUrl: null },
+  fields: ["storage", "varName", "channel", "varName2", "message", "storage2", "varName3"],
 
-	//---------------------------------------------------------------------
-	// Action Fields
-	//
-	// These are the fields for the action. These fields are customized
-	// by creating elements with corresponding IDs in the HTML. These
-	// are also the names of the fields stored in the action's JSON data.
-	//---------------------------------------------------------------------
+  //---------------------------------------------------------------------
+  // Action Storage Function << added
+  //
+  // Stores the relevant variable info for the editor.
+  //---------------------------------------------------------------------
 
-	fields: ["storage", "varName", "channel", "varName2", "message", "storage2", "varName3"],
+  variableStorage: function (data, varType) {
+    const type = parseInt(data.storage2, 10);
+    if (type !== varType) return;
+    return [data.varName3, "Message"];
+  },
 
-	//---------------------------------------------------------------------
-	// Action Storage Function << added
-	//
-	// Stores the relevant variable info for the editor.
-	//---------------------------------------------------------------------
+  //---------------------------------------------------------------------
+  // Command HTML
+  //
+  // This function returns a string containing the HTML used for
+  // editing actions.
+  //
+  // The "isEvent" parameter will be true if this action is being used
+  // for an event. Due to their nature, events lack certain information,
+  // so edit the HTML to reflect this.
+  //
+  // The "data" parameter stores constants for select elements to use.
+  // Each is an array: index 0 for commands, index 1 for events.
+  // The names are: sendTargets, members, roles, channels,
+  //                messages, servers, variables
+  //---------------------------------------------------------------------
 
-	variableStorage(data, varType) {
-		const type = parseInt(data.storage2, 10);
-		if (type !== varType) return;
-		return [data.varName3, "Message"];
-	},
-
-	//---------------------------------------------------------------------
-	// Command HTML
-	//
-	// This function returns a string containing the HTML used for
-	// editing actions.
-	//
-	// The "isEvent" parameter will be true if this action is being used
-	// for an event. Due to their nature, events lack certain information,
-	// so edit the HTML to reflect this.
-	//---------------------------------------------------------------------
-
-	html(isEvent, data) {
-		return `
+  html: function (isEvent, data) {
+    return `
 <retrieve-from-variable dropdownLabel="Source Image" selectId="storage" variableContainerId="varNameContainer" variableInputId="varName"></retrieve-from-variable>
 
 <br><br><br>
 
-<send-target-input style="padding-top: 8px;" dropdownLabel="Send To" selectId="channel" variableContainerId="varNameContainer2" variableInputId="varName2"></send-target-input>
+<send-target-input dropdownLabel="Send To" selectId="channel" variableContainerId="varNameContainer2" variableInputId="varName2"></send-target-input>
 
 <br><br><br>
 
 <div style="padding-top: 8px;">
 	<span class="dbminputlabel">Message</span><br>
-	<textarea id="message" class="dbm_monospace" rows="7" placeholder="Insert message here..." style="white-space: nowrap; resize: none;"></textarea>
+	<textarea id="message" rows="8" placeholder="Insert message here..." style="width: 99%; font-family: monospace; white-space: nowrap; resize: none;"></textarea>
 </div>
 
 <br>
 
 <store-in-variable allowNone selectId="storage2" variableInputId="varName3" variableContainerId="varNameContainer3"></store-in-variable>`;
-	},
+  },
 
-	//---------------------------------------------------------------------
-	// Action Editor Init Code
-	//
-	// When the HTML is first applied to the action editor, this code
-	// is also run. This helps add modifications or setup reactionary
-	// functions for the DOM elements.
-	//---------------------------------------------------------------------
+  //---------------------------------------------------------------------
+  // Action Editor Init Code
+  //
+  // When the HTML is first applied to the action editor, this code
+  // is also run. This helps add modifications or setup reactionary
+  // functions for the DOM elements.
+  //---------------------------------------------------------------------
 
-	init() {},
+  init: function () {},
 
-	//---------------------------------------------------------------------
-	// Action Bot Function
-	//
-	// This is the function for the action within the Bot's Action class.
-	// Keep in mind event calls won't have access to the "msg" parameter,
-	// so be sure to provide checks for variable existence.
-	//---------------------------------------------------------------------
+  //---------------------------------------------------------------------
+  // Action Bot Function
+  //
+  // This is the function for the action within the Bot's Action class.
+  // Keep in mind event calls won't have access to the "msg" parameter,
+  // so be sure to provide checks for variable existence.
+  //---------------------------------------------------------------------
 
-	async action(cache) {
-		const data = cache.actions[cache.index];
-		const { DiscordJS, Images } = this.getDBM();
+  action: function (cache) {
+    const data = cache.actions[cache.index];
+    const storage = parseInt(data.storage, 10);
+    const varName = this.evalMessage(data.varName, cache);
+    const image = this.getVariable(storage, varName, cache);
+    if (!image) {
+      this.callNextAction(cache);
+      return;
+    }
+    const channel = parseInt(data.channel, 10);
+    const varName2 = this.evalMessage(data.varName2, cache);
+    const varName3 = this.evalMessage(data.varName3, cache);
+    const storage2 = parseInt(data.storage2, 10);
+    const target = this.getSendTarget(channel, varName2, cache);
+    if (Array.isArray(target)) {
+      const Images = this.getDBM().Images;
+      Images.createBuffer(image)
+        .then(
+          function (buffer) {
+            this.callListFunc(target, "send", [
+              this.evalMessage(data.message, cache),
+              {
+                files: [
+                  {
+                    attachment: buffer,
+                    name: "image.png",
+                  },
+                ],
+              },
+            ])
+              .then((msg) => {
+                this.storeValue(msg, storage2, varName3, cache);
+                this.callNextAction(cache);
+              })
+              .catch((err) => this.displayError(data, cache, err));
+          }.bind(this),
+        )
+        .catch((err) => this.displayError(data, cache, err));
+    } else if (target && target.send) {
+      const Images = this.getDBM().Images;
+      Images.createBuffer(image)
+        .then(
+          function (buffer) {
+            target
+              .send(this.evalMessage(data.message, cache), {
+                files: [
+                  {
+                    attachment: buffer,
+                    name: "image.png",
+                  },
+                ],
+              })
+              .then((msg) => {
+                this.storeValue(msg, storage2, varName3, cache);
+                this.callNextAction(cache);
+              })
+              .catch((err) => this.displayError(data, cache, err));
+          }.bind(this),
+        )
+        .catch((err) => this.displayError(data, cache, err));
+    } else {
+      this.callNextAction(cache);
+    }
+  },
 
-		const storage = parseInt(data.storage, 10);
-		const varName = this.evalMessage(data.varName, cache);
-		const image = this.getVariable(storage, varName, cache);
-		if (!image) {
-			this.callNextAction(cache);
-			return;
-		}
+  //---------------------------------------------------------------------
+  // Action Bot Mod
+  //
+  // Upon initialization of the bot, this code is run. Using the bot's
+  // DBM namespace, one can add/modify existing functions if necessary.
+  // In order to reduce conflicts between mods, be sure to alias
+  // functions you wish to overwrite.
+  //---------------------------------------------------------------------
 
-		const target = await this.getSendTargetFromData(data.channel, data.varName2, cache);
-
-		const varName3 = this.evalMessage(data.varName3, cache);
-		const storage2 = parseInt(data.storage2, 10);
-
-		if (!Array.isArray(target) && !target?.send) return this.callNextAction(cache);
-
-		Images.createBuffer(image)
-			.then((buffer) => {
-				const obj = {
-					files: [new DiscordJS.AttachmentBuilder(buffer, "image.png")],
-				};
-
-				if (data.message) {
-					obj.content = this.evalMessage(data.message, cache);
-				}
-
-				if (Array.isArray(target)) {
-					this.callListFunc(target, "send", [obj])
-						.then((msg) => {
-							this.storeValue(msg, storage2, varName3, cache);
-							this.callNextAction(cache);
-						})
-						.catch((err) => this.displayError(data, cache, err));
-				} else if (target?.send) {
-					target
-						.send(obj)
-						.then((msg) => {
-							this.storeValue(msg, storage2, varName3, cache);
-							this.callNextAction(cache);
-						})
-						.catch((err) => this.displayError(data, cache, err));
-				}
-			})
-			.catch((err) => this.displayError(data, cache, err));
-	},
-
-	//---------------------------------------------------------------------
-	// Action Bot Mod
-	//
-	// Upon initialization of the bot, this code is run. Using the bot's
-	// DBM namespace, one can add/modify existing functions if necessary.
-	// In order to reduce conflicts between mods, be sure to alias
-	// functions you wish to overwrite.
-	//---------------------------------------------------------------------
-
-	mod() {},
+  mod: function () {},
 };
