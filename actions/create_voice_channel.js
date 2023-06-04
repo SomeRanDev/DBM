@@ -135,7 +135,11 @@ module.exports = {
 		const reason = this.evalMessage(data.reason, cache);
 
 		/** @type {import('discord.js').GuildChannelCreateOptions} */
-		const channelData = { name, reason, type: this.getDBM().DiscordJS.ChannelType.GuildVoice };
+		const channelData = {
+			name,
+			reason,
+			type: this.getDBM().DiscordJS.ChannelType.GuildVoice
+		};
 		if (data.bitrate) {
 			channelData.bitrate = parseInt(this.evalMessage(data.bitrate, cache), 10) * 1000;
 		}

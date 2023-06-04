@@ -142,7 +142,9 @@ module.exports = {
 		if (data.mentionable !== "none") {
 			roleData.mentionable = data.mentionable === "true";
 		}
-		roleData.reason = this.evalMessage(data.reason, cache);
+		if (data.reason) {
+			roleData.reason = this.evalMessage(data.reason, cache);
+		}
 
 		const role = await this.getRoleFromData(data.storage, data.varName, cache);
 
