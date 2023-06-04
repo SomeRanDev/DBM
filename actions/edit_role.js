@@ -149,7 +149,7 @@ module.exports = {
 		if (Array.isArray(role)) {
 			this.callListFunc(role, "edit", [{ roleData }]).then(() => this.callNextAction(cache));
 		} else if (role?.edit) {
-			role.edit({ roleData })
+			role.edit(roleData)
 				.then(() => this.callNextAction(cache))
 				.catch((err) => this.displayError(data, cache, err));
 		} else {

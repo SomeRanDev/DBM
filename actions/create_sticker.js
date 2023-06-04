@@ -142,7 +142,7 @@ module.exports = {
 		stickerData.description = this.evalMessage(data.description, cache);
 
 		server.stickers
-			.create({ stickerData })
+			.create(stickerData)
 			.then((sticker) => {
 				const varName2 = this.evalMessage(data.varName2, cache);
 				const storage = parseInt(data.storage, 10);

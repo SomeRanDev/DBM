@@ -286,7 +286,7 @@ module.exports = {
 			this.callListFunc(channel, "edit", [{ channelData }]).then(() => this.callNextAction(cache));
 		} else if (channel?.edit) {
 			channel
-				.edit({ channelData })
+				.edit(channelData)
 				.then(() => this.callNextAction(cache))
 				.catch((err) => this.displayError(data, cache, err));
 		} else {

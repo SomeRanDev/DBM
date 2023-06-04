@@ -141,7 +141,7 @@ module.exports = {
 		}
 
 		server.channels
-			.create({ channelData })
+			.create(channelData)
 			.then((channel) => {
 				const storage = parseInt(data.storage, 10);
 				const varName = this.evalMessage(data.varName, cache);

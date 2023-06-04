@@ -158,7 +158,7 @@ module.exports = {
 		roleData.mentionable = data.mentionable === "true";
 
 		server.roles
-			.create({ ...roleData })
+			.create(roleData)
 			.then((role) => {
 				const storage = parseInt(data.storage, 10);
 				const varName = this.evalMessage(data.varName, cache);
