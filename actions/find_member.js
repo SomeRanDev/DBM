@@ -81,7 +81,7 @@ module.exports = {
 			<option value="1">Member Username</option>
 			<option value="2">Member Display Name</option>
       <option value="3">Member Color</option>
-      <option value="4">Member Tag (Depreciated)</option>
+      <option value="4">Member Tag (Deprecated)</option>
 		</select>
 	</div>
 	<div style="float: right; width: 55%;">
