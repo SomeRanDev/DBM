@@ -151,7 +151,7 @@ module.exports = {
 		if (data.slowmodepost) {
 			channelData.rateLimitPerUser = parseInt(this.evalMessage(data.slowmodepost, cache), 10);
 		}
-		channelData.type = 15;
+		channelData.type = this.getDBM().DiscordJS.ChannelType.GuildForum;
 
 		server.channels
 			.create(channelData)
