@@ -35,7 +35,7 @@ module.exports = {
 	// This will make it so the patch version (0.0.X) is not checked.
 	//---------------------------------------------------------------------
 
-	meta: { version: "2.2.0", preciseCheck: true, author: null, authorUrl: null, downloadUrl: null },
+	meta: { version: "2.1.7", preciseCheck: true, author: null, authorUrl: null, downloadUrl: null },
 
 	//---------------------------------------------------------------------
 	// Action Fields
@@ -147,30 +147,28 @@ module.exports = {
 
 		name = names[0];
 
-		const { ApplicationCommandPermissionType } = this.getDBM().DiscordJS;
-
 		let memberOrRole = null;
-		let resolvedType;
-		if (data.fromTarget._index === 0) {
-			memberOrRole = await this.getMemberFromData(data.fromTarget.member, data.fromTarget.memberVarName, cache);
-			resolvedType = ApplicationCommandPermissionType.User;
-		} else {
-			memberOrRole = await this.getRoleFromData(data.fromTarget.role, data.fromTarget.roleVarName, cache);
-			resolvedType = ApplicationCommandPermissionType.Role;
-		}
+		let resolvedType = "";
+    if(data.fromTarget._index === 0) {
+      memberOrRole = await this.getMemberFromData(data.fromTarget.member, data.fromTarget.memberVarName, cache);
+      resolvedType = "USER";
+    } else {
+      memberOrRole = await this.getRoleFromData(data.fromTarget.role, data.fromTarget.roleVarName, cache);
+      resolvedType = "ROLE";
+    }
 
-		if (!memberOrRole) {
-			this.callNextAction(cache);
+    if (!memberOrRole) {
+    	this.callNextAction(cache);
 			return;
-		}
+    }
 
-		resolvedId = memberOrRole?.id;
+    resolvedId = memberOrRole?.id;
 
-		const disable = data.disable === "disable";
+    const disable = data.disable === "disable";
 
-		let command = Bot.bot.application.commands.cache.find((com) => com.name === name);
+		let command = Bot.bot.application.commands.cache.find(com => com.name === name);
 		if (!command) {
-			command = cache.server.commands.cache.find((com) => com.name === name);
+			command = cache.server.commands.cache.find(com => com.name === name);
 		}
 
 		if (command) {
@@ -182,8 +180,7 @@ module.exports = {
 				},
 			];
 
-			const promise = command.permissions
-				.add({ permissions })
+			const promise = command.permissions.add({ permissions })
 				.then(() => this.callNextAction(cache))
 				.catch((err) => this.displayError(data, cache, err));
 		} else {

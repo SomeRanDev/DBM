@@ -1,23 +1,11 @@
 {
-  "name": "dbm",
-  "version": "2.2.0",
-  "description": "for dbm development",
+  "name": "discord-bot-maker-bot",
+  "author": "Robert Borghese",
   "main": "bot.js",
-  "scripts": {
-    "prettier:check": "npx prettier --check **/*.js",
-    "prettier:fix": "npx prettier --write **/*.js"
-  },
+  "version": "2.1.7",
   "dependencies": {
-    "@discordjs/opus": "^0.6.0",
-    "@discordjs/voice": "^0.7.5",
-    "discord.js": "^14.11.0",
-    "ffmpeg-static": "^4.4.0",
-    "tweetnacl": "^1.0.3",
-    "youtube-dl-exec": "^1.2.12",
-    "ytdl-core": "^4.9.1"
-  },
-  "devDependencies": {
-    "prettier": "^2.4.1"
-  },
-  "is-music-bot": true
+    "discord.js": "^13.14.0",
+    "fstorm": "latest",
+    "jimp": "latest"
+  }
 }
