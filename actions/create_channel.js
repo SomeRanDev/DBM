@@ -124,7 +124,10 @@ module.exports = {
 	action(cache) {
 		const data = cache.actions[cache.index];
 		const server = cache.server;
-		if (!server?.channels?.create) return this.callNextAction(cache);
+		if (!server?.channels?.create) {
+			this.callNextAction(cache);
+			return;
+		}
 
 		const channelData = {
 			reason: this.evalMessage(data.reason, cache),

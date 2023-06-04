@@ -121,7 +121,10 @@ module.exports = {
 		const { server } = cache;
 		const source = await this.getChannelFromData(data.channel, data.varName, cache);
 
-		if (!source?.messages) return this.callNextAction(cache);
+		if (!source?.messages) {
+			this.callNextAction(cache);
+			return;
+		}
 
 		const count = Math.min(parseInt(this.evalMessage(data.count, cache), 10), 100);
 		const options = {

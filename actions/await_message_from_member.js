@@ -124,7 +124,10 @@ module.exports = {
 		const channel = await this.getChannelFromData(data.channel, data.channelVarName, cache);
 		const member = await this.getMemberFromData(data.member, data.memberVarName, cache);
 
-		if (!member || !channel?.createMessageCollector) return this.callNextAction(cache);
+		if (!member || !channel?.createMessageCollector) {
+			this.callNextAction(cache);
+			return;
+		}
 
 		const maxProcessed = Math.min(parseInt(this.evalMessage(data.count, cache), 10), 200);
 		const time = parseInt(this.evalMessage(data.time, cache) || "5", 10) * 1000;

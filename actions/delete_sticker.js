@@ -129,7 +129,11 @@ module.exports = {
 		} else {
 			sticker = this.getVariable(type, varName, cache);
 		}
-		if (!sticker) return this.callNextAction(cache);
+		if (!sticker) {
+			this.callNextAction(cache);
+			return;
+		}
+
 		if (sticker?.delete) {
 			sticker
 				.delete(reason)

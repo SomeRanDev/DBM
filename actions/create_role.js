@@ -138,7 +138,10 @@ module.exports = {
 	action(cache) {
 		const data = cache.actions[cache.index];
 		const server = cache.server;
-		if (!server) return this.callNextAction(cache);
+		if (!server) {
+			this.callNextAction(cache);
+			return;
+		}
 
 		/** @type {import('discord.js').CreateRoleOptions} */
 		const roleData = {};

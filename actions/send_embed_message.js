@@ -112,7 +112,8 @@ module.exports = {
 		const varName = this.evalMessage(data.varName, cache);
 		const embed = this.getVariable(storage, varName, cache);
 		if (!embed) {
-			return this.callNextAction(cache);
+			this.callNextAction(cache);
+			return;
 		}
 
 		const target = await this.getSendTargetFromData(data.channel, data.varName2, cache);

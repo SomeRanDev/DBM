@@ -117,12 +117,19 @@ module.exports = {
 		const storage = parseInt(data.storage, 10);
 		const varName = this.evalMessage(data.varName, cache);
 		const image = this.getVariable(storage, varName, cache);
-		if (!image || !image.composite) return this.callNextAction(cache);
+		if (!image || !image.composite) {
+			this.callNextAction(cache);
+			return;
+		}
 
 		const storage2 = parseInt(data.storage2, 10);
 		const varName2 = this.evalMessage(data.varName2, cache);
 		const image2 = this.getVariable(storage2, varName2, cache);
-		if (!image2) return this.callNextAction(cache);
+		if (!image2) {
+			this.callNextAction(cache);
+			return;
+		}
+
 
 		const x = parseInt(this.evalMessage(data.x, cache), 10);
 		const y = parseInt(this.evalMessage(data.y, cache), 10);
