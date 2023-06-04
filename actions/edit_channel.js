@@ -283,7 +283,7 @@ module.exports = {
 		const channel = await this.getAnyChannel(channelStorage, channelVarName, cache);
 
 		if (Array.isArray(channel)) {
-			this.callListFunc(channel, "edit", [{ channelData }]).then(() => this.callNextAction(cache));
+			this.callListFunc(channel, "edit", [channelData]).then(() => this.callNextAction(cache));
 		} else if (channel?.edit) {
 			channel
 				.edit(channelData)
