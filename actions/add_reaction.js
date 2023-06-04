@@ -105,7 +105,7 @@ module.exports = {
 				document.getElementById("varNameContainer3").style.display = "none";
 				document.getElementById("varNameContainer2").style.display = null;
 			} else if (value === 4) {
-				varNameInput.innerHTML = "Emoji  (right-click -> Insert Emoji)";
+				varNameInput.innerHTML = "Emoji (right-click -> Insert Emoji)";
 				document.getElementById("varNameContainer3").style.display = "none";
 				document.getElementById("varNameContainer2").style.display = null;
 			} else {
