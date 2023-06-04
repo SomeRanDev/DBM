@@ -79,8 +79,8 @@ module.exports = {
 			<option value="4">Greater Than</option>
 			<option value="5">Includes</option>
 			<option value="6">Matches Regex</option>
-      <option value="7">Greater Than or Equal To</option>
-      <option value="8">Less Than or Equal To</option>
+			<option value="7">Greater Than or Equal To</option>
+			<option value="8">Less Than or Equal To</option>
 		</select>
 	</div>
 </div>

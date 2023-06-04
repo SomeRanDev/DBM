@@ -66,9 +66,9 @@ module.exports = {
 		<optgroup id="commands" label="Commands"></optgroup>
 		<optgroup id="events" label="Events"></optgroup>
 	</select>
-  <br>
+	<br>
 	
-  <span class="dbminputlabel">Call Type</span><br>
+	<span class="dbminputlabel">Call Type</span><br>
 	<select id="type" class="round">
 		<option value="true" selected>Wait for Completion</option>
 		<option value="false">Run Simultaneously</option>

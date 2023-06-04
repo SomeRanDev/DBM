@@ -89,11 +89,11 @@ module.exports = {
 
 <span class="dbminputlabel">Activity Type</span>
 <select id="activityType" class="round">
-  <option value="PLAYING" selected>Playing</option>
-  <option value="STREAMING">Streaming</option>
-  <option value="LISTENING">Listening</option>
-  <option value="WATCHING">Watching</option>
-  <option value="COMPETING">Competing</option>
+	<option value="PLAYING" selected>Playing</option>
+	<option value="STREAMING">Streaming</option>
+	<option value="LISTENING">Listening</option>
+	<option value="WATCHING">Watching</option>
+	<option value="COMPETING">Competing</option>
 </select>
 `;
 	},

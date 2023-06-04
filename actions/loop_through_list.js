@@ -62,73 +62,73 @@ module.exports = {
 	html(isEvent, data) {
 		return `
 <tab-system>
-  <tab label="Iteration Options" icon="align right">
-    <div style="padding: 12px;">
-      <div style="display: flex; justify-content: space-between;">
-        <div style="width: calc(40% - 12px);">
-          <span class="dbminputlabel">Source List</span><br>
-          <select id="list" class="round" onchange="glob.onChange1(this)">
-            ${data.lists[isEvent ? 1 : 0]}
-          </select>
-        </div>
-        <div id="varNameContainer" style="width: calc(60% - 12px);">
-          <span class="dbminputlabel">Variable Name</span><br>
-          <input id="varName" class="round" type="text" list="variableList">
-        </div>
-      </div>
-    </div>
-  </tab>
+	<tab label="Iteration Options" icon="align right">
+		<div style="padding: 12px;">
+			<div style="display: flex; justify-content: space-between;">
+				<div style="width: calc(40% - 12px);">
+					<span class="dbminputlabel">Source List</span><br>
+					<select id="list" class="round" onchange="glob.onChange1(this)">
+						${data.lists[isEvent ? 1 : 0]}
+					</select>
+				</div>
+				<div id="varNameContainer" style="width: calc(60% - 12px);">
+					<span class="dbminputlabel">Variable Name</span><br>
+					<input id="varName" class="round" type="text" list="variableList">
+				</div>
+			</div>
+		</div>
+	</tab>
 
-  <tab label="Loop Options" icon="cogs">
-    <div style="padding: 12px;">
-      <div style="display: flex; justify-content: space-between;">
-        <div style="width: calc(50% - 12px);">
-          <span class="dbminputlabel">Temp Var. Name (stores <span id="tempName">member</span>)</span><br>
-          <input id="tempVarName" class="round" type="text" placeholder="Leave blank for none...">
-        </div>
+	<tab label="Loop Options" icon="cogs">
+		<div style="padding: 12px;">
+			<div style="display: flex; justify-content: space-between;">
+				<div style="width: calc(50% - 12px);">
+					<span class="dbminputlabel">Temp Var. Name (stores <span id="tempName">member</span>)</span><br>
+					<input id="tempVarName" class="round" type="text" placeholder="Leave blank for none...">
+				</div>
 
-        <div style="width: calc(50% - 12px);">
-          <span class="dbminputlabel">Call Type</span><br>
-          <select id="type" class="round">
-            <option value="true" selected>Wait for Completion</option>
-            <option value="false">Process Simultaneously</option>
-          </select>
-        </div>
-      </div>
-    </div>
-  </tab>
+				<div style="width: calc(50% - 12px);">
+					<span class="dbminputlabel">Call Type</span><br>
+					<select id="type" class="round">
+						<option value="true" selected>Wait for Completion</option>
+						<option value="false">Process Simultaneously</option>
+					</select>
+				</div>
+			</div>
+		</div>
+	</tab>
 </tab-system>
 
 <br><br><br><br><br><br><br><br>
 
 <action-list-input id="actions" height="calc(100vh - 360px)">
-  <script class="setupTempVars">
-    const elem = document.getElementById("tempVarName");
-    if(elem?.value) {
-      const typeElem = document.getElementById("list");
-      let result = "Unknown Type";
-      switch (typeElem.value) {
-        case "0":
-          result = "Member";
-          break;
-        case "1":
-          result = "Channel";
-          break;
-        case "4":
-          result = "Server";
-          break;
-        case "2":
-        case "5":
-        case "6":
-          result = "Role";
-          break;
-        case "3":
-          result = "Emoji";
-          break;
-      }
-      tempVars.push([elem.value, result]);
-    }
-  </script>
+	<script class="setupTempVars">
+		const elem = document.getElementById("tempVarName");
+		if(elem?.value) {
+			const typeElem = document.getElementById("list");
+			let result = "Unknown Type";
+			switch (typeElem.value) {
+				case "0":
+					result = "Member";
+					break;
+				case "1":
+					result = "Channel";
+					break;
+				case "4":
+					result = "Server";
+					break;
+				case "2":
+				case "5":
+				case "6":
+					result = "Role";
+					break;
+				case "3":
+					result = "Emoji";
+					break;
+			}
+			tempVars.push([elem.value, result]);
+		}
+	</script>
 </action-list-input>`;
 	},
 

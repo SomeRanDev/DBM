@@ -79,8 +79,8 @@ module.exports = {
 		<select id="info" class="round">
 			<option value="0" selected>Role ID</option>
 			<option value="1">Role Name</option>
-      <option value="2">Role Color</option>
-      <option value="3">Role Position</option>
+			<option value="2">Role Color</option>
+			<option value="3">Role Position</option>
 		</select>
 	</div>
 	<div style="float: right; width: 55%;">

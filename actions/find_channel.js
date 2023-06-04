@@ -79,9 +79,9 @@ module.exports = {
 		<select id="info" class="round">
 			<option value="0" selected>Channel ID</option>
 			<option value="1">Channel Name</option>
-      <option value="2">Channel Topic</option>
-      <option value="3">Channel Position</option>
-      <option value="4">Channel Category ID</option>
+			<option value="2">Channel Topic</option>
+			<option value="3">Channel Position</option>
+			<option value="4">Channel Category ID</option>
 		</select>
 	</div>
 	<div style="float: right; width: 55%;">

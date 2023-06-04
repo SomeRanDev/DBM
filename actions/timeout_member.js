@@ -65,13 +65,13 @@ module.exports = {
 <br><br><br>
 
 <div style="padding-top: 8px;">
-  <span class="dbminputlabel">Time</span><br>
-  <input id="time" class="round" placeholder="Insert the time in seconds here..." type="text">
+	<span class="dbminputlabel">Time</span><br>
+	<input id="time" class="round" placeholder="Insert the time in seconds here..." type="text">
 </div>
 
 <div style="padding-top: 16px;">
-  <span class="dbminputlabel">Reason</span><br>
-  <textarea id="reason" class="dbm_monospace" rows="5" placeholder="Insert reason here..." style="white-space: nowrap; resize: none;"></textarea>
+	<span class="dbminputlabel">Reason</span><br>
+	<textarea id="reason" class="dbm_monospace" rows="5" placeholder="Insert reason here..." style="white-space: nowrap; resize: none;"></textarea>
 </div>`;
 	},
 

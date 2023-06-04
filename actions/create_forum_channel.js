@@ -73,41 +73,41 @@ module.exports = {
 	html() {
 		return `
 <div style="height: 350px; overflow-y: scroll; overflow-x: hidden;">
-  <div style="float: left; width: 100%; padding-top: 8px;">
-    <span class="dbminputlabel">Name</span>
-    <input id="channelName" class="round" type="text">
-  </div>
+	<div style="float: left; width: 100%; padding-top: 8px;">
+		<span class="dbminputlabel">Name</span>
+		<input id="channelName" class="round" type="text">
+	</div>
 
-  <div style="float: left; width: 100%; padding-top: 16px;">
-    <span class="dbminputlabel">Guidelines</span>
-    <textarea id="topic" rows="3" style="font-family: monospace; white-space: nowrap;"></textarea>
-  </div>
-  
-  <div style="float: left; width: 100%;">
-    <div style="float: left; width: 60%; padding-top: 16px;">
-      <span class="dbminputlabel">Category ID</span>
-      <input id= "categoryID" class="round" type="text" placeholder="Leave blank for no category">
-    </div>
+	<div style="float: left; width: 100%; padding-top: 16px;">
+		<span class="dbminputlabel">Guidelines</span>
+		<textarea id="topic" rows="3" style="font-family: monospace; white-space: nowrap;"></textarea>
+	</div>
+	
+	<div style="float: left; width: 100%;">
+		<div style="float: left; width: 60%; padding-top: 16px;">
+			<span class="dbminputlabel">Category ID</span>
+			<input id= "categoryID" class="round" type="text" placeholder="Leave blank for no category">
+		</div>
 
-    <div style="float: right; width: 35%; padding-top: 16px;">
-      <span class="dbminputlabel">Position</span>
-      <input id="position" class="round" type="text" placeholder="Leave blank for default">
-    </div>
-  </div>
+		<div style="float: right; width: 35%; padding-top: 16px;">
+			<span class="dbminputlabel">Position</span>
+			<input id="position" class="round" type="text" placeholder="Leave blank for default">
+		</div>
+	</div>
 
-  <div style="float: left; width: 100%; padding-top: 16px;">
-    <span class="dbminputlabel">Slowmode</span><br>
-    <input id="slowmodepost" class="round" type="text" placeholder="Leave blank to disable">
-  </div>
+	<div style="float: left; width: 100%; padding-top: 16px;">
+		<span class="dbminputlabel">Slowmode</span><br>
+		<input id="slowmodepost" class="round" type="text" placeholder="Leave blank to disable">
+	</div>
 
-  <div style="float: left; width: 100%; padding-top: 16px;">
-    <span class="dbminputlabel">Reason</span>
-    <input id="reason" placeholder="Optional" class="round" type="text">
-  </div>
+	<div style="float: left; width: 100%; padding-top: 16px;">
+		<span class="dbminputlabel">Reason</span>
+		<input id="reason" placeholder="Optional" class="round" type="text">
+	</div>
 
-  <div style="float: left; width: 100%; padding-top: 16px;">
-    <store-in-variable allowNone dropdownLabel="Store In" selectId="storage" variableContainerId="varNameContainer" variableInputId="varName"></store-in-variable>
-  </div>
+	<div style="float: left; width: 100%; padding-top: 16px;">
+		<store-in-variable allowNone dropdownLabel="Store In" selectId="storage" variableContainerId="varNameContainer" variableInputId="varName"></store-in-variable>
+	</div>
 </div>
 `;
 	},

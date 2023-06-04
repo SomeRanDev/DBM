@@ -84,14 +84,14 @@ module.exports = {
 <br><br><br><br>
 
 <div style="padding-top: 8px;">
-  <div style="width: calc(50% - 12px); float: left;">
-  	<span class="dbminputlabel">Await Time (in Seconds)</span><br>
-  	<input id="time" class="round" type="text" style="width: 100%;" value="5"><br>
-  </div>
-  <div style="width: calc(50% - 12px); float: right;">
-    <span class="dbminputlabel">Number of Messages to Check</span><br>
-    <input id="count" class="round" type="text" style="width: 100%;" value="20"><br>
-  </div>
+	<div style="width: calc(50% - 12px); float: left;">
+		<span class="dbminputlabel">Await Time (in Seconds)</span><br>
+		<input id="time" class="round" type="text" style="width: 100%;" value="5"><br>
+	</div>
+	<div style="width: calc(50% - 12px); float: right;">
+		<span class="dbminputlabel">Number of Messages to Check</span><br>
+		<input id="count" class="round" type="text" style="width: 100%;" value="20"><br>
+	</div>
 </div>
 
 <br><br><br><br>

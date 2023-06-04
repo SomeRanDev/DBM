@@ -71,67 +71,67 @@ module.exports = {
 <br><br><br><br>
 
 <div style="float: left; width: calc(50% - 12px);">
-  <span class="dbminputlabel">Components to Edit</span><br>
-  <select id="type" class="round" onchange="glob.onButtonSelectTypeChange(this)">
-    <option value="allSelects">All Select Menus</option>
-    <option value="sourceSelect" selected>Source Select Menu</option>
-    <option value="findSelect">Specific Select Menu</option>
-  </select>
+	<span class="dbminputlabel">Components to Edit</span><br>
+	<select id="type" class="round" onchange="glob.onButtonSelectTypeChange(this)">
+		<option value="allSelects">All Select Menus</option>
+		<option value="sourceSelect" selected>Source Select Menu</option>
+		<option value="findSelect">Specific Select Menu</option>
+	</select>
 </div>
 
 <div style="float: right; width: calc(50% - 12px);">
-  <div id="nameContainer">
-    <span class="dbminputlabel">Select Menu Label/ID</span><br>
-    <input id="searchValue" class="round" type="text">
-  </div>
+	<div id="nameContainer">
+		<span class="dbminputlabel">Select Menu Label/ID</span><br>
+		<input id="searchValue" class="round" type="text">
+	</div>
 </div>
 
 <br><br><br><br>
 
 <tab-system exclusiveTabData spreadOut id="optionChange">
 
-  <tab label="Add Option" icon="plus" fields='["label", "description", "value", "emoji"]'>
-    <div style="padding: 8px;">
-      <div style="float: left; width: calc(50% - 12px);">
-        <span class="dbminputlabel">Name</span>
-        <input id="label" class="round" type="text">
+	<tab label="Add Option" icon="plus" fields='["label", "description", "value", "emoji"]'>
+		<div style="padding: 8px;">
+			<div style="float: left; width: calc(50% - 12px);">
+				<span class="dbminputlabel">Name</span>
+				<input id="label" class="round" type="text">
 
-        <br>
+				<br>
 
-        <span class="dbminputlabel">Value</span>
-        <input id="value" placeholder="Passed to the temp variable..." class="round" type="text">
-      </div>
-      <div style="float: right; width: calc(50% - 12px);">
-        <span class="dbminputlabel">Description</span>
-        <input id="description" class="round" type="text">
+				<span class="dbminputlabel">Value</span>
+				<input id="value" placeholder="Passed to the temp variable..." class="round" type="text">
+			</div>
+			<div style="float: right; width: calc(50% - 12px);">
+				<span class="dbminputlabel">Description</span>
+				<input id="description" class="round" type="text">
 
-        <br>
+				<br>
 
-        <span class="dbminputlabel">Emoji</span>
-        <input id="emoji" placeholder="Leave blank for none..." class="round" type="text">
-      </div>
+				<span class="dbminputlabel">Emoji</span>
+				<input id="emoji" placeholder="Leave blank for none..." class="round" type="text">
+			</div>
 
-      <br><br><br><br><br><br>
-    </div>
-  </tab>
+			<br><br><br><br><br><br>
+		</div>
+	</tab>
 
-  <tab label="Remove Option" icon="x icon" fields='["type", "value"]'>
-    <div style="padding: 8px; margin-bottom: 10px;">
-      <div style="float: left; width: calc(50% - 12px);">
-        <span class="dbminputlabel">Remove Type</span><br>
-        <select id="type" class="round">
-          <option value="value" selected>Remove By Value</option>
-          <option value="label">Remove By Label</option>
-        </select>
-      </div>
-      <div id="removeValueContainer" style="float: right; width: calc(50% - 12px);">
-        <span class="dbminputlabel">Option Value to Remove</span>
-        <input id="value" class="round" type="text">
-      </div>
+	<tab label="Remove Option" icon="x icon" fields='["type", "value"]'>
+		<div style="padding: 8px; margin-bottom: 10px;">
+			<div style="float: left; width: calc(50% - 12px);">
+				<span class="dbminputlabel">Remove Type</span><br>
+				<select id="type" class="round">
+					<option value="value" selected>Remove By Value</option>
+					<option value="label">Remove By Label</option>
+				</select>
+			</div>
+			<div id="removeValueContainer" style="float: right; width: calc(50% - 12px);">
+				<span class="dbminputlabel">Option Value to Remove</span>
+				<input id="value" class="round" type="text">
+			</div>
 
-      <br><br>
-    </div>
-  </tab>
+			<br><br>
+		</div>
+	</tab>
 
 </tab-system>
 `;

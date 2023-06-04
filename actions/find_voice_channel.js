@@ -88,8 +88,8 @@ module.exports = {
 			<option value="1">Voice Channel Name</option>
 			<option value="2">Voice Channel Position</option>
 			<option value="3">Voice Channel User Limit</option>
-      <option value="4">Voice Channel Bitrate (kbps)</option>
-      <option value="5">Voice Channel Category ID</option>
+			<option value="4">Voice Channel Bitrate (kbps)</option>
+			<option value="5">Voice Channel Category ID</option>
 		</select>
 	</div>
 	<div style="float: right; width: 55%;">

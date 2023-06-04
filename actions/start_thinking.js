@@ -61,7 +61,7 @@ module.exports = {
 	html(isEvent, data) {
 		return `
 <div style="padding: 8px;">
-  <dbm-checkbox id="ephemeral" label="Inform User Privately (Ephemeral)"></dbm-checkbox>
+	<dbm-checkbox id="ephemeral" label="Inform User Privately (Ephemeral)"></dbm-checkbox>
 </div>`;
 	},
 

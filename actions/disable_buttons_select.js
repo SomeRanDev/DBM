@@ -65,31 +65,31 @@ module.exports = {
 <br><br><br><br>
 
 <div style="float: left; width: calc(50% - 12px);">
-  <span class="dbminputlabel">Components to Disable</span><br>
-  <select id="type" class="round" onchange="glob.onButtonSelectTypeChange(this)">
-    <option value="all" selected>All Buttons and Select Menus</option>
-    <option value="allButtons">All Buttons</option>
-    <option value="allSelects">All Select Menus</option>
-    <option value="sourceButton">Source Button</option>
-    <option value="sourceSelect">Source Select Menu</option>
-    <option value="findButton">Specific Button</option>
-    <option value="findSelect">Specific Select Menu</option>
-  </select>
+	<span class="dbminputlabel">Components to Disable</span><br>
+	<select id="type" class="round" onchange="glob.onButtonSelectTypeChange(this)">
+		<option value="all" selected>All Buttons and Select Menus</option>
+		<option value="allButtons">All Buttons</option>
+		<option value="allSelects">All Select Menus</option>
+		<option value="sourceButton">Source Button</option>
+		<option value="sourceSelect">Source Select Menu</option>
+		<option value="findButton">Specific Button</option>
+		<option value="findSelect">Specific Select Menu</option>
+	</select>
 </div>
 
 <div style="float: right; width: calc(50% - 12px);">
-  <span class="dbminputlabel">Disable or Re-enable</span><br>
-  <select id="disable" class="round">
-    <option value="disable" selected>Disable</option>
-    <option value="reenable">Re-Enable</option>
-  </select>
+	<span class="dbminputlabel">Disable or Re-enable</span><br>
+	<select id="disable" class="round">
+		<option value="disable" selected>Disable</option>
+		<option value="reenable">Re-Enable</option>
+	</select>
 </div>
 
 <br><br><br><br>
 
 <div id="nameContainer" style="width: calc(50% - 12px)">
-  <span class="dbminputlabel">Component Label/ID</span><br>
-  <input id="searchValue" class="round" type="text">
+	<span class="dbminputlabel">Component Label/ID</span><br>
+	<input id="searchValue" class="round" type="text">
 </div>`;
 	},
 

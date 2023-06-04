@@ -82,7 +82,7 @@ module.exports = {
 
 <div style="float: left; width: calc(50% - 12px);">
 	<span class="dbminputlabel">Topic</span><br>
-  <input id="topic" class="round" type="text"><br>
+	<input id="topic" class="round" type="text"><br>
 </div>
 <div style="float: right; width: calc(50% - 12px);">
 	<span class="dbminputlabel">Position</span><br>
@@ -95,8 +95,8 @@ module.exports = {
 <br>
 
 <div>
-  <span class="dbminputlabel">Reason</span>
-  <input id="reason" placeholder="Optional" class="round" type="text">
+	<span class="dbminputlabel">Reason</span>
+	<input id="reason" placeholder="Optional" class="round" type="text">
 </div>
 <br>
 

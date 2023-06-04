@@ -83,7 +83,7 @@ module.exports = {
 		<option value="false" selected>No</option>
 	</select>
 
-  <br>
+	<br>
 
 	<span class="dbminputlabel">Mentionable</span><br>
 	<select id="mentionable" class="round" style="width: 90%;">
@@ -95,7 +95,7 @@ module.exports = {
 	<span class="dbminputlabel">Color</span><br>
 	<input id="color" class="round" type="text" placeholder="Leave blank for default!">
 
-  <br>
+	<br>
 
 	<span class="dbminputlabel">Position</span><br>
 	<input id="position" class="round" type="text" placeholder="Leave blank for default!"><br>
@@ -108,8 +108,8 @@ module.exports = {
 <br>
 
 <div>
-  <span class="dbminputlabel">Reason</span>
-  <input id="reason" placeholder="Optional" class="round" type="text">
+	<span class="dbminputlabel">Reason</span>
+	<input id="reason" placeholder="Optional" class="round" type="text">
 </div>
 
 <br>

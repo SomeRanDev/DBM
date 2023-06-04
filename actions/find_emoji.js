@@ -89,8 +89,8 @@ module.exports = {
 		<select id="info" class="round">
 			<option value="0" selected>Emoji ID</option>
 			<option value="1">Emoji Name</option>
-      <option value="2">Sticker ID</option>
-      <option value="3">Sticker Name</option>
+			<option value="2">Sticker ID</option>
+			<option value="3">Sticker Name</option>
 		</select>
 	</div>
 	<div style="float: right; width: calc(55% - 12px);">

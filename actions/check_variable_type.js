@@ -77,8 +77,8 @@ module.exports = {
 			<option value="7">Role</option>
 			<option value="8">Server</option>
 			<option value="9">Emoji</option>
-      <option value="10">Sticker</option>
-      <option value="11">Thread Channel</option>
+			<option value="10">Sticker</option>
+			<option value="11">Thread Channel</option>
 		</select>
 </div>
 

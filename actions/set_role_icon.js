@@ -64,10 +64,10 @@ module.exports = {
 	html(isEvent, data) {
 		return `
 <div>
-  <p>
-    <u>Note:</u><br>
-    Role icons only work in servers with a boost of level 2 or higher. If you are having issues, please ensure you are able to set role icons yourself before attempting with the bot.
-  </p>
+	<p>
+		<u>Note:</u><br>
+		Role icons only work in servers with a boost of level 2 or higher. If you are having issues, please ensure you are able to set role icons yourself before attempting with the bot.
+	</p>
 </div>
 <br>
 

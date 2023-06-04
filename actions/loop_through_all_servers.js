@@ -62,8 +62,8 @@ module.exports = {
 		return `
 <span class="dbminputlabel">Call Type</span><br>
 <select id="type" class="round">
-  <option value="true" selected>Wait for Completion</option>
-  <option value="false">Process Simultaneously</option>
+	<option value="true" selected>Wait for Completion</option>
+	<option value="false">Process Simultaneously</option>
 </select>
 
 <br><br>

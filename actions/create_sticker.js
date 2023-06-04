@@ -83,8 +83,8 @@ module.exports = {
 <br><br><br>
 
 <div>
-  <span class="dbminputlabel">Sticker Tag</span><br>
-  <input id="tag" class="round" type="text" placeholder="A standard emoji name. This is required.">
+	<span class="dbminputlabel">Sticker Tag</span><br>
+	<input id="tag" class="round" type="text" placeholder="A standard emoji name. This is required.">
 </div>
 
 <br>

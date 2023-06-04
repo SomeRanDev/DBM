@@ -86,7 +86,7 @@ module.exports = {
 		<select id="changeType" class="round">
 			<option value="0" selected>Set Value</option>
 			<option value="1">Add Value</option>
-      <option value="2">Subtract Value</option>
+			<option value="2">Subtract Value</option>
 		</select>
 	</div>
 </div>

@@ -70,8 +70,8 @@ module.exports = {
 </div><br>
 
 <div>
-  <span class="dbminputlabel">Number of days of messages to delete</span>
-  <input id="days" placeholder="Optional" class="round" type="text">
+	<span class="dbminputlabel">Number of days of messages to delete</span>
+	<input id="days" placeholder="Optional" class="round" type="text">
 </div>`;
 	},
 

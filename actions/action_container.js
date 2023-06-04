@@ -61,8 +61,8 @@ module.exports = {
 	html(isEvent, data) {
 		return `
 <div>
-  <span class="dbminputlabel">Comment</span><br>
-  <input id="comment" class="round" type="text">
+	<span class="dbminputlabel">Comment</span><br>
+	<input id="comment" class="round" type="text">
 </div>
 
 <br><br>

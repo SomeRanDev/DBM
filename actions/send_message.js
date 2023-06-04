@@ -113,370 +113,370 @@ module.exports = {
 <tab-system style="margin-top: 20px;">
 
 
-  <tab label="Message" icon="align left">
-    <div style="padding: 8px;">
-      <textarea id="message" class="dbm_monospace" rows="10" placeholder="Insert message here..." style="height: calc(100vh - 309px); white-space: nowrap; resize: none;"></textarea>
-    </div>
-  </tab>
+	<tab label="Message" icon="align left">
+		<div style="padding: 8px;">
+			<textarea id="message" class="dbm_monospace" rows="10" placeholder="Insert message here..." style="height: calc(100vh - 309px); white-space: nowrap; resize: none;"></textarea>
+		</div>
+	</tab>
 
 
-  <tab label="Embeds" icon="book image">
-    <div style="padding: 8px;">
+	<tab label="Embeds" icon="book image">
+		<div style="padding: 8px;">
 
-      <dialog-list id="embeds" fields='["title", "url", "color", "timestamp", "imageUrl", "thumbUrl", "description", "fields", "author", "authorUrl", "authorIcon", "footerText", "footerIconUrl"]' dialogTitle="Embed Info" dialogWidth="540" dialogHeight="460" listLabel="Embeds" listStyle="height: calc(100vh - 350px);" itemName="Embed" itemCols="1" itemHeight="30px;" itemTextFunction="data.title + ' - ' + data.description" itemStyle="text-align: left; line-height: 30px;">
-        <div style="padding: 16px 16px 0px 16px;">
+			<dialog-list id="embeds" fields='["title", "url", "color", "timestamp", "imageUrl", "thumbUrl", "description", "fields", "author", "authorUrl", "authorIcon", "footerText", "footerIconUrl"]' dialogTitle="Embed Info" dialogWidth="540" dialogHeight="460" listLabel="Embeds" listStyle="height: calc(100vh - 350px);" itemName="Embed" itemCols="1" itemHeight="30px;" itemTextFunction="data.title + ' - ' + data.description" itemStyle="text-align: left; line-height: 30px;">
+				<div style="padding: 16px 16px 0px 16px;">
 
-          <tab-system>
+					<tab-system>
 
-            <tab label="General" icon="certificate">
-              <div style="padding: 8px">
-                <div style="float: left; width: calc(50% - 12px);">
-                  <span class="dbminputlabel">Title</span><br>
-                  <input id="title" class="round" type="text">
+						<tab label="General" icon="certificate">
+							<div style="padding: 8px">
+								<div style="float: left; width: calc(50% - 12px);">
+									<span class="dbminputlabel">Title</span><br>
+									<input id="title" class="round" type="text">
 
-                  <br>
+									<br>
 
-                  <span class="dbminputlabel">Color</span><br>
-                  <input id="color" class="round" type="text" placeholder="Leave blank for default...">
-                </div>
+									<span class="dbminputlabel">Color</span><br>
+									<input id="color" class="round" type="text" placeholder="Leave blank for default...">
+								</div>
 
-                <div style="float: right; width: calc(50% - 12px);">
-                  <span class="dbminputlabel">URL</span><br>
-                  <input id="url" class="round" type="text" placeholder="Leave blank for none...">
+								<div style="float: right; width: calc(50% - 12px);">
+									<span class="dbminputlabel">URL</span><br>
+									<input id="url" class="round" type="text" placeholder="Leave blank for none...">
 
-                  <br>
+									<br>
 
-                  <span class="dbminputlabel">Use Timestamp</span><br>
-                  <select id="timestamp" class="round">
-                    <option value="true">Yes</option>
-                    <option value="false" selected>No</option>
-                  </select>
-                </div>
+									<span class="dbminputlabel">Use Timestamp</span><br>
+									<select id="timestamp" class="round">
+										<option value="true">Yes</option>
+										<option value="false" selected>No</option>
+									</select>
+								</div>
 
-                <br><br><br><br><br><br><br>
+								<br><br><br><br><br><br><br>
 
-                <hr class="subtlebar">
+								<hr class="subtlebar">
 
-                <br>
+								<br>
 
-                <span class="dbminputlabel">Image URL</span><br>
-                <input id="imageUrl" class="round" type="text" placeholder="Leave blank for none...">
+								<span class="dbminputlabel">Image URL</span><br>
+								<input id="imageUrl" class="round" type="text" placeholder="Leave blank for none...">
 
-                <br>
+								<br>
 
-                <span class="dbminputlabel">Thumbnail URL</span><br>
-                <input id="thumbUrl" class="round" type="text" placeholder="Leave blank for none...">
-              </div>
-            </tab>
+								<span class="dbminputlabel">Thumbnail URL</span><br>
+								<input id="thumbUrl" class="round" type="text" placeholder="Leave blank for none...">
+							</div>
+						</tab>
 
-            <tab label="Description" icon="file image">
-              <div style="padding: 8px">
-                <textarea id="description" class="dbm_monospace" rows="10" placeholder="Insert description here..." style="height: calc(100vh - 149px); white-space: nowrap; resize: none;"></textarea>
-              </div>
-            </tab>
+						<tab label="Description" icon="file image">
+							<div style="padding: 8px">
+								<textarea id="description" class="dbm_monospace" rows="10" placeholder="Insert description here..." style="height: calc(100vh - 149px); white-space: nowrap; resize: none;"></textarea>
+							</div>
+						</tab>
 
-            <tab label="Fields" icon="list">
-              <div style="padding: 8px">
-                <dialog-list id="fields" fields='["name", "value", "inline"]' dialogTitle="Field Info" dialogWidth="540" dialogHeight="300" listLabel="Fields" listStyle="height: calc(100vh - 190px);" itemName="Field" itemCols="1" itemHeight="30px;" itemTextFunction="data.name + '<br>' + data.value" itemStyle="text-align: left; line-height: 30px;">
-                  <div style="padding: 16px;">
-                    <div style="float: left; width: calc(50% - 12px);">
-                      <span class="dbminputlabel">Field Name</span><br>
-                      <input id="name" class="round" type="text">
-                    </div>
+						<tab label="Fields" icon="list">
+							<div style="padding: 8px">
+								<dialog-list id="fields" fields='["name", "value", "inline"]' dialogTitle="Field Info" dialogWidth="540" dialogHeight="300" listLabel="Fields" listStyle="height: calc(100vh - 190px);" itemName="Field" itemCols="1" itemHeight="30px;" itemTextFunction="data.name + '<br>' + data.value" itemStyle="text-align: left; line-height: 30px;">
+									<div style="padding: 16px;">
+										<div style="float: left; width: calc(50% - 12px);">
+											<span class="dbminputlabel">Field Name</span><br>
+											<input id="name" class="round" type="text">
+										</div>
 
-                    <div style="float: right; width: calc(50% - 12px);">
-                      <span class="dbminputlabel">Inline?</span><br>
-                      <select id="inline" class="round">
-                        <option value="true">Yes</option>
-                        <option value="false" selected>No</option>
-                      </select>
-                    </div>
+										<div style="float: right; width: calc(50% - 12px);">
+											<span class="dbminputlabel">Inline?</span><br>
+											<select id="inline" class="round">
+												<option value="true">Yes</option>
+												<option value="false" selected>No</option>
+											</select>
+										</div>
 
-                    <br><br><br><br>
+										<br><br><br><br>
 
-                    <span class="dbminputlabel">Field Value</span><br>
-                    <textarea id="value" class="dbm_monospace" rows="10" placeholder="Insert field text here..." style="height: calc(100vh - 190px); white-space: nowrap; resize: none;"></textarea>
+										<span class="dbminputlabel">Field Value</span><br>
+										<textarea id="value" class="dbm_monospace" rows="10" placeholder="Insert field text here..." style="height: calc(100vh - 190px); white-space: nowrap; resize: none;"></textarea>
 
-                  </div>
-                </dialog-list>
-              </div>
-            </tab>
+									</div>
+								</dialog-list>
+							</div>
+						</tab>
 
-            <tab label="Author" icon="user circle">
-              <div style="padding: 8px">
-                <span class="dbminputlabel">Author Text</span><br>
-                <input id="author" class="round" type="text" placeholder="Leave blank to disallow...">
+						<tab label="Author" icon="user circle">
+							<div style="padding: 8px">
+								<span class="dbminputlabel">Author Text</span><br>
+								<input id="author" class="round" type="text" placeholder="Leave blank to disallow...">
 
-                <br>
+								<br>
 
-                <span class="dbminputlabel">Author URL</span><br>
-                <input id="authorUrl" class="round" type="text" placeholder="Leave blank for none...">
+								<span class="dbminputlabel">Author URL</span><br>
+								<input id="authorUrl" class="round" type="text" placeholder="Leave blank for none...">
 
-                <br>
+								<br>
 
-                <span class="dbminputlabel">Author Icon URL</span><br>
-                <input id="authorIcon" class="round" type="text" placeholder="Leave blank for none...">
-              </div>
-            </tab>
+								<span class="dbminputlabel">Author Icon URL</span><br>
+								<input id="authorIcon" class="round" type="text" placeholder="Leave blank for none...">
+							</div>
+						</tab>
 
-            <tab label="Footer" icon="map outline">
-              <div style="padding: 8px;">
-                <span class="dbminputlabel">Footer Icon URL</span><br>
-                <input id="footerIconUrl" class="round" type="text" placeholder="Leave blank for none...">
+						<tab label="Footer" icon="map outline">
+							<div style="padding: 8px;">
+								<span class="dbminputlabel">Footer Icon URL</span><br>
+								<input id="footerIconUrl" class="round" type="text" placeholder="Leave blank for none...">
 
-                <br>
+								<br>
 
-                <span class="dbminputlabel">Footer Text</span><br>
-                <textarea id="footerText" class="dbm_monospace" rows="10" placeholder="Leave blank to disallow..." style="height: calc(100vh - 234px); white-space: nowrap; resize: none;"></textarea>
-              </div>
-            </tab>
+								<span class="dbminputlabel">Footer Text</span><br>
+								<textarea id="footerText" class="dbm_monospace" rows="10" placeholder="Leave blank to disallow..." style="height: calc(100vh - 234px); white-space: nowrap; resize: none;"></textarea>
+							</div>
+						</tab>
 
-          </tab-system>
+					</tab-system>
 
-        </div>
-      </dialog-list>
+				</div>
+			</dialog-list>
 
-    </div>
-  </tab>
+		</div>
+	</tab>
 
 
-  <tab label="Buttons" icon="clone">
-    <div style="padding: 8px;">
+	<tab label="Buttons" icon="clone">
+		<div style="padding: 8px;">
 
-      <dialog-list id="buttons" fields='["name", "type", "id", "row", "url", "emoji", "disabled", "mode", "time", "actions"]' dialogTitle="Button Info" dialogWidth="600" dialogHeight="700" listLabel="Buttons" listStyle="height: calc(100vh - 350px);" itemName="Button" itemCols="4" itemHeight="40px;" itemTextFunction="data.name" itemStyle="text-align: center; line-height: 40px;">
-        <div style="padding: 16px;">
-          <div style="width: calc(50% - 12px); float: left;">
-            <span class="dbminputlabel">Name</span>
-            <input id="name" class="round" type="text">
+			<dialog-list id="buttons" fields='["name", "type", "id", "row", "url", "emoji", "disabled", "mode", "time", "actions"]' dialogTitle="Button Info" dialogWidth="600" dialogHeight="700" listLabel="Buttons" listStyle="height: calc(100vh - 350px);" itemName="Button" itemCols="4" itemHeight="40px;" itemTextFunction="data.name" itemStyle="text-align: center; line-height: 40px;">
+				<div style="padding: 16px;">
+					<div style="width: calc(50% - 12px); float: left;">
+						<span class="dbminputlabel">Name</span>
+						<input id="name" class="round" type="text">
 
-            <br>
+						<br>
 
-            <span class="dbminputlabel">Type</span><br>
-            <select id="type" class="round">
-              <option value="PRIMARY" selected>Primary (Blurple)</option>
-              <option value="SECONDARY">Secondary (Grey)</option>
-              <option value="SUCCESS">Success (Green)</option>
-              <option value="DANGER">Danger (Red)</option>
-              <option value="LINK">Link (Grey)</option>
-            </select>
+						<span class="dbminputlabel">Type</span><br>
+						<select id="type" class="round">
+							<option value="PRIMARY" selected>Primary (Blurple)</option>
+							<option value="SECONDARY">Secondary (Grey)</option>
+							<option value="SUCCESS">Success (Green)</option>
+							<option value="DANGER">Danger (Red)</option>
+							<option value="LINK">Link (Grey)</option>
+						</select>
 
-            <br>
+						<br>
 
-            <span class="dbminputlabel">Link URL</span>
-            <input id="url" placeholder="Leave blank for none..." class="round" type="text">
+						<span class="dbminputlabel">Link URL</span>
+						<input id="url" placeholder="Leave blank for none..." class="round" type="text">
 
-            <br>
+						<br>
 
-            <span class="dbminputlabel">
-              Action Response Mode
-              <help-icon type="ACTION_RESPONSE_MODE"></help-icon>
-            </span><br>
-            <select id="mode" class="round">
-              <option value="PERSONAL">Once, Command User Only</option>
-              <option value="PUBLIC">Once, Anyone Can Use</option>
-              <option value="MULTIPERSONAL">Multi, Command User Only</option>
-              <option value="MULTI" selected>Multi, Anyone Can Use</option>
-              <option value="PERSISTENT">Persistent</option>
-            </select>
-          </div>
-          <div style="width: calc(50% - 12px); float: right;">
-            <span class="dbminputlabel">Unique ID</span>
-            <input id="id" placeholder="Leave blank to auto-generate..." class="round" type="text">
+						<span class="dbminputlabel">
+							Action Response Mode
+							<help-icon type="ACTION_RESPONSE_MODE"></help-icon>
+						</span><br>
+						<select id="mode" class="round">
+							<option value="PERSONAL">Once, Command User Only</option>
+							<option value="PUBLIC">Once, Anyone Can Use</option>
+							<option value="MULTIPERSONAL">Multi, Command User Only</option>
+							<option value="MULTI" selected>Multi, Anyone Can Use</option>
+							<option value="PERSISTENT">Persistent</option>
+						</select>
+					</div>
+					<div style="width: calc(50% - 12px); float: right;">
+						<span class="dbminputlabel">Unique ID</span>
+						<input id="id" placeholder="Leave blank to auto-generate..." class="round" type="text">
 
-            <br>
+						<br>
 
-            <span class="dbminputlabel">Action Row (1 - 5)</span>
-            <input id="row" placeholder="Leave blank for default..." class="round" type="text">
+						<span class="dbminputlabel">Action Row (1 - 5)</span>
+						<input id="row" placeholder="Leave blank for default..." class="round" type="text">
 
-            <br>
+						<br>
 
-            <span class="dbminputlabel">Emoji</span>
-            <input id="emoji" placeholder="Leave blank for none..." class="round" type="text">
+						<span class="dbminputlabel">Emoji</span>
+						<input id="emoji" placeholder="Leave blank for none..." class="round" type="text">
 
-            <br>
+						<br>
 
-            <span class="dbminputlabel">Temporary Time-Limit (Miliseconds)</span>
-            <input id="time" placeholder="60000" class="round" type="text">
-          </div>
+						<span class="dbminputlabel">Temporary Time-Limit (Miliseconds)</span>
+						<input id="time" placeholder="60000" class="round" type="text">
+					</div>
 
-          <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+					<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 
-          <action-list-input mode="BUTTON" id="actions" height="calc(100vh - 460px)"></action-list-input>
+					<action-list-input mode="BUTTON" id="actions" height="calc(100vh - 460px)"></action-list-input>
 
-        </div>
-      </dialog-list>
+				</div>
+			</dialog-list>
 
-    </div>
-  </tab>
+		</div>
+	</tab>
 
 
-  <tab label="Selects" icon="list alternate">
-    <div style="padding: 8px;">
+	<tab label="Selects" icon="list alternate">
+		<div style="padding: 8px;">
 
-      <dialog-list id="selectMenus" fields='["placeholder", "id", "tempVarName", "row", "min", "max", "mode", "time", "options", "actions"]' dialogTitle="Select Menu Info" dialogWidth="800" dialogHeight="700" listLabel="Select Menus" listStyle="height: calc(100vh - 350px);" itemName="Select Menu" itemCols="1" itemHeight="40px;" itemTextFunction="data.placeholder + '<br>' + data.options" itemStyle="text-align: left; line-height: 40px;">
-        <div style="padding: 16px;">
-          <div style="width: calc(33% - 16px); float: left; margin-right: 16px;">
-            <span class="dbminputlabel">Placeholder</span>
-            <input id="placeholder" class="round" type="text">
+			<dialog-list id="selectMenus" fields='["placeholder", "id", "tempVarName", "row", "min", "max", "mode", "time", "options", "actions"]' dialogTitle="Select Menu Info" dialogWidth="800" dialogHeight="700" listLabel="Select Menus" listStyle="height: calc(100vh - 350px);" itemName="Select Menu" itemCols="1" itemHeight="40px;" itemTextFunction="data.placeholder + '<br>' + data.options" itemStyle="text-align: left; line-height: 40px;">
+				<div style="padding: 16px;">
+					<div style="width: calc(33% - 16px); float: left; margin-right: 16px;">
+						<span class="dbminputlabel">Placeholder</span>
+						<input id="placeholder" class="round" type="text">
 
-            <br>
+						<br>
 
-            <span class="dbminputlabel">Temp Variable Name</span>
-            <input id="tempVarName" placeholder="Stores selected value for actions..." class="round" type="text">
+						<span class="dbminputlabel">Temp Variable Name</span>
+						<input id="tempVarName" placeholder="Stores selected value for actions..." class="round" type="text">
 
-            <br>
+						<br>
 
-            <span class="dbminputlabel">Minimum Select Number</span>
-            <input id="min" class="round" type="text" value="1">
+						<span class="dbminputlabel">Minimum Select Number</span>
+						<input id="min" class="round" type="text" value="1">
 
-            <br>
+						<br>
 
-            <span class="dbminputlabel">
-              Action Response Mode
-              <help-icon type="ACTION_RESPONSE_MODE"></help-icon>
-            </span><br>
-            <select id="mode" class="round">
-              <option value="PERSONAL">Once, Command User Only</option>
-              <option value="PUBLIC">Once, Anyone Can Use</option>
-              <option value="MULTIPERSONAL">Multi, Command User Only</option>
-              <option value="MULTI" selected>Multi, Anyone Can Use</option>
-              <option value="PERSISTENT">Persistent</option>
-            </select>
-          </div>
-          <div style="width: calc(33% - 16px); float: left; margin-right: 16px;">
-            <span class="dbminputlabel">Unique ID</span>
-            <input id="id" placeholder="Leave blank to auto-generate..." class="round" type="text">
+						<span class="dbminputlabel">
+							Action Response Mode
+							<help-icon type="ACTION_RESPONSE_MODE"></help-icon>
+						</span><br>
+						<select id="mode" class="round">
+							<option value="PERSONAL">Once, Command User Only</option>
+							<option value="PUBLIC">Once, Anyone Can Use</option>
+							<option value="MULTIPERSONAL">Multi, Command User Only</option>
+							<option value="MULTI" selected>Multi, Anyone Can Use</option>
+							<option value="PERSISTENT">Persistent</option>
+						</select>
+					</div>
+					<div style="width: calc(33% - 16px); float: left; margin-right: 16px;">
+						<span class="dbminputlabel">Unique ID</span>
+						<input id="id" placeholder="Leave blank to auto-generate..." class="round" type="text">
 
-            <br>
+						<br>
 
-            <span class="dbminputlabel">Action Row (1 - 5)</span>
-            <input id="row" placeholder="Leave blank for default..." class="round" type="text">
+						<span class="dbminputlabel">Action Row (1 - 5)</span>
+						<input id="row" placeholder="Leave blank for default..." class="round" type="text">
 
-            <br>
+						<br>
 
-            <span class="dbminputlabel">Maximum Select Number</span>
-            <input id="max" class="round" type="text" value="1">
+						<span class="dbminputlabel">Maximum Select Number</span>
+						<input id="max" class="round" type="text" value="1">
 
-            <br>
+						<br>
 
-            <span class="dbminputlabel">Temporary Time-Limit (Miliseconds)</span>
-            <input id="time" placeholder="60000" class="round" type="text">
-          </div>
-          <div style="width: calc(34% - 8px); height: 300px; float: left; margin-left: 8px;">
+						<span class="dbminputlabel">Temporary Time-Limit (Miliseconds)</span>
+						<input id="time" placeholder="60000" class="round" type="text">
+					</div>
+					<div style="width: calc(34% - 8px); height: 300px; float: left; margin-left: 8px;">
 
-            <dialog-list id="options" fields='["label", "description", "value", "emoji", "default"]' dialogTitle="Select Menu Option Info" dialogWidth="360" dialogHeight="440" listLabel="Options" listStyle="height: 210px;" itemName="Option" itemCols="1" itemHeight="20px;" itemTextFunction="data.label" itemStyle="text-align: left; line-height: 20px;">
-              <div style="padding: 16px;">
-                <span class="dbminputlabel">Name</span>
-                <input id="label" class="round" type="text">
+						<dialog-list id="options" fields='["label", "description", "value", "emoji", "default"]' dialogTitle="Select Menu Option Info" dialogWidth="360" dialogHeight="440" listLabel="Options" listStyle="height: 210px;" itemName="Option" itemCols="1" itemHeight="20px;" itemTextFunction="data.label" itemStyle="text-align: left; line-height: 20px;">
+							<div style="padding: 16px;">
+								<span class="dbminputlabel">Name</span>
+								<input id="label" class="round" type="text">
 
-                <br>
+								<br>
 
-                <span class="dbminputlabel">Description</span>
-                <input id="description" class="round" type="text">
+								<span class="dbminputlabel">Description</span>
+								<input id="description" class="round" type="text">
 
-                <br>
+								<br>
 
-                <span class="dbminputlabel">Value</span>
-                <input id="value" placeholder="The text passed to the temp variable..." class="round" type="text">
+								<span class="dbminputlabel">Value</span>
+								<input id="value" placeholder="The text passed to the temp variable..." class="round" type="text">
 
-                <br>
+								<br>
 
-                <span class="dbminputlabel">Emoji</span>
-                <input id="emoji" placeholder="Leave blank for none..." class="round" type="text">
+								<span class="dbminputlabel">Emoji</span>
+								<input id="emoji" placeholder="Leave blank for none..." class="round" type="text">
 
-                <br>
+								<br>
 
-                <span class="dbminputlabel">Default Selected</span><br>
-                <select id="default" class="round">
-                  <option value="true">Yes</option>
-                  <option value="false" selected>No</option>
-                </select>
-              </div>
-            </dialog-list>
+								<span class="dbminputlabel">Default Selected</span><br>
+								<select id="default" class="round">
+									<option value="true">Yes</option>
+									<option value="false" selected>No</option>
+								</select>
+							</div>
+						</dialog-list>
 
-          </div>
+					</div>
 
-          <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+					<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 
-          <action-list-input mode="SELECT" id="actions" height="calc(100vh - 460px)">
-            <script class="setupTempVars">
-              const elem = document.getElementById("tempVarName");
-              if(elem?.value) {
-                tempVars.push([elem.value, "Text"]);
-              }
-            </script>
-          </action-list-input>
+					<action-list-input mode="SELECT" id="actions" height="calc(100vh - 460px)">
+						<script class="setupTempVars">
+							const elem = document.getElementById("tempVarName");
+							if(elem?.value) {
+								tempVars.push([elem.value, "Text"]);
+							}
+						</script>
+					</action-list-input>
 
-        </div>
-      </dialog-list>
+				</div>
+			</dialog-list>
 
-    </div>
-  </tab>
+		</div>
+	</tab>
 
 
-  <tab label="Files" icon="file image">
-    <div style="padding: 8px;">
+	<tab label="Files" icon="file image">
+		<div style="padding: 8px;">
 
-      <dialog-list id="attachments" fields='["url", "name", "spoiler"]' dialogTitle="Attachment Info" dialogWidth="400" dialogHeight="280" listLabel="Files" listStyle="height: calc(100vh - 350px);" itemName="File" itemCols="1" itemHeight="30px;" itemTextFunction="data.url" itemStyle="text-align: left; line-height: 30px;">
-        <div style="padding: 16px;">
-          <span class="dbminputlabel">Attachment Local/Web URL</span>
-          <input id="url" class="round" type="text" value="resources/">
+			<dialog-list id="attachments" fields='["url", "name", "spoiler"]' dialogTitle="Attachment Info" dialogWidth="400" dialogHeight="280" listLabel="Files" listStyle="height: calc(100vh - 350px);" itemName="File" itemCols="1" itemHeight="30px;" itemTextFunction="data.url" itemStyle="text-align: left; line-height: 30px;">
+				<div style="padding: 16px;">
+					<span class="dbminputlabel">Attachment Local/Web URL</span>
+					<input id="url" class="round" type="text" value="resources/">
 
-          <br>
+					<br>
 
-          <span class="dbminputlabel">Attachment Name</span>
-          <input id="name" class="round" type="text" placeholder="Leave blank for default...">
+					<span class="dbminputlabel">Attachment Name</span>
+					<input id="name" class="round" type="text" placeholder="Leave blank for default...">
 
-          <br>
+					<br>
 
-          <div style="text-align: center; padding-top: 4px;">
-            <dbm-checkbox id="spoiler" label="Make Attachment Spoiler"></dbm-checkbox>
-          </div>
-        </div>
-      </dialog-list>
-    </div>
-  </tab>
+					<div style="text-align: center; padding-top: 4px;">
+						<dbm-checkbox id="spoiler" label="Make Attachment Spoiler"></dbm-checkbox>
+					</div>
+				</div>
+			</dialog-list>
+		</div>
+	</tab>
 
 
-  <tab label="Settings" icon="cogs">
-    <div style="padding: 8px;">
-      <dbm-checkbox style="float: left;" id="reply" label="Reply to Interaction if Possible" checked></dbm-checkbox>
+	<tab label="Settings" icon="cogs">
+		<div style="padding: 8px;">
+			<dbm-checkbox style="float: left;" id="reply" label="Reply to Interaction if Possible" checked></dbm-checkbox>
 
-      <dbm-checkbox style="float: right;" id="ephemeral" label="Make Reply Private (Ephemeral)"></dbm-checkbox>
+			<dbm-checkbox style="float: right;" id="ephemeral" label="Make Reply Private (Ephemeral)"></dbm-checkbox>
 
-      <br><br>
+			<br><br>
 
-      <div style="display: flex; justify-content: space-between;">
-        <dbm-checkbox id="tts" label="Text-to-Speech"></dbm-checkbox>
+			<div style="display: flex; justify-content: space-between;">
+				<dbm-checkbox id="tts" label="Text-to-Speech"></dbm-checkbox>
 
-        <dbm-checkbox id="overwrite" label="Overwrite Changes"></dbm-checkbox>
+				<dbm-checkbox id="overwrite" label="Overwrite Changes"></dbm-checkbox>
 
-        <dbm-checkbox id="dontSend" label="Don't Send Message"></dbm-checkbox>
-      </div>
+				<dbm-checkbox id="dontSend" label="Don't Send Message"></dbm-checkbox>
+			</div>
 
-      <br>
+			<br>
 
-      <hr class="subtlebar" style="margin-top: 4px; margin-bottom: 4px;">
+			<hr class="subtlebar" style="margin-top: 4px; margin-bottom: 4px;">
 
-      <br>
+			<br>
 
-      <div style="padding-bottom: 12px;">
-        <retrieve-from-variable allowNone dropdownLabel="Message/Options to Edit" selectId="editMessage" variableInputId="editMessageVarName" variableContainerId="editMessageVarNameContainer">
-          <option value="intUpdate">Interaction Update</option>
-        </retrieve-from-variable>
-      </div>
+			<div style="padding-bottom: 12px;">
+				<retrieve-from-variable allowNone dropdownLabel="Message/Options to Edit" selectId="editMessage" variableInputId="editMessageVarName" variableContainerId="editMessageVarNameContainer">
+					<option value="intUpdate">Interaction Update</option>
+				</retrieve-from-variable>
+			</div>
 
-      <br><br><br>
+			<br><br><br>
 
-      <div style="padding-bottom: 12px;">
-        <store-in-variable allowNone selectId="storage" variableInputId="varName2" variableContainerId="varNameContainer2"></store-in-variable>
-      </div>
+			<div style="padding-bottom: 12px;">
+				<store-in-variable allowNone selectId="storage" variableInputId="varName2" variableContainerId="varNameContainer2"></store-in-variable>
+			</div>
 
-      <br><br>
+			<br><br>
 
-      <div></div>
-    </div>
-  </tab>
+			<div></div>
+		</div>
+	</tab>
 </tab-system>`;
 	},
 

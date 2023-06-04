@@ -73,10 +73,10 @@ module.exports = {
 	<input id="url" class="round" type="text" value="http://"><br>
 </div>
 <div style="float: left; width: calc(50% - 12px);">
-  <span class="dbminputlabel">Volume (0 = min; 100 = max)</span><br>
-  <input id="volume" class="round" type="text" placeholder="Leave blank for automatic..."><br>
-  <span class="dbminputlabel">Bitrate</span><br>
-  <input id="bitrate" class="round" type="text" placeholder="Leave blank for automatic...">
+	<span class="dbminputlabel">Volume (0 = min; 100 = max)</span><br>
+	<input id="volume" class="round" type="text" placeholder="Leave blank for automatic..."><br>
+	<span class="dbminputlabel">Bitrate</span><br>
+	<input id="bitrate" class="round" type="text" placeholder="Leave blank for automatic...">
 </div>
 <div style="float: right; width: calc(50% - 12px);">
 	<span class="dbminputlabel">Seek Position</span><br>
