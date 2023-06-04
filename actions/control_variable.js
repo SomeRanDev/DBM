@@ -90,7 +90,7 @@ module.exports = {
 	</div>
 	<div style="float: right; width: 60%;">
 		<span class="dbminputlabel">Value</span><br>
-		<input id="value" class="round" type="text" name="is-eval"><br>
+		<input id="value" class="round" type="text" name="is-eval">
 	</div>
 </div>`;
 	},

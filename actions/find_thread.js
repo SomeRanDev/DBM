@@ -116,10 +116,7 @@ module.exports = {
 
 	async action(cache) {
 		const server = cache.server;
-		if (!server?.channels) {
-			this.callNextAction(cache);
-			return;
-		}
+		if (!server?.channels) return this.callNextAction(cache);
 
 		const data = cache.actions[cache.index];
 		const info = parseInt(data.info, 10);

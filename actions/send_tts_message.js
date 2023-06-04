@@ -107,9 +107,7 @@ module.exports = {
 	async action(cache) {
 		const data = cache.actions[cache.index];
 		const message = data.message;
-		if (!data.channel || !message) {
-			return this.callNextAction(cache);
-		}
+		if (!data.channel || !message) return this.callNextAction(cache);
 
 		const target = await this.getSendTargetFromData(data.channel, data.varName, cache);
 

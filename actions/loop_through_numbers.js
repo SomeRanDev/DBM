@@ -141,10 +141,7 @@ module.exports = {
 		const data = cache.actions[cache.index];
 
 		const actions = data.actions;
-		if (!actions || actions.length <= 0) {
-			this.callNextAction(cache);
-			return;
-		}
+		if (!actions || actions.length <= 0) return this.callNextAction(cache);
 
 		const startNumText = this.evalMessage(data.startNum, cache);
 		const endNumText = this.evalMessage(data.endNum, cache);
@@ -188,10 +185,7 @@ module.exports = {
 			}
 		}
 
-		if (valid !== 0) {
-			this.callNextAction(cache);
-			return;
-		}
+		if (valid !== 0) return this.callNextAction(cache);
 
 		const waitForCompletion = data.type === "true";
 

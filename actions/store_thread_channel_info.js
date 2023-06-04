@@ -152,10 +152,7 @@ module.exports = {
 
 		const targetChannel = await this.getChannelFromData(data.thread, data.threadVarName, cache);
 
-		if (!targetChannel) {
-			this.callNextAction(cache);
-			return;
-		}
+		if (!targetChannel) return this.callNextAction(cache);
 
 		let result;
 		const info = parseInt(data.info, 10);

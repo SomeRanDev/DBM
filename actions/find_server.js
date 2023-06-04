@@ -132,6 +132,7 @@ module.exports = {
 		const info = parseInt(data.info, 10);
 		const find = this.evalMessage(data.find, cache);
 		let result;
+
 		switch (info) {
 			case 0:
 				result = servers.get(find);

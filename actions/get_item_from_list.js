@@ -96,13 +96,13 @@ module.exports = {
 		return `
 <div>
 	<div style="float: left; width: 35%;">
-		Source List:<br>
+		<span class="dbminputlabel">Source List</span>
 		<select id="list" class="round" onchange="glob.listChange(this, 'varNameContainer')">
 			${data.lists[isEvent ? 1 : 0]}
 		</select>
 	</div>
 	<div id="varNameContainer" style="display: none; float: right; width: 60%;">
-		Variable Name:<br>
+		<span class="dbminputlabel">Variable Name</span>
 		<input id="varName" class="round" type="text" list="variableList"><br>
 	</div>
 </div>

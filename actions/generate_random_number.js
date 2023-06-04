@@ -81,11 +81,9 @@ module.exports = {
 	<span class="dbminputlabel">Maximum Range</span><br>
 	<input id="max" class="round" type="text"><br>
 </div>
-
 <br><br><br><br>
 
 <hr class="subtlebar">
-
 <br>
 
 <store-in-variable style="padding-top: 8px;" dropdownLabel="Store In" selectId="storage" variableContainerId="varNameContainer" variableInputId="varName"></store-in-variable>`;

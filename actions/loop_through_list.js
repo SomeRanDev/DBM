@@ -189,10 +189,7 @@ module.exports = {
 		const data = cache.actions[cache.index];
 
 		const actions = data.actions;
-		if (!actions) {
-			this.callNextAction(cache);
-			return;
-		}
+		if (!actions) return this.callNextAction(cache);
 
 		const list = await this.getListFromData(data.list, data.varName, cache);
 

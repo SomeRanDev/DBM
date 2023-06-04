@@ -100,7 +100,7 @@ module.exports = {
 		const server = await this.getServerFromData(data.server, data.varName, cache);
 		const nickname = this.evalMessage(data.nickname, cache) || null;
 		const reason = this.evalMessage(data.reason, cache);
-		const botMember = server.me;
+		const botMember = server.members.me;
 		if (botMember?.setNickname) {
 			botMember
 				.setNickname(nickname, reason)
