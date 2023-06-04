@@ -106,7 +106,8 @@ module.exports = {
 		const reason = this.evalMessage(data.reason, cache);
 
 		if (!Array.isArray(server) && !server?.setIcon) {
-			return this.callNextAction(cache);
+			this.callNextAction(cache);
+			return;
 		}
 
 		const varName2 = this.evalMessage(data.varName2, cache);

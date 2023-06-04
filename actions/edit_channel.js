@@ -276,16 +276,17 @@ module.exports = {
 				break;
 			}
 		}
+		channelData.reason = reason;
 
 		const channelStorage = parseInt(data.channel, 10);
 		const channelVarName = this.evalMessage(data.channelVarName, cache);
 		const channel = await this.getAnyChannel(channelStorage, channelVarName, cache);
 
 		if (Array.isArray(channel)) {
-			this.callListFunc(channel, "edit", [channelData, reason]).then(() => this.callNextAction(cache));
+			this.callListFunc(channel, "edit", [channelData]).then(() => this.callNextAction(cache));
 		} else if (channel?.edit) {
 			channel
-				.edit(channelData, reason)
+				.edit(channelData)
 				.then(() => this.callNextAction(cache))
 				.catch((err) => this.displayError(data, cache, err));
 		} else {

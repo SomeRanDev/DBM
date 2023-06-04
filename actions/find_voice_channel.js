@@ -127,12 +127,14 @@ module.exports = {
 			this.callNextAction(cache);
 			return;
 		}
+
 		const data = cache.actions[cache.index];
 		const info = parseInt(data.info, 10);
 		const find = this.evalMessage(data.find, cache);
 		const { ChannelType } = this.getDBM().DiscordJS;
 		const channels = server.channels.cache.filter((c) => c.type === ChannelType.GuildVoice);
 		let result;
+
 		switch (info) {
 			case 0:
 				result = channels.get(find);

@@ -61,7 +61,7 @@ module.exports = {
 	html(isEvent, data) {
 		return `
 <div style="float: left; width: 80%;">
-	Volume (0 = min; 100 = max):<br>
+	<span class="dbminputlabel">Volume (min: 0; max: 100)</span>
 	<input id="volume" class="round" value="50">
 </div>`;
 	},

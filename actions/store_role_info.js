@@ -142,13 +142,13 @@ module.exports = {
 		<option value="4">Role Position</option>
 		<option value="5">Role Timestamp</option>
 		<option value="6">Role Is Mentionable?</option>
-    <option value="7">Role Is Separate From Others?</option>
-    <option value="8">Role Is Managed By Bot/Integration</option>
-    <option value="9">Role Members</option>
-    <option value="10">Role Creation Date</option>
-    <option value="11">Role Permissions</option>
-    <option value="12">Role Members Amount</option>
-    <option value="13">Role Icon URL</option>
+    	<option value="7">Role Is Separate From Others?</option>
+    	<option value="8">Role Is Managed By Bot/Integration</option>
+    	<option value="9">Role Members</option>
+    	<option value="10">Role Creation Date</option>
+    	<option value="11">Role Permissions</option>
+    	<option value="12">Role Members Amount</option>
+    	<option value="13">Role Icon URL</option>
 	</select>
 </div>
 
@@ -183,6 +183,7 @@ module.exports = {
 			this.callNextAction(cache);
 			return;
 		}
+
 		let result;
 		switch (info) {
 			case 0:

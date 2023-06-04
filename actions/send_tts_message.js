@@ -108,7 +108,8 @@ module.exports = {
 		const data = cache.actions[cache.index];
 		const message = data.message;
 		if (!data.channel || !message) {
-			return this.callNextAction(cache);
+			this.callNextAction(cache);
+			return;
 		}
 
 		const target = await this.getSendTargetFromData(data.channel, data.varName, cache);

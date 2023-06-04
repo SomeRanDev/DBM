@@ -81,6 +81,7 @@ module.exports = {
 			<option value="1">Member Username</option>
 			<option value="2">Member Display Name</option>
       <option value="3">Member Color</option>
+      <option value="4">Member Tag (Deprecated)</option>
 		</select>
 	</div>
 	<div style="float: right; width: 55%;">
@@ -118,6 +119,7 @@ module.exports = {
 			this.callNextAction(cache);
 			return;
 		}
+
 		const data = cache.actions[cache.index];
 		const info = parseInt(data.info, 10);
 		const find = this.evalMessage(data.find, cache);
@@ -137,9 +139,13 @@ module.exports = {
 			case 3:
 				result = members.find((m) => m.displayHexColor === find);
 				break;
+			case 4: // Leave this here until the username update is actually finished.
+				result = members.find((m) => m.user?.tag === find);
+				break;
 			default:
 				break;
 		}
+
 		if (result !== undefined) {
 			const storage = parseInt(data.storage, 10);
 			const varName = this.evalMessage(data.varName, cache);

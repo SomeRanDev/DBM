@@ -178,7 +178,8 @@ module.exports = {
 		const msg = cache.msg;
 		const interactionOptions = cache.interaction?.options ?? null;
 		if (!msg && !interactionOptions) {
-			return this.callNextAction(cache);
+			this.callNextAction(cache);
+			return;
 		}
 
 		const { Bot, Files } = this.getDBM();

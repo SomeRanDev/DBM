@@ -742,7 +742,7 @@ module.exports = {
 				if (url) {
 					const spoiler = !!attachment?.spoiler;
 					const name = attachment?.name || (spoiler ? Util.basename(url) : undefined);
-					const msgAttachment = new AttachmentBuilder(url, name);
+					const msgAttachment = new AttachmentBuilder(url, { name });
 					if (spoiler) {
 						msgAttachment.setSpoiler(true);
 					}
