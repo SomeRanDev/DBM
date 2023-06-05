@@ -57,7 +57,7 @@ module.exports = {
 	// are also the names of the fields stored in the action's JSON data.
 	//---------------------------------------------------------------------
 
-	fields: ["channelName", "topic", "position", "storage", "varName", "categoryID", "slowmodepost", "reason"],
+	fields: ["channelName", "topic", "position", "storage", "varName", "categoryID", "options"],
 
 	//---------------------------------------------------------------------
 	// Command HTML
@@ -80,32 +80,130 @@ module.exports = {
 
 	<div style="float: left; width: 100%; padding-top: 16px;">
 		<span class="dbminputlabel">Guidelines</span>
-		<textarea id="topic" rows="3" style="font-family: monospace; white-space: nowrap;"></textarea>
+		<textarea id="topic" rows="3" style="white-space: nowrap;"></textarea>
 	</div>
 	
 	<div style="float: left; width: 100%;">
 		<div style="float: left; width: 60%; padding-top: 16px;">
-			<span class="dbminputlabel">Category ID</span>
+			<span class="dbminputlabel">Category ID</span><br>
 			<input id= "categoryID" class="round" type="text" placeholder="Leave blank for no category">
 		</div>
 
 		<div style="float: right; width: 35%; padding-top: 16px;">
-			<span class="dbminputlabel">Position</span>
+			<span class="dbminputlabel">Position</span><br>
 			<input id="position" class="round" type="text" placeholder="Leave blank for default">
 		</div>
 	</div>
 
-	<div style="float: left; width: 100%; padding-top: 16px;">
-		<span class="dbminputlabel">Slowmode</span><br>
-		<input id="slowmodepost" class="round" type="text" placeholder="Leave blank to disable">
+	<br><br><br><br><br><br><br><br><br><br><br><br>
+
+	<div style="padding-top: 8px">
+		<span class="dbminputlabel">Extra Options</span>
+		<dialog-button
+			id="options"
+			style="width: 100%;"
+			fields='[
+				"defaultSortType",
+				"defaultForumLayout",
+				"rateLimitPerUser",
+				"autoArchiveDuration",
+				"reason",
+				"tags"
+			]'
+			dialogTitle="Forum Channel Options"
+			dialogWidth="600"
+			dialogHeight="430"
+			dialogResizable="false"
+			saveButtonText="Save Actions"
+			saveButtonIcon="star"
+			buttonTextFunction="
+				'(' +
+				(data.defaultSortType === '1' ? 'Creation Date' : 'Latest Activity') +
+				', ' + (data.defaultForumLayout === '2' ? 'Gallery View' : 'List View') +
+				', ' + (data.rateLimitPerUser || '[no rate limit]') +
+				', ' + (data.reason || '[no reason]') +
+				')'
+			"
+		>
+			<div style="padding: 16px;">
+				<div style="padding-top: 8px; float: left; width: calc(50% - 12px);">
+					<span class="dbminputlabel">Default Sort Type</span><br>
+					<select id="defaultSortType" class="round">
+						<option value="1" selected>Creation Date</option>
+						<option value="0">Latest Activity</option>
+					</select>
+
+					<br>
+
+					<span class="dbminputlabel">Default Layout Type</span><br>
+					<select id="defaultForumLayout" class="round">
+						<option value="2" selected>Gallery View</option>
+						<option value="1">List View</option>
+					</select>
+
+					<br>
+
+					<span class="dbminputlabel">Rate Limit Per User</span><br>
+					<input id="rateLimitPerUser" class="round" type="text" placeholder="Leave blank to disable">
+
+					<br>
+
+					<span class="dbminputlabel">Auto-Archive Duration</span><br>
+					<select id="autoArchiveDuration" class="round">
+						<option value="60" selected>1 hour</option>
+						<option value="1440">24 hours</option>
+						<option value="4320">3 days</option>
+						<option value="10080">1 week</option>
+						<option value="max">Maximum</option>
+					</select>
+
+					<br>
+
+					<span class="dbminputlabel">Reason</span>
+					<input id="reason" placeholder="Optional" class="round" type="text">
+				</div>
+				<div style="width: calc(50% - 12px); float: right">
+					<dialog-list
+						id="tags"
+						fields='[
+							"name",
+							"moderated",
+							"emoji"
+						]'
+						dialogTitle="Tag Info"
+						dialogWidth="400"
+						dialogHeight="300"
+						listLabel="Available Tags"
+						listStyle="height: calc(100vh - 150px);"
+						itemName="Tag"
+						itemCols="1"
+						itemHeight="30px;"
+						itemTextFunction="data.name"
+						itemStyle="text-align: left; line-height: 30px;"
+					>
+						<div style="padding: 16px;">
+							<span class="dbminputlabel">Name</span>
+							<input id="name" class="round" type="text">
+
+							<br>
+
+							<span class="dbminputlabel">Moderated</span>
+							<input id="moderated" placeholder="'Yes' or 'No'" class="round" type="text">
+
+							<br>
+
+							<span class="dbminputlabel">Emoji</span>
+							<input id="emoji" placeholder="Leave blank for none..." class="round" type="text">
+						</div>
+					</dialog-list>
+				</div>
+			</div>
+		</dialog-button>
 	</div>
 
-	<div style="float: left; width: 100%; padding-top: 16px;">
-		<span class="dbminputlabel">Reason</span>
-		<input id="reason" placeholder="Optional" class="round" type="text">
-	</div>
+	<br>
 
-	<div style="float: left; width: 100%; padding-top: 16px;">
+	<div style="float: left; width: 100%;">
 		<store-in-variable allowNone dropdownLabel="Store In" selectId="storage" variableContainerId="varNameContainer" variableInputId="varName"></store-in-variable>
 	</div>
 </div>
@@ -140,8 +238,8 @@ module.exports = {
 		}
 
 		const channelData = {
-			reason: this.evalMessage(data.reason, cache),
 			name: this.evalMessage(data.channelName, cache),
+			type: this.getDBM().DiscordJS.ChannelType.GuildForum,
 		};
 
 		if (data.topic) {
@@ -153,10 +251,39 @@ module.exports = {
 		if (data.categoryID) {
 			channelData.parent = this.evalMessage(data.categoryID, cache);
 		}
-		if (data.slowmodepost) {
-			channelData.rateLimitPerUser = parseInt(this.evalMessage(data.slowmodepost, cache), 10);
+		if (data.options.rateLimitPerUser) {
+			channelData.rateLimitPerUser = parseInt(this.evalMessage(data.options.rateLimitPerUser, cache), 10);
 		}
-		channelData.type = this.getDBM().DiscordJS.ChannelType.GuildForum;
+		if (data.options.reason) {
+			channelData.reason = this.evalMessage(data.options.reason, cache);
+		}
+
+		// ThreadAutoArchiveDuration
+		// https://discord-api-types.dev/api/discord-api-types-v10/enum/ThreadAutoArchiveDuration
+		channelData.autoArchiveDuration = data.options.autoArchiveDuration === "max" ? 10080 : parseInt(data.autoArchiveDuration, 10);
+
+		// SortOrderType
+		// https://discord-api-types.dev/api/discord-api-types-v10/enum/SortOrderType
+		channelData.defaultSortOrder = parseInt(data.options.defaultSortType, 10);
+
+		// ForumLayoutType
+		// https://discord-api-types.dev/api/discord-api-types-v10/enum/ForumLayoutType
+		channelData.defaultForumLayout = parseInt(data.options.defaultForumLayout, 10);
+
+		// GuildForumTagData
+		// https://discord.js.org/#/docs/discord.js/main/typedef/GuildForumTagData
+		if (data.options.tags.length > 0) {
+			channelData.availableTags = data.options.tags.map(tagData => {
+				const result = {
+					name: this.evalMessage(tagData.name, cache),
+					moderated: tagData.moderated === "yes",
+				}
+				if(tagData.emoji) {
+					result = this.evalMessage(tagData.emoji, cache);
+				}
+				return result;
+			});
+		}
 
 		server.channels
 			.create(channelData)
