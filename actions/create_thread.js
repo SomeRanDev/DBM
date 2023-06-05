@@ -179,6 +179,8 @@ module.exports = {
 				break;
 		}
 
+		// ThreadAutoArchiveDuration
+		// https://discord-api-types.dev/api/discord-api-types-v10/enum/ThreadAutoArchiveDuration
 		const threadOptions = {
 			name: this.evalMessage(data.threadName, cache),
 			autoArchiveDuration: data.autoArchiveDuration === "max" ? 10080 : parseInt(data.autoArchiveDuration, 10),
