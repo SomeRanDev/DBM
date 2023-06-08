@@ -143,7 +143,7 @@ module.exports = {
 					result = typeof variable === "string";
 					break;
 				case 2:
-					result = variable instanceof this.getDBM().JIMP;
+					result = this.getDBM().Images.isImage(variable);
 					break;
 				case 3:
 					result = variable instanceof DiscordJS.GuildMember;
