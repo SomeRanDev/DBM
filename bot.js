@@ -1673,26 +1673,28 @@ Actions.getParameterFromInteraction = function (interaction, name) {
 
 Actions.getParameterFromParameterData = function (option) {
 	if (typeof option === "object") {
+		// ApplicationCommandOptionType
+		// https://discord-api-types.dev/api/discord-api-types-v10/enum/ApplicationCommandOptionType
 		switch (option?.type) {
-			case "STRING":
-			case "INTEGER":
-			case "BOOLEAN":
-			case "NUMBER": {
+			case DiscordJS.ApplicationCommandOptionType.String:
+			case DiscordJS.ApplicationCommandOptionType.Integer:
+			case DiscordJS.ApplicationCommandOptionType.Boolean:
+			case DiscordJS.ApplicationCommandOptionType.Number: {
 				return option.value;
 			}
-			case "USER": {
+			case DiscordJS.ApplicationCommandOptionType.User: {
 				return option.member ?? option.user;
 			}
-			case "CHANNEL": {
+			case DiscordJS.ApplicationCommandOptionType.Channel: {
 				return option.channel;
 			}
-			case "ROLE": {
+			case DiscordJS.ApplicationCommandOptionType.Role: {
 				return option.role;
 			}
-			case "MENTIONABLE": {
+			case DiscordJS.ApplicationCommandOptionType.Mentionable: {
 				return option.member ?? option.channel ?? option.role ?? option.user;
 			}
-			case "ATTACHMENT": {
+			case DiscordJS.ApplicationCommandOptionType.Attachment: {
 				return option.attachment?.url ?? "";
 			}
 		}
