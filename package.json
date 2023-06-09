@@ -13,8 +13,8 @@
     "discord.js": "^14.11.0",
     "ffmpeg-static": "^4.4.0",
     "tweetnacl": "^1.0.3",
-    "youtube-dl-exec": "^1.2.12",
-    "ytdl-core": "^4.9.1"
+    "youtube-dl-exec": "^2.4.4",
+    "ytdl-core": "^4.11.4"
   },
   "devDependencies": {
     "prettier": "^2.4.1"
