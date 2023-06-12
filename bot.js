@@ -3408,7 +3408,7 @@ Audio.connectToVoice = function (voiceChannel) {
 Audio.getSubscription = function (guild) {
 	const subscription = this.subscriptions.get(guild?.id);
 	if (!subscription) {
-		const voiceChannel = guild?.me?.voice?.channel;
+		const voiceChannel = guild?.members?.me?.voice?.channel;
 		if (voiceChannel) {
 			return this.connectToVoice(voiceChannel);
 		}
