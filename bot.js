@@ -1016,7 +1016,7 @@ Bot.checkRegExps = function (msg) {
 };
 
 Bot.onInteraction = function (interaction) {
-	if (interaction.isCommand()) {
+	if (interaction.isChatInputCommand()) {
 		this.onSlashCommandInteraction(interaction);
 	} else if (interaction.isContextMenuCommand()) {
 		this.onContextMenuInteraction(interaction);
@@ -1057,9 +1057,9 @@ Bot.onSlashCommandInteraction = function (interaction) {
 };
 
 Bot.onContextMenuInteraction = function (interaction) {
-	if (interaction.isUserContextMenu()) {
+	if (interaction.isUserContextMenuCommand()) {
 		this.onUserContextMenuInteraction(interaction);
-	} else if (interaction.isMessageContextMenu()) {
+	} else if (interaction.isMessageContextMenuCommand()) {
 		this.onMessageContextMenuInteraction(interaction);
 	}
 };
