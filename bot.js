@@ -1016,9 +1016,9 @@ Bot.checkRegExps = function (msg) {
 };
 
 Bot.onInteraction = function (interaction) {
-	if (interaction.isCommand()) {
+	if (interaction.isChatInputCommand()) {
 		this.onSlashCommandInteraction(interaction);
-	} else if (interaction.isContextMenu()) {
+	} else if (interaction.isContextMenuCommand()) {
 		this.onContextMenuInteraction(interaction);
 	} else if (interaction.isModalSubmit()) {
 		Actions.checkModalSubmitResponses(interaction);
@@ -1057,9 +1057,9 @@ Bot.onSlashCommandInteraction = function (interaction) {
 };
 
 Bot.onContextMenuInteraction = function (interaction) {
-	if (interaction.isUserContextMenu()) {
+	if (interaction.isUserContextMenuCommand()) {
 		this.onUserContextMenuInteraction(interaction);
-	} else if (interaction.isMessageContextMenu()) {
+	} else if (interaction.isMessageContextMenuCommand()) {
 		this.onMessageContextMenuInteraction(interaction);
 	}
 };
@@ -3408,7 +3408,7 @@ Audio.connectToVoice = function (voiceChannel) {
 Audio.getSubscription = function (guild) {
 	const subscription = this.subscriptions.get(guild?.id);
 	if (!subscription) {
-		const voiceChannel = guild?.me?.voice?.channel;
+		const voiceChannel = guild?.members?.me?.voice?.channel;
 		if (voiceChannel) {
 			return this.connectToVoice(voiceChannel);
 		}
