@@ -1018,7 +1018,7 @@ Bot.checkRegExps = function (msg) {
 Bot.onInteraction = function (interaction) {
 	if (interaction.isCommand()) {
 		this.onSlashCommandInteraction(interaction);
-	} else if (interaction.isContextMenu()) {
+	} else if (interaction.isContextMenuCommand()) {
 		this.onContextMenuInteraction(interaction);
 	} else if (interaction.isModalSubmit()) {
 		Actions.checkModalSubmitResponses(interaction);
