@@ -629,11 +629,13 @@ module.exports = {
 					const fields = embedData.fields;
 					for (let i = 0; i < fields.length; i++) {
 						const f = fields[i];
-						embed.addField(
-							this.evalMessage(f.name, cache),
-							this.evalMessage(f.value, cache),
-							f.inline === "true",
-						);
+						embed.addFields([
+							{
+								name: this.evalMessage(f.name, cache),
+								value: this.evalMessage(f.value, cache),
+								inline: f.inline === "true",
+							},
+						]);
 					}
 				}
 
