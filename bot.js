@@ -1732,25 +1732,16 @@ Actions.findMemberOrUserFromID = async function (id, server) {
 		return null;
 	}
 
-	if (server && id) {
-		let result;
-		try {
-			result = await server.members.fetch(id);
-		} catch (error) {}
-		if (result) {
-			return result;
-		} else {
-			const result = await Bot.bot.users.fetch(id);
-			if (result) {
-				return result;
-			}
+	if (server) {
+		const member = await server.members.fetch(id).catch(noop);
+		if (member) {
+			return member;
 		}
 	}
-	if (id) {
-		const result = await Bot.bot.users.fetch(id);
-		if (result) {
-			return result;
-		}
+
+	const user = await Bot.bot.users.fetch(id).catch(noop);
+	if (user) {
+		return user;
 	}
 	return null;
 };
