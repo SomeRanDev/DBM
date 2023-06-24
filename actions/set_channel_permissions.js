@@ -115,7 +115,6 @@ module.exports = {
 			return;
 		}
 
-
 		const channel = await this.getChannelFromData(data.storage, data.varName, cache);
 		const reason = this.evalMessage(data.reason, cache);
 		const options = { [data.permission]: [true, false, null][parseInt(data.state, 10)] };

@@ -128,7 +128,7 @@ module.exports = {
 			this.callNextAction(cache);
 			return;
 		}
-		
+
 		const stickerData = { name: this.evalMessage(data.stickerName, cache) };
 
 		const varName = this.evalMessage(data.varName, cache);

@@ -138,7 +138,7 @@ module.exports = {
 		const channelData = {
 			name,
 			reason,
-			type: this.getDBM().DiscordJS.ChannelType.GuildVoice
+			type: this.getDBM().DiscordJS.ChannelType.GuildVoice,
 		};
 		if (data.bitrate) {
 			channelData.bitrate = parseInt(this.evalMessage(data.bitrate, cache), 10) * 1000;
