@@ -1725,7 +1725,13 @@ Actions.findMemberOrUserFromName = async function (name, server) {
 Actions.findMemberOrUserFromID = async function (id, server) {
 	if (!Bot.hasMemberIntents) {
 		PrintError(MsgType.MISSING_MEMBER_INTENT_FIND_USER_ID);
+		return null;
 	}
+	if (!id) {
+		PrintError(MsgType.CANNOT_FIND_USER_BY_ID, id);
+		return null;
+	}
+
 	if (server && id) {
 		let result;
 		try {
@@ -1739,13 +1745,12 @@ Actions.findMemberOrUserFromID = async function (id, server) {
 				return result;
 			}
 		}
-	} else if (id) {
+	}
+	if (id) {
 		const result = await Bot.bot.users.fetch(id);
 		if (result) {
 			return result;
 		}
-	} else {
-		PrintError(MsgType.CANNOT_FIND_USER_BY_ID, id);
 	}
 	return null;
 };
