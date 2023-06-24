@@ -1726,7 +1726,20 @@ Actions.findMemberOrUserFromID = async function (id, server) {
 	if (!Bot.hasMemberIntents) {
 		PrintError(MsgType.MISSING_MEMBER_INTENT_FIND_USER_ID);
 	}
-	if (id) {
+	if (server && id) {
+		let result;
+		try {
+			result = await server.members.fetch(id);
+		} catch (error) {}
+		if (result) {
+			return result;
+		} else {
+			const result = await Bot.bot.users.fetch(id);
+			if (result) {
+				return result;
+			}
+		}
+	} else if (id) {
 		const result = await Bot.bot.users.fetch(id);
 		if (result) {
 			return result;
