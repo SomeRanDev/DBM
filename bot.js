@@ -1725,14 +1725,23 @@ Actions.findMemberOrUserFromName = async function (name, server) {
 Actions.findMemberOrUserFromID = async function (id, server) {
 	if (!Bot.hasMemberIntents) {
 		PrintError(MsgType.MISSING_MEMBER_INTENT_FIND_USER_ID);
+		return null;
 	}
-	if (id) {
-		const result = await Bot.bot.users.fetch(id);
-		if (result) {
-			return result;
-		}
-	} else {
+	if (!id) {
 		PrintError(MsgType.CANNOT_FIND_USER_BY_ID, id);
+		return null;
+	}
+
+	if (server) {
+		const member = await server.members.fetch(id).catch(noop);
+		if (member) {
+			return member;
+		}
+	}
+
+	const user = await Bot.bot.users.fetch(id).catch(noop);
+	if (user) {
+		return user;
 	}
 	return null;
 };
