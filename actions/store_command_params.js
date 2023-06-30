@@ -21,7 +21,7 @@ module.exports = {
 	// This is the section the action will fall into.
 	//---------------------------------------------------------------------
 
-	section: "Other Stuff",
+	section: "Command Control",
 
 	//---------------------------------------------------------------------
 	// Action Subtitle
