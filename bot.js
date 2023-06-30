@@ -3247,7 +3247,7 @@ Audio.Subscription = class {
 		}
 
 		if (this.queue.length === 0) {
-			const leaveVoiceTimeout = Files.data.settings.leaveVoiceTimeout ?? "0";
+			const leaveVoiceTimeout = Files.data.settings.leaveVoiceTimeout ?? "10";
 			let seconds = parseInt(leaveVoiceTimeout, 10);
 
 			if (isNaN(seconds) || seconds < 0) seconds = 0;
