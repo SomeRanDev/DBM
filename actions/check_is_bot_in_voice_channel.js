@@ -102,9 +102,9 @@ module.exports = {
 		const Audio = this.getDBM().Audio;
 		let result = false;
 		if (cache.server) {
-			result = Audio.getSubscription(cache.server);
+			result = !!Audio.getSubscription(cache.server);
 			if (!result) {
-				result = !!cache.server.members?.me?.voice?.channel;
+				result = !!cache.server.members?.me?.voice?.channelId;
 			}
 		}
 		this.executeResults(result, data?.branch ?? data, cache);
