@@ -194,7 +194,6 @@ module.exports = {
 			}
 
 			components = newComponents;
-			console.log(components);
 		}
 
 		if (components) {
