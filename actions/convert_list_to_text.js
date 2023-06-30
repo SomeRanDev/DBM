@@ -132,17 +132,12 @@ module.exports = {
 
 	async action(cache) {
 		const data = cache.actions[cache.index];
-		const list = await this.getListFromData(data.list, data.varName, cache);
+		const list = (await this.getListFromData(data.list, data.varName, cache)) ?? [];
 
 		const start = this.evalMessage(data.start, cache).replace("\\n", "\n");
 		const middle = this.evalMessage(data.middle, cache).replace("\\n", "\n");
 		const end = this.evalMessage(data.end, cache).replace("\\n", "\n");
 		let result = "";
-
-		if (!list) {
-			this.callNextAction(cache);
-			return;
-		}
 
 		for (let i = 0; i < list.length; i++) {
 			if (i === 0) {
@@ -152,7 +147,7 @@ module.exports = {
 			}
 		}
 
-		if (result) {
+		if (typeof result === "string") {
 			const varName2 = this.evalMessage(data.varName2, cache);
 			const storage2 = parseInt(data.storage, 10);
 			this.storeValue(result, storage2, varName2, cache);
