@@ -204,17 +204,19 @@ module.exports = {
 			if (select) {
 				if (!select.options) select.options = [];
 				if (newOptionData) {
-					select.options.push({ ...newOptionData });
+					select.addOptions({ ...newOptionData });
 				} else if (removeOptionValue) {
-					select.options = select.options.filter((o) => o.value !== removeOptionValue);
+					select.setOptions(select.options.filter((o) => o.value !== removeOptionValue));
 				} else if (removeOptionLabel) {
-					select.options = select.options.filter((o) => o.label !== removeOptionLabel);
+					select.setOptions(select.options.filter((o) => o.label !== removeOptionLabel));
 				}
 			}
 		};
 
 		let components = null;
 		let searchValue = null;
+
+		const { StringSelectMenuBuilder } = this.getDBM().DiscordJS;
 
 		if (message?.components) {
 			const { ActionRowBuilder, ComponentType } = this.getDBM().DiscordJS;
@@ -224,19 +226,21 @@ module.exports = {
 			for (let i = 0; i < oldComponents.length; i++) {
 				const compData = oldComponents[i];
 				const comps = compData instanceof ActionRowBuilder ? compData.toJSON() : compData;
+				const newComps = [];
 
 				for (let j = 0; j < comps.components.length; j++) {
-					const comp = comps.components[j];
+					const comp = StringSelectMenuBuilder.from(comps.components[j]);
+					const compData = comp.data;
 
 					switch (type) {
 						case "allSelects": {
-							if (comp.type === 3 || comp.type === ComponentType.SelectMenu) {
+							if (compData.type === 3 || compData.type === ComponentType.SelectMenu) {
 								onSelectMenuFound(comp);
 							}
 							break;
 						}
 						case "sourceSelect": {
-							if (comp.custom_id === sourceSelect) {
+							if (compData.custom_id === sourceSelect) {
 								onSelectMenuFound(comp);
 							}
 							break;
@@ -246,18 +250,23 @@ module.exports = {
 								searchValue = this.evalMessage(data.searchValue, cache);
 							}
 							if (
-								comp.custom_id === searchValue ||
-								comp.customId === searchValue ||
-								comp.label === searchValue
+								compData.custom_id === searchValue ||
+								compData.customId === searchValue ||
+								compData.label === searchValue
 							) {
 								onSelectMenuFound(comp);
 							}
 							break;
 						}
 					}
+
+					newComps.push(comp);
 				}
 
-				newComponents.push(comps);
+				newComponents.push(ActionRowBuilder.from({
+					data: oldComponents.data,
+					components: newComps
+				}));
 			}
 
 			components = newComponents;

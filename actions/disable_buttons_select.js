@@ -141,16 +141,18 @@ module.exports = {
 		let searchValue = null;
 
 		if (message?.components) {
-			const { ActionRowBuilder, ComponentType } = this.getDBM().DiscordJS;
+			const { ActionRowBuilder, ComponentType, Component } = this.getDBM().DiscordJS;
 			const oldComponents = message.components;
 			const newComponents = [];
 
 			for (let i = 0; i < oldComponents.length; i++) {
 				const compData = oldComponents[i];
-				const comps = compData instanceof ActionRowBuilder ? compData.toJSON() : compData;
+				const rowComps = compData instanceof ActionRowBuilder ? compData.toJSON() : compData;
+				const newRowComps = [];
 
-				for (let j = 0; j < comps.components.length; j++) {
-					const comp = comps.components[j];
+				for (let j = 0; j < rowComps.components.length; j++) {
+					const compStructure = rowComps.components[j];
+					const comp = compStructure instanceof Component ? compStructure.toJSON() : compStructure;
 					const id = comp.custom_id ?? comp.customId;
 
 					switch (type) {
@@ -181,12 +183,18 @@ module.exports = {
 							break;
 						}
 					}
+
+					newRowComps.push(comp);
 				}
 
-				newComponents.push(comps);
+				newComponents.push(ActionRowBuilder.from({
+					data: oldComponents.data,
+					components: newRowComps
+				}));
 			}
 
 			components = newComponents;
+			console.log(components);
 		}
 
 		if (components) {
