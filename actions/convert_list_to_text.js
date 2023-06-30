@@ -139,6 +139,11 @@ module.exports = {
 		const end = this.evalMessage(data.end, cache).replace("\\n", "\n");
 		let result = "";
 
+		if (!list) {
+			this.callNextAction(cache);
+			return;
+		}
+
 		for (let i = 0; i < list.length; i++) {
 			if (i === 0) {
 				result += start + String(list[i]) + end;
