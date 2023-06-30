@@ -199,7 +199,7 @@ module.exports = {
 		const waitForCompletion = data.type === "true";
 
 		const act = actions[0];
-		if (act && this.exists(act.name)) {
+		if (list && act && this.exists(act.name)) {
 			const looper = (i) => {
 				if (!list[i]) {
 					if (waitForCompletion) {

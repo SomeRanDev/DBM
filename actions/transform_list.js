@@ -128,7 +128,7 @@ module.exports = {
 
 	async action(cache) {
 		const data = cache.actions[cache.index];
-		const list = await this.getListFromData(data.list, data.varName, cache);
+		const list = (await this.getListFromData(data.list, data.varName, cache)) ?? [];
 
 		let result = [];
 		const code = this.evalMessage(data.transform, cache);
