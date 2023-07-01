@@ -809,7 +809,7 @@ module.exports = {
 			this.storeValue(messageOptions, storage, varName2, cache);
 			this.callNextAction(cache);
 		} else if (Array.isArray(target)) {
-			this.callListFunc(target, "send", [messageOptions]).then(onComplete);
+			this.callListFunc(target, "send", [messageOptions]).then(() => onComplete());
 		} else if (isEdit === 2) {
 			let promise = null;
 
