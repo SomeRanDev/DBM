@@ -4,6 +4,7 @@
   "description": "for dbm development",
   "main": "bin/bot.js",
   "scripts": {
+    "build": "npx ts-node build.ts",
     "prettier:check": "npx prettier --check **/*.js",
     "prettier:fix": "npx prettier --write **/*.js"
   },
@@ -12,7 +13,9 @@
     "@discordjs/voice": "^0.16.0",
     "discord.js": "^14.11.0",
     "ffmpeg-static": "^4.4.0",
+    "ts-node": "^10.9.1",
     "tweetnacl": "^1.0.3",
+    "typescript": "^5.1.6",
     "youtube-dl-exec": "^1.2.12",
     "ytdl-core": "^4.9.1"
   },
