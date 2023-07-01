@@ -116,10 +116,10 @@ module.exports = {
 
 		if (Array.isArray(target)) {
 			this.callListFunc(target, "send", [{ content: this.evalMessage(message, cache), tts: true }]).then(
-				(resultMsg) => {
+				(resultMsgList) => {
 					const varName2 = this.evalMessage(data.varName2, cache);
 					const storage = parseInt(data.storage, 10);
-					this.storeValue(resultMsg, storage, varName2, cache);
+					this.storeValue(resultMsgList, storage, varName2, cache);
 					this.callNextAction(cache);
 				},
 			);

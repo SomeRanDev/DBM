@@ -142,8 +142,8 @@ module.exports = {
 
 				if (Array.isArray(target)) {
 					this.callListFunc(target, "send", [obj])
-						.then((msg) => {
-							this.storeValue(msg, storage2, varName3, cache);
+						.then((msgList) => {
+							this.storeValue(msgList, storage2, varName3, cache);
 							this.callNextAction(cache);
 						})
 						.catch((err) => this.displayError(data, cache, err));
