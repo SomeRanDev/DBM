@@ -1,4 +1,7 @@
-module.exports = {
+import * as djs from "discord.js";
+import Action from "../bot.ts";
+
+export default {
 	//---------------------------------------------------------------------
 	// Action Name
 	//
@@ -21,7 +24,7 @@ module.exports = {
 	// This function generates the subtitle displayed next to the name.
 	//---------------------------------------------------------------------
 
-	subtitle(data, presets) {
+	subtitle(data: any, presets: any): string {
 		return `${presets.getMemberText(data.member, data.varName)}`;
 	},
 
@@ -58,7 +61,7 @@ module.exports = {
 	// so edit the HTML to reflect this.
 	//---------------------------------------------------------------------
 
-	html(isEvent, data) {
+	html(isEvent: boolean, data: any): string {
 		return `
 <member-input dropdownLabel="Member" selectId="member" variableContainerId="varNameContainer" variableInputId="varName"></member-input>
 
@@ -93,24 +96,23 @@ module.exports = {
 	// so be sure to provide checks for variable existence.
 	//---------------------------------------------------------------------
 
-	async action(cache) {
-		const data = cache.actions[cache.index];
-		const member = await this.getMemberFromData(data.member, data.varName, cache);
-		const reason = this.evalMessage(data.reason, cache);
-		const days = parseInt(data.days, 10) || 0;
-		const banObject = { deleteMessageSeconds: days * 24 * 60 * 60, reason };
+	async action(this: typeof Action, cache: any): Promise<void> {
+		const data: any = cache.actions[cache.index];
+		const member: djs.GuildMember | djs.GuildMember[] | null = await this.getMemberFromData(data.member, data.varName, cache);
+		const reason: string = this.evalMessage(data.reason, cache);
+		const days: number = parseInt(data.days, 10) || 0;
+		const banOptions: djs.BanOptions = { deleteMessageSeconds: days * 24 * 60 * 60, reason };
 
-		if (Array.isArray(member)) {
-			this.callListFunc(member, "ban", [{ banObject }])
-				.then(() => this.callNextAction(cache))
-				.catch((err) => this.displayError(data, cache, err));
-		} else if (member?.ban) {
-			member
-				.ban({ banObject })
-				.then(() => this.callNextAction(cache))
-				.catch((err) => this.displayError(data, cache, err));
+		try {
+			if (Array.isArray(member)) {
+				await this.callListFunc(member, "ban", [banOptions])
+			} else if (member?.ban) {
+				await member.ban(banOptions);
+			}
+			this.callNextAction(cache);
+		} catch(err: any) {
+			this.displayError(data, cache, err)
 		}
-		this.callNextAction(cache);
 	},
 
 	//---------------------------------------------------------------------
