@@ -2,14 +2,14 @@
   "name": "dbm",
   "version": "2.2.0",
   "description": "for dbm development",
-  "main": "bot.js",
+  "main": "bin/bot.js",
   "scripts": {
     "prettier:check": "npx prettier --check **/*.js",
     "prettier:fix": "npx prettier --write **/*.js"
   },
   "dependencies": {
-    "@discordjs/opus": "^0.6.0",
-    "@discordjs/voice": "^0.7.5",
+    "@discordjs/opus": "^0.9.0",
+    "@discordjs/voice": "^0.16.0",
     "discord.js": "^14.11.0",
     "ffmpeg-static": "^4.4.0",
     "tweetnacl": "^1.0.3",
