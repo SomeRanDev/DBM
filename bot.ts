@@ -7,19 +7,25 @@
 import * as djs from "discord.js"
 import * as djsvoice from "@discordjs/voice"
 
-const DBM: any = {};
-DBM.version = "2.2.0";
+interface DBM {
+	version: string;
+	DiscordJS: typeof djs;
+	requiredDjsVersion: string;
+}
 
-const DiscordJS = (DBM.DiscordJS = require("discord.js"));
+const DBM: DBM = {
+	version: (await import("./package.json")).default.version;
+	DiscordJS: (await import("discord.js"));
+	requiredDjsVersion: "14.11.0";
+};
 
-const requiredDjsVersion = "14.11.0";
-if (requiredDjsVersion.localeCompare(DiscordJS.version, undefined, { numeric: true, sensitivity: "base" }) > 0) {
+if (DBM.requiredDjsVersion.localeCompare(DBM.DiscordJS.version, undefined, { numeric: true, sensitivity: "base" }) > 0) {
 	console.log(
-		`This version of Discord Bot Maker requires discord.js ${requiredDjsVersion}+.
-It is currently ${DiscordJS.version}.
-Please use "Project > Module Manager" and "Project > Reinstall Node Modules" to update to discord.js ${requiredDjsVersion}.\n\n`,
+		`This version of Discord Bot Maker requires discord.js ${DBM.requiredDjsVersion}+.
+It is currently ${DBM.DiscordJS.version}.
+Please use "Project > Module Manager" and "Project > Reinstall Node Modules" to update to discord.js ${DBM.requiredDjsVersion}.\n\n`,
 	);
-	throw new Error(`Need discord.js ${requiredDjsVersion} to run!!!`);
+	throw new Error(`Need discord.js ${DBM.requiredDjsVersion} to run!!!`);
 }
 
 const noop = () => void 0;
@@ -29,7 +35,40 @@ const noop = () => void 0;
 // Gathered all the output messages in single place for easier translation.
 //---------------------------------------------------------------------
 
-const MsgType = {
+enum MsgType {
+	MISSING_ACTION = 0,
+	DATA_PARSING_ERROR = 1,
+	MISSING_ACTIONS = 2,
+	DUPLICATE_SLASH_COMMAND = 3,
+	INVALID_SLASH_NAME = 4,
+	DUPLICATE_USER_COMMAND = 5,
+	DUPLICATE_MESSAGE_COMMAND = 6,
+	DUPLICATE_SLASH_PARAMETER = 7,
+	INVALID_SLASH_PARAMETER_NAME = 8,
+	INVALID_SLASH_COMMAND_SERVER_ID = 9,
+	DUPLICATE_BUTTON_ID = 10,
+	DUPLICATE_SELECT_ID = 11,
+	TOO_MANY_SPACES_SLASH_NAME = 12,
+	SUB_COMMAND_ALREADY_EXISTS = 13,
+	SUB_COMMAND_GROUP_ALREADY_EXISTS = 14,
+
+	MISSING_APPLICATION_COMMAND_ACCESS = 100,
+	MISSING_MUSIC_MODULES = 101,
+
+	MUTABLE_VOLUME_DISABLED = 200,
+	MUTABLE_VOLUME_NOT_IN_CHANNEL = 201,
+	ERROR_GETTING_YT_INFO = 202,
+	ERROR_CREATING_AUDIO = 203,
+
+	MISSING_MEMBER_INTENT_FIND_USER_ID = 300,
+	CANNOT_FIND_USER_BY_ID = 301,
+
+	SERVER_MESSAGE_INTENT_REQUIRED = 400,
+	CHANNEL_PARTIAL_REQUIRED = 401,
+
+}
+
+/* const MsgType = {
 	MISSING_ACTION: 0,
 	DATA_PARSING_ERROR: 1,
 	MISSING_ACTIONS: 2,
@@ -60,10 +99,10 @@ const MsgType = {
 
 	SERVER_MESSAGE_INTENT_REQUIRED: 400,
 	CHANNEL_PARTIAL_REQUIRED: 401,
-};
+}; */
 
-function PrintError(type, ...args: any[]) {
-	const { format } = require("node:util");
+function PrintError(type: MsgType, ...args: any[]) {
+	const { format } = (await import("node:util"));
 	const { error, warn } = console;
 
 	switch (type) {
