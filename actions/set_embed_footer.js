@@ -97,7 +97,7 @@ module.exports = {
 		const storage = parseInt(data.storage, 10);
 		const varName = this.evalMessage(data.varName, cache);
 		let embed = this.getVariable(storage, varName, cache);
-		
+
 		const { EmbedBuilder } = this.getDBM().DiscordJS;
 		embed = EmbedBuilder.from(embed).setFooter({
 			text: this.evalMessage(data.message, cache),

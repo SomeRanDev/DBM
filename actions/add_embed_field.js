@@ -116,7 +116,7 @@ module.exports = {
 		const name = this.evalMessage(data.fieldName, cache);
 		const message = this.evalMessage(data.message, cache);
 		const inline = data.inline === "0";
-		
+
 		const { EmbedBuilder } = this.getDBM().DiscordJS;
 		embed = EmbedBuilder.from(embed).addFields({ name, value: message, inline });
 

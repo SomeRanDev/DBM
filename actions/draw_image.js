@@ -130,7 +130,6 @@ module.exports = {
 			return;
 		}
 
-
 		const x = parseInt(this.evalMessage(data.x, cache), 10);
 		const y = parseInt(this.evalMessage(data.y, cache), 10);
 		const mask = data.mask;

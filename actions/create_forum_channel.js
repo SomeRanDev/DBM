@@ -260,7 +260,8 @@ module.exports = {
 
 		// ThreadAutoArchiveDuration
 		// https://discord-api-types.dev/api/discord-api-types-v10/enum/ThreadAutoArchiveDuration
-		channelData.autoArchiveDuration = data.options.autoArchiveDuration === "max" ? 10080 : parseInt(data.autoArchiveDuration, 10);
+		channelData.autoArchiveDuration =
+			data.options.autoArchiveDuration === "max" ? 10080 : parseInt(data.autoArchiveDuration, 10);
 
 		// SortOrderType
 		// https://discord-api-types.dev/api/discord-api-types-v10/enum/SortOrderType
@@ -273,12 +274,12 @@ module.exports = {
 		// GuildForumTagData
 		// https://discord.js.org/#/docs/discord.js/main/typedef/GuildForumTagData
 		if (data.options.tags.length > 0) {
-			channelData.availableTags = data.options.tags.map(tagData => {
+			channelData.availableTags = data.options.tags.map((tagData) => {
 				const result = {
 					name: this.evalMessage(tagData.name, cache),
 					moderated: tagData.moderated === "yes",
-				}
-				if(tagData.emoji) {
+				};
+				if (tagData.emoji) {
 					result = this.evalMessage(tagData.emoji, cache);
 				}
 				return result;

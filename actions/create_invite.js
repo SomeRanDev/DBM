@@ -156,7 +156,7 @@ module.exports = {
 			this.callListFunc(channel, "createInvite", [options]).then((invite) => {
 				const varName2 = this.evalMessage(data.varName2, cache);
 				const storage2 = parseInt(data.storage, 10);
-				this.storeValue(invite.map(i => i.url).join("\n"), storage2, varName2, cache);
+				this.storeValue(invite.map((i) => i.url).join("\n"), storage2, varName2, cache);
 				this.callNextAction(cache);
 			});
 		} else if (channel?.createInvite) {
