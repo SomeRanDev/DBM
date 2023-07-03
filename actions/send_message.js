@@ -626,11 +626,13 @@ module.exports = {
 				if (embedData.description) embed.setDescription(this.evalMessage(embedData.description, cache));
 
 				if (embedData.fields?.length > 0) {
-					embed.addFields(embedData.fields.map((f) => ({
-						name: this.evalMessage(f.name, cache),
-						value: this.evalMessage(f.value, cache),
-						inline: f.inline === "true",
-					})));
+					embed.addFields(
+						embedData.fields.map((f) => ({
+							name: this.evalMessage(f.name, cache),
+							value: this.evalMessage(f.value, cache),
+							inline: f.inline === "true",
+						})),
+					);
 				}
 
 				if (embedData.author) {

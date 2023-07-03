@@ -263,10 +263,12 @@ module.exports = {
 					newComps.push(comp);
 				}
 
-				newComponents.push(ActionRowBuilder.from({
-					data: oldComponents.data,
-					components: newComps
-				}));
+				newComponents.push(
+					ActionRowBuilder.from({
+						data: oldComponents.data,
+						components: newComps,
+					}),
+				);
 			}
 
 			components = newComponents;
