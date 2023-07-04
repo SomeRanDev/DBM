@@ -4,22 +4,30 @@
  * Robert Borghese
  ******************************************************/
 
-import * as djs from "discord.js"
-import * as djsvoice from "@discordjs/voice"
+import * as djs from "discord.js";
+import * as djsvoice from "@discordjs/voice";
+import { format } from "node:util"
 
-const DBM: any = {};
-DBM.version = "2.2.0";
+/* interface DBM {
+	version: string;
+	DiscordJS: typeof djs;
+	requiredDjsVersion: string;
+	Bot?: any;
+} */
 
-const DiscordJS = (DBM.DiscordJS = require("discord.js"));
+const DBM: any = {
+	version: (await import("./package.json")).default.version,
+	DiscordJS: (await import("discord.js")),
+	requiredDjsVersion: "14.11.0",
+};
 
-const requiredDjsVersion = "14.11.0";
-if (requiredDjsVersion.localeCompare(DiscordJS.version, undefined, { numeric: true, sensitivity: "base" }) > 0) {
+if (DBM.requiredDjsVersion.localeCompare(DBM.DiscordJS.version, undefined, { numeric: true, sensitivity: "base" }) > 0) {
 	console.log(
-		`This version of Discord Bot Maker requires discord.js ${requiredDjsVersion}+.
-It is currently ${DiscordJS.version}.
-Please use "Project > Module Manager" and "Project > Reinstall Node Modules" to update to discord.js ${requiredDjsVersion}.\n\n`,
+		`This version of Discord Bot Maker requires discord.js ${DBM.requiredDjsVersion}+.
+It is currently ${DBM.DiscordJS.version}.
+Please use "Project > Module Manager" and "Project > Reinstall Node Modules" to update to discord.js ${DBM.requiredDjsVersion}.\n\n`,
 	);
-	throw new Error(`Need discord.js ${requiredDjsVersion} to run!!!`);
+	throw new Error(`Need discord.js ${DBM.requiredDjsVersion} to run!!!`);
 }
 
 const noop = () => void 0;
@@ -29,7 +37,40 @@ const noop = () => void 0;
 // Gathered all the output messages in single place for easier translation.
 //---------------------------------------------------------------------
 
-const MsgType = {
+enum MsgType {
+	MISSING_ACTION = 0,
+	DATA_PARSING_ERROR = 1,
+	MISSING_ACTIONS = 2,
+	DUPLICATE_SLASH_COMMAND = 3,
+	INVALID_SLASH_NAME = 4,
+	DUPLICATE_USER_COMMAND = 5,
+	DUPLICATE_MESSAGE_COMMAND = 6,
+	DUPLICATE_SLASH_PARAMETER = 7,
+	INVALID_SLASH_PARAMETER_NAME = 8,
+	INVALID_SLASH_COMMAND_SERVER_ID = 9,
+	DUPLICATE_BUTTON_ID = 10,
+	DUPLICATE_SELECT_ID = 11,
+	TOO_MANY_SPACES_SLASH_NAME = 12,
+	SUB_COMMAND_ALREADY_EXISTS = 13,
+	SUB_COMMAND_GROUP_ALREADY_EXISTS = 14,
+
+	MISSING_APPLICATION_COMMAND_ACCESS = 100,
+	MISSING_MUSIC_MODULES = 101,
+
+	MUTABLE_VOLUME_DISABLED = 200,
+	MUTABLE_VOLUME_NOT_IN_CHANNEL = 201,
+	ERROR_GETTING_YT_INFO = 202,
+	ERROR_CREATING_AUDIO = 203,
+
+	MISSING_MEMBER_INTENT_FIND_USER_ID = 300,
+	CANNOT_FIND_USER_BY_ID = 301,
+
+	SERVER_MESSAGE_INTENT_REQUIRED = 400,
+	CHANNEL_PARTIAL_REQUIRED = 401,
+
+}
+
+/* const MsgType = {
 	MISSING_ACTION: 0,
 	DATA_PARSING_ERROR: 1,
 	MISSING_ACTIONS: 2,
@@ -60,10 +101,9 @@ const MsgType = {
 
 	SERVER_MESSAGE_INTENT_REQUIRED: 400,
 	CHANNEL_PARTIAL_REQUIRED: 401,
-};
+}; */
 
-function PrintError(type, ...args: any[]) {
-	const { format } = require("node:util");
+function PrintError(type: MsgType, ...args: any[]) {
 	const { error, warn } = console;
 
 	switch (type) {
@@ -266,7 +306,7 @@ function PrintError(type, ...args: any[]) {
 	}
 }
 
-function GetActionErrorText(location, index, dataName) {
+function GetActionErrorText(location: string, index: number, dataName: string) {
 	return "Error with the " + location + (dataName ? ` - Action #${index} (${dataName})` : "");
 }
 
@@ -277,46 +317,67 @@ function GetActionErrorText(location, index, dataName) {
 // Contains functions for controlling the bot.
 //---------------------------------------------------------------------
 
-const Bot: any = (DBM.Bot = {});
+/* interface Bot {
+	$slash: unknown;
+	$user: unknown;
+	$msge: unknown;
 
-Bot.$slash = {}; // Slash commands
-Bot.$user = {}; // User commands
-Bot.$msge = {}; // Message commands
+	$button: unknown;
+	$select: unknown;
 
-Bot.$button = {}; // Button interactions
-Bot.$select = {}; // Select interactions
+	$cmds: unknown;
+	$icds: Array<unknown>;
+	$regx: Array<unknown>;
+	$anym: Array<unknown>;
 
-Bot.$cmds = {}; // Normal commands
-Bot.$icds = []; // Includes word commands
-Bot.$regx = []; // Regular Expression commands
-Bot.$anym = []; // Any message commands
+	$other: unknown;
+	$evts: unknown;
+	bot: any;
+	applicationCommandData: Array<unknown>;
+} */
 
-Bot.$other = {}; // Manual commands
+// const Bot: any = (DBM.Bot = {});
 
-Bot.$evts = {}; // Events
+const Bot: any = {
+	$slash: {}, 	// Slash commands
+	$user: {}, 		// User commands
+	$msge: {}, 		// Message commands
 
-Bot.bot = null;
-Bot.applicationCommandData = [];
+	$button: {}, 	// Button interactions
+	$select: {}, 	// Select interactions
+
+	$cmds: {}, 		// Normal commands
+	$icds: [], 		// Includes word commands
+	$regx: [], 		// Regular Expression commands
+	$anym: [], 		// Any message commands
+
+	$other: {}, 	// Manual commands
+
+	$evts: {}, 		// Events
+
+	bot: null,
+	applicationCommandData: [],
+}
 
 Bot.PRIVILEGED_INTENTS =
-	DiscordJS.IntentsBitField.Flags.GuildMembers |
-	DiscordJS.IntentsBitField.Flags.GuildPresences |
-	DiscordJS.IntentsBitField.Flags.MessageContent;
+	DBM.DiscordJS.IntentsBitField.Flags.GuildMembers |
+	DBM.DiscordJS.IntentsBitField.Flags.GuildPresences |
+	DBM.DiscordJS.IntentsBitField.Flags.MessageContent;
 
 Bot.NON_PRIVILEGED_INTENTS =
-	DiscordJS.IntentsBitField.Flags.Guilds |
-	DiscordJS.IntentsBitField.Flags.GuildBans |
-	DiscordJS.IntentsBitField.Flags.GuildEmojisAndStickers |
-	DiscordJS.IntentsBitField.Flags.GuildIntegrations |
-	DiscordJS.IntentsBitField.Flags.GuildWebhooks |
-	DiscordJS.IntentsBitField.Flags.GuildInvites |
-	DiscordJS.IntentsBitField.Flags.GuildVoiceStates |
-	DiscordJS.IntentsBitField.Flags.GuildMessages |
-	DiscordJS.IntentsBitField.Flags.GuildMessageReactions |
-	DiscordJS.IntentsBitField.Flags.GuildMessageTyping |
-	DiscordJS.IntentsBitField.Flags.DirectMessages |
-	DiscordJS.IntentsBitField.Flags.DirectMessageReactions |
-	DiscordJS.IntentsBitField.Flags.DirectMessageTyping;
+	DBM.DiscordJS.IntentsBitField.Flags.Guilds |
+	DBM.DiscordJS.IntentsBitField.Flags.GuildBans |
+	DBM.DiscordJS.IntentsBitField.Flags.GuildEmojisAndStickers |
+	DBM.DiscordJS.IntentsBitField.Flags.GuildIntegrations |
+	DBM.DiscordJS.IntentsBitField.Flags.GuildWebhooks |
+	DBM.DiscordJS.IntentsBitField.Flags.GuildInvites |
+	DBM.DiscordJS.IntentsBitField.Flags.GuildVoiceStates |
+	DBM.DiscordJS.IntentsBitField.Flags.GuildMessages |
+	DBM.DiscordJS.IntentsBitField.Flags.GuildMessageReactions |
+	DBM.DiscordJS.IntentsBitField.Flags.GuildMessageTyping |
+	DBM.DiscordJS.IntentsBitField.Flags.DirectMessages |
+	DBM.DiscordJS.IntentsBitField.Flags.DirectMessageReactions |
+	DBM.DiscordJS.IntentsBitField.Flags.DirectMessageTyping;
 
 Bot.ALL_INTENTS = Bot.PRIVILEGED_INTENTS | Bot.NON_PRIVILEGED_INTENTS;
 
@@ -335,9 +396,9 @@ Bot.initBot = function () {
 	if (this.usePartials()) {
 		options.partials = this.partials();
 	}
-	this.hasMemberIntents = (options.intents & DiscordJS.IntentsBitField.Flags.GuildMembers) !== 0;
-	this.hasMessageContentIntents = (options.intents & DiscordJS.IntentsBitField.Flags.MessageContent) !== 0;
-	this.bot = new DiscordJS.Client(options);
+	this.hasMemberIntents = (options.intents & DBM.DiscordJS.IntentsBitField.Flags.GuildMembers) !== 0;
+	this.hasMessageContentIntents = (options.intents & DBM.DiscordJS.IntentsBitField.Flags.MessageContent) !== 0;
+	this.bot = new DBM.DiscordJS.Client(options);
 };
 
 Bot.makeClientOptions = function () {
@@ -360,7 +421,7 @@ Bot.setupBot = function () {
 	this.bot.on("raw", this.onRawData);
 };
 
-Bot.onRawData = function (packet) {
+Bot.onRawData = function (packet: any) {
 	if (packet.t !== "MESSAGE_REACTION_ADD" || packet.t !== "MESSAGE_REACTION_REMOVE") return;
 
 	const client = Bot.bot;
@@ -369,7 +430,7 @@ Bot.onRawData = function (packet) {
 
 	channel.messages
 		.fetch(packet.d.message_id)
-		.then((message) => {
+		.then((message: djs.Message) => {
 			const emoji = packet.d.emoji.id ? `${packet.d.emoji.name}:${packet.d.emoji.id}` : packet.d.emoji.name;
 			const reaction = message.reactions.resolve(emoji);
 			if (packet.t === "MESSAGE_REACTION_ADD") {
@@ -502,15 +563,15 @@ Bot.createApiJsonFromCommand = function (com, name) {
 	};
 	switch (com.comType) {
 		case "4": {
-			result.type = DiscordJS.ApplicationCommandType.ChatInput;
+			result.type = DBM.DiscordJS.ApplicationCommandType.ChatInput;
 			break;
 		}
 		case "5": {
-			result.type = DiscordJS.ApplicationCommandType.User;
+			result.type = DBM.DiscordJS.ApplicationCommandType.User;
 			break;
 		}
 		case "6": {
-			result.type = DiscordJS.ApplicationCommandType.Message;
+			result.type = DBM.DiscordJS.ApplicationCommandType.Message;
 			break;
 		}
 	}
@@ -521,7 +582,7 @@ Bot.createApiJsonFromCommand = function (com, name) {
 };
 
 Bot.mergeSubCommandIntoCommandData = function (names, data) {
-	data.type = DiscordJS.ApplicationCommandOptionType.Subcommand;
+	data.type = DBM.DiscordJS.ApplicationCommandOptionType.Subcommand;
 
 	const baseName = names[0];
 	let baseCommand = this.applicationCommandData.find((data) => data.name === baseName) ?? null;
@@ -540,7 +601,7 @@ Bot.mergeSubCommandIntoCommandData = function (names, data) {
 		}
 		if (
 			baseCommand.options.find(
-				(d) => d.name === data.name && d.type === DiscordJS.ApplicationCommandOptionType.SubcommandGroup,
+				(d) => d.name === data.name && d.type === DBM.DiscordJS.ApplicationCommandOptionType.SubcommandGroup,
 			)
 		) {
 			PrintError(MsgType.SUB_COMMAND_GROUP_ALREADY_EXISTS, names.join(" "));
@@ -558,11 +619,11 @@ Bot.mergeSubCommandIntoCommandData = function (names, data) {
 			baseGroup = {
 				name: groupName,
 				description: this.getNoDescriptionText(),
-				type: DiscordJS.ApplicationCommandOptionType.SubcommandGroup,
+				type: DBM.DiscordJS.ApplicationCommandOptionType.SubcommandGroup,
 				options: [],
 			};
 			baseCommand.options.push(baseGroup);
-		} else if (baseGroup.type === DiscordJS.ApplicationCommandOptionType.Subcommand) {
+		} else if (baseGroup.type === DBM.DiscordJS.ApplicationCommandOptionType.Subcommand) {
 			PrintError(MsgType.SUB_COMMAND_ALREADY_EXISTS, names.join(" "), `${names[0]} ${names[1]}`);
 			return;
 		}
@@ -645,7 +706,7 @@ Bot.validateSlashCommandParameters = function (parameters, commandName) {
 };
 
 Bot.convertStringCommandParamTypeToEnum = function (paramTypeStr) {
-	const optionType = DiscordJS.ApplicationCommandOptionType;
+	const optionType = DBM.DiscordJS.ApplicationCommandOptionType;
 	switch (paramTypeStr) {
 		case "SUB_COMMAND":
 			return optionType.Subcommand;
@@ -1026,9 +1087,9 @@ Bot.onInteraction = function (interaction) {
 	} else if (interaction.isModalSubmit()) {
 		Actions.checkModalSubmitResponses(interaction);
 	} else {
-		if (interaction.component?.type === DiscordJS.ComponentType.Button) {
+		if (interaction.component?.type === DBM.DiscordJS.ComponentType.Button) {
 			interaction._button = interaction.component;
-		} else if (interaction.component?.type === DiscordJS.ComponentType.SelectMenu) {
+		} else if (interaction.component?.type === DBM.DiscordJS.ComponentType.SelectMenu) {
 			interaction._select = interaction.component;
 		}
 		if (!Actions.checkTemporaryInteractionResponses(interaction)) {
@@ -1089,7 +1150,7 @@ Bot.onMessageContextMenuInteraction = function (interaction) {
 	const interactionName = interaction.commandName;
 	if (this.$msge[interactionName]) {
 		const msg = interaction.targetMessage;
-		if (!(msg instanceof DiscordJS.Message) && interaction.channel) {
+		if (!(msg instanceof DBM.DiscordJS.Message) && interaction.channel) {
 			interaction.channel.messages
 				.fetch(interaction.targetId)
 				.then((message) => {
@@ -1689,25 +1750,25 @@ Actions.getParameterFromParameterData = function (option) {
 		// ApplicationCommandOptionType
 		// https://discord-api-types.dev/api/discord-api-types-v10/enum/ApplicationCommandOptionType
 		switch (option?.type) {
-			case DiscordJS.ApplicationCommandOptionType.String:
-			case DiscordJS.ApplicationCommandOptionType.Integer:
-			case DiscordJS.ApplicationCommandOptionType.Boolean:
-			case DiscordJS.ApplicationCommandOptionType.Number: {
+			case DBM.DiscordJS.ApplicationCommandOptionType.String:
+			case DBM.DiscordJS.ApplicationCommandOptionType.Integer:
+			case DBM.DiscordJS.ApplicationCommandOptionType.Boolean:
+			case DBM.DiscordJS.ApplicationCommandOptionType.Number: {
 				return option.value;
 			}
-			case DiscordJS.ApplicationCommandOptionType.User: {
+			case DBM.DiscordJS.ApplicationCommandOptionType.User: {
 				return option.member ?? option.user;
 			}
-			case DiscordJS.ApplicationCommandOptionType.Channel: {
+			case DBM.DiscordJS.ApplicationCommandOptionType.Channel: {
 				return option.channel;
 			}
-			case DiscordJS.ApplicationCommandOptionType.Role: {
+			case DBM.DiscordJS.ApplicationCommandOptionType.Role: {
 				return option.role;
 			}
-			case DiscordJS.ApplicationCommandOptionType.Mentionable: {
+			case DBM.DiscordJS.ApplicationCommandOptionType.Mentionable: {
 				return option.member ?? option.channel ?? option.role ?? option.user;
 			}
-			case DiscordJS.ApplicationCommandOptionType.Attachment: {
+			case DBM.DiscordJS.ApplicationCommandOptionType.Attachment: {
 				return option.attachment?.url ?? "";
 			}
 		}
@@ -2320,9 +2381,9 @@ Actions.generateSubCache = function (cache, actions) {
 };
 
 Actions.generateButton = function (button, cache) {
-	const style = button.url ? DiscordJS.ButtonStyle.Link : this.convertStringButtonStyleToEnum(button.type);
+	const style = button.url ? DBM.DiscordJS.ButtonStyle.Link : this.convertStringButtonStyleToEnum(button.type);
 	const buttonData: djs.APIButtonComponentBase<djs.ButtonStyle> = {
-		type: DiscordJS.ComponentType.Button,
+		type: DBM.DiscordJS.ComponentType.Button,
 		label: this.evalMessage(button.name, cache),
 		style,
 	};
@@ -2340,22 +2401,22 @@ Actions.generateButton = function (button, cache) {
 Actions.convertStringButtonStyleToEnum = function (style) {
 	switch (style) {
 		case "PRIMARY":
-			return DiscordJS.ButtonStyle.Primary;
+			return DBM.DiscordJS.ButtonStyle.Primary;
 		case "SECONDARY":
-			return DiscordJS.ButtonStyle.Secondary;
+			return DBM.DiscordJS.ButtonStyle.Secondary;
 		case "SUCCESS":
-			return DiscordJS.ButtonStyle.Success;
+			return DBM.DiscordJS.ButtonStyle.Success;
 		case "DANGER":
-			return DiscordJS.ButtonStyle.Danger;
+			return DBM.DiscordJS.ButtonStyle.Danger;
 		case "LINK":
-			return DiscordJS.ButtonStyle.Link;
+			return DBM.DiscordJS.ButtonStyle.Link;
 	}
-	return DiscordJS.ButtonStyle.Primary;
+	return DBM.DiscordJS.ButtonStyle.Primary;
 };
 
 Actions.generateSelectMenu = function (select, cache) {
 	const selectData = {
-		type: DiscordJS.ComponentType.SelectMenu,
+		type: DBM.DiscordJS.ComponentType.SelectMenu,
 		customId: this.evalMessage(select.id, cache),
 		placeholder: this.evalMessage(select.placeholder, cache),
 		minValues: parseInt(this.evalMessage(select.min, cache), 10) ?? 1,
@@ -2372,7 +2433,7 @@ Actions.generateSelectMenu = function (select, cache) {
 
 Actions.generateTextInput = function (textInput, defaultCustomId, cache) {
 	const inputTextData = {
-		type: DiscordJS.ComponentType.TextInput,
+		type: DBM.DiscordJS.ComponentType.TextInput,
 		customId: !!textInput.id ? textInput.id : defaultCustomId,
 		label: this.evalMessage(textInput.name, cache),
 		placeholder: this.evalMessage(textInput.placeholder, cache),
@@ -2387,11 +2448,11 @@ Actions.generateTextInput = function (textInput, defaultCustomId, cache) {
 Actions.convertStringTextInputStyleToEnum = function (style) {
 	switch (style) {
 		case "PARAGRAPH":
-			return DiscordJS.TextInputStyle.Paragraph;
+			return DBM.DiscordJS.TextInputStyle.Paragraph;
 		case "SHORT":
-			return DiscordJS.TextInputStyle.Short;
+			return DBM.DiscordJS.TextInputStyle.Short;
 	}
-	return DiscordJS.TextInputStyle.Short;
+	return DBM.DiscordJS.TextInputStyle.Short;
 };
 
 Actions.addButtonToActionRowArray = function (array, rowText, buttonData, cache) {
@@ -2400,7 +2461,7 @@ Actions.addButtonToActionRowArray = function (array, rowText, buttonData, cache)
 		let found = false;
 		for (let i = 0; i < array.length; i++) {
 			if (array[i].length < 5) {
-				if (array[i].length === 0 || array[i][0]?.type === DiscordJS.ComponentType.Button) {
+				if (array[i].length === 0 || array[i][0]?.type === DBM.DiscordJS.ComponentType.Button) {
 					found = true;
 					row = i;
 					break;
@@ -3542,43 +3603,43 @@ Audio.getTrack = function (url, type) {
 // GuildMember
 //---------------------------------------------------------------------
 
-Reflect.defineProperty(DiscordJS.GuildMember.prototype, "unban", {
+Reflect.defineProperty(DBM.DiscordJS.GuildMember.prototype, "unban", {
 	value(server, reason) {
 		return server.bans.remove(this.id, reason);
 	},
 });
 
-Reflect.defineProperty(DiscordJS.GuildMember.prototype, "data", {
+Reflect.defineProperty(DBM.DiscordJS.GuildMember.prototype, "data", {
 	value(name, defaultValue) {
-		return DiscordJS.User.prototype.data.apply(this, arguments);
+		return DBM.DiscordJS.User.prototype.data.apply(this, arguments);
 	},
 });
 
-Reflect.defineProperty(DiscordJS.GuildMember.prototype, "setData", {
+Reflect.defineProperty(DBM.DiscordJS.GuildMember.prototype, "setData", {
 	value(name, value) {
-		return DiscordJS.User.prototype.setData.apply(this, arguments);
+		return DBM.DiscordJS.User.prototype.setData.apply(this, arguments);
 	},
 });
 
-Reflect.defineProperty(DiscordJS.GuildMember.prototype, "addData", {
+Reflect.defineProperty(DBM.DiscordJS.GuildMember.prototype, "addData", {
 	value(name, value) {
-		return DiscordJS.User.prototype.addData.apply(this, arguments);
+		return DBM.DiscordJS.User.prototype.addData.apply(this, arguments);
 	},
 });
 
-Reflect.defineProperty(DiscordJS.GuildMember.prototype, "subData", {
+Reflect.defineProperty(DBM.DiscordJS.GuildMember.prototype, "subData", {
 	value(name, value) {
-		return DiscordJS.User.prototype.subData.apply(this, arguments);
+		return DBM.DiscordJS.User.prototype.subData.apply(this, arguments);
 	},
 });
 
-Reflect.defineProperty(DiscordJS.GuildMember.prototype, "clearData", {
+Reflect.defineProperty(DBM.DiscordJS.GuildMember.prototype, "clearData", {
 	value(name) {
-		return DiscordJS.User.prototype.clearData.apply(this, arguments);
+		return DBM.DiscordJS.User.prototype.clearData.apply(this, arguments);
 	},
 });
 
-Reflect.defineProperty(DiscordJS.GuildMember.prototype, "convertToString", {
+Reflect.defineProperty(DBM.DiscordJS.GuildMember.prototype, "convertToString", {
 	value() {
 		return `mem-${this.id}_s-${this.guild.id}`;
 	},
@@ -3588,7 +3649,7 @@ Reflect.defineProperty(DiscordJS.GuildMember.prototype, "convertToString", {
 // User
 //---------------------------------------------------------------------
 
-Reflect.defineProperty(DiscordJS.User.prototype, "data", {
+Reflect.defineProperty(DBM.DiscordJS.User.prototype, "data", {
 	value(name, defaultValue) {
 		const id = this.id;
 		const data = Files.data.players;
@@ -3606,7 +3667,7 @@ Reflect.defineProperty(DiscordJS.User.prototype, "data", {
 	},
 });
 
-Reflect.defineProperty(DiscordJS.User.prototype, "setData", {
+Reflect.defineProperty(DBM.DiscordJS.User.prototype, "setData", {
 	value(name, value) {
 		const id = this.id;
 		const data = Files.data.players;
@@ -3618,7 +3679,7 @@ Reflect.defineProperty(DiscordJS.User.prototype, "setData", {
 	},
 });
 
-Reflect.defineProperty(DiscordJS.User.prototype, "addData", {
+Reflect.defineProperty(DBM.DiscordJS.User.prototype, "addData", {
 	value(name, value) {
 		const id = this.id;
 		const data = Files.data.players;
@@ -3633,7 +3694,7 @@ Reflect.defineProperty(DiscordJS.User.prototype, "addData", {
 	},
 });
 
-Reflect.defineProperty(DiscordJS.User.prototype, "subData", {
+Reflect.defineProperty(DBM.DiscordJS.User.prototype, "subData", {
 	value(name, value) {
 		const id = this.id;
 		const data = Files.data.players;
@@ -3648,7 +3709,7 @@ Reflect.defineProperty(DiscordJS.User.prototype, "subData", {
 	},
 });
 
-Reflect.defineProperty(DiscordJS.User.prototype, "clearData", {
+Reflect.defineProperty(DBM.DiscordJS.User.prototype, "clearData", {
 	value(name) {
 		const id = this.id;
 		const data = Files.data.players;
@@ -3666,7 +3727,7 @@ Reflect.defineProperty(DiscordJS.User.prototype, "clearData", {
 	},
 });
 
-Reflect.defineProperty(DiscordJS.User.prototype, "convertToString", {
+Reflect.defineProperty(DBM.DiscordJS.User.prototype, "convertToString", {
 	value() {
 		return `usr-${this.id}`;
 	},
@@ -3676,14 +3737,14 @@ Reflect.defineProperty(DiscordJS.User.prototype, "convertToString", {
 // Guild
 //---------------------------------------------------------------------
 
-Reflect.defineProperty(DiscordJS.Guild.prototype, "getDefaultChannel", {
+Reflect.defineProperty(DBM.DiscordJS.Guild.prototype, "getDefaultChannel", {
 	value() {
 		let channel = this.channels.resolve(this.id);
 		if (!channel) {
 			[...this.channels.cache.values()].forEach((c) => {
 				if (
-					c.permissionsFor(DBM.Bot.bot.user)?.has(DiscordJS.PermissionsBitField.Flags.SendMessages) &&
-					(c.type === DiscordJS.ChannelType.GuildText || c.type === DiscordJS.ChannelType.GuildAnnouncement)
+					c.permissionsFor(DBM.Bot.bot.user)?.has(DBM.DiscordJS.PermissionsBitField.Flags.SendMessages) &&
+					(c.type === DBM.DiscordJS.ChannelType.GuildText || c.type === DBM.DiscordJS.ChannelType.GuildAnnouncement)
 				) {
 					if (!channel || channel.position > c.position) {
 						channel = c;
@@ -3695,14 +3756,14 @@ Reflect.defineProperty(DiscordJS.Guild.prototype, "getDefaultChannel", {
 	},
 });
 
-Reflect.defineProperty(DiscordJS.Guild.prototype, "getDefaultVoiceChannel", {
+Reflect.defineProperty(DBM.DiscordJS.Guild.prototype, "getDefaultVoiceChannel", {
 	value() {
 		let channel = this.channels.resolve(this.id);
 		if (!channel) {
 			[...this.channels.cache.values()].forEach((c) => {
 				if (
-					c.permissionsFor(DBM.Bot.bot.user)?.has(DiscordJS.PermissionsBitField.Flags.SendMessages) &&
-					c.type === DiscordJS.ChannelType.GuildVoice
+					c.permissionsFor(DBM.Bot.bot.user)?.has(DBM.DiscordJS.PermissionsBitField.Flags.SendMessages) &&
+					c.type === DBM.DiscordJS.ChannelType.GuildVoice
 				) {
 					if (!channel || channel.position > c.position) {
 						channel = c;
@@ -3714,7 +3775,7 @@ Reflect.defineProperty(DiscordJS.Guild.prototype, "getDefaultVoiceChannel", {
 	},
 });
 
-Reflect.defineProperty(DiscordJS.Guild.prototype, "data", {
+Reflect.defineProperty(DBM.DiscordJS.Guild.prototype, "data", {
 	value(name, defaultValue) {
 		const id = this.id;
 		const data = Files.data.servers;
@@ -3732,7 +3793,7 @@ Reflect.defineProperty(DiscordJS.Guild.prototype, "data", {
 	},
 });
 
-Reflect.defineProperty(DiscordJS.Guild.prototype, "setData", {
+Reflect.defineProperty(DBM.DiscordJS.Guild.prototype, "setData", {
 	value(name, value) {
 		const id = this.id;
 		const data = Files.data.servers;
@@ -3744,7 +3805,7 @@ Reflect.defineProperty(DiscordJS.Guild.prototype, "setData", {
 	},
 });
 
-Reflect.defineProperty(DiscordJS.Guild.prototype, "addData", {
+Reflect.defineProperty(DBM.DiscordJS.Guild.prototype, "addData", {
 	value(name, value) {
 		const id = this.id;
 		const data = Files.data.servers;
@@ -3759,7 +3820,7 @@ Reflect.defineProperty(DiscordJS.Guild.prototype, "addData", {
 	},
 });
 
-Reflect.defineProperty(DiscordJS.Guild.prototype, "subData", {
+Reflect.defineProperty(DBM.DiscordJS.Guild.prototype, "subData", {
 	value(name, value) {
 		const id = this.id;
 		const data = Files.data.servers;
@@ -3774,7 +3835,7 @@ Reflect.defineProperty(DiscordJS.Guild.prototype, "subData", {
 	},
 });
 
-Reflect.defineProperty(DiscordJS.Guild.prototype, "clearData", {
+Reflect.defineProperty(DBM.DiscordJS.Guild.prototype, "clearData", {
 	value(name) {
 		const id = this.id;
 		const data = Files.data.servers;
@@ -3792,7 +3853,7 @@ Reflect.defineProperty(DiscordJS.Guild.prototype, "clearData", {
 	},
 });
 
-Reflect.defineProperty(DiscordJS.Guild.prototype, "convertToString", {
+Reflect.defineProperty(DBM.DiscordJS.Guild.prototype, "convertToString", {
 	value() {
 		return `s-${this.id}`;
 	},
@@ -3802,7 +3863,7 @@ Reflect.defineProperty(DiscordJS.Guild.prototype, "convertToString", {
 // Message
 //---------------------------------------------------------------------
 
-Reflect.defineProperty(DiscordJS.Message.prototype, "data", {
+Reflect.defineProperty(DBM.DiscordJS.Message.prototype, "data", {
 	value(name, defaultValue) {
 		const id = this.id;
 		const data = Files.data.messages;
@@ -3820,7 +3881,7 @@ Reflect.defineProperty(DiscordJS.Message.prototype, "data", {
 	},
 });
 
-Reflect.defineProperty(DiscordJS.Message.prototype, "setData", {
+Reflect.defineProperty(DBM.DiscordJS.Message.prototype, "setData", {
 	value(name, value) {
 		const id = this.id;
 		const data = Files.data.messages;
@@ -3832,7 +3893,7 @@ Reflect.defineProperty(DiscordJS.Message.prototype, "setData", {
 	},
 });
 
-Reflect.defineProperty(DiscordJS.Message.prototype, "addData", {
+Reflect.defineProperty(DBM.DiscordJS.Message.prototype, "addData", {
 	value(name, value) {
 		const id = this.id;
 		const data = Files.data.messages;
@@ -3847,7 +3908,7 @@ Reflect.defineProperty(DiscordJS.Message.prototype, "addData", {
 	},
 });
 
-Reflect.defineProperty(DiscordJS.Message.prototype, "subData", {
+Reflect.defineProperty(DBM.DiscordJS.Message.prototype, "subData", {
 	value(name, value) {
 		const id = this.id;
 		const data = Files.data.messages;
@@ -3862,7 +3923,7 @@ Reflect.defineProperty(DiscordJS.Message.prototype, "subData", {
 	},
 });
 
-Reflect.defineProperty(DiscordJS.Message.prototype, "clearData", {
+Reflect.defineProperty(DBM.DiscordJS.Message.prototype, "clearData", {
 	value(name) {
 		const id = this.id;
 		const data = Files.data.messages;
@@ -3880,7 +3941,7 @@ Reflect.defineProperty(DiscordJS.Message.prototype, "clearData", {
 	},
 });
 
-Reflect.defineProperty(DiscordJS.Message.prototype, "convertToString", {
+Reflect.defineProperty(DBM.DiscordJS.Message.prototype, "convertToString", {
 	value() {
 		return `msg-${this.id}_c-${this.channel.id}`;
 	},
@@ -3890,13 +3951,13 @@ Reflect.defineProperty(DiscordJS.Message.prototype, "convertToString", {
 // TextChannel
 //---------------------------------------------------------------------
 
-Reflect.defineProperty(DiscordJS.TextChannel.prototype, "startThread", {
+Reflect.defineProperty(DBM.DiscordJS.TextChannel.prototype, "startThread", {
 	value(options) {
 		return this.threads.create(options);
 	},
 });
 
-Reflect.defineProperty(DiscordJS.TextChannel.prototype, "convertToString", {
+Reflect.defineProperty(DBM.DiscordJS.TextChannel.prototype, "convertToString", {
 	value() {
 		return `tc-${this.id}`;
 	},
@@ -3906,7 +3967,7 @@ Reflect.defineProperty(DiscordJS.TextChannel.prototype, "convertToString", {
 // VoiceChannel
 //---------------------------------------------------------------------
 
-Reflect.defineProperty(DiscordJS.VoiceChannel.prototype, "convertToString", {
+Reflect.defineProperty(DBM.DiscordJS.VoiceChannel.prototype, "convertToString", {
 	value() {
 		return `vc-${this.id}`;
 	},
@@ -3916,7 +3977,7 @@ Reflect.defineProperty(DiscordJS.VoiceChannel.prototype, "convertToString", {
 // Role
 //---------------------------------------------------------------------
 
-Reflect.defineProperty(DiscordJS.Role.prototype, "convertToString", {
+Reflect.defineProperty(DBM.DiscordJS.Role.prototype, "convertToString", {
 	value() {
 		return `r-${this.id}_s-${this.guild.id}`;
 	},
@@ -3926,7 +3987,7 @@ Reflect.defineProperty(DiscordJS.Role.prototype, "convertToString", {
 // Emoji
 //---------------------------------------------------------------------
 
-Reflect.defineProperty(DiscordJS.GuildEmoji.prototype, "convertToString", {
+Reflect.defineProperty(DBM.DiscordJS.GuildEmoji.prototype, "convertToString", {
 	value() {
 		return `e-${this.id}`;
 	},
