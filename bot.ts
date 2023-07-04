@@ -305,7 +305,7 @@ function PrintError(type: MsgType, ...args: any[]) {
 	}
 }
 
-function GetActionErrorText(location, index, dataName) {
+function GetActionErrorText(location: string, index: number, dataName: string) {
 	return "Error with the " + location + (dataName ? ` - Action #${index} (${dataName})` : "");
 }
 
