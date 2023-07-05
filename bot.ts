@@ -10,7 +10,8 @@ import * as djsvoice from "@discordjs/voice"
 const DBM: any = {};
 DBM.version = "2.2.0";
 
-const DiscordJS = (DBM.DiscordJS = require("discord.js"));
+const DiscordJS = require("discord.js");
+DBM.DiscordJS = DiscordJS;
 
 const requiredDjsVersion = "14.11.0";
 if (requiredDjsVersion.localeCompare(DiscordJS.version, undefined, { numeric: true, sensitivity: "base" }) > 0) {
@@ -273,860 +274,925 @@ function GetActionErrorText(location, index, dataName) {
 //#endregion
 
 //---------------------------------------------------------------------
+//#region Types
+// Contains core types defined by Discord Bot Maker.
+//---------------------------------------------------------------------
+
+namespace dbm {
+	export type Command = {
+		name: string,
+		_id: string,
+		comType: string,
+		permissions: string,
+		permissions2: string,
+		restriction: string,
+		actions: Action[],
+
+		_aliases?: string[]
+	}
+
+	export type Event = {
+		name: string,
+		_id: string,
+		"event-type": string,
+		temp?: string,
+		temp2?: string,
+		actions: Action[]
+	}
+	
+	export type Action = {
+		name: string
+	}
+	
+	export type CommandList = Command[];
+	export type CommandMap = Record<string, Command>;
+
+	export type ActionList = Action[];
+	export type ActionMap = Record<string, Action>;
+}
+
+//---------------------------------------------------------------------
 //#region Bot
 // Contains functions for controlling the bot.
 //---------------------------------------------------------------------
 
-const Bot: any = (DBM.Bot = {});
+//const Bot: any = (DBM.Bot = {});
 
-Bot.$slash = {}; // Slash commands
-Bot.$user = {}; // User commands
-Bot.$msge = {}; // Message commands
+class Bot {
+	// GLOBALS
+	static $slash: dbm.CommandMap = {}; // Slash commands
+	static $user: dbm.CommandMap = {}; // User commands
+	static $msge: dbm.CommandMap = {}; // Message commands
 
-Bot.$button = {}; // Button interactions
-Bot.$select = {}; // Select interactions
+	static $button: dbm.CommandMap = {}; // Button interactions
+	static $select: dbm.CommandMap = {}; // Select interactions
 
-Bot.$cmds = {}; // Normal commands
-Bot.$icds = []; // Includes word commands
-Bot.$regx = []; // Regular Expression commands
-Bot.$anym = []; // Any message commands
+	static $cmds: dbm.CommandMap = {}; // Normal commands
+	static $icds: dbm.CommandList = []; // Includes word commands
+	static $regx: dbm.CommandList = []; // Regular Expression commands
+	static $anym: dbm.CommandList = []; // Any message commands
 
-Bot.$other = {}; // Manual commands
+	static $other: dbm.ActionMap = {}; // Manual commands
 
-Bot.$evts = {}; // Events
+	static $evts: Record<string, dbm.Event[]> = {}; // Events
 
-Bot.bot = null;
-Bot.applicationCommandData = [];
+	static bot: djs.Client;
+	static applicationCommandData: djs.ApplicationCommandData[] = [];
+	static tagRegex: RegExp;
 
-Bot.PRIVILEGED_INTENTS =
-	DiscordJS.IntentsBitField.Flags.GuildMembers |
-	DiscordJS.IntentsBitField.Flags.GuildPresences |
-	DiscordJS.IntentsBitField.Flags.MessageContent;
+	// CONSTANTS
+	static PRIVILEGED_INTENTS: djs.GatewayIntentBits =
+		djs.IntentsBitField.Flags.GuildMembers |
+		djs.IntentsBitField.Flags.GuildPresences |
+		djs.IntentsBitField.Flags.MessageContent;
 
-Bot.NON_PRIVILEGED_INTENTS =
-	DiscordJS.IntentsBitField.Flags.Guilds |
-	DiscordJS.IntentsBitField.Flags.GuildBans |
-	DiscordJS.IntentsBitField.Flags.GuildEmojisAndStickers |
-	DiscordJS.IntentsBitField.Flags.GuildIntegrations |
-	DiscordJS.IntentsBitField.Flags.GuildWebhooks |
-	DiscordJS.IntentsBitField.Flags.GuildInvites |
-	DiscordJS.IntentsBitField.Flags.GuildVoiceStates |
-	DiscordJS.IntentsBitField.Flags.GuildMessages |
-	DiscordJS.IntentsBitField.Flags.GuildMessageReactions |
-	DiscordJS.IntentsBitField.Flags.GuildMessageTyping |
-	DiscordJS.IntentsBitField.Flags.DirectMessages |
-	DiscordJS.IntentsBitField.Flags.DirectMessageReactions |
-	DiscordJS.IntentsBitField.Flags.DirectMessageTyping;
+	static NON_PRIVILEGED_INTENTS: djs.GatewayIntentBits =
+		DiscordJS.IntentsBitField.Flags.Guilds |
+		DiscordJS.IntentsBitField.Flags.GuildBans |
+		DiscordJS.IntentsBitField.Flags.GuildEmojisAndStickers |
+		DiscordJS.IntentsBitField.Flags.GuildIntegrations |
+		DiscordJS.IntentsBitField.Flags.GuildWebhooks |
+		DiscordJS.IntentsBitField.Flags.GuildInvites |
+		DiscordJS.IntentsBitField.Flags.GuildVoiceStates |
+		DiscordJS.IntentsBitField.Flags.GuildMessages |
+		DiscordJS.IntentsBitField.Flags.GuildMessageReactions |
+		DiscordJS.IntentsBitField.Flags.GuildMessageTyping |
+		DiscordJS.IntentsBitField.Flags.DirectMessages |
+		DiscordJS.IntentsBitField.Flags.DirectMessageReactions |
+		DiscordJS.IntentsBitField.Flags.DirectMessageTyping;
 
-Bot.ALL_INTENTS = Bot.PRIVILEGED_INTENTS | Bot.NON_PRIVILEGED_INTENTS;
+	static ALL_INTENTS: djs.GatewayIntentBits = Bot.PRIVILEGED_INTENTS | Bot.NON_PRIVILEGED_INTENTS;
 
-Bot.init = function () {
-	this.initBot();
-	this.setupBot();
-	this.reformatData();
-	this.checkForCommandErrors();
-	this.initEvents();
-	this.login();
-};
+	// LOCALS
+	static hasMemberIntents: boolean;
+	static hasMessageContentIntents: boolean;
 
-Bot.initBot = function () {
-	const options = this.makeClientOptions();
-	options.intents = this.intents();
-	if (this.usePartials()) {
-		options.partials = this.partials();
-	}
-	this.hasMemberIntents = (options.intents & DiscordJS.IntentsBitField.Flags.GuildMembers) !== 0;
-	this.hasMessageContentIntents = (options.intents & DiscordJS.IntentsBitField.Flags.MessageContent) !== 0;
-	this.bot = new DiscordJS.Client(options);
-};
+	static _hasTextCommands: boolean
+	static _textCommandCount: number;
+	static _dmTextCommandCount: number;
+	static _caseSensitive: boolean;
 
-Bot.makeClientOptions = function () {
-	return {};
-};
+	static _slashCommandCreateType: string;
+	static _slashCommandServerList: string[];
 
-Bot.intents = function () {
-	return this.NON_PRIVILEGED_INTENTS;
-};
-
-Bot.usePartials = function () {
-	return false;
-};
-
-Bot.partials = function () {
-	return [];
-};
-
-Bot.setupBot = function () {
-	this.bot.on("raw", this.onRawData);
-};
-
-Bot.onRawData = function (packet) {
-	if (packet.t !== "MESSAGE_REACTION_ADD" || packet.t !== "MESSAGE_REACTION_REMOVE") return;
-
-	const client = Bot.bot;
-	const channel = client.channels.resolve(packet.d.channel_id);
-	if (channel?.messages.cache.has(packet.d.message_id)) return;
-
-	channel.messages
-		.fetch(packet.d.message_id)
-		.then((message) => {
-			const emoji = packet.d.emoji.id ? `${packet.d.emoji.name}:${packet.d.emoji.id}` : packet.d.emoji.name;
-			const reaction = message.reactions.resolve(emoji);
-			if (packet.t === "MESSAGE_REACTION_ADD") {
-				client.emit("messageReactionAdd", reaction, client.users.resolve(packet.d.user_id));
+	static init (): void {
+		this.initBot();
+		this.setupBot();
+		this.reformatData();
+		this.checkForCommandErrors();
+		this.initEvents();
+		this.login();
+	};
+	
+	static initBot (): void {
+		const options: Partial<djs.ClientOptions> = this.makeClientOptions();
+		options.intents = this.intents();
+		if (this.usePartials()) {
+			options.partials = this.partials();
+		}
+		this.hasMemberIntents = (options.intents & DiscordJS.IntentsBitField.Flags.GuildMembers) !== 0;
+		this.hasMessageContentIntents = (options.intents & DiscordJS.IntentsBitField.Flags.MessageContent) !== 0;
+		this.bot = new DiscordJS.Client(options);
+	};
+	
+	static makeClientOptions (): Partial<djs.ClientOptions> {
+		return {};
+	};
+	
+	static intents (): djs.GatewayIntentBits {
+		return this.NON_PRIVILEGED_INTENTS;
+	};
+	
+	static usePartials (): boolean {
+		return false;
+	};
+	
+	static partials (): djs.Partials[] {
+		return [];
+	};
+	
+	static setupBot () {
+		this.bot.on("raw", this.onRawData);
+	};
+	
+	static onRawData (packet) {
+		if (packet.t !== "MESSAGE_REACTION_ADD" || packet.t !== "MESSAGE_REACTION_REMOVE") return;
+	
+		const client = Bot.bot;
+		const channel: djs.Channel = client.channels.resolve(packet.d.channel_id);
+		if (channel instanceof djs.TextChannel) {
+			if (channel?.messages.cache.has(packet.d.message_id)) {
+				return;
 			}
-			if (packet.t === "MESSAGE_REACTION_REMOVE") {
-				client.emit("messageReactionRemove", reaction, client.users.resolve(packet.d.user_id));
-			}
-		})
-		.catch(noop);
-};
-
-Bot.reformatData = function () {
-	this.reformatCommands();
-	this.reformatEvents();
-};
-
-Bot.reformatCommands = function () {
-	const data = Files.data.commands;
-	if (!data) return;
-	this._hasTextCommands = false;
-	this._textCommandCount = 0;
-	this._dmTextCommandCount = 0;
-	this._caseSensitive = Files.data.settings.case === "true";
-	for (let i = 0; i < data.length; i++) {
-		const com = data[i];
-		if (com) {
-			this.prepareActions(com.actions);
-
-			if (com.comType <= "3") {
-				this._textCommandCount++;
-				if (com.restriction === "3") {
-					this._dmTextCommandCount++;
-				}
-			}
-
-			switch (com.comType) {
-				case "0": {
-					this._hasTextCommands = true;
-					if (this._caseSensitive) {
-						this.$cmds[com.name] = com;
-						if (com._aliases) {
-							const aliases = com._aliases;
-							for (let j = 0; j < aliases.length; j++) {
-								this.$cmds[aliases[j]] = com;
-							}
-						}
-					} else {
-						this.$cmds[com.name.toLowerCase()] = com;
-						if (com._aliases) {
-							const aliases = com._aliases;
-							for (let j = 0; j < aliases.length; j++) {
-								this.$cmds[aliases[j].toLowerCase()] = com;
-							}
-						}
+		
+			channel.messages
+				.fetch(packet.d.message_id)
+				.then((message) => {
+					const emoji = packet.d.emoji.id ? `${packet.d.emoji.name}:${packet.d.emoji.id}` : packet.d.emoji.name;
+					const reaction = message.reactions.resolve(emoji);
+					if (packet.t === "MESSAGE_REACTION_ADD") {
+						client.emit("messageReactionAdd", reaction, client.users.resolve(packet.d.user_id));
 					}
-					break;
+					if (packet.t === "MESSAGE_REACTION_REMOVE") {
+						client.emit("messageReactionRemove", reaction, client.users.resolve(packet.d.user_id));
+					}
+				})
+				.catch(noop);
+		}
+	};
+	
+	static reformatData () {
+		this.reformatCommands();
+		this.reformatEvents();
+	};
+	
+	static reformatCommands () {
+		const data = Files.data.commands;
+		if (!data) return;
+		this._hasTextCommands = false;
+		this._textCommandCount = 0;
+		this._dmTextCommandCount = 0;
+		this._caseSensitive = Files.data.settings.case === "true";
+		for (let i = 0; i < data.length; i++) {
+			const com = data[i];
+			if (com) {
+				this.prepareActions(com.actions);
+	
+				if (com.comType <= "3") {
+					this._textCommandCount++;
+					if (com.restriction === "3") {
+						this._dmTextCommandCount++;
+					}
 				}
-				case "1": {
-					this.$icds.push(com);
-					break;
-				}
-				case "2": {
-					this.$regx.push(com);
-					break;
-				}
-				case "3": {
-					this.$anym.push(com);
-					break;
-				}
-				case "4": {
-					const names = this.validateSlashCommandName(com.name);
-					if (names) {
-						if (names.length > 3) {
-							PrintError(MsgType.TOO_MANY_SPACES_SLASH_NAME, com.name);
+	
+				switch (com.comType) {
+					case "0": {
+						this._hasTextCommands = true;
+						if (this._caseSensitive) {
+							this.$cmds[com.name] = com;
+							if (com._aliases) {
+								const aliases = com._aliases;
+								for (let j = 0; j < aliases.length; j++) {
+									this.$cmds[aliases[j]] = com;
+								}
+							}
 						} else {
-							const keyName = names.join(" ");
-							if (this.$slash[keyName]) {
-								PrintError(MsgType.DUPLICATE_SLASH_COMMAND, keyName);
-							} else {
-								this.$slash[keyName] = com;
-								if (names.length === 1) {
-									this.applicationCommandData.push(this.createApiJsonFromCommand(com, keyName));
-								} else {
-									this.mergeSubCommandIntoCommandData(
-										names,
-										this.createApiJsonFromCommand(com, names[names.length - 1]),
-									);
+							this.$cmds[com.name.toLowerCase()] = com;
+							if (com._aliases) {
+								const aliases = com._aliases;
+								for (let j = 0; j < aliases.length; j++) {
+									this.$cmds[aliases[j].toLowerCase()] = com;
 								}
 							}
 						}
-					} else {
-						PrintError(MsgType.INVALID_SLASH_NAME, com.name);
+						break;
 					}
-					break;
-				}
-				case "5": {
-					const name = com.name;
-					if (this.$user[name]) {
-						PrintError(MsgType.DUPLICATE_USER_COMMAND, name);
-					} else {
-						this.$user[name] = com;
-						this.applicationCommandData.push(this.createApiJsonFromCommand(com, name));
+					case "1": {
+						this.$icds.push(com);
+						break;
 					}
-					break;
-				}
-				case "6": {
-					const name = com.name;
-					if (this.$msge[name]) {
-						PrintError(MsgType.DUPLICATE_MESSAGE_COMMAND, name);
-					} else {
-						this.$msge[name] = com;
-						this.applicationCommandData.push(this.createApiJsonFromCommand(com, name));
+					case "2": {
+						this.$regx.push(com);
+						break;
 					}
-					break;
-				}
-				default: {
-					this.$other[com._id] = com;
-					break;
-				}
-			}
-		}
-	}
-};
-
-Bot.createApiJsonFromCommand = function (com, name) {
-	const result: Partial<djs.APIApplicationCommand> = {
-		name: name ?? com.name,
-		description: this.generateSlashCommandDescription(com),
-	};
-	switch (com.comType) {
-		case "4": {
-			result.type = DiscordJS.ApplicationCommandType.ChatInput;
-			break;
-		}
-		case "5": {
-			result.type = DiscordJS.ApplicationCommandType.User;
-			break;
-		}
-		case "6": {
-			result.type = DiscordJS.ApplicationCommandType.Message;
-			break;
-		}
-	}
-	if (com.comType === "4" && com.parameters && Array.isArray(com.parameters)) {
-		result.options = this.validateSlashCommandParameters(com.parameters, result.name);
-	}
-	return result;
-};
-
-Bot.mergeSubCommandIntoCommandData = function (names, data) {
-	data.type = DiscordJS.ApplicationCommandOptionType.Subcommand;
-
-	const baseName = names[0];
-	let baseCommand = this.applicationCommandData.find((data) => data.name === baseName) ?? null;
-	if (baseCommand === null) {
-		baseCommand = {
-			name: baseName,
-			description: this.getNoDescriptionText(),
-			options: [],
-		};
-		this.applicationCommandData.push(baseCommand);
-	}
-
-	if (names.length === 2) {
-		if (!baseCommand.options) {
-			baseCommand.options = [];
-		}
-		if (
-			baseCommand.options.find(
-				(d) => d.name === data.name && d.type === DiscordJS.ApplicationCommandOptionType.SubcommandGroup,
-			)
-		) {
-			PrintError(MsgType.SUB_COMMAND_GROUP_ALREADY_EXISTS, names.join(" "));
-		} else {
-			baseCommand.options.push(data);
-		}
-	} else if (names.length >= 3) {
-		if (!baseCommand.options) {
-			baseCommand.options = [];
-		}
-
-		const groupName = names[1];
-		let baseGroup = baseCommand.options.find((option) => option.name === groupName) ?? null;
-		if (baseGroup === null) {
-			baseGroup = {
-				name: groupName,
-				description: this.getNoDescriptionText(),
-				type: DiscordJS.ApplicationCommandOptionType.SubcommandGroup,
-				options: [],
-			};
-			baseCommand.options.push(baseGroup);
-		} else if (baseGroup.type === DiscordJS.ApplicationCommandOptionType.Subcommand) {
-			PrintError(MsgType.SUB_COMMAND_ALREADY_EXISTS, names.join(" "), `${names[0]} ${names[1]}`);
-			return;
-		}
-
-		baseGroup.options.push(data);
-	}
-};
-
-Bot.validateSlashCommandName = function (name) {
-	if (!name) {
-		return false;
-	}
-
-	const names = name
-		.split(/\s+/)
-		.map((name) => this.validateSlashCommandParameterName(name))
-		.filter((name) => typeof name === "string");
-
-	return names.length > 0 ? names : false;
-};
-
-Bot.validateSlashCommandParameterName = function (name) {
-	if (!name) {
-		return false;
-	}
-	if (name.length > 32) {
-		name = name.substring(0, 32);
-	}
-	if (name.match(/^[\p{L}\w-]{1,32}$/iu)) {
-		return name.toLowerCase();
-	}
-	return false;
-};
-
-Bot.generateSlashCommandDescription = function (com) {
-	const desc = com.description;
-	if (com.comType !== "4") {
-		return "";
-	}
-	return this.validateSlashCommandDescription(desc);
-};
-
-Bot.validateSlashCommandDescription = function (desc) {
-	if (desc?.length > 100) {
-		return desc.substring(0, 100);
-	}
-	return desc || this.getNoDescriptionText();
-};
-
-Bot.getNoDescriptionText = function () {
-	return Files.data.settings.noDescriptionText ?? "(no description)";
-};
-
-Bot.validateSlashCommandParameters = function (parameters, commandName) {
-	const requireParams: djs.APIApplicationCommandOption[] = [];
-	const optionalParams: djs.APIApplicationCommandOption[] = [];
-	const existingNames = {};
-	for (let i = 0; i < parameters.length; i++) {
-		const paramsData: djs.APIApplicationCommandOption = parameters[i];
-		const name = this.validateSlashCommandParameterName(paramsData.name);
-		if (name) {
-			if (!existingNames[name]) {
-				existingNames[name] = true;
-				paramsData.name = name;
-				paramsData.description = this.validateSlashCommandDescription(paramsData.description);
-				paramsData.type = this.convertStringCommandParamTypeToEnum(paramsData.type);
-				if (paramsData.required) {
-					requireParams.push(paramsData);
-				} else {
-					optionalParams.push(paramsData);
-				}
-			} else {
-				PrintError(MsgType.DUPLICATE_SLASH_PARAMETER, commandName, i + 1, name);
-			}
-		} else {
-			PrintError(MsgType.INVALID_SLASH_PARAMETER_NAME, commandName, i + 1, paramsData.name);
-		}
-	}
-	return requireParams.concat(optionalParams);
-};
-
-Bot.convertStringCommandParamTypeToEnum = function (paramTypeStr) {
-	const optionType = DiscordJS.ApplicationCommandOptionType;
-	switch (paramTypeStr) {
-		case "SUB_COMMAND":
-			return optionType.Subcommand;
-		case "SUB_COMMAND_GROUP":
-			return optionType.SubcommandGroup;
-		case "INTEGER":
-			return optionType.Integer;
-		case "STRING":
-			return optionType.String;
-		case "BOOLEAN":
-			return optionType.Boolean;
-		case "USER":
-			return optionType.User;
-		case "CHANNEL":
-			return optionType.Channel;
-		case "ROLE":
-			return optionType.Role;
-		case "MENTIONABLE":
-			return optionType.Mentionable;
-		case "NUMBER":
-			return optionType.Number;
-		case "ATTACHMENT":
-			return optionType.Attachment;
-	}
-	return 0;
-};
-
-Bot.reformatEvents = function () {
-	const data = Files.data.events;
-	if (!data) return;
-	for (let i = 0; i < data.length; i++) {
-		const com = data[i];
-		if (com) {
-			this.prepareActions(com.actions);
-			const type = com["event-type"];
-			if (!this.$evts[type]) this.$evts[type] = [];
-			this.$evts[type].push(com);
-		}
-	}
-};
-
-Bot.prepareActions = function (actions) {
-	if (actions) {
-		const customData = {};
-		for (let i = 0; i < actions.length; i++) {
-			const action = actions[i];
-			if (action?.name && Actions.modInitReferences[action.name]) {
-				Actions.modInitReferences[action.name].call(this, action, customData, i);
-			}
-		}
-		if (Object.keys(customData).length > 0) {
-			actions._customData = customData;
-		}
-	}
-};
-
-Bot.registerButtonInteraction = function (interactionId, data) {
-	if (interactionId) {
-		if (!this.$button[interactionId]) {
-			this.$button[interactionId] = data;
-		} else {
-			PrintError(MsgType.DUPLICATE_BUTTON_ID, interactionId);
-		}
-	}
-};
-
-Bot.registerSelectMenuInteraction = function (interactionId, data) {
-	if (interactionId) {
-		if (!this.$select[interactionId]) {
-			this.$select[interactionId] = data;
-		} else {
-			PrintError(MsgType.DUPLICATE_SELECT_ID, interactionId);
-		}
-	}
-};
-
-Bot.checkForCommandErrors = function () {
-	if (this._textCommandCount > 0 && !this.hasMessageContentIntents) {
-		PrintError(MsgType.SERVER_MESSAGE_INTENT_REQUIRED, this._textCommandCount);
-	}
-	if (this._dmTextCommandCount > 0 && (!this.usePartials() || !this.partials().includes("CHANNEL"))) {
-		PrintError(MsgType.CHANNEL_PARTIAL_REQUIRED, this._dmTextCommandCount);
-	}
-};
-
-Bot.initEvents = function () {
-	this.bot.on("ready", this.onReady.bind(this));
-	this.bot.on("guildCreate", this.onServerJoin.bind(this));
-	this.bot.on("messageCreate", this.onMessage.bind(this));
-	this.bot.on("interactionCreate", this.onInteraction.bind(this));
-	Events.registerEvents(this.bot);
-};
-
-Bot.login = function () {
-	this.bot.login(Files.data.settings.token);
-};
-
-Bot.onReady = function () {
-	process.send?.("BotReady");
-	console.log("Bot is ready!"); // Tells editor to start!
-	this.restoreVariables();
-	this.registerApplicationCommands();
-	this.preformInitialization();
-};
-
-Bot.restoreVariables = function () {
-	Files.restoreServerVariables();
-	Files.restoreGlobalVariables();
-};
-
-Bot.registerApplicationCommands = function () {
-	let slashType = Files.data.settings.slashType ?? "auto";
-
-	if (slashType === "auto") {
-		const serverCount = this.bot.guilds.cache.size;
-		if (serverCount <= 15) {
-			slashType = "all";
-		} else {
-			slashType = "global";
-		}
-	}
-
-	this._slashCommandCreateType = slashType;
-	this._slashCommandServerList = Files.data.settings?.slashServers?.split?.(/[\n\r]+/) ?? [];
-
-	switch (slashType) {
-		case "all": {
-			this.setAllServerCommands(this.applicationCommandData);
-			this.setGlobalCommands([]);
-			break;
-		}
-		case "global": {
-			this.setAllServerCommands([], false);
-			this.setGlobalCommands(this.applicationCommandData);
-			break;
-		}
-		case "manual": {
-			this.setCertainServerCommands(this.applicationCommandData, this._slashCommandServerList);
-			this.setGlobalCommands([]);
-			break;
-		}
-		case "manualglobal": {
-			this.setCertainServerCommands(this.applicationCommandData, this._slashCommandServerList);
-			this.setGlobalCommands(this.applicationCommandData);
-			break;
-		}
-	}
-};
-
-Bot.onServerJoin = function (guild) {
-	this.initializeCommandsForNewServer(guild);
-};
-
-Bot.initializeCommandsForNewServer = function (guild) {
-	switch (this._slashCommandCreateType) {
-		case "all":
-		case "manual":
-		case "manualglobal": {
-			if (this._slashCommandCreateType === "all" || this._slashCommandServerList.includes(guild.id)) {
-				this.setCommandsForServer(guild, this.applicationCommandData, true);
-			}
-			break;
-		}
-	}
-};
-
-Bot.shouldPrintAnyMissingAccessError = function () {
-	return !(Files.data.settings.ignoreCommandScopeErrors ?? false);
-};
-
-Bot.clearUnspecifiedServerCommands = function () {
-	return Files.data.settings.clearUnlistedServers ?? false;
-};
-
-Bot.setGlobalCommands = function (commands: djs.APIApplicationCommand[]) {
-	this.bot.application?.commands
-		?.set?.(commands)
-		.then(function () {})
-		.catch(function (err) {
-			console.error(err);
-		});
-};
-
-Bot.setCommandsForServer = function (guild, commands: djs.APIApplicationCommand[], printMissingAccessError) {
-	if (guild?.commands?.set) {
-		guild.commands
-			.set(commands)
-			.then(function () {})
-			.catch((err) => {
-				if (err.code === 50001) {
-					if (this.shouldPrintAnyMissingAccessError() && printMissingAccessError) {
-						PrintError(MsgType.MISSING_APPLICATION_COMMAND_ACCESS, guild.name, guild.id);
+					case "3": {
+						this.$anym.push(com);
+						break;
 					}
-				} else {
-					console.error(err);
-				}
-			});
-	}
-};
-
-Bot.setAllServerCommands = function (commands: djs.APIApplicationCommand[], printMissingAccessError = true) {
-	this.bot.guilds.cache.forEach((key, value) => {
-		this.bot.guilds
-			.fetch(key)
-			.then((guild) => {
-				this.setCommandsForServer(guild, commands, printMissingAccessError);
-			})
-			.catch(function (err) {
-				console.error(err);
-			});
-	});
-};
-
-Bot.setCertainServerCommands = function (commands: djs.APIApplicationCommand[], serverIdList) {
-	if (this.clearUnspecifiedServerCommands()) {
-		this.bot.guilds.cache.forEach((key, value) => {
-			this.bot.guilds
-				.fetch(key)
-				.then((guild) => {
-					if (serverIdList.includes(guild.id)) {
-						this.setCommandsForServer(guild, commands, true);
-					} else {
-						this.setCommandsForServer(guild, [], true);
+					case "4": {
+						const names = this.validateSlashCommandName(com.name);
+						if (names) {
+							if (names.length > 3) {
+								PrintError(MsgType.TOO_MANY_SPACES_SLASH_NAME, com.name);
+							} else {
+								const keyName = names.join(" ");
+								if (this.$slash[keyName]) {
+									PrintError(MsgType.DUPLICATE_SLASH_COMMAND, keyName);
+								} else {
+									this.$slash[keyName] = com;
+									if (names.length === 1) {
+										this.applicationCommandData.push(this.createApiJsonFromCommand(com, keyName));
+									} else {
+										this.mergeSubCommandIntoCommandData(
+											names,
+											this.createApiJsonFromCommand(com, names[names.length - 1]),
+										);
+									}
+								}
+							}
+						} else {
+							PrintError(MsgType.INVALID_SLASH_NAME, com.name);
+						}
+						break;
 					}
-				})
-				.catch(function (err) {
-					console.error(err);
-				});
-		});
-	} else {
-		for (let i = 0; i < serverIdList.length; i++) {
-			this.bot.guilds
-				.fetch(serverIdList[i])
-				.then((guild) => {
-					this.setCommandsForServer(guild, commands, true);
-				})
-				.catch(function (err) {
-					PrintError(MsgType.INVALID_SLASH_COMMAND_SERVER_ID, serverIdList[i]);
-				});
-		}
-	}
-};
-
-Bot.preformInitialization = function () {
-	const bot = this.bot;
-	if (this.$evts["1"]) {
-		Events.onInitialization(bot);
-	}
-	if (this.$evts["48"]) {
-		Events.onInitializationOnce(bot);
-	}
-	if (this.$evts["3"]) {
-		Events.setupIntervals(bot);
-	}
-};
-
-Bot.onMessage = function (msg) {
-	if (msg.author.bot) return;
-	try {
-		if (!this.checkCommand(msg)) {
-			this.onAnyMessage(msg);
-		}
-	} catch (e) {
-		console.error(e);
-	}
-};
-
-Bot.checkCommand = function (msg) {
-	if (!this._hasTextCommands) return false;
-	let command = this.checkTag(msg.content);
-	if (!command) return false;
-	if (!this._caseSensitive) {
-		command = command.toLowerCase();
-	}
-	const cmd = this.$cmds[command];
-	if (cmd) {
-		Actions.preformActionsFromMessage(msg, cmd);
-		return true;
-	}
-	return false;
-};
-
-Bot.escapeRegExp = function (text) {
-	return text.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&");
-};
-
-Bot.generateTagRegex = function (tag, allowPrefixSpace) {
-	return new RegExp(`^${this.escapeRegExp(tag)}${allowPrefixSpace ? "\\s*" : ""}`);
-};
-
-Bot.populateTagRegex = function () {
-	if (this.tagRegex) return;
-	const tag = Files.data.settings.tag;
-	const allowPrefixSpace = Files.data.settings.allowPrefixSpace === "true";
-	this.tagRegex = this.generateTagRegex(tag, allowPrefixSpace);
-	return this.tagRegex;
-};
-
-Bot.checkTag = function (content) {
-	const allowPrefixSpace = Files.data.settings.allowPrefixSpace === "true";
-	const tag = Files.data.settings.tag;
-	this.populateTagRegex();
-	const separator = Files.data.settings.separator || "\\s+";
-	if (content.startsWith(tag)) {
-		if (allowPrefixSpace && this.tagRegex.test(content)) {
-			content = content.replace(this.tagRegex, "");
-			return content.split(new RegExp(separator))[0];
-		} else {
-			content = content.split(new RegExp(separator))[0];
-			return content.substring(tag.length);
-		}
-	}
-	return null;
-};
-
-Bot.onAnyMessage = function (msg) {
-	this.checkIncludes(msg);
-	this.checkRegExps(msg);
-	if (!msg.author.bot) {
-		if (this.$evts["2"]) {
-			Events.callEvents("2", 1, 0, 2, false, "", msg);
-		}
-		const anym = this.$anym;
-		for (let i = 0; i < anym.length; i++) {
-			if (anym[i]) {
-				Actions.preformActionsFromMessage(msg, anym[i]);
-			}
-		}
-	}
-};
-
-Bot.checkIncludes = function (msg) {
-	const text = msg.content;
-	if (!text) return;
-	const icds = this.$icds;
-	const icds_len = icds.length;
-	for (let i = 0; i < icds_len; i++) {
-		if (!icds[i]?.name) continue;
-		if (icds[i]._aliases) {
-			const words = [icds[i].name].concat(icds[i]._aliases);
-			if (text.match(new RegExp("\\b(?:" + words.join("|") + ")\\b", "i"))) {
-				Actions.preformActionsFromMessage(msg, icds[i]);
-			}
-		} else if (text.match(new RegExp("\\b" + icds[i].name + "\\b", "i"))) {
-			Actions.preformActionsFromMessage(msg, icds[i]);
-		}
-	}
-};
-
-Bot.checkRegExps = function (msg) {
-	const text = msg.content;
-	if (!text) return;
-	const regx = this.$regx;
-	const regx_len = regx.length;
-	for (let i = 0; i < regx_len; i++) {
-		if (regx[i]?.name) {
-			if (text.match(new RegExp(regx[i].name, "i"))) {
-				Actions.preformActionsFromMessage(msg, regx[i]);
-			} else if (regx[i]._aliases) {
-				const aliases = regx[i]._aliases;
-				const aliases_len = aliases.length;
-				for (let j = 0; j < aliases_len; j++) {
-					if (text.match(new RegExp("\\b" + aliases[j] + "\\b", "i"))) {
-						Actions.preformActionsFromMessage(msg, regx[i]);
+					case "5": {
+						const name = com.name;
+						if (this.$user[name]) {
+							PrintError(MsgType.DUPLICATE_USER_COMMAND, name);
+						} else {
+							this.$user[name] = com;
+							this.applicationCommandData.push(this.createApiJsonFromCommand(com, name));
+						}
+						break;
+					}
+					case "6": {
+						const name = com.name;
+						if (this.$msge[name]) {
+							PrintError(MsgType.DUPLICATE_MESSAGE_COMMAND, name);
+						} else {
+							this.$msge[name] = com;
+							this.applicationCommandData.push(this.createApiJsonFromCommand(com, name));
+						}
+						break;
+					}
+					default: {
+						this.$other[com._id] = com;
 						break;
 					}
 				}
 			}
 		}
-	}
-};
-
-Bot.onInteraction = function (interaction) {
-	if (interaction.isChatInputCommand()) {
-		this.onSlashCommandInteraction(interaction);
-	} else if (interaction.isContextMenuCommand()) {
-		this.onContextMenuInteraction(interaction);
-	} else if (interaction.isModalSubmit()) {
-		Actions.checkModalSubmitResponses(interaction);
-	} else {
-		if (interaction.component?.type === DiscordJS.ComponentType.Button) {
-			interaction._button = interaction.component;
-		} else if (interaction.component?.type === DiscordJS.ComponentType.SelectMenu) {
-			interaction._select = interaction.component;
-		}
-		if (!Actions.checkTemporaryInteractionResponses(interaction)) {
-			if (interaction.isButton()) {
-				this.onButtonInteraction(interaction);
-			} else if (interaction.isStringSelectMenu()) {
-				this.onSelectMenuInteraction(interaction);
+	};
+	
+	static createApiJsonFromCommand (com, name): djs.ApplicationCommandData {
+		const result: Partial<djs.ChatInputApplicationCommandData> = {
+			name: name ?? com.name,
+			description: this.generateSlashCommandDescription(com),
+		};
+		switch (com.comType) {
+			case "4": {
+				result.type = DiscordJS.ApplicationCommandType.ChatInput;
+				break;
+			}
+			case "5": {
+				result.type = DiscordJS.ApplicationCommandType.User;
+				break;
+			}
+			case "6": {
+				result.type = DiscordJS.ApplicationCommandType.Message;
+				break;
 			}
 		}
-	}
-};
+		if (com.comType === "4" && com.parameters && Array.isArray(com.parameters)) {
+			result.options = this.validateSlashCommandParameters(com.parameters, result.name);
+		}
+		return result as djs.ChatInputApplicationCommandData;
+	};
+	
+	static mergeSubCommandIntoCommandData (names, data) {
+		data.type = DiscordJS.ApplicationCommandOptionType.Subcommand;
+	
+		const baseName = names[0];
+		let baseCommand: djs.ApplicationCommandData | null = this.applicationCommandData.find((data) => data.name === baseName) ?? null;
+		if (baseCommand === null) {
+			baseCommand = {
+				name: baseName,
+				description: this.getNoDescriptionText(),
+				options: [],
+			};
+			this.applicationCommandData.push(baseCommand);
+		}
 
-Bot.onSlashCommandInteraction = function (interaction) {
-	let interactionName = interaction.commandName;
+		if(baseCommand.type !== djs.ApplicationCommandType.ChatInput) {
+			return;
+		}
 
-	const group = interaction.options.getSubcommandGroup(false);
-	if (group) {
-		interactionName += " " + group;
-	}
+		const chatCommand = baseCommand as djs.ChatInputApplicationCommandData;
+	
+		if (names.length === 2) {
+			if (!chatCommand.options) {
+				chatCommand.options = [];
+			}
+			if (
+				chatCommand.options.find(
+					(d) => d.name === data.name && d.type === DiscordJS.ApplicationCommandOptionType.SubcommandGroup,
+				)
+			) {
+				PrintError(MsgType.SUB_COMMAND_GROUP_ALREADY_EXISTS, names.join(" "));
+			} else {
+				chatCommand.options.push(data);
+			}
+		} else if (names.length >= 3) {
+			if (!chatCommand.options) {
+				chatCommand.options = [];
+			}
+	
+			const groupName = names[1];
+			let baseGroup: djs.ApplicationCommandOptionData | null = chatCommand.options.find((option) => option.name === groupName) ?? null;
+			if (baseGroup === null) {
+				baseGroup = {
+					name: groupName,
+					description: this.getNoDescriptionText(),
+					type: DiscordJS.ApplicationCommandOptionType.SubcommandGroup,
+					options: [],
+				};
+				chatCommand.options.push(baseGroup);
+			} else if (baseGroup.type === DiscordJS.ApplicationCommandOptionType.Subcommand) {
+				PrintError(MsgType.SUB_COMMAND_ALREADY_EXISTS, names.join(" "), `${names[0]} ${names[1]}`);
+				return;
+			}
 
-	const sub = interaction.options.getSubcommand(false);
-	if (sub) {
-		interactionName += " " + sub;
-	}
+			(baseGroup as djs.APIApplicationCommandSubcommandOption).options?.push(data);
+		}
+	};
+	
+	static validateSlashCommandName (name) {
+		if (!name) {
+			return false;
+		}
+	
+		const names = name
+			.split(/\s+/)
+			.map((name) => this.validateSlashCommandParameterName(name))
+			.filter((name) => typeof name === "string");
+	
+		return names.length > 0 ? names : false;
+	};
+	
+	static validateSlashCommandParameterName (name) {
+		if (!name) {
+			return false;
+		}
+		if (name.length > 32) {
+			name = name.substring(0, 32);
+		}
+		if (name.match(/^[\p{L}\w-]{1,32}$/iu)) {
+			return name.toLowerCase();
+		}
+		return false;
+	};
+	
+	static generateSlashCommandDescription (com) {
+		const desc = com.description;
+		if (com.comType !== "4") {
+			return "";
+		}
+		return this.validateSlashCommandDescription(desc);
+	};
+	
+	static validateSlashCommandDescription (desc: string): string {
+		if (desc?.length > 100) {
+			return desc.substring(0, 100);
+		}
+		return desc || this.getNoDescriptionText();
+	};
+	
+	static getNoDescriptionText () {
+		return Files.data.settings.noDescriptionText ?? "(no description)";
+	};
+	
+	static validateSlashCommandParameters (parameters, commandName): djs.ApplicationCommandOptionData[] {
+		const requireParams: djs.ApplicationCommandOptionData[] = [];
+		const optionalParams: djs.ApplicationCommandOptionData[] = [];
+		const existingNames = {};
+		for (let i = 0; i < parameters.length; i++) {
+			const paramsData: djs.ApplicationCommandOptionData = parameters[i];
+			const name = this.validateSlashCommandParameterName(paramsData.name);
+			if (name) {
+				if (!existingNames[name]) {
+					existingNames[name] = true;
+					paramsData.name = name;
+					paramsData.description = this.validateSlashCommandDescription(paramsData.description);
+					paramsData.type = this.convertStringCommandParamTypeToEnum(paramsData.type);
+					if ((paramsData as djs.BaseApplicationCommandOptionsData).required) {
+						requireParams.push(paramsData);
+					} else {
+						optionalParams.push(paramsData);
+					}
+				} else {
+					PrintError(MsgType.DUPLICATE_SLASH_PARAMETER, commandName, i + 1, name);
+				}
+			} else {
+				PrintError(MsgType.INVALID_SLASH_PARAMETER_NAME, commandName, i + 1, paramsData.name);
+			}
+		}
+		return requireParams.concat(optionalParams);
+	};
+	
+	static convertStringCommandParamTypeToEnum (paramTypeStr) {
+		const optionType = DiscordJS.ApplicationCommandOptionType;
+		switch (paramTypeStr) {
+			case "SUB_COMMAND":
+				return optionType.Subcommand;
+			case "SUB_COMMAND_GROUP":
+				return optionType.SubcommandGroup;
+			case "INTEGER":
+				return optionType.Integer;
+			case "STRING":
+				return optionType.String;
+			case "BOOLEAN":
+				return optionType.Boolean;
+			case "USER":
+				return optionType.User;
+			case "CHANNEL":
+				return optionType.Channel;
+			case "ROLE":
+				return optionType.Role;
+			case "MENTIONABLE":
+				return optionType.Mentionable;
+			case "NUMBER":
+				return optionType.Number;
+			case "ATTACHMENT":
+				return optionType.Attachment;
+		}
+		return 0;
+	};
+	
+	static reformatEvents () {
+		const data: dbm.Event[] = Files.data.events;
+		if (!data) return;
+		for (let i = 0; i < data.length; i++) {
+			const event: dbm.Event = data[i];
+			if (event) {
+				this.prepareActions(event.actions);
+				const type: string = event["event-type"];
+				if (!this.$evts[type]) this.$evts[type] = [];
+				this.$evts[type].push(event);
+			}
+		}
+	};
+	
+	static prepareActions (actions) {
+		if (actions) {
+			const customData = {};
+			for (let i = 0; i < actions.length; i++) {
+				const action = actions[i];
+				if (action?.name && Actions.modInitReferences[action.name]) {
+					Actions.modInitReferences[action.name].call(this, action, customData, i);
+				}
+			}
+			if (Object.keys(customData).length > 0) {
+				actions._customData = customData;
+			}
+		}
+	};
+	
+	static registerButtonInteraction (interactionId, data) {
+		if (interactionId) {
+			if (!this.$button[interactionId]) {
+				this.$button[interactionId] = data;
+			} else {
+				PrintError(MsgType.DUPLICATE_BUTTON_ID, interactionId);
+			}
+		}
+	};
+	
+	static registerSelectMenuInteraction (interactionId, data) {
+		if (interactionId) {
+			if (!this.$select[interactionId]) {
+				this.$select[interactionId] = data;
+			} else {
+				PrintError(MsgType.DUPLICATE_SELECT_ID, interactionId);
+			}
+		}
+	};
+	
+	static checkForCommandErrors () {
+		if (this._textCommandCount > 0 && !this.hasMessageContentIntents) {
+			PrintError(MsgType.SERVER_MESSAGE_INTENT_REQUIRED, this._textCommandCount);
+		}
+		if (this._dmTextCommandCount > 0 && (!this.usePartials() || !this.partials().includes(DiscordJS.Partials.Channel))) {
+			PrintError(MsgType.CHANNEL_PARTIAL_REQUIRED, this._dmTextCommandCount);
+		}
+	};
+	
+	static initEvents () {
+		this.bot.on("ready", this.onReady.bind(this));
+		this.bot.on("guildCreate", this.onServerJoin.bind(this));
+		this.bot.on("messageCreate", this.onMessage.bind(this));
+		this.bot.on("interactionCreate", this.onInteraction.bind(this));
+		Events.registerEvents(this.bot);
+	};
+	
+	static login () {
+		this.bot.login(Files.data.settings.token);
+	};
+	
+	static onReady () {
+		process.send?.("BotReady");
+		console.log("Bot is ready!"); // Tells editor to start!
+		this.restoreVariables();
+		this.registerApplicationCommands();
+		this.preformInitialization();
+	};
+	
+	static restoreVariables () {
+		Files.restoreServerVariables();
+		Files.restoreGlobalVariables();
+	};
 
-	if (this.$slash[interactionName]) {
-		Actions.preformActionsFromInteraction(interaction, this.$slash[interactionName], true);
-	}
-};
-
-Bot.onContextMenuInteraction = function (interaction) {
-	if (interaction.isUserContextMenuCommand()) {
-		this.onUserContextMenuInteraction(interaction);
-	} else if (interaction.isMessageContextMenuCommand()) {
-		this.onMessageContextMenuInteraction(interaction);
-	}
-};
-
-Bot.onUserContextMenuInteraction = function (interaction) {
-	const interactionName = interaction.commandName;
-	if (this.$user[interactionName]) {
-		if (interaction.guild) {
-			interaction.guild.members
-				.fetch(interaction.targetId)
-				.then((member) => {
-					interaction._targetMember = member;
-					Actions.preformActionsFromInteraction(interaction, this.$user[interactionName], true);
+	static registerApplicationCommands () {
+		let slashType = Files.data.settings.slashType ?? "auto";
+	
+		if (slashType === "auto") {
+			const serverCount = this.bot.guilds.cache.size;
+			if (serverCount <= 15) {
+				slashType = "all";
+			} else {
+				slashType = "global";
+			}
+		}
+	
+		this._slashCommandCreateType = slashType;
+		this._slashCommandServerList = Files.data.settings?.slashServers?.split?.(/[\n\r]+/) ?? [];
+	
+		switch (slashType) {
+			case "all": {
+				this.setAllServerCommands(this.applicationCommandData);
+				this.setGlobalCommands([]);
+				break;
+			}
+			case "global": {
+				this.setAllServerCommands([], false);
+				this.setGlobalCommands(this.applicationCommandData);
+				break;
+			}
+			case "manual": {
+				this.setCertainServerCommands(this.applicationCommandData, this._slashCommandServerList);
+				this.setGlobalCommands([]);
+				break;
+			}
+			case "manualglobal": {
+				this.setCertainServerCommands(this.applicationCommandData, this._slashCommandServerList);
+				this.setGlobalCommands(this.applicationCommandData);
+				break;
+			}
+		}
+	};
+	
+	static onServerJoin (guild) {
+		this.initializeCommandsForNewServer(guild);
+	};
+	
+	static initializeCommandsForNewServer (guild) {
+		switch (this._slashCommandCreateType) {
+			case "all":
+			case "manual":
+			case "manualglobal": {
+				if (this._slashCommandCreateType === "all" || this._slashCommandServerList.includes(guild.id)) {
+					this.setCommandsForServer(guild, this.applicationCommandData, true);
+				}
+				break;
+			}
+		}
+	};
+	
+	static shouldPrintAnyMissingAccessError () {
+		return !(Files.data.settings.ignoreCommandScopeErrors ?? false);
+	};
+	
+	static clearUnspecifiedServerCommands () {
+		return Files.data.settings.clearUnlistedServers ?? false;
+	};
+	
+	static setGlobalCommands (commands: djs.ApplicationCommandData[]) {
+		this.bot.application?.commands
+			?.set?.(commands)
+			.then(function () {})
+			.catch(function (err) {
+				console.error(err);
+			});
+	};
+	
+	static setCommandsForServer (guild, commands: djs.ApplicationCommandData[], printMissingAccessError) {
+		if (guild?.commands?.set) {
+			guild.commands
+				.set(commands)
+				.then(function () {})
+				.catch((err) => {
+					if (err.code === 50001) {
+						if (this.shouldPrintAnyMissingAccessError() && printMissingAccessError) {
+							PrintError(MsgType.MISSING_APPLICATION_COMMAND_ACCESS, guild.name, guild.id);
+						}
+					} else {
+						console.error(err);
+					}
+				});
+		}
+	};
+	
+	static setAllServerCommands (commands: djs.ApplicationCommandData[], printMissingAccessError = true) {
+		this.bot.guilds.cache.forEach((value: djs.Guild, key: string, map: Map<string, djs.Guild>) => {
+			this.bot.guilds
+				.fetch(key)
+				.then((guild) => {
+					this.setCommandsForServer(guild, commands, printMissingAccessError);
 				})
-				.catch(console.error);
+				.catch(function (err) {
+					console.error(err);
+				});
+		});
+	};
+	
+	static setCertainServerCommands (commands: djs.ApplicationCommandData[], serverIdList) {
+		if (this.clearUnspecifiedServerCommands()) {
+			this.bot.guilds.cache.forEach((value: djs.Guild, key: string, map: Map<string, djs.Guild>) => {
+				this.bot.guilds
+					.fetch(key)
+					.then((guild) => {
+						if (serverIdList.includes(guild.id)) {
+							this.setCommandsForServer(guild, commands, true);
+						} else {
+							this.setCommandsForServer(guild, [], true);
+						}
+					})
+					.catch(function (err) {
+						console.error(err);
+					});
+			});
 		} else {
-			interaction._targetMember = interaction.targetUser;
-			Actions.preformActionsFromInteraction(interaction, this.$user[interactionName], true);
+			for (let i = 0; i < serverIdList.length; i++) {
+				this.bot.guilds
+					.fetch(serverIdList[i])
+					.then((guild) => {
+						this.setCommandsForServer(guild, commands, true);
+					})
+					.catch(function (err) {
+						PrintError(MsgType.INVALID_SLASH_COMMAND_SERVER_ID, serverIdList[i]);
+					});
+			}
 		}
-	}
-};
-
-Bot.onMessageContextMenuInteraction = function (interaction) {
-	const interactionName = interaction.commandName;
-	if (this.$msge[interactionName]) {
-		const msg = interaction.targetMessage;
-		if (!(msg instanceof DiscordJS.Message) && interaction.channel) {
-			interaction.channel.messages
-				.fetch(interaction.targetId)
-				.then((message) => {
-					interaction._targetMessage = message;
-					Actions.preformActionsFromInteraction(interaction, this.$msge[interactionName], true);
-				})
-				.catch(console.error);
+	};
+	
+	static preformInitialization () {
+		const bot = this.bot;
+		if (this.$evts["1"]) {
+			Events.onInitialization(bot);
+		}
+		if (this.$evts["48"]) {
+			Events.onInitializationOnce(bot);
+		}
+		if (this.$evts["3"]) {
+			Events.setupIntervals(bot);
+		}
+	};
+	
+	static onMessage (msg) {
+		if (msg.author.bot) return;
+		try {
+			if (!this.checkCommand(msg)) {
+				this.onAnyMessage(msg);
+			}
+		} catch (e) {
+			console.error(e);
+		}
+	};
+	
+	static checkCommand (msg) {
+		if (!this._hasTextCommands) return false;
+		let command = this.checkTag(msg.content);
+		if (!command) return false;
+		if (!this._caseSensitive) {
+			command = command.toLowerCase();
+		}
+		const cmd = this.$cmds[command];
+		if (cmd) {
+			Actions.preformActionsFromMessage(msg, cmd);
+			return true;
+		}
+		return false;
+	};
+	
+	static escapeRegExp (text) {
+		return text.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&");
+	};
+	
+	static generateTagRegex (tag, allowPrefixSpace): RegExp {
+		return new RegExp(`^${this.escapeRegExp(tag)}${allowPrefixSpace ? "\\s*" : ""}`);
+	};
+	
+	static populateTagRegex () {
+		if (this.tagRegex) return;
+		const tag = Files.data.settings.tag;
+		const allowPrefixSpace = Files.data.settings.allowPrefixSpace === "true";
+		this.tagRegex = this.generateTagRegex(tag, allowPrefixSpace);
+		return this.tagRegex;
+	};
+	
+	static checkTag (content) {
+		const allowPrefixSpace = Files.data.settings.allowPrefixSpace === "true";
+		const tag = Files.data.settings.tag;
+		this.populateTagRegex();
+		const separator = Files.data.settings.separator || "\\s+";
+		if (content.startsWith(tag)) {
+			if (allowPrefixSpace && this.tagRegex.test(content)) {
+				content = content.replace(this.tagRegex, "");
+				return content.split(new RegExp(separator))[0];
+			} else {
+				content = content.split(new RegExp(separator))[0];
+				return content.substring(tag.length);
+			}
+		}
+		return null;
+	};
+	
+	static onAnyMessage (msg: djs.Message) {
+		this.checkIncludes(msg);
+		this.checkRegExps(msg);
+		if (!msg.author.bot) {
+			if (this.$evts["2"]) {
+				Events.callEvents("2", 1, 0, 2, false, "", msg);
+			}
+			const anym = this.$anym;
+			for (let i = 0; i < anym.length; i++) {
+				if (anym[i]) {
+					Actions.preformActionsFromMessage(msg, anym[i]);
+				}
+			}
+		}
+	};
+	
+	static checkIncludes (msg: djs.Message) {
+		const text = msg.content;
+		if (!text) return;
+		const icds = this.$icds;
+		const icds_len = icds.length;
+		for (let i = 0; i < icds_len; i++) {
+			if (!icds[i]?.name) continue;
+			if (icds[i]._aliases) {
+				const words = [icds[i].name].concat(icds[i]._aliases!);
+				if (text.match(new RegExp("\\b(?:" + words.join("|") + ")\\b", "i"))) {
+					Actions.preformActionsFromMessage(msg, icds[i]);
+				}
+			} else if (text.match(new RegExp("\\b" + icds[i].name + "\\b", "i"))) {
+				Actions.preformActionsFromMessage(msg, icds[i]);
+			}
+		}
+	};
+	
+	static checkRegExps (msg) {
+		const text = msg.content;
+		if (!text) return;
+		const regx = this.$regx;
+		const regx_len = regx.length;
+		for (let i = 0; i < regx_len; i++) {
+			if (regx[i]?.name) {
+				if (text.match(new RegExp(regx[i].name, "i"))) {
+					Actions.preformActionsFromMessage(msg, regx[i]);
+				} else if (regx[i]._aliases) {
+					const aliases: string[] = regx[i]._aliases!;
+					const aliases_len: number = aliases.length;
+					for (let j = 0; j < aliases_len; j++) {
+						if (text.match(new RegExp("\\b" + aliases[j] + "\\b", "i"))) {
+							Actions.preformActionsFromMessage(msg, regx[i]);
+							break;
+						}
+					}
+				}
+			}
+		}
+	};
+	
+	static onInteraction (interaction) {
+		if (interaction.isChatInputCommand()) {
+			this.onSlashCommandInteraction(interaction);
+		} else if (interaction.isContextMenuCommand()) {
+			this.onContextMenuInteraction(interaction);
+		} else if (interaction.isModalSubmit()) {
+			Actions.checkModalSubmitResponses(interaction);
 		} else {
-			interaction._targetMessage = msg;
-			Actions.preformActionsFromInteraction(interaction, this.$msge[interactionName], true);
+			if (interaction.component?.type === DiscordJS.ComponentType.Button) {
+				interaction._button = interaction.component;
+			} else if (interaction.component?.type === DiscordJS.ComponentType.SelectMenu) {
+				interaction._select = interaction.component;
+			}
+			if (!Actions.checkTemporaryInteractionResponses(interaction)) {
+				if (interaction.isButton()) {
+					this.onButtonInteraction(interaction);
+				} else if (interaction.isStringSelectMenu()) {
+					this.onSelectMenuInteraction(interaction);
+				}
+			}
 		}
-	}
-};
-
-Bot.onButtonInteraction = function (interaction) {
-	const interactionId = interaction.customId;
-	if (this.$button[interactionId]) {
-		Actions.preformActionsFromInteraction(interaction, this.$button[interactionId]);
-	} else {
-		const response = Actions.getInvalidButtonResponseText();
-		if (response) {
-			interaction.reply({ content: response, ephemeral: true });
+	};
+	
+	static onSlashCommandInteraction (interaction) {
+		let interactionName = interaction.commandName;
+	
+		const group = interaction.options.getSubcommandGroup(false);
+		if (group) {
+			interactionName += " " + group;
 		}
-	}
-};
-
-Bot.onSelectMenuInteraction = function (interaction) {
-	const interactionId = interaction.customId;
-	if (this.$select[interactionId]) {
-		Actions.preformActionsFromSelectInteraction(interaction, this.$select[interactionId]);
-	} else {
-		const response = Actions.getInvalidSelectResponseText();
-		if (response) {
-			interaction.reply({ content: response, ephemeral: true });
+	
+		const sub = interaction.options.getSubcommand(false);
+		if (sub) {
+			interactionName += " " + sub;
 		}
-	}
-};
+	
+		if (this.$slash[interactionName]) {
+			Actions.preformActionsFromInteraction(interaction, this.$slash[interactionName], true);
+		}
+	};
+	
+	static onContextMenuInteraction (interaction) {
+		if (interaction.isUserContextMenuCommand()) {
+			this.onUserContextMenuInteraction(interaction);
+		} else if (interaction.isMessageContextMenuCommand()) {
+			this.onMessageContextMenuInteraction(interaction);
+		}
+	};
+	
+	static onUserContextMenuInteraction (interaction) {
+		const interactionName = interaction.commandName;
+		if (this.$user[interactionName]) {
+			if (interaction.guild) {
+				interaction.guild.members
+					.fetch(interaction.targetId)
+					.then((member) => {
+						interaction._targetMember = member;
+						Actions.preformActionsFromInteraction(interaction, this.$user[interactionName], true);
+					})
+					.catch(console.error);
+			} else {
+				interaction._targetMember = interaction.targetUser;
+				Actions.preformActionsFromInteraction(interaction, this.$user[interactionName], true);
+			}
+		}
+	};
+	
+	static onMessageContextMenuInteraction (interaction) {
+		const interactionName = interaction.commandName;
+		if (this.$msge[interactionName]) {
+			const msg = interaction.targetMessage;
+			if (!(msg instanceof DiscordJS.Message) && interaction.channel) {
+				interaction.channel.messages
+					.fetch(interaction.targetId)
+					.then((message) => {
+						interaction._targetMessage = message;
+						Actions.preformActionsFromInteraction(interaction, this.$msge[interactionName], true);
+					})
+					.catch(console.error);
+			} else {
+				interaction._targetMessage = msg;
+				Actions.preformActionsFromInteraction(interaction, this.$msge[interactionName], true);
+			}
+		}
+	};
+	
+	static onButtonInteraction (interaction) {
+		const interactionId = interaction.customId;
+		if (this.$button[interactionId]) {
+			Actions.preformActionsFromInteraction(interaction, this.$button[interactionId]);
+		} else {
+			const response = Actions.getInvalidButtonResponseText();
+			if (response) {
+				interaction.reply({ content: response, ephemeral: true });
+			}
+		}
+	};
+	
+	static onSelectMenuInteraction (interaction) {
+		const interactionId = interaction.customId;
+		if (this.$select[interactionId]) {
+			Actions.preformActionsFromSelectInteraction(interaction, this.$select[interactionId]);
+		} else {
+			const response = Actions.getInvalidSelectResponseText();
+			if (response) {
+				interaction.reply({ content: response, ephemeral: true });
+			}
+		}
+	};
+}
 
 //#endregion
 
@@ -1862,7 +1928,9 @@ Actions.getSendTarget = async function (type, varName, cache) {
 		}
 		case 102: {
 			const searchValue = this.evalMessage(varName, cache);
-			const result = Bot.bot.channels.cache.find((channel) => channel.name === searchValue);
+			const result = Bot.bot.channels.cache.find(
+				(channel: djs.Channel) => (channel as djs.GuildChannel).name === searchValue
+			);
 			if (result) {
 				return result;
 			}
@@ -2093,7 +2161,9 @@ Actions.getChannel = async function (type, varName, cache) {
 			break;
 		case 100: {
 			const searchValue = this.evalMessage(varName, cache);
-			const result = Bot.bot.channels.cache.find((channel) => channel.name === searchValue);
+			const result = Bot.bot.channels.cache.find(
+				(channel: djs.Channel) => (channel as djs.GuildChannel).name === searchValue
+			);
 			if (result) {
 				return result;
 			}
@@ -2149,7 +2219,9 @@ Actions.getVoiceChannel = async function (type, varName, cache) {
 			break;
 		case 100: {
 			const searchValue = this.evalMessage(varName, cache);
-			const result = Bot.bot.channels.cache.find((channel) => channel.name === searchValue);
+			const result = Bot.bot.channels.cache.find(
+				(channel: djs.Channel) => (channel as djs.GuildChannel).name === searchValue
+			);
 			if (result) {
 				return result;
 			}
@@ -3280,7 +3352,7 @@ Audio.Subscription = class {
 
 			require("node:timers")
 				.setTimeout(async () => {
-					let guild = null;
+					let guild: djs.Guild | null = null;
 					try {
 						guild = await Bot.bot.guilds.resolve(this.voiceConnection.joinConfig.guildId);
 					} catch (e) {
