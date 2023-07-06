@@ -1216,8 +1216,8 @@ Actions.timeStamps = [];
 
 type ActionsCacheMeta = { isEvent: boolean, name: string };
 
-const ActionsCache = (Actions.ActionsCache = class ActionsCache {
-	actions: any; // TODO: make this class. Currently an array of actions that can have properties assigned to it.
+class ActionsCache {
+	actions: dbm.Action[] & { _customData: any };
 	server: djs.Guild;
 	index: number;
 	temp: object;
@@ -1306,7 +1306,9 @@ const ActionsCache = (Actions.ActionsCache = class ActionsCache {
 			meta: other.meta,
 		});
 	}
-});
+};
+
+Actions.ActionsCache = ActionsCache;
 
 Actions.exists = function (action) {
 	if (!action) return false;
