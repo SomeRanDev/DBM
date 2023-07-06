@@ -5,8 +5,8 @@
   "main": "bin/bot.js",
   "scripts": {
     "build": "npx ts-node build.ts",
-    "prettier:check": "npx prettier --check **/*.js",
-    "prettier:fix": "npx prettier --write **/*.js"
+    "prettier:check": "npx prettier --check **/*.js --check **/*.ts",
+    "prettier:fix": "npx prettier --write **/*.js --write **/*.ts"
   },
   "dependencies": {
     "@discordjs/opus": "^0.9.0",
