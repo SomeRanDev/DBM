@@ -2908,54 +2908,60 @@ DBM.Events = Events;
 // Contains functions for image management.
 //---------------------------------------------------------------------
 
-const Images: any = (DBM.Images = {});
+class Images {
+	static JIMP: typeof import("jimp") | null = null;
 
-Images.JIMP = null;
-try {
-	Images.JIMP = require("jimp");
-} catch {}
-
-Images.getImage = function (url) {
-	if (!url.startsWith("http")) url = Actions.getLocalFile(url);
-	return this.JIMP.read(url);
-};
-
-Images.getFont = function (url) {
-	return this.JIMP.loadFont(Actions.getLocalFile(url));
-};
-
-Images.isImage = function (obj) {
-	if (!Images.JIMP) {
-		return false;
+	static {
+		this.JIMP = null;
+		try {
+			this.JIMP = require("jimp");
+		} catch {}
 	}
-	return obj instanceof Images.JIMP;
-};
 
-Images.createBuffer = function (image) {
-	return new Promise((resolve, reject) => {
-		image.getBuffer(this.JIMP.AUTO, function (err, buffer) {
-			if (err) {
-				reject(err);
-			} else {
-				resolve(buffer);
-			}
+	static getImage (url: string): Promise<import("jimp")> {
+		if (!url.startsWith("http")) url = Actions.getLocalFile(url);
+		return this.JIMP!.read(url);
+	};
+
+	static getFont (url: string): Promise<import("@jimp/plugin-print").Font> {
+		return this.JIMP!.loadFont(Actions.getLocalFile(url));
+	};
+
+	static isImage (obj: any): boolean {
+		if (!Images.JIMP) {
+			return false;
+		}
+		return obj instanceof Images.JIMP;
+	};
+
+	static createBuffer (image: import("jimp")): Promise<Buffer> {
+		return new Promise((resolve, reject) => {
+			image.getBuffer(this.JIMP!.MIME_PNG, function (err, buffer) {
+				if (err) {
+					reject(err);
+				} else {
+					resolve(buffer);
+				}
+			});
 		});
-	});
-};
+	};
 
-Images.drawImageOnImage = function (img1, img2, x, y) {
-	for (let i = 0; i < img2.bitmap.width; i++) {
-		for (let j = 0; j < img2.bitmap.height; j++) {
-			const pos = i * (img2.bitmap.width * 4) + j * 4;
-			const pos2 = (i + y) * (img1.bitmap.width * 4) + (j + x) * 4;
-			const target = img1.bitmap.data;
-			const source = img2.bitmap.data;
-			for (let k = 0; k < 4; k++) {
-				target[pos2 + k] = source[pos + k];
+	static drawImageOnImage (img1: import("jimp"), img2: import("jimp"), x: number, y: number) {
+		for (let i = 0; i < img2.bitmap.width; i++) {
+			for (let j = 0; j < img2.bitmap.height; j++) {
+				const pos = i * (img2.bitmap.width * 4) + j * 4;
+				const pos2 = (i + y) * (img1.bitmap.width * 4) + (j + x) * 4;
+				const target = img1.bitmap.data;
+				const source = img2.bitmap.data;
+				for (let k = 0; k < 4; k++) {
+					target[pos2 + k] = source[pos + k];
+				}
 			}
 		}
-	}
-};
+	};
+}
+
+DBM.Images = Images;
 
 //#endregion
 
