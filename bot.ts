@@ -4,8 +4,8 @@
  * Robert Borghese
  ******************************************************/
 
-import * as djs from "discord.js"
-import * as djsvoice from "@discordjs/voice"
+import * as djs from "discord.js";
+import * as djsvoice from "@discordjs/voice";
 
 const DBM: any = {};
 DBM.version = "2.2.0";
@@ -61,7 +61,7 @@ enum MsgType {
 
 	SERVER_MESSAGE_INTENT_REQUIRED,
 	CHANNEL_PARTIAL_REQUIRED,
-};
+}
 
 function PrintError(type: MsgType, ...args: any[]) {
 	const { format } = require("node:util");
@@ -281,31 +281,31 @@ function GetActionErrorText(location: string, index: number, dataName: string | 
 // TODO: most of these are incomplete, add to them when needed.
 namespace dbm {
 	export type Command = {
-		name: string,
-		_id: string,
-		comType: string,
-		permissions: string,
-		permissions2: string,
-		restriction: string,
-		actions: Action[],
+		name: string;
+		_id: string;
+		comType: string;
+		permissions: string;
+		permissions2: string;
+		restriction: string;
+		actions: Action[];
 
-		_aliases?: string[],
+		_aliases?: string[];
 		_timeRestriction?: number;
-	}
+	};
 
 	export type Event = {
-		name: string,
-		_id: string,
-		"event-type": string,
-		temp?: string,
-		temp2?: string,
-		actions: Action[]
-	}
-	
+		name: string;
+		_id: string;
+		"event-type": string;
+		temp?: string;
+		temp2?: string;
+		actions: Action[];
+	};
+
 	export type Action = {
-		name: string
-	}
-	
+		name: string;
+	};
+
 	export type CommandList = Command[];
 	export type CommandMap = Record<string, Command>;
 
@@ -344,7 +344,7 @@ class Bot {
 	static hasMemberIntents: boolean;
 	static hasMessageContentIntents: boolean;
 
-	static _hasTextCommands: boolean
+	static _hasTextCommands: boolean;
 	static _textCommandCount: number;
 	static _dmTextCommandCount: number;
 	static _caseSensitive: boolean;
@@ -373,19 +373,18 @@ class Bot {
 		DiscordJS.IntentsBitField.Flags.DirectMessageReactions |
 		DiscordJS.IntentsBitField.Flags.DirectMessageTyping;
 
-	static ALL_INTENTS: djs.GatewayIntentBits =
-		Bot.PRIVILEGED_INTENTS | Bot.NON_PRIVILEGED_INTENTS;
+	static ALL_INTENTS: djs.GatewayIntentBits = Bot.PRIVILEGED_INTENTS | Bot.NON_PRIVILEGED_INTENTS;
 
-	static init (): void {
+	static init(): void {
 		this.initBot();
 		this.setupBot();
 		this.reformatData();
 		this.checkForCommandErrors();
 		this.initEvents();
 		this.login();
-	};
-	
-	static initBot (): void {
+	}
+
+	static initBot(): void {
 		const options: Partial<djs.ClientOptions> = this.makeClientOptions();
 		options.intents = this.intents();
 		if (this.usePartials()) {
@@ -394,42 +393,44 @@ class Bot {
 		this.hasMemberIntents = (options.intents & DiscordJS.IntentsBitField.Flags.GuildMembers) !== 0;
 		this.hasMessageContentIntents = (options.intents & DiscordJS.IntentsBitField.Flags.MessageContent) !== 0;
 		this.bot = new DiscordJS.Client(options);
-	};
-	
-	static makeClientOptions (): Partial<djs.ClientOptions> {
+	}
+
+	static makeClientOptions(): Partial<djs.ClientOptions> {
 		return {};
-	};
-	
-	static intents (): djs.GatewayIntentBits {
+	}
+
+	static intents(): djs.GatewayIntentBits {
 		return this.NON_PRIVILEGED_INTENTS;
-	};
-	
-	static usePartials (): boolean {
+	}
+
+	static usePartials(): boolean {
 		return false;
-	};
-	
-	static partials (): djs.Partials[] {
+	}
+
+	static partials(): djs.Partials[] {
 		return [];
-	};
-	
-	static setupBot () {
+	}
+
+	static setupBot() {
 		this.bot.on("raw", this.onRawData);
-	};
-	
-	static onRawData (packet) {
+	}
+
+	static onRawData(packet) {
 		if (packet.t !== "MESSAGE_REACTION_ADD" || packet.t !== "MESSAGE_REACTION_REMOVE") return;
-	
+
 		const client = Bot.bot;
 		const channel: djs.Channel = client.channels.resolve(packet.d.channel_id);
 		if (channel instanceof djs.TextChannel) {
 			if (channel?.messages.cache.has(packet.d.message_id)) {
 				return;
 			}
-		
+
 			channel.messages
 				.fetch(packet.d.message_id)
 				.then((message) => {
-					const emoji = packet.d.emoji.id ? `${packet.d.emoji.name}:${packet.d.emoji.id}` : packet.d.emoji.name;
+					const emoji = packet.d.emoji.id
+						? `${packet.d.emoji.name}:${packet.d.emoji.id}`
+						: packet.d.emoji.name;
 					const reaction = message.reactions.resolve(emoji);
 					if (packet.t === "MESSAGE_REACTION_ADD") {
 						client.emit("messageReactionAdd", reaction, client.users.resolve(packet.d.user_id));
@@ -440,14 +441,14 @@ class Bot {
 				})
 				.catch(noop);
 		}
-	};
-	
-	static reformatData () {
+	}
+
+	static reformatData() {
 		this.reformatCommands();
 		this.reformatEvents();
-	};
-	
-	static reformatCommands () {
+	}
+
+	static reformatCommands() {
 		const data = Files.data.commands;
 		if (!data) return;
 		this._hasTextCommands = false;
@@ -458,14 +459,14 @@ class Bot {
 			const com = data[i];
 			if (com) {
 				this.prepareActions(com.actions);
-	
+
 				if (com.comType <= "3") {
 					this._textCommandCount++;
 					if (com.restriction === "3") {
 						this._dmTextCommandCount++;
 					}
 				}
-	
+
 				switch (com.comType) {
 					case "0": {
 						this._hasTextCommands = true;
@@ -553,9 +554,9 @@ class Bot {
 				}
 			}
 		}
-	};
-	
-	static createApiJsonFromCommand (com, name): djs.ApplicationCommandData {
+	}
+
+	static createApiJsonFromCommand(com, name): djs.ApplicationCommandData {
 		const result: Partial<djs.ChatInputApplicationCommandData> = {
 			name: name ?? com.name,
 			description: this.generateSlashCommandDescription(com),
@@ -578,13 +579,14 @@ class Bot {
 			result.options = this.validateSlashCommandParameters(com.parameters, result.name);
 		}
 		return result as djs.ChatInputApplicationCommandData;
-	};
-	
-	static mergeSubCommandIntoCommandData (names, data) {
+	}
+
+	static mergeSubCommandIntoCommandData(names, data) {
 		data.type = DiscordJS.ApplicationCommandOptionType.Subcommand;
-	
+
 		const baseName = names[0];
-		let baseCommand: djs.ApplicationCommandData | null = this.applicationCommandData.find((data) => data.name === baseName) ?? null;
+		let baseCommand: djs.ApplicationCommandData | null =
+			this.applicationCommandData.find((data) => data.name === baseName) ?? null;
 		if (baseCommand === null) {
 			baseCommand = {
 				name: baseName,
@@ -594,12 +596,12 @@ class Bot {
 			this.applicationCommandData.push(baseCommand);
 		}
 
-		if(baseCommand.type !== djs.ApplicationCommandType.ChatInput) {
+		if (baseCommand.type !== djs.ApplicationCommandType.ChatInput) {
 			return;
 		}
 
 		const chatCommand = baseCommand as djs.ChatInputApplicationCommandData;
-	
+
 		if (names.length === 2) {
 			if (!chatCommand.options) {
 				chatCommand.options = [];
@@ -617,9 +619,10 @@ class Bot {
 			if (!chatCommand.options) {
 				chatCommand.options = [];
 			}
-	
+
 			const groupName = names[1];
-			let baseGroup: djs.ApplicationCommandOptionData | null = chatCommand.options.find((option) => option.name === groupName) ?? null;
+			let baseGroup: djs.ApplicationCommandOptionData | null =
+				chatCommand.options.find((option) => option.name === groupName) ?? null;
 			if (baseGroup === null) {
 				baseGroup = {
 					name: groupName,
@@ -635,22 +638,22 @@ class Bot {
 
 			(baseGroup as djs.APIApplicationCommandSubcommandOption).options?.push(data);
 		}
-	};
-	
-	static validateSlashCommandName (name) {
+	}
+
+	static validateSlashCommandName(name) {
 		if (!name) {
 			return false;
 		}
-	
+
 		const names = name
 			.split(/\s+/)
 			.map((name) => this.validateSlashCommandParameterName(name))
 			.filter((name) => typeof name === "string");
-	
+
 		return names.length > 0 ? names : false;
-	};
-	
-	static validateSlashCommandParameterName (name) {
+	}
+
+	static validateSlashCommandParameterName(name) {
 		if (!name) {
 			return false;
 		}
@@ -661,28 +664,28 @@ class Bot {
 			return name.toLowerCase();
 		}
 		return false;
-	};
-	
-	static generateSlashCommandDescription (com) {
+	}
+
+	static generateSlashCommandDescription(com) {
 		const desc = com.description;
 		if (com.comType !== "4") {
 			return "";
 		}
 		return this.validateSlashCommandDescription(desc);
-	};
-	
-	static validateSlashCommandDescription (desc: string): string {
+	}
+
+	static validateSlashCommandDescription(desc: string): string {
 		if (desc?.length > 100) {
 			return desc.substring(0, 100);
 		}
 		return desc || this.getNoDescriptionText();
-	};
-	
-	static getNoDescriptionText () {
+	}
+
+	static getNoDescriptionText() {
 		return Files.data.settings.noDescriptionText ?? "(no description)";
-	};
-	
-	static validateSlashCommandParameters (parameters, commandName): djs.ApplicationCommandOptionData[] {
+	}
+
+	static validateSlashCommandParameters(parameters, commandName): djs.ApplicationCommandOptionData[] {
 		const requireParams: djs.ApplicationCommandOptionData[] = [];
 		const optionalParams: djs.ApplicationCommandOptionData[] = [];
 		const existingNames = {};
@@ -708,9 +711,9 @@ class Bot {
 			}
 		}
 		return requireParams.concat(optionalParams);
-	};
-	
-	static convertStringCommandParamTypeToEnum (paramTypeStr) {
+	}
+
+	static convertStringCommandParamTypeToEnum(paramTypeStr) {
 		const optionType = DiscordJS.ApplicationCommandOptionType;
 		switch (paramTypeStr) {
 			case "SUB_COMMAND":
@@ -737,9 +740,9 @@ class Bot {
 				return optionType.Attachment;
 		}
 		return 0;
-	};
-	
-	static reformatEvents () {
+	}
+
+	static reformatEvents() {
 		const data: dbm.Event[] = Files.data.events;
 		if (!data) return;
 		for (let i = 0; i < data.length; i++) {
@@ -751,9 +754,9 @@ class Bot {
 				this.$evts[type].push(event);
 			}
 		}
-	};
-	
-	static prepareActions (actions) {
+	}
+
+	static prepareActions(actions) {
 		if (actions) {
 			const customData = {};
 			for (let i = 0; i < actions.length; i++) {
@@ -766,9 +769,9 @@ class Bot {
 				actions._customData = customData;
 			}
 		}
-	};
-	
-	static registerButtonInteraction (interactionId, data) {
+	}
+
+	static registerButtonInteraction(interactionId, data) {
 		if (interactionId) {
 			if (!this.$button[interactionId]) {
 				this.$button[interactionId] = data;
@@ -776,9 +779,9 @@ class Bot {
 				PrintError(MsgType.DUPLICATE_BUTTON_ID, interactionId);
 			}
 		}
-	};
-	
-	static registerSelectMenuInteraction (interactionId, data) {
+	}
+
+	static registerSelectMenuInteraction(interactionId, data) {
 		if (interactionId) {
 			if (!this.$select[interactionId]) {
 				this.$select[interactionId] = data;
@@ -786,45 +789,48 @@ class Bot {
 				PrintError(MsgType.DUPLICATE_SELECT_ID, interactionId);
 			}
 		}
-	};
-	
-	static checkForCommandErrors () {
+	}
+
+	static checkForCommandErrors() {
 		if (this._textCommandCount > 0 && !this.hasMessageContentIntents) {
 			PrintError(MsgType.SERVER_MESSAGE_INTENT_REQUIRED, this._textCommandCount);
 		}
-		if (this._dmTextCommandCount > 0 && (!this.usePartials() || !this.partials().includes(DiscordJS.Partials.Channel))) {
+		if (
+			this._dmTextCommandCount > 0 &&
+			(!this.usePartials() || !this.partials().includes(DiscordJS.Partials.Channel))
+		) {
 			PrintError(MsgType.CHANNEL_PARTIAL_REQUIRED, this._dmTextCommandCount);
 		}
-	};
-	
-	static initEvents () {
+	}
+
+	static initEvents() {
 		this.bot.on("ready", this.onReady.bind(this));
 		this.bot.on("guildCreate", this.onServerJoin.bind(this));
 		this.bot.on("messageCreate", this.onMessage.bind(this));
 		this.bot.on("interactionCreate", this.onInteraction.bind(this));
 		Events.registerEvents(this.bot);
-	};
-	
-	static login () {
+	}
+
+	static login() {
 		this.bot.login(Files.data.settings.token);
-	};
-	
-	static onReady () {
+	}
+
+	static onReady() {
 		process.send?.("BotReady");
 		console.log("Bot is ready!"); // Tells editor to start!
 		this.restoreVariables();
 		this.registerApplicationCommands();
 		this.preformInitialization();
-	};
-	
-	static restoreVariables () {
+	}
+
+	static restoreVariables() {
 		Files.restoreServerVariables();
 		Files.restoreGlobalVariables();
-	};
+	}
 
-	static registerApplicationCommands () {
+	static registerApplicationCommands() {
 		let slashType = Files.data.settings.slashType ?? "auto";
-	
+
 		if (slashType === "auto") {
 			const serverCount = this.bot.guilds.cache.size;
 			if (serverCount <= 15) {
@@ -833,10 +839,10 @@ class Bot {
 				slashType = "global";
 			}
 		}
-	
+
 		this._slashCommandCreateType = slashType;
 		this._slashCommandServerList = Files.data.settings?.slashServers?.split?.(/[\n\r]+/) ?? [];
-	
+
 		switch (slashType) {
 			case "all": {
 				this.setAllServerCommands(this.applicationCommandData);
@@ -859,13 +865,13 @@ class Bot {
 				break;
 			}
 		}
-	};
-	
-	static onServerJoin (guild) {
+	}
+
+	static onServerJoin(guild) {
 		this.initializeCommandsForNewServer(guild);
-	};
-	
-	static initializeCommandsForNewServer (guild) {
+	}
+
+	static initializeCommandsForNewServer(guild) {
 		switch (this._slashCommandCreateType) {
 			case "all":
 			case "manual":
@@ -876,26 +882,26 @@ class Bot {
 				break;
 			}
 		}
-	};
-	
-	static shouldPrintAnyMissingAccessError () {
+	}
+
+	static shouldPrintAnyMissingAccessError() {
 		return !(Files.data.settings.ignoreCommandScopeErrors ?? false);
-	};
-	
-	static clearUnspecifiedServerCommands () {
+	}
+
+	static clearUnspecifiedServerCommands() {
 		return Files.data.settings.clearUnlistedServers ?? false;
-	};
-	
-	static setGlobalCommands (commands: djs.ApplicationCommandData[]) {
+	}
+
+	static setGlobalCommands(commands: djs.ApplicationCommandData[]) {
 		this.bot.application?.commands
 			?.set?.(commands)
 			.then(function () {})
 			.catch(function (err) {
 				console.error(err);
 			});
-	};
-	
-	static setCommandsForServer (guild, commands: djs.ApplicationCommandData[], printMissingAccessError) {
+	}
+
+	static setCommandsForServer(guild, commands: djs.ApplicationCommandData[], printMissingAccessError) {
 		if (guild?.commands?.set) {
 			guild.commands
 				.set(commands)
@@ -910,9 +916,9 @@ class Bot {
 					}
 				});
 		}
-	};
-	
-	static setAllServerCommands (commands: djs.ApplicationCommandData[], printMissingAccessError = true) {
+	}
+
+	static setAllServerCommands(commands: djs.ApplicationCommandData[], printMissingAccessError = true) {
 		this.bot.guilds.cache.forEach((value: djs.Guild, key: string, map: Map<string, djs.Guild>) => {
 			this.bot.guilds
 				.fetch(key)
@@ -923,9 +929,9 @@ class Bot {
 					console.error(err);
 				});
 		});
-	};
-	
-	static setCertainServerCommands (commands: djs.ApplicationCommandData[], serverIdList) {
+	}
+
+	static setCertainServerCommands(commands: djs.ApplicationCommandData[], serverIdList) {
 		if (this.clearUnspecifiedServerCommands()) {
 			this.bot.guilds.cache.forEach((value: djs.Guild, key: string, map: Map<string, djs.Guild>) => {
 				this.bot.guilds
@@ -953,9 +959,9 @@ class Bot {
 					});
 			}
 		}
-	};
-	
-	static preformInitialization () {
+	}
+
+	static preformInitialization() {
 		const bot = this.bot;
 		if (this.$evts["1"]) {
 			Events.onInitialization(bot);
@@ -966,9 +972,9 @@ class Bot {
 		if (this.$evts["3"]) {
 			Events.setupIntervals(bot);
 		}
-	};
-	
-	static onMessage (msg) {
+	}
+
+	static onMessage(msg) {
 		if (msg.author.bot) return;
 		try {
 			if (!this.checkCommand(msg)) {
@@ -977,9 +983,9 @@ class Bot {
 		} catch (e) {
 			console.error(e);
 		}
-	};
-	
-	static checkCommand (msg) {
+	}
+
+	static checkCommand(msg) {
 		if (!this._hasTextCommands) return false;
 		let command = this.checkTag(msg.content);
 		if (!command) return false;
@@ -992,25 +998,25 @@ class Bot {
 			return true;
 		}
 		return false;
-	};
-	
-	static escapeRegExp (text) {
+	}
+
+	static escapeRegExp(text) {
 		return text.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&");
-	};
-	
-	static generateTagRegex (tag, allowPrefixSpace): RegExp {
+	}
+
+	static generateTagRegex(tag, allowPrefixSpace): RegExp {
 		return new RegExp(`^${this.escapeRegExp(tag)}${allowPrefixSpace ? "\\s*" : ""}`);
-	};
-	
-	static populateTagRegex () {
+	}
+
+	static populateTagRegex() {
 		if (this.tagRegex) return;
 		const tag = Files.data.settings.tag;
 		const allowPrefixSpace = Files.data.settings.allowPrefixSpace === "true";
 		this.tagRegex = this.generateTagRegex(tag, allowPrefixSpace);
 		return this.tagRegex;
-	};
-	
-	static checkTag (content) {
+	}
+
+	static checkTag(content) {
 		const allowPrefixSpace = Files.data.settings.allowPrefixSpace === "true";
 		const tag = Files.data.settings.tag;
 		this.populateTagRegex();
@@ -1025,9 +1031,9 @@ class Bot {
 			}
 		}
 		return null;
-	};
-	
-	static onAnyMessage (msg: djs.Message) {
+	}
+
+	static onAnyMessage(msg: djs.Message) {
 		this.checkIncludes(msg);
 		this.checkRegExps(msg);
 		if (!msg.author.bot) {
@@ -1041,9 +1047,9 @@ class Bot {
 				}
 			}
 		}
-	};
-	
-	static checkIncludes (msg: djs.Message) {
+	}
+
+	static checkIncludes(msg: djs.Message) {
 		const text = msg.content;
 		if (!text) return;
 		const icds = this.$icds;
@@ -1059,9 +1065,9 @@ class Bot {
 				Actions.preformActionsFromMessage(msg, icds[i]);
 			}
 		}
-	};
-	
-	static checkRegExps (msg) {
+	}
+
+	static checkRegExps(msg) {
 		const text = msg.content;
 		if (!text) return;
 		const regx = this.$regx;
@@ -1082,9 +1088,9 @@ class Bot {
 				}
 			}
 		}
-	};
-	
-	static onInteraction (interaction) {
+	}
+
+	static onInteraction(interaction) {
 		if (interaction.isChatInputCommand()) {
 			this.onSlashCommandInteraction(interaction);
 		} else if (interaction.isContextMenuCommand()) {
@@ -1105,35 +1111,35 @@ class Bot {
 				}
 			}
 		}
-	};
-	
-	static onSlashCommandInteraction (interaction) {
+	}
+
+	static onSlashCommandInteraction(interaction) {
 		let interactionName = interaction.commandName;
-	
+
 		const group = interaction.options.getSubcommandGroup(false);
 		if (group) {
 			interactionName += " " + group;
 		}
-	
+
 		const sub = interaction.options.getSubcommand(false);
 		if (sub) {
 			interactionName += " " + sub;
 		}
-	
+
 		if (this.$slash[interactionName]) {
 			Actions.preformActionsFromInteraction(interaction, this.$slash[interactionName], true);
 		}
-	};
-	
-	static onContextMenuInteraction (interaction) {
+	}
+
+	static onContextMenuInteraction(interaction) {
 		if (interaction.isUserContextMenuCommand()) {
 			this.onUserContextMenuInteraction(interaction);
 		} else if (interaction.isMessageContextMenuCommand()) {
 			this.onMessageContextMenuInteraction(interaction);
 		}
-	};
-	
-	static onUserContextMenuInteraction (interaction) {
+	}
+
+	static onUserContextMenuInteraction(interaction) {
 		const interactionName = interaction.commandName;
 		if (this.$user[interactionName]) {
 			if (interaction.guild) {
@@ -1149,9 +1155,9 @@ class Bot {
 				Actions.preformActionsFromInteraction(interaction, this.$user[interactionName], true);
 			}
 		}
-	};
-	
-	static onMessageContextMenuInteraction (interaction) {
+	}
+
+	static onMessageContextMenuInteraction(interaction) {
 		const interactionName = interaction.commandName;
 		if (this.$msge[interactionName]) {
 			const msg = interaction.targetMessage;
@@ -1168,9 +1174,9 @@ class Bot {
 				Actions.preformActionsFromInteraction(interaction, this.$msge[interactionName], true);
 			}
 		}
-	};
-	
-	static onButtonInteraction (interaction) {
+	}
+
+	static onButtonInteraction(interaction) {
 		const interactionId = interaction.customId;
 		if (this.$button[interactionId]) {
 			Actions.preformActionsFromInteraction(interaction, this.$button[interactionId]);
@@ -1180,9 +1186,9 @@ class Bot {
 				interaction.reply({ content: response, ephemeral: true });
 			}
 		}
-	};
-	
-	static onSelectMenuInteraction (interaction) {
+	}
+
+	static onSelectMenuInteraction(interaction) {
 		const interactionId = interaction.customId;
 		if (this.$select[interactionId]) {
 			Actions.preformActionsFromSelectInteraction(interaction, this.$select[interactionId]);
@@ -1192,7 +1198,7 @@ class Bot {
 				interaction.reply({ content: response, ephemeral: true });
 			}
 		}
-	};
+	}
 }
 
 DBM.Bot = Bot;
@@ -1221,46 +1227,48 @@ class Actions {
 	static __cachedText: Record<string, boolean> | undefined;
 
 	static _temporaryInteractionIdMax: number;
-	static _temporaryInteractions: Record<string, { customId: string, userId: string, callback: Function, uniqueId: string }[] | Function>;
+	static _temporaryInteractions: Record<
+		string,
+		{ customId: string; userId: string; callback: Function; uniqueId: string }[] | Function
+	>;
 
-	static exists (action) {
+	static exists(action) {
 		if (!action) return false;
 		return typeof this[action] === "function";
-	};
+	}
 
-	static getLocalFile (url) {
+	static getLocalFile(url) {
 		return require("node:path").join(process.cwd(), url);
-	};
+	}
 
-	static getDBM () {
+	static getDBM() {
 		return DBM;
-	};
+	}
 
-	static async callListFunc (list, funcName, args) {
+	static async callListFunc(list, funcName, args) {
 		let result: any[] = [];
 
 		const len = list.length;
-		for(let i = 0; i < len; i++) {
+		for (let i = 0; i < len; i++) {
 			const item = list[i];
 			if (typeof item?.[funcName] === "function") {
 				try {
 					result.push(await item[funcName].apply(item, args));
-				} catch(e) {
-				}
+				} catch (e) {}
 			}
 		}
 
 		return result;
-	};
+	}
 
-	static getActionVariable (name, defaultValue) {
+	static getActionVariable(name, defaultValue) {
 		if (this[name] === undefined && defaultValue !== undefined) {
 			this[name] = defaultValue;
 		}
 		return this[name];
-	};
+	}
 
-	static getSlashParameter (interaction, name, defaultValue) {
+	static getSlashParameter(interaction, name, defaultValue) {
 		if (!interaction) {
 			return defaultValue ?? null;
 		}
@@ -1278,9 +1286,9 @@ class Actions {
 		}
 
 		return defaultValue !== undefined ? defaultValue : result;
-	};
+	}
 
-	static convertTextToEmojis (text, useRegional = true) {
+	static convertTextToEmojis(text, useRegional = true) {
 		let result = "";
 		for (let i = 0; i < text.length; i++) {
 			const code = text.toUpperCase().charCodeAt(i) - 65;
@@ -1293,21 +1301,21 @@ class Actions {
 			}
 		}
 		return result;
-	};
+	}
 
-	static getFlagEmoji (flagName) {
+	static getFlagEmoji(flagName) {
 		if (flagName.startsWith("flag_")) {
 			flagName = flagName.substring(5);
 		}
 		flagName = flagName.toUpperCase();
 		return this._letterEmojis[flagName.charCodeAt(0) - 65] + this._letterEmojis[flagName.charCodeAt(1) - 65];
-	};
+	}
 
-	static getCustomEmoji (nameOrId) {
+	static getCustomEmoji(nameOrId) {
 		return Bot.bot.emojis.cache.get(nameOrId) ?? Bot.bot.emojis.cache.find((e) => e.name === nameOrId);
-	};
+	}
 
-	static eval (content, cache, logError = true) {
+	static eval(content, cache, logError = true) {
 		if (!content) return false;
 		const DBM = this.getDBM();
 		const tempVars = this.getActionVariable.bind(cache.temp);
@@ -1357,15 +1365,15 @@ class Actions {
 			if (logError) console.error(e);
 			return false;
 		}
-	};
+	}
 
-	static evalMessage (content, cache) {
+	static evalMessage(content, cache) {
 		if (!content) return "";
 		if (!content.match(/\$\{.*\}/im)) return content;
 		return this.eval("`" + content.replace(/`/g, "\\`") + "`", cache);
-	};
+	}
 
-	static evalIfPossible (content, cache) {
+	static evalIfPossible(content, cache) {
 		this.__cachedText ??= {};
 		if (content in this.__cachedText) return content;
 		let result = this.eval(content, cache, false);
@@ -1375,9 +1383,9 @@ class Actions {
 			result = content;
 		}
 		return result;
-	};
+	}
 
-	static initMods () {
+	static initMods() {
 		this.modInitReferences = {};
 		const fs = require("node:fs");
 		const path = require("node:path");
@@ -1400,9 +1408,9 @@ class Actions {
 				}
 			});
 		});
-	};
+	}
 
-	static modDirectories () {
+	static modDirectories() {
 		const result = [this.actionsLocation];
 		if (Files.verifyDirectory(Actions.eventsLocation)) {
 			result.push(this.eventsLocation);
@@ -1411,18 +1419,23 @@ class Actions {
 			result.push(this.extensionsLocation);
 		}
 		return result;
-	};
+	}
 
-	static preformActionsFromMessage (msg, cmd) {
+	static preformActionsFromMessage(msg, cmd) {
 		if (
 			this.checkConditions(msg.guild, msg.member, msg.author, cmd) &&
 			this.checkTimeRestriction(msg.author, msg, cmd)
 		) {
 			this.invokeActions(msg, cmd.actions, cmd);
 		}
-	};
+	}
 
-	static preformActionsFromInteraction (interaction: djs.MessageComponentInteraction, cmd: dbm.Command, passMeta: boolean = false, initialTempVars: Record<string, any> | null = null) {
+	static preformActionsFromInteraction(
+		interaction: djs.MessageComponentInteraction,
+		cmd: dbm.Command,
+		passMeta: boolean = false,
+		initialTempVars: Record<string, any> | null = null,
+	) {
 		const invalidPermissions = this.getInvalidPermissionsResponse();
 		const invalidCooldown = this.getInvalidCooldownResponse();
 		if (this.checkConditions(interaction.guild, interaction.member, interaction.user, cmd)) {
@@ -1438,18 +1451,24 @@ class Actions {
 		} else if (invalidPermissions) {
 			interaction.reply({ content: invalidPermissions, ephemeral: true });
 		}
-	};
+	}
 
-	static preformActionsFromSelectInteraction (interaction: djs.StringSelectMenuInteraction, select, passMeta: boolean = false, initialTempVars: Record<string, any> | null = null) {
+	static preformActionsFromSelectInteraction(
+		interaction: djs.StringSelectMenuInteraction,
+		select,
+		passMeta: boolean = false,
+		initialTempVars: Record<string, any> | null = null,
+	) {
 		const tempVars = initialTempVars ?? {};
 		if (typeof select.tempVarName === "string") {
 			const values = interaction.values;
-			tempVars[select.tempVarName] = !values || values.length === 0 ? 0 : values.length === 1 ? values[0] : values;
+			tempVars[select.tempVarName] =
+				!values || values.length === 0 ? 0 : values.length === 1 ? values[0] : values;
 		}
 		this.preformActionsFromInteraction(interaction, select, passMeta, tempVars);
-	};
+	}
 
-	static checkConditions (guild, member, user, cmd) {
+	static checkConditions(guild, member, user, cmd) {
 		const isServer = Boolean(guild && member);
 		const restriction = parseInt(cmd.restriction, 10);
 		switch (restriction) {
@@ -1457,7 +1476,8 @@ class Actions {
 			case 1: {
 				if (isServer) {
 					return (
-						this.checkPermissions(member, cmd.permissions) && this.checkPermissions(member, cmd.permissions2)
+						this.checkPermissions(member, cmd.permissions) &&
+						this.checkPermissions(member, cmd.permissions2)
 					);
 				}
 				return restriction === 0;
@@ -1471,9 +1491,9 @@ class Actions {
 			default:
 				return true;
 		}
-	};
+	}
 
-	static checkTimeRestriction (user, msgOrInteraction, cmd: dbm.Command, returnTimeString = false) {
+	static checkTimeRestriction(user, msgOrInteraction, cmd: dbm.Command, returnTimeString = false) {
 		if (!cmd._timeRestriction) return true;
 		if (!user) return false;
 		const mid = user.id;
@@ -1498,9 +1518,9 @@ class Actions {
 				return returnTimeString ? timeString : false;
 			}
 		}
-	};
+	}
 
-	static generateTimeString (milliseconds) {
+	static generateTimeString(milliseconds) {
 		let remaining = milliseconds;
 		const times: string[] = [];
 
@@ -1536,17 +1556,17 @@ class Actions {
 			result = times[0] + ", " + times[1] + ", " + times[2] + ", and " + times[3];
 		}
 		return result;
-	};
+	}
 
-	static checkPermissions (member, permissions) {
+	static checkPermissions(member, permissions) {
 		if (!permissions) return true;
 		if (!member) return false;
 		if (permissions === "NONE") return true;
 		if (member.guild?.ownerId === member.id) return true;
 		return member.permissions.has(permissions);
-	};
+	}
 
-	static invokeActions (msg, actions, cmd: any = null) {
+	static invokeActions(msg, actions, cmd: any = null) {
 		if (actions.length > 0) {
 			this.callNextAction(
 				new ActionsCache(actions, msg.guild, {
@@ -1558,9 +1578,9 @@ class Actions {
 				}),
 			);
 		}
-	};
+	}
 
-	static invokeInteraction (interaction, actions, initialTempVars, meta: { name: string } | null = null) {
+	static invokeInteraction(interaction, actions, initialTempVars, meta: { name: string } | null = null) {
 		const cacheData: any = {
 			interaction,
 			temp: initialTempVars || {},
@@ -1573,9 +1593,9 @@ class Actions {
 		}
 		const cache = new ActionsCache(actions, interaction.guild, cacheData);
 		this.callNextAction(cache);
-	};
+	}
 
-	static invokeEvent (event, server, temp) {
+	static invokeEvent(event, server, temp) {
 		const actions = event.actions;
 		if (actions.length > 0) {
 			const cache = new ActionsCache(actions, server, {
@@ -1587,9 +1607,9 @@ class Actions {
 			});
 			this.callNextAction(cache);
 		}
-	};
+	}
 
-	static callNextAction (cache) {
+	static callNextAction(cache) {
 		cache.index++;
 		const index = cache.index;
 		const actions = cache.actions;
@@ -1608,50 +1628,50 @@ class Actions {
 			PrintError(MsgType.MISSING_ACTION, act.name);
 			this.callNextAction(cache);
 		}
-	};
+	}
 
-	static endActions (cache: ActionsCache) {
+	static endActions(cache: ActionsCache) {
 		cache.callback?.();
 		cache.onCompleted?.();
-	};
+	}
 
-	static getInvalidButtonResponseText () {
+	static getInvalidButtonResponseText() {
 		return Files.data.settings.invalidButtonText ?? "Button response no longer valid.";
-	};
+	}
 
-	static getInvalidSelectResponseText () {
+	static getInvalidSelectResponseText() {
 		return Files.data.settings.invalidSelectText ?? "Select menu response no longer valid.";
-	};
+	}
 
-	static getDefaultResponseText () {
+	static getDefaultResponseText() {
 		return Files.data.settings.autoResponseText ?? "Command successfully run!";
-	};
+	}
 
-	static getInvalidPermissionsResponse () {
+	static getInvalidPermissionsResponse() {
 		return Files.data.settings.invalidPermissionsText ?? "Invalid permissions!";
-	};
+	}
 
-	static getInvalidUserResponse () {
+	static getInvalidUserResponse() {
 		return Files.data.settings.invalidUserText ?? "Invalid user!";
-	};
+	}
 
-	static getInvalidCooldownResponse () {
+	static getInvalidCooldownResponse() {
 		return Files.data.settings.invalidCooldownText ?? "Must wait %s before using this action.";
-	};
+	}
 
-	static getErrorString (data: { name: string } | null, cache: ActionsCache) {
+	static getErrorString(data: { name: string } | null, cache: ActionsCache) {
 		const location = cache.toString();
 		return GetActionErrorText(location, cache.index + 1, data?.name ?? null);
-	};
+	}
 
-	static displayError (data, cache, err) {
+	static displayError(data, cache, err) {
 		if (!data) data = cache.actions[cache.index];
 		const dbm = this.getErrorString(data, cache);
 		console.error(dbm + ":\n" + (err.stack ?? err));
 		Events.onError(dbm, err.stack ?? err, cache);
-	};
+	}
 
-	static getParameterFromInteraction (interaction, name) {
+	static getParameterFromInteraction(interaction, name) {
 		if (interaction.__originalInteraction) {
 			const result = this.getParameterFromInteraction(interaction.__originalInteraction, name);
 			if (result !== null) {
@@ -1663,9 +1683,9 @@ class Actions {
 			return this.getParameterFromParameterData(option);
 		}
 		return null;
-	};
+	}
 
-	static getParameterFromParameterData (option) {
+	static getParameterFromParameterData(option) {
 		if (typeof option === "object") {
 			// ApplicationCommandOptionType
 			// https://discord-api-types.dev/api/discord-api-types-v10/enum/ApplicationCommandOptionType
@@ -1694,9 +1714,9 @@ class Actions {
 			}
 		}
 		return null;
-	};
+	}
 
-	static async findMemberOrUserFromName (name, server) {
+	static async findMemberOrUserFromName(name, server) {
 		if (!Bot.hasMemberIntents) {
 			PrintError(MsgType.MISSING_MEMBER_INTENT_FIND_USER_ID);
 		}
@@ -1714,9 +1734,9 @@ class Actions {
 			}
 		}
 		return null;
-	};
+	}
 
-	static async findMemberOrUserFromID (id, server) {
+	static async findMemberOrUserFromID(id, server) {
 		if (!Bot.hasMemberIntents) {
 			PrintError(MsgType.MISSING_MEMBER_INTENT_FIND_USER_ID);
 			return null;
@@ -1738,9 +1758,9 @@ class Actions {
 			return user;
 		}
 		return null;
-	};
+	}
 
-	static getTargetFromVariableOrParameter (varType, varName, cache) {
+	static getTargetFromVariableOrParameter(varType, varName, cache) {
 		switch (varType) {
 			case 0:
 				return cache.temp[varName];
@@ -1763,13 +1783,13 @@ class Actions {
 				break;
 		}
 		return null;
-	};
+	}
 
-	static async getSendTargetFromData (typeData, varNameData, cache) {
+	static async getSendTargetFromData(typeData, varNameData, cache) {
 		return await this.getSendTarget(parseInt(typeData, 10), this.evalMessage(varNameData, cache), cache);
-	};
+	}
 
-	static async getSendTarget (type, varName, cache) {
+	static async getSendTarget(type, varName, cache) {
 		const { interaction, msg, server } = cache;
 		switch (type) {
 			case 0:
@@ -1844,7 +1864,7 @@ class Actions {
 			case 102: {
 				const searchValue = this.evalMessage(varName, cache);
 				const result = Bot.bot.channels.cache.find(
-					(channel: djs.Channel) => (channel as djs.GuildChannel).name === searchValue
+					(channel: djs.Channel) => (channel as djs.GuildChannel).name === searchValue,
 				);
 				if (result) {
 					return result;
@@ -1863,9 +1883,9 @@ class Actions {
 				return this.getTargetFromVariableOrParameter(type - 5, varName, cache);
 		}
 		return null;
-	};
+	}
 
-	static async getSendReplyTarget (type, varName, cache) {
+	static async getSendReplyTarget(type, varName, cache) {
 		const { interaction, msg, server } = cache;
 		switch (type) {
 			case 13:
@@ -1878,13 +1898,13 @@ class Actions {
 				return await this.getSendTarget(type, varName, cache);
 		}
 		return null;
-	};
+	}
 
-	static async getMemberFromData (typeData, varNameData, cache) {
+	static async getMemberFromData(typeData, varNameData, cache) {
 		return await this.getMember(parseInt(typeData, 10), this.evalMessage(varNameData, cache), cache);
-	};
+	}
 
-	static async getMember (type, varName, cache) {
+	static async getMember(type, varName, cache) {
 		const { interaction, msg } = cache;
 		switch (type) {
 			case 0: {
@@ -1926,13 +1946,13 @@ class Actions {
 				return this.getTargetFromVariableOrParameter(type - 2, varName, cache);
 		}
 		return null;
-	};
+	}
 
-	static async getMessageFromData (typeData, varNameData, cache) {
+	static async getMessageFromData(typeData, varNameData, cache) {
 		return await this.getMessage(parseInt(typeData, 10), this.evalMessage(varNameData, cache), cache);
-	};
+	}
 
-	static async getMessage (type, varName, cache) {
+	static async getMessage(type, varName, cache) {
 		switch (type) {
 			case 0:
 				const msg = cache.getMessage();
@@ -1944,13 +1964,13 @@ class Actions {
 				return this.getTargetFromVariableOrParameter(type - 1, varName, cache);
 		}
 		return null;
-	};
+	}
 
-	static async getServerFromData (typeData, varNameData, cache) {
+	static async getServerFromData(typeData, varNameData, cache) {
 		return await this.getServer(parseInt(typeData, 10), this.evalMessage(varNameData, cache), cache);
-	};
+	}
 
-	static async getServer (type, varName, cache) {
+	static async getServer(type, varName, cache) {
 		const server = cache.server;
 		switch (type) {
 			case 0:
@@ -1978,13 +1998,13 @@ class Actions {
 				return this.getTargetFromVariableOrParameter(type - 1, varName, cache);
 		}
 		return null;
-	};
+	}
 
-	static async getRoleFromData (typeData, varNameData, cache) {
+	static async getRoleFromData(typeData, varNameData, cache) {
 		return await this.getRole(parseInt(typeData, 10), this.evalMessage(varNameData, cache), cache);
-	};
+	}
 
-	static async getRole (type, varName, cache) {
+	static async getRole(type, varName, cache) {
 		const { interaction, msg, server } = cache;
 		switch (type) {
 			case 0: {
@@ -2031,13 +2051,13 @@ class Actions {
 				return this.getTargetFromVariableOrParameter(type - 3, varName, cache);
 		}
 		return null;
-	};
+	}
 
-	static async getChannelFromData (typeData, varNameData, cache) {
+	static async getChannelFromData(typeData, varNameData, cache) {
 		return await this.getChannel(parseInt(typeData, 10), this.evalMessage(varNameData, cache), cache);
-	};
+	}
 
-	static async getChannel (type, varName, cache) {
+	static async getChannel(type, varName, cache) {
 		const { interaction, msg, server } = cache;
 		switch (type) {
 			case 0:
@@ -2077,7 +2097,7 @@ class Actions {
 			case 100: {
 				const searchValue = this.evalMessage(varName, cache);
 				const result = Bot.bot.channels.cache.find(
-					(channel: djs.Channel) => (channel as djs.GuildChannel).name === searchValue
+					(channel: djs.Channel) => (channel as djs.GuildChannel).name === searchValue,
 				);
 				if (result) {
 					return result;
@@ -2096,13 +2116,13 @@ class Actions {
 				return this.getTargetFromVariableOrParameter(type - 3, varName, cache);
 		}
 		return null;
-	};
+	}
 
-	static async getVoiceChannelFromData (typeData, varNameData, cache) {
+	static async getVoiceChannelFromData(typeData, varNameData, cache) {
 		return await this.getVoiceChannel(parseInt(typeData, 10), this.evalMessage(varNameData, cache), cache);
-	};
+	}
 
-	static async getVoiceChannel (type, varName, cache) {
+	static async getVoiceChannel(type, varName, cache) {
 		const { interaction, msg, server } = cache;
 		switch (type) {
 			case 0: {
@@ -2135,7 +2155,7 @@ class Actions {
 			case 100: {
 				const searchValue = this.evalMessage(varName, cache);
 				const result = Bot.bot.channels.cache.find(
-					(channel: djs.Channel) => (channel as djs.GuildChannel).name === searchValue
+					(channel: djs.Channel) => (channel as djs.GuildChannel).name === searchValue,
 				);
 				if (result) {
 					return result;
@@ -2154,9 +2174,9 @@ class Actions {
 				return this.getTargetFromVariableOrParameter(type - 3, varName, cache);
 		}
 		return null;
-	};
+	}
 
-	static async getAnyChannel (type, varName, cache) {
+	static async getAnyChannel(type, varName, cache) {
 		switch (type) {
 			case 10:
 				return await this.getVoiceChannel(0, varName, cache);
@@ -2170,13 +2190,13 @@ class Actions {
 				return await this.getChannel(type, varName, cache);
 		}
 		return null;
-	};
+	}
 
-	static async getListFromData (typeData, varNameData, cache) {
+	static async getListFromData(typeData, varNameData, cache) {
 		return await this.getList(parseInt(typeData, 10), this.evalMessage(varNameData, cache), cache);
-	};
+	}
 
-	static async getList (type, varName, cache) {
+	static async getList(type, varName, cache) {
 		const { interaction, msg, server } = cache;
 		switch (type) {
 			case 0:
@@ -2218,13 +2238,13 @@ class Actions {
 			default:
 				return this.getTargetFromVariableOrParameter(type - 7, varName, cache);
 		}
-	};
+	}
 
-	static getVariable (type, varName, cache) {
+	static getVariable(type, varName, cache) {
 		return this.getTargetFromVariableOrParameter(type - 1, varName, cache);
-	};
+	}
 
-	static storeValue (value, type, varName, cache) {
+	static storeValue(value, type, varName, cache) {
 		const server = cache.server;
 		switch (type) {
 			case 1:
@@ -2242,9 +2262,9 @@ class Actions {
 			default:
 				break;
 		}
-	};
+	}
 
-	static executeResults (result, data, cache) {
+	static executeResults(result, data, cache) {
 		const type = parseInt(result ? data.iftrue : data.iffalse, 10);
 		switch (type) {
 			case 0: {
@@ -2285,13 +2305,13 @@ class Actions {
 			default:
 				break;
 		}
-	};
+	}
 
-	static executeSubActionsThenNextAction (actions, cache) {
+	static executeSubActionsThenNextAction(actions, cache) {
 		return this.executeSubActions(actions, cache, () => this.callNextAction(cache));
-	};
+	}
 
-	static executeSubActions (actions, cache, callback: (() => void) | null = null) {
+	static executeSubActions(actions, cache, callback: (() => void) | null = null) {
 		if (!actions) {
 			callback?.();
 			return false;
@@ -2300,13 +2320,13 @@ class Actions {
 		newCache.callback = () => callback?.();
 		this.callNextAction(newCache);
 		return true;
-	};
+	}
 
-	static generateSubCache (cache, actions) {
+	static generateSubCache(cache, actions) {
 		return ActionsCache.extend(cache, actions);
-	};
+	}
 
-	static generateButton (button, cache) {
+	static generateButton(button, cache) {
 		const style = button.url ? DiscordJS.ButtonStyle.Link : this.convertStringButtonStyleToEnum(button.type);
 		const buttonData: djs.APIButtonComponentBase<djs.ButtonStyle> = {
 			type: DiscordJS.ComponentType.Button,
@@ -2322,9 +2342,9 @@ class Actions {
 			buttonData.emoji = this.evalMessage(button.emoji, cache);
 		}
 		return buttonData;
-	};
+	}
 
-	static convertStringButtonStyleToEnum (style) {
+	static convertStringButtonStyleToEnum(style) {
 		switch (style) {
 			case "PRIMARY":
 				return DiscordJS.ButtonStyle.Primary;
@@ -2338,9 +2358,9 @@ class Actions {
 				return DiscordJS.ButtonStyle.Link;
 		}
 		return DiscordJS.ButtonStyle.Primary;
-	};
+	}
 
-	static generateSelectMenu (select, cache) {
+	static generateSelectMenu(select, cache) {
 		const selectData = {
 			type: DiscordJS.ComponentType.SelectMenu,
 			customId: this.evalMessage(select.id, cache),
@@ -2355,9 +2375,9 @@ class Actions {
 			}),
 		};
 		return selectData;
-	};
+	}
 
-	static generateTextInput (textInput, defaultCustomId, cache) {
+	static generateTextInput(textInput, defaultCustomId, cache) {
 		const inputTextData = {
 			type: DiscordJS.ComponentType.TextInput,
 			customId: !!textInput.id ? textInput.id : defaultCustomId,
@@ -2369,9 +2389,9 @@ class Actions {
 			required: textInput.required === "true",
 		};
 		return inputTextData;
-	};
+	}
 
-	static convertStringTextInputStyleToEnum (style) {
+	static convertStringTextInputStyleToEnum(style) {
 		switch (style) {
 			case "PARAGRAPH":
 				return DiscordJS.TextInputStyle.Paragraph;
@@ -2379,9 +2399,9 @@ class Actions {
 				return DiscordJS.TextInputStyle.Short;
 		}
 		return DiscordJS.TextInputStyle.Short;
-	};
+	}
 
-	static addButtonToActionRowArray (array, rowText, buttonData, cache) {
+	static addButtonToActionRowArray(array, rowText, buttonData, cache) {
 		let row = 0;
 		if (!rowText) {
 			let found = false;
@@ -2415,9 +2435,9 @@ class Actions {
 		} else {
 			this.displayError(null, cache, 'Invalid action row: "' + rowText + '".');
 		}
-	};
+	}
 
-	static addSelectToActionRowArray (array, rowText, selectData, cache) {
+	static addSelectToActionRowArray(array, rowText, selectData, cache) {
 		let row = 0;
 		if (!rowText) {
 			if (array.length !== 0) {
@@ -2445,9 +2465,9 @@ class Actions {
 		} else {
 			this.displayError(null, cache, `Invalid action row: '${rowText}'.`);
 		}
-	};
+	}
 
-	static addTextInputToActionRowArray (array, rowText, textInput, cache) {
+	static addTextInputToActionRowArray(array, rowText, textInput, cache) {
 		let row = 0;
 		if (!rowText) {
 			if (array.length !== 0) {
@@ -2475,9 +2495,9 @@ class Actions {
 		} else {
 			this.displayError(null, cache, `Invalid action row: '${rowText}'.`);
 		}
-	};
+	}
 
-	static checkTemporaryInteractionResponses (interaction) {
+	static checkTemporaryInteractionResponses(interaction) {
 		const customId = interaction.customId;
 		const messageId = interaction.message?.id;
 		if (this._temporaryInteractions?.[messageId]) {
@@ -2499,9 +2519,9 @@ class Actions {
 			}
 		}
 		return false;
-	};
+	}
 
-	static registerTemporaryInteraction (messageId, time, customId, userId, multi, interactionCallback) {
+	static registerTemporaryInteraction(messageId, time, customId, userId, multi, interactionCallback) {
 		this._temporaryInteractionIdMax ??= 0;
 		this._temporaryInteractions ??= {};
 		this._temporaryInteractions[messageId] ??= [];
@@ -2526,10 +2546,10 @@ class Actions {
 		if (time > 0) {
 			require("node:timers").setTimeout(removeInteraction, time).unref();
 		}
-	};
+	}
 
-	static removeTemporaryInteraction (messageId, uniqueOrCustomId) {
-		const interactions = this._temporaryInteractions?.[messageId] as { uniqueId: string, customId: string }[];
+	static removeTemporaryInteraction(messageId, uniqueOrCustomId) {
+		const interactions = this._temporaryInteractions?.[messageId] as { uniqueId: string; customId: string }[];
 		if (interactions) {
 			let i = 0;
 			for (; i < interactions.length; i++) {
@@ -2542,21 +2562,21 @@ class Actions {
 			}
 			if (i < interactions.length) interactions.splice(i, 1);
 		}
-	};
+	}
 
-	static clearTemporaryInteraction (messageId, customId) {
+	static clearTemporaryInteraction(messageId, customId) {
 		if (this._temporaryInteractions?.[messageId]) {
 			this.removeTemporaryInteraction(messageId, customId);
 		}
-	};
+	}
 
-	static clearAllTemporaryInteractions (messageId) {
+	static clearAllTemporaryInteractions(messageId) {
 		if (this._temporaryInteractions?.[messageId]) {
 			delete this._temporaryInteractions[messageId];
 		}
-	};
+	}
 
-	static registerModalSubmitResponses (interactionId, callback) {
+	static registerModalSubmitResponses(interactionId, callback) {
 		this._temporaryInteractions ??= {};
 		this._temporaryInteractions[interactionId] = callback;
 
@@ -2566,15 +2586,15 @@ class Actions {
 				this.clearAllTemporaryInteractions(interactionId);
 			}, 60 * 60 * 1000)
 			.unref();
-	};
+	}
 
-	static checkModalSubmitResponses (interaction) {
+	static checkModalSubmitResponses(interaction) {
 		const interactionId = interaction.customId;
 		if (this._temporaryInteractions?.[interactionId]) {
 			(this._temporaryInteractions[interactionId] as Function)(interaction);
 			this.clearAllTemporaryInteractions(interactionId);
 		}
-	};
+	}
 }
 
 DBM.Actions = Actions;
@@ -2586,7 +2606,7 @@ DBM.Actions = Actions;
 // The `cache` object passed around while processing actions.
 //---------------------------------------------------------------------
 
-type ActionsCacheMeta = { isEvent: boolean, name: string };
+type ActionsCacheMeta = { isEvent: boolean; name: string };
 
 class ActionsCache {
 	actions: dbm.Action[] & { _customData: any };
@@ -2680,7 +2700,7 @@ class ActionsCache {
 			meta: other.meta,
 		});
 	}
-};
+}
 
 (Actions as any).ActionsCache = ActionsCache;
 
@@ -2696,7 +2716,7 @@ let $evts: Record<string, dbm.Event[]> = {};
 class Events {
 	static data = Events.generateData();
 
-	static generateData (): ([string, number, number, number, boolean?, Function?] | [])[] {
+	static generateData(): ([string, number, number, number, boolean?, Function?] | [])[] {
 		return [
 			[],
 			[],
@@ -2750,9 +2770,9 @@ class Events {
 			["inviteCreate", 1, 0, 2],
 			["inviteDelete", 1, 0, 2],
 		];
-	};
+	}
 
-	static registerEvents (bot: djs.Client) {
+	static registerEvents(bot: djs.Client) {
 		$evts = Bot.$evts;
 		for (let i = 0; i < this.data.length; i++) {
 			const d: any[] = this.data[i];
@@ -2763,9 +2783,18 @@ class Events {
 		if ($evts["28"]) bot.on("messageReactionAdd", this.onReaction.bind(this, "28"));
 		if ($evts["29"]) bot.on("messageReactionRemove", this.onReaction.bind(this, "29"));
 		if ($evts["34"]) bot.on("typingStart", this.onTyping.bind(this, "34"));
-	};
-	
-	static callEvents (id: string, temp1: number, temp2: number, objectExtractorType: number, mustServe: boolean, condition: Function | null, arg1: any, arg2: any | null = null) {
+	}
+
+	static callEvents(
+		id: string,
+		temp1: number,
+		temp2: number,
+		objectExtractorType: number,
+		mustServe: boolean,
+		condition: Function | null,
+		arg1: any,
+		arg2: any | null = null,
+	) {
 		if (mustServe && ((temp1 > 0 && !arg1.guild) || (temp2 > 0 && !arg2.guild))) return;
 		if (condition && !condition(arg1, arg2)) return;
 		const events = $evts[id];
@@ -2777,9 +2806,9 @@ class Events {
 			if (event.temp2) temp[event.temp2] = this.getObject(temp2, arg1, arg2);
 			Actions.invokeEvent(event, this.getObject(objectExtractorType, arg1, arg2), temp);
 		}
-	};
-	
-	static getObject (id, arg1, arg2) {
+	}
+
+	static getObject(id, arg1, arg2) {
 		switch (id) {
 			case 1:
 				return arg1;
@@ -2794,9 +2823,9 @@ class Events {
 			case 200:
 				return arg1.user;
 		}
-	};
-	
-	static onInitialization (bot) {
+	}
+
+	static onInitialization(bot) {
 		const events = $evts["1"];
 		for (let i = 0; i < events.length; i++) {
 			const event = events[i];
@@ -2804,17 +2833,17 @@ class Events {
 				Actions.invokeEvent(event, server, {});
 			}
 		}
-	};
-	
-	static onInitializationOnce (bot) {
+	}
+
+	static onInitializationOnce(bot) {
 		const events = $evts["48"];
 		const server = bot.guilds.cache.first();
 		for (let i = 0; i < events.length; i++) {
 			Actions.invokeEvent(events[i], server, {});
 		}
-	};
-	
-	static setupIntervals (bot) {
+	}
+
+	static setupIntervals(bot) {
 		const events = $evts["3"];
 		for (let i = 0; i < events.length; i++) {
 			const event = events[i];
@@ -2825,9 +2854,9 @@ class Events {
 				}
 			}, time * 1e3).unref();
 		}
-	};
-	
-	static onReaction (id, reaction, user) {
+	}
+
+	static onReaction(id, reaction, user) {
 		const events = $evts[id];
 		if (!events) return;
 		const server = reaction.message?.guild;
@@ -2840,9 +2869,9 @@ class Events {
 			if (event.temp2) temp[event.temp2] = member;
 			Actions.invokeEvent(event, server, temp);
 		}
-	};
-	
-	static onTyping (id: string, typing: djs.Typing) {
+	}
+
+	static onTyping(id: string, typing: djs.Typing) {
 		const events = $evts[id];
 		if (!events) return;
 		const server = (typing.channel as any).guild;
@@ -2855,9 +2884,9 @@ class Events {
 			if (event.temp2) temp[event.temp2] = member;
 			Actions.invokeEvent(event, server, temp);
 		}
-	};
-	
-	static onError (text, text2, cache) {
+	}
+
+	static onError(text, text2, cache) {
 		const events = $evts["37"];
 		if (!events) return;
 		for (let i = 0; i < events.length; i++) {
@@ -2867,7 +2896,7 @@ class Events {
 			if (event.temp2) temp[event.temp2] = text2;
 			Actions.invokeEvent(event, cache.server, temp);
 		}
-	};
+	}
 }
 
 DBM.Events = Events;
@@ -3396,7 +3425,7 @@ Audio.Subscription = class {
 		try {
 			// `nextTrack` guaranteed to exist because of if (this.queue.length === 0) {...} above.
 			// But check still required to make TypeScript compiler happy.
-			if(nextTrack) {
+			if (nextTrack) {
 				const resource = await nextTrack.createAudioResource();
 				if (Audio.inlineVolume && typeof resource?.volume?.volume === "number") {
 					resource.volume.volume = this.volume ?? 0.5;
@@ -3480,7 +3509,7 @@ class DBMAudioTrack {
 		}
 		return new Audio.Track({ title: info?.videoDetails?.title ?? "", url });
 	}
-};
+}
 
 class DBMAudioBasicTrack {
 	url: string;
@@ -3495,7 +3524,7 @@ class DBMAudioBasicTrack {
 			inputType: Audio.voice.StreamType.Arbitrary,
 		});
 	}
-};
+}
 
 Audio.subscriptions = new Map();
 

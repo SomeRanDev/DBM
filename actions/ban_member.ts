@@ -98,20 +98,24 @@ export default {
 
 	async action(this: typeof Action, cache: any): Promise<void> {
 		const data: any = cache.actions[cache.index];
-		const member: djs.GuildMember | djs.GuildMember[] | null = await this.getMemberFromData(data.member, data.varName, cache);
+		const member: djs.GuildMember | djs.GuildMember[] | null = await this.getMemberFromData(
+			data.member,
+			data.varName,
+			cache,
+		);
 		const reason: string = this.evalMessage(data.reason, cache);
 		const days: number = parseInt(data.days, 10) || 0;
 		const banOptions: djs.BanOptions = { deleteMessageSeconds: days * 24 * 60 * 60, reason };
 
 		try {
 			if (Array.isArray(member)) {
-				await this.callListFunc(member, "ban", [banOptions])
+				await this.callListFunc(member, "ban", [banOptions]);
 			} else if (member?.ban) {
 				await member.ban(banOptions);
 			}
 			this.callNextAction(cache);
-		} catch(err: any) {
-			this.displayError(data, cache, err)
+		} catch (err: any) {
+			this.displayError(data, cache, err);
 		}
 	},
 
