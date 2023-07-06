@@ -2579,6 +2579,13 @@ class Actions {
 
 DBM.Actions = Actions;
 
+//#endregion
+
+//---------------------------------------------------------------------
+//#region Actions Cache
+// The `cache` object passed around while processing actions.
+//---------------------------------------------------------------------
+
 type ActionsCacheMeta = { isEvent: boolean, name: string };
 
 class ActionsCache {
