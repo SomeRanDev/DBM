@@ -1728,9 +1728,9 @@ Actions.getInvalidCooldownResponse = function () {
 	return Files.data.settings.invalidCooldownText ?? "Must wait %s before using this action.";
 };
 
-Actions.getErrorString = function (data, cache) {
+Actions.getErrorString = function (data: { name: string } | null, cache: ActionsCache) {
 	const location = cache.toString();
-	return GetActionErrorText(location, cache.index + 1, data?.name);
+	return GetActionErrorText(location, cache.index + 1, data?.name ?? null);
 };
 
 Actions.displayError = function (data, cache, err) {
