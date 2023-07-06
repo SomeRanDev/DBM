@@ -19,6 +19,8 @@ DBM.version = "2.2.0";
 const DiscordJS = require("discord.js");
 DBM.DiscordJS = DiscordJS;
 
+const noop = () => void 0;
+
 //---------------------------------------------------------------------
 // Check Discord.JS version
 //---------------------------------------------------------------------
@@ -32,7 +34,17 @@ Please use "Project > Module Manager" and "Project > Reinstall Node Modules" to 
 	throw new Error(`Need discord.js ${requiredDjsVersion} to run!!!`);
 }
 
-const noop = () => void 0;
+//---------------------------------------------------------------------
+// This decorator stores the target in DBM or the object as an argument.
+//---------------------------------------------------------------------
+function DBMExport(container: any = DBM) {
+	return function internalDecorator(classObject, context: ClassDecoratorContext) {
+		if(context.name) {
+			container[context.name] = classObject;
+		}
+		return classObject;
+	}
+}
 
 //---------------------------------------------------------------------
 //#region Output Messages
@@ -327,6 +339,7 @@ namespace dbm {
 // Contains functions for controlling the bot.
 //---------------------------------------------------------------------
 
+@DBMExport()
 class Bot {
 	// GLOBALS
 	static $slash: dbm.CommandMap = {}; // Slash commands
@@ -1210,8 +1223,6 @@ class Bot {
 	}
 }
 
-DBM.Bot = Bot;
-
 //#endregion
 
 //---------------------------------------------------------------------
@@ -1219,6 +1230,7 @@ DBM.Bot = Bot;
 // Contains functions for bot actions.
 //---------------------------------------------------------------------
 
+@DBMExport()
 class Actions {
 	static actionsLocation = null;
 	static eventsLocation = null;
@@ -2606,8 +2618,6 @@ class Actions {
 	}
 }
 
-DBM.Actions = Actions;
-
 //#endregion
 
 //---------------------------------------------------------------------
@@ -2617,6 +2627,7 @@ DBM.Actions = Actions;
 
 type ActionsCacheMeta = { isEvent: boolean; name: string };
 
+@DBMExport(Actions)
 class ActionsCache {
 	actions: dbm.Action[] & { _customData: any };
 	server: djs.Guild;
@@ -2711,8 +2722,6 @@ class ActionsCache {
 	}
 }
 
-(Actions as any).ActionsCache = ActionsCache;
-
 //#endregion
 
 //---------------------------------------------------------------------
@@ -2722,6 +2731,7 @@ class ActionsCache {
 
 let $evts: Record<string, dbm.Event[]> = {};
 
+@DBMExport()
 class Events {
 	static data = Events.generateData();
 
@@ -2908,8 +2918,6 @@ class Events {
 	}
 }
 
-DBM.Events = Events;
-
 //#endregion
 
 //---------------------------------------------------------------------
@@ -2917,6 +2925,7 @@ DBM.Events = Events;
 // Contains functions for image management.
 //---------------------------------------------------------------------
 
+@DBMExport()
 class Images {
 	static JIMP: typeof import("jimp") | null = null;
 
@@ -2969,8 +2978,6 @@ class Images {
 		}
 	};
 }
-
-DBM.Images = Images;
 
 //#endregion
 
