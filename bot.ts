@@ -3275,7 +3275,6 @@ class Files {
 //---------------------------------------------------------------------
 
 const Audio: any = (DBM.Audio = {});
-const { setTimeout } = require("node:timers/promises");
 
 Audio.checkIfHasDependency = function (key) {
 	if (!Audio.packageJson) {
@@ -3363,7 +3362,7 @@ Audio.Subscription = class {
 						}
 					}
 				} else if (this.voiceConnection.rejoinAttempts < 5) {
-					await setTimeout((this.voiceConnection.rejoinAttempts + 1) * 5_000);
+					await require("node:timers/promises").setTimeout((this.voiceConnection.rejoinAttempts + 1) * 5_000);
 					this.voiceConnection.rejoin();
 				} else {
 					this.voiceConnection.destroy();
