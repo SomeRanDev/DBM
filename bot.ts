@@ -278,6 +278,7 @@ function GetActionErrorText(location, index, dataName) {
 // Contains core types defined by Discord Bot Maker.
 //---------------------------------------------------------------------
 
+// TODO: most of these are incomplete, add to them when needed.
 namespace dbm {
 	export type Command = {
 		name: string,
@@ -315,8 +316,6 @@ namespace dbm {
 //#region Bot
 // Contains functions for controlling the bot.
 //---------------------------------------------------------------------
-
-//const Bot: any = (DBM.Bot = {});
 
 class Bot {
 	// GLOBALS
