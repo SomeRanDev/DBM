@@ -339,6 +339,18 @@ class Bot {
 	static applicationCommandData: djs.ApplicationCommandData[] = [];
 	static tagRegex: RegExp;
 
+	// LOCALS
+	static hasMemberIntents: boolean;
+	static hasMessageContentIntents: boolean;
+
+	static _hasTextCommands: boolean
+	static _textCommandCount: number;
+	static _dmTextCommandCount: number;
+	static _caseSensitive: boolean;
+
+	static _slashCommandCreateType: string;
+	static _slashCommandServerList: string[];
+
 	// CONSTANTS
 	static PRIVILEGED_INTENTS: djs.GatewayIntentBits =
 		djs.IntentsBitField.Flags.GuildMembers |
@@ -360,19 +372,8 @@ class Bot {
 		DiscordJS.IntentsBitField.Flags.DirectMessageReactions |
 		DiscordJS.IntentsBitField.Flags.DirectMessageTyping;
 
-	static ALL_INTENTS: djs.GatewayIntentBits = Bot.PRIVILEGED_INTENTS | Bot.NON_PRIVILEGED_INTENTS;
-
-	// LOCALS
-	static hasMemberIntents: boolean;
-	static hasMessageContentIntents: boolean;
-
-	static _hasTextCommands: boolean
-	static _textCommandCount: number;
-	static _dmTextCommandCount: number;
-	static _caseSensitive: boolean;
-
-	static _slashCommandCreateType: string;
-	static _slashCommandServerList: string[];
+	static ALL_INTENTS: djs.GatewayIntentBits =
+		Bot.PRIVILEGED_INTENTS | Bot.NON_PRIVILEGED_INTENTS;
 
 	static init (): void {
 		this.initBot();
