@@ -1232,9 +1232,9 @@ class Bot {
 
 @DBMExport()
 class Actions {
-	static actionsLocation = null;
-	static eventsLocation = null;
-	static extensionsLocation = null;
+	static actionsLocation: string | null = null;
+	static eventsLocation: string | null = null;
+	static extensionsLocation: string | null = null;
 
 	static server = {};
 	static global = {};
@@ -2986,281 +2986,286 @@ class Images {
 // Contains functions for file management.
 //---------------------------------------------------------------------
 
-const Files: any = (DBM.Files = {});
+@DBMExport()
+class Files {
+	static data: any = {};
+	static writers = {};
+	static crypto = require("node:crypto");
+	static dataFiles = [
+		"commands.json",
+		"events.json",
+		"settings.json",
+		"players.json",
+		"servers.json",
+		"messages.json",
+		"serverVars.json",
+		"globalVars.json",
+	];
 
-Files.data = {};
-Files.writers = {};
-Files.crypto = require("node:crypto");
-Files.dataFiles = [
-	"commands.json",
-	"events.json",
-	"settings.json",
-	"players.json",
-	"servers.json",
-	"messages.json",
-	"serverVars.json",
-	"globalVars.json",
-];
+	static #password: string;
 
-Files.startBot = function () {
-	const path = require("node:path");
-	Actions.actionsLocation = path.join(__dirname, "actions");
-	Actions.eventsLocation = path.join(__dirname, "events");
-	Actions.extensionsLocation = path.join(__dirname, "extensions");
-	if (this.verifyDirectory(Actions.actionsLocation)) {
-		Actions.initMods();
-		this.readData(Bot.init.bind(Bot));
-	} else {
-		PrintError(MsgType.MISSING_ACTIONS, Actions.actionsLocation);
+	static {
+		Files.initEncryption();
 	}
-};
 
-Files.verifyDirectory = function (dir) {
-	return typeof dir === "string" && require("node:fs").existsSync(dir);
-};
-
-Files.readData = function (callback) {
-	const fs = require("node:fs");
-	const path = require("node:path");
-	let max = this.dataFiles.length;
-	let cur = 0;
-	for (let i = 0; i < max; i++) {
-		const filePath = path.join(process.cwd(), "data", this.dataFiles[i]);
-		const filename = this.dataFiles[i].slice(0, -5);
-
-		const setData = (data) => {
-			this.data[filename] = data;
-			if (++cur === max) {
-				callback();
-			}
-		};
-
-		if (!fs.existsSync(filePath)) {
-			setData({});
+	static startBot () {
+		const path = require("node:path");
+		Actions.actionsLocation = path.join(__dirname, "actions");
+		Actions.eventsLocation = path.join(__dirname, "events");
+		Actions.extensionsLocation = path.join(__dirname, "extensions");
+		if (this.verifyDirectory(Actions.actionsLocation)) {
+			Actions.initMods();
+			this.readData(Bot.init.bind(Bot));
 		} else {
-			fs.readFile(filePath, (_error, content) => {
-				let data;
-				try {
-					if (typeof content !== "string" && content.toString) content = content.toString();
-					data = JSON.parse(this.decrypt(content));
-				} catch {
-					PrintError(MsgType.DATA_PARSING_ERROR, this.dataFiles[i]);
-					return;
+			PrintError(MsgType.MISSING_ACTIONS, Actions.actionsLocation);
+		}
+	};
+
+	static verifyDirectory (dir: string | null | undefined) {
+		return typeof dir === "string" && require("node:fs").existsSync(dir);
+	};
+
+	static readData (callback: Function) {
+		const fs = require("node:fs");
+		const path = require("node:path");
+		let max = this.dataFiles.length;
+		let cur = 0;
+		for (let i = 0; i < max; i++) {
+			const filePath = path.join(process.cwd(), "data", this.dataFiles[i]);
+			const filename = this.dataFiles[i].slice(0, -5);
+
+			const setData = (data) => {
+				this.data[filename] = data;
+				if (++cur === max) {
+					callback();
 				}
-				setData(data);
-			});
+			};
+
+			if (!fs.existsSync(filePath)) {
+				setData({});
+			} else {
+				fs.readFile(filePath, (_error, content) => {
+					let data;
+					try {
+						if (typeof content !== "string" && content.toString) content = content.toString();
+						data = JSON.parse(this.decrypt(content));
+					} catch {
+						PrintError(MsgType.DATA_PARSING_ERROR, this.dataFiles[i]);
+						return;
+					}
+					setData(data);
+				});
+			}
 		}
-	}
-};
+	};
 
-Files.saveData = function (file, callback) {
-	const path = require("node:path");
-	const data = this.data[file];
-	if (!this.writers[file]) {
-		const fstorm = require("fstorm");
-		this.writers[file] = fstorm(path.join(process.cwd(), "data", file + ".json"));
-	}
-	this.writers[file].write(this.encrypt(JSON.stringify(data)), () => callback?.());
-};
-
-Files.initEncryption = function () {
-	try {
-		this.password = require("discord-bot-maker");
-	} catch {
-		this.password = "";
-	}
-};
-
-Files.encrypt = function (text) {
-	if (this.password.length === 0) return text;
-	const cipher = this.crypto.createCipher("aes-128-ofb", this.password);
-	return cipher.update(text, "utf8", "hex") + cipher.final("hex");
-};
-
-Files.decrypt = function (text) {
-	if (this.password.length === 0) return text;
-	const decipher = this.crypto.createDecipher("aes-128-ofb", this.password);
-	return decipher.update(text, "hex", "utf8") + decipher.final("utf8");
-};
-
-Files.convertItem = function (item) {
-	if (Array.isArray(item)) {
-		const result: any[] = [];
-		const length = item.length;
-		for (let i = 0; i < length; i++) {
-			result[i] = this.convertItem(item[i]);
+	static saveData (file: string, callback: Function | null = null) {
+		const path = require("node:path");
+		const data = this.data[file];
+		if (!this.writers[file]) {
+			const fstorm = require("fstorm");
+			this.writers[file] = fstorm(path.join(process.cwd(), "data", file + ".json"));
 		}
-		return result;
-	} else if (typeof item !== "object") {
-		let result = "";
+		this.writers[file].write(this.encrypt(JSON.stringify(data)), () => callback?.());
+	};
+
+	static initEncryption () {
 		try {
-			result = JSON.stringify(item);
-		} catch {}
-		if (result !== "{}") {
-			return item;
+			this.#password = require("discord-bot-maker");
+		} catch {
+			this.#password = "";
 		}
-	} else if (item.convertToString) {
-		return item.convertToString();
-	}
-	return null;
-};
+	};
 
-Files.saveServerVariable = function (serverId, varName, item) {
-	this.data.serverVars[serverId] ??= {};
-	const strItem = this.convertItem(item);
-	if (strItem !== null) {
-		this.data.serverVars[serverId][varName] = strItem;
-	}
-	this.saveData("serverVars");
-};
+	static encrypt (text: string): string {
+		if (this.#password.length === 0) return text;
+		const cipher = this.crypto.createCipher("aes-128-ofb", this.#password);
+		return cipher.update(text, "utf8", "hex") + cipher.final("hex");
+	};
 
-Files.restoreServerVariables = function () {
-	const keys = Object.keys(this.data.serverVars);
-	for (let i = 0; i < keys.length; i++) {
-		const varNames = Object.keys(this.data.serverVars[keys[i]]);
-		for (let j = 0; j < varNames.length; j++) {
-			this.restoreVariable(this.data.serverVars[keys[i]][varNames[j]], 2, varNames[j], keys[i]);
-		}
-	}
-};
+	static decrypt (text: string): string {
+		if (this.#password.length === 0) return text;
+		const decipher = this.crypto.createDecipher("aes-128-ofb", this.#password);
+		return decipher.update(text, "hex", "utf8") + decipher.final("utf8");
+	};
 
-Files.saveGlobalVariable = function (varName, item) {
-	const strItem = this.convertItem(item);
-	if (strItem !== null) {
-		this.data.globalVars[varName] = strItem;
-	}
-	this.saveData("globalVars");
-};
-
-Files.restoreGlobalVariables = function () {
-	const keys = Object.keys(this.data.globalVars);
-	for (let i = 0; i < keys.length; i++) {
-		this.restoreVariable(this.data.globalVars[keys[i]], 3, keys[i]);
-	}
-};
-
-Files.restoreVariable = function (value, type, varName, serverId) {
-	const cache: any = {};
-	if (serverId) {
-		cache.server = { id: serverId };
-	}
-	if (typeof value === "string" || Array.isArray(value)) {
-		this.restoreValue(value, Bot.bot)
-			.then((finalValue) => {
-				if (finalValue) {
-					Actions.storeValue(finalValue, type, varName, cache);
-				}
-			})
-			.catch(noop);
-	} else {
-		Actions.storeValue(value, type, varName, cache);
-	}
-};
-
-Files.restoreValue = function (value, bot) {
-	return new Promise((resolve, reject) => {
-		if (typeof value === "string") {
-			if (value.startsWith("mem-")) {
-				return resolve(this.restoreMember(value, bot));
-			} else if (value.startsWith("msg-")) {
-				return this.restoreMessage(value, bot).then(resolve).catch(reject);
-			} else if (value.startsWith("tc-")) {
-				return resolve(this.restoreTextChannel(value, bot));
-			} else if (value.startsWith("vc-")) {
-				return resolve(this.restoreVoiceChannel(value, bot));
-			} else if (value.startsWith("r-")) {
-				return resolve(this.restoreRole(value, bot));
-			} else if (value.startsWith("s-")) {
-				return resolve(this.restoreServer(value, bot));
-			} else if (value.startsWith("e-")) {
-				return resolve(this.restoreEmoji(value, bot));
-			} else if (value.startsWith("usr-")) {
-				return resolve(this.restoreUser(value, bot));
-			}
-			resolve(value);
-		} else if (Array.isArray(value)) {
+	static convertItem (item: any[] | { convertToString: () => string }): any {
+		if (Array.isArray(item)) {
 			const result: any[] = [];
-			const length = value.length;
-			let curr = 0;
+			const length = item.length;
 			for (let i = 0; i < length; i++) {
-				this.restoreValue(value[i], bot)
-					.then((item) => {
-						result[i] = item;
-						if (++curr >= length) {
-							resolve(result);
-						}
-					})
-					.catch(() => {
-						if (++curr >= length) {
-							resolve(result);
-						}
-					});
+				result[i] = this.convertItem(item[i]);
 			}
-		} else {
-			resolve(value);
+			return result;
+		} else if (typeof item !== "object") {
+			let result = "";
+			try {
+				result = JSON.stringify(item);
+			} catch {}
+			if (result !== "{}") {
+				return item;
+			}
+		} else if (item.convertToString) {
+			return item.convertToString();
 		}
-	});
-};
+		return null;
+	};
 
-Files.restoreMember = function (value, bot) {
-	const split = value.split("_");
-	const memId = split[0].slice(4);
-	const serverId = split[1].slice(2);
-	const server = bot.guilds.get(serverId);
-	if (server) {
-		return server.members.resolve(memId);
-	}
-	return null;
-};
+	static saveServerVariable (serverId, varName, item) {
+		this.data.serverVars[serverId] ??= {};
+		const strItem = this.convertItem(item);
+		if (strItem !== null) {
+			this.data.serverVars[serverId][varName] = strItem;
+		}
+		this.saveData("serverVars");
+	};
 
-Files.restoreMessage = function (value, bot) {
-	const split = value.split("_");
-	const msgId = split[0].slice(4);
-	const channelId = split[1].slice(2);
-	const channel = bot.channels.resolve(channelId);
-	if (channel) {
-		return channel.messages.fetch(msgId);
-	}
-	return null;
-};
+	static restoreServerVariables () {
+		const keys = Object.keys(this.data.serverVars);
+		for (let i = 0; i < keys.length; i++) {
+			const varNames = Object.keys(this.data.serverVars[keys[i]]);
+			for (let j = 0; j < varNames.length; j++) {
+				this.restoreVariable(this.data.serverVars[keys[i]][varNames[j]], 2, varNames[j], keys[i]);
+			}
+		}
+	};
 
-Files.restoreTextChannel = function (value, bot) {
-	const channelId = value.slice(3);
-	return bot.channels.resolve(channelId);
-};
+	static saveGlobalVariable (varName, item) {
+		const strItem = this.convertItem(item);
+		if (strItem !== null) {
+			this.data.globalVars[varName] = strItem;
+		}
+		this.saveData("globalVars");
+	};
 
-Files.restoreVoiceChannel = function (value, bot) {
-	const channelId = value.slice(3);
-	return bot.channels.resolve(channelId);
-};
+	static restoreGlobalVariables () {
+		const keys = Object.keys(this.data.globalVars);
+		for (let i = 0; i < keys.length; i++) {
+			this.restoreVariable(this.data.globalVars[keys[i]], 3, keys[i]);
+		}
+	};
 
-Files.restoreRole = function (value, bot) {
-	const split = value.split("_");
-	const roleId = split[0].slice(2);
-	const serverId = split[1].slice(2);
-	const server = bot.guilds.resolve(serverId);
-	if (server?.roles) {
-		return server.roles.resolve(roleId);
-	}
-	return null;
-};
+	static restoreVariable (value, type, varName: string, serverId: string | null = null) {
+		const cache: any = {};
+		if (serverId) {
+			cache.server = { id: serverId };
+		}
+		if (typeof value === "string" || Array.isArray(value)) {
+			this.restoreValue(value, Bot.bot)
+				.then((finalValue) => {
+					if (finalValue) {
+						Actions.storeValue(finalValue, type, varName, cache);
+					}
+				})
+				.catch(noop);
+		} else {
+			Actions.storeValue(value, type, varName, cache);
+		}
+	};
 
-Files.restoreServer = function (value, bot) {
-	const serverId = value.slice(2);
-	return bot.guilds.resolve(serverId);
-};
+	static restoreValue (value, bot) {
+		return new Promise((resolve, reject) => {
+			if (typeof value === "string") {
+				if (value.startsWith("mem-")) {
+					return resolve(this.restoreMember(value, bot));
+				} else if (value.startsWith("msg-")) {
+					return this.restoreMessage(value, bot).then(resolve).catch(reject);
+				} else if (value.startsWith("tc-")) {
+					return resolve(this.restoreTextChannel(value, bot));
+				} else if (value.startsWith("vc-")) {
+					return resolve(this.restoreVoiceChannel(value, bot));
+				} else if (value.startsWith("r-")) {
+					return resolve(this.restoreRole(value, bot));
+				} else if (value.startsWith("s-")) {
+					return resolve(this.restoreServer(value, bot));
+				} else if (value.startsWith("e-")) {
+					return resolve(this.restoreEmoji(value, bot));
+				} else if (value.startsWith("usr-")) {
+					return resolve(this.restoreUser(value, bot));
+				}
+				resolve(value);
+			} else if (Array.isArray(value)) {
+				const result: any[] = [];
+				const length = value.length;
+				let curr = 0;
+				for (let i = 0; i < length; i++) {
+					this.restoreValue(value[i], bot)
+						.then((item) => {
+							result[i] = item;
+							if (++curr >= length) {
+								resolve(result);
+							}
+						})
+						.catch(() => {
+							if (++curr >= length) {
+								resolve(result);
+							}
+						});
+				}
+			} else {
+				resolve(value);
+			}
+		});
+	};
 
-Files.restoreEmoji = function (value, bot) {
-	const emojiId = value.slice(2);
-	return bot.emojis.resolve(emojiId);
-};
+	static restoreMember (value, bot) {
+		const split = value.split("_");
+		const memId = split[0].slice(4);
+		const serverId = split[1].slice(2);
+		const server = bot.guilds.get(serverId);
+		if (server) {
+			return server.members.resolve(memId);
+		}
+		return null;
+	};
 
-Files.restoreUser = function (value, bot) {
-	const userId = value.slice(4);
-	return bot.users.resolve(userId);
-};
+	static restoreMessage (value, bot) {
+		const split = value.split("_");
+		const msgId = split[0].slice(4);
+		const channelId = split[1].slice(2);
+		const channel = bot.channels.resolve(channelId);
+		if (channel) {
+			return channel.messages.fetch(msgId);
+		}
+		return null;
+	};
 
-Files.initEncryption();
+	static restoreTextChannel (value, bot) {
+		const channelId = value.slice(3);
+		return bot.channels.resolve(channelId);
+	};
+
+	static restoreVoiceChannel (value, bot) {
+		const channelId = value.slice(3);
+		return bot.channels.resolve(channelId);
+	};
+
+	static restoreRole (value, bot) {
+		const split = value.split("_");
+		const roleId = split[0].slice(2);
+		const serverId = split[1].slice(2);
+		const server = bot.guilds.resolve(serverId);
+		if (server?.roles) {
+			return server.roles.resolve(roleId);
+		}
+		return null;
+	};
+
+	static restoreServer (value, bot) {
+		const serverId = value.slice(2);
+		return bot.guilds.resolve(serverId);
+	};
+
+	static restoreEmoji (value, bot) {
+		const emojiId = value.slice(2);
+		return bot.emojis.resolve(emojiId);
+	};
+
+	static restoreUser (value, bot) {
+		const userId = value.slice(4);
+		return bot.users.resolve(userId);
+	};
+}
 
 //#endregion
 
