@@ -1032,7 +1032,7 @@ class Bot {
 		this.checkRegExps(msg);
 		if (!msg.author.bot) {
 			if (this.$evts["2"]) {
-				Events.callEvents("2", 1, 0, 2, false, "", msg);
+				Events.callEvents("2", 1, 0, 2, false, null, msg);
 			}
 			const anym = this.$anym;
 			for (let i = 0; i < anym.length; i++) {
@@ -1494,7 +1494,7 @@ class Actions {
 			} else {
 				const remaining = cmd._timeRestriction - Math.floor(diff / 1000);
 				const timeString = this.generateTimeString(remaining);
-				Events.callEvents("38", 1, 3, 2, false, "", msgOrInteraction?.member, timeString);
+				Events.callEvents("38", 1, 3, 2, false, null, msgOrInteraction?.member, timeString);
 				return returnTimeString ? timeString : false;
 			}
 		}
@@ -2691,184 +2691,186 @@ class ActionsCache {
 // Handles the various events that occur.
 //---------------------------------------------------------------------
 
-const Events: any = (DBM.Events = {});
+let $evts: Record<string, dbm.Event[]> = {};
 
-let $evts: { [key: string]: any } = {};
+class Events {
+	static data = Events.generateData();
 
-Events.generateData = function () {
-	return [
-		[],
-		[],
-		[],
-		[],
-		["guildCreate", 0, 0, 1],
-		["guildDelete", 0, 0, 1],
-		["guildMemberAdd", 1, 0, 2],
-		["guildMemberRemove", 1, 0, 2],
-		["channelCreate", 1, 0, 2, true, (arg1) => arg1.type === "GUILD_TEXT"],
-		["channelDelete", 1, 0, 2, true, (arg1) => arg1.type === "GUILD_TEXT"],
-		["roleCreate", 1, 0, 2],
-		["roleDelete", 1, 0, 2],
-		["guildBanAdd", 200, 0, 2],
-		["guildBanRemove", 200, 0, 2],
-		["channelCreate", 1, 0, 2, true, (arg1) => arg1.type === "GUILD_VOICE"],
-		["channelDelete", 1, 0, 2, true, (arg1) => arg1.type === "GUILD_VOICE"],
-		["emojiCreate", 1, 0, 2],
-		["emojiDelete", 1, 0, 2],
-		["messageDelete", 1, 0, 2, true],
-		["guildUpdate", 1, 3, 3],
-		["guildMemberUpdate", 1, 3, 4],
-		["presenceUpdate", 1, 3, 4],
-		["voiceStateUpdate", 1, 3, 4],
-		["channelUpdate", 1, 3, 4, true],
-		["channelPinsUpdate", 1, 0, 2, true],
-		["roleUpdate", 1, 3, 4],
-		["messageUpdate", 1, 3, 4, true, (arg1, arg2) => !!arg2.content],
-		["emojiUpdate", 1, 3, 4],
-		[],
-		[],
-		["messageReactionRemoveAll", 1, 0, 2, true],
-		["guildMemberAvailable", 1, 0, 2],
-		["guildMembersChunk", 1, 0, 3],
-		["guildMemberSpeaking", 1, 3, 2],
-		[],
-		[],
-		["guildUnavailable", 1, 0, 1],
-		[],
-		[],
-		["channelCreate", 1, 0, 2, true, (arg1) => arg1.type !== "GUILD_TEXT" && arg1.type !== "GUILD_VOICE"],
-		["channelDelete", 1, 0, 2, true, (arg1) => arg1.type !== "GUILD_TEXT" && arg1.type !== "GUILD_VOICE"],
-		["stickerCreate", 1, 0, 2, true],
-		["stickerDelete", 1, 0, 2, true],
-		["threadCreate", 1, 0, 2, true],
-		["threadDelete", 1, 0, 2, true],
-		["stickerUpdate", 1, 3, 4, true],
-		["threadUpdate", 1, 3, 4, true],
-		["threadMemberUpdate", 1, 3, 100, true],
-		[],
-		["inviteCreate", 1, 0, 2],
-		["inviteDelete", 1, 0, 2],
-	];
-};
+	static generateData (): ([string, number, number, number, boolean?, Function?] | [])[] {
+		return [
+			[],
+			[],
+			[],
+			[],
+			["guildCreate", 0, 0, 1],
+			["guildDelete", 0, 0, 1],
+			["guildMemberAdd", 1, 0, 2],
+			["guildMemberRemove", 1, 0, 2],
+			["channelCreate", 1, 0, 2, true, (arg1) => arg1.type === "GUILD_TEXT"],
+			["channelDelete", 1, 0, 2, true, (arg1) => arg1.type === "GUILD_TEXT"],
+			["roleCreate", 1, 0, 2],
+			["roleDelete", 1, 0, 2],
+			["guildBanAdd", 200, 0, 2],
+			["guildBanRemove", 200, 0, 2],
+			["channelCreate", 1, 0, 2, true, (arg1) => arg1.type === "GUILD_VOICE"],
+			["channelDelete", 1, 0, 2, true, (arg1) => arg1.type === "GUILD_VOICE"],
+			["emojiCreate", 1, 0, 2],
+			["emojiDelete", 1, 0, 2],
+			["messageDelete", 1, 0, 2, true],
+			["guildUpdate", 1, 3, 3],
+			["guildMemberUpdate", 1, 3, 4],
+			["presenceUpdate", 1, 3, 4],
+			["voiceStateUpdate", 1, 3, 4],
+			["channelUpdate", 1, 3, 4, true],
+			["channelPinsUpdate", 1, 0, 2, true],
+			["roleUpdate", 1, 3, 4],
+			["messageUpdate", 1, 3, 4, true, (arg1, arg2) => !!arg2.content],
+			["emojiUpdate", 1, 3, 4],
+			[],
+			[],
+			["messageReactionRemoveAll", 1, 0, 2, true],
+			["guildMemberAvailable", 1, 0, 2],
+			["guildMembersChunk", 1, 0, 3],
+			["guildMemberSpeaking", 1, 3, 2],
+			[],
+			[],
+			["guildUnavailable", 1, 0, 1],
+			[],
+			[],
+			["channelCreate", 1, 0, 2, true, (arg1) => arg1.type !== "GUILD_TEXT" && arg1.type !== "GUILD_VOICE"],
+			["channelDelete", 1, 0, 2, true, (arg1) => arg1.type !== "GUILD_TEXT" && arg1.type !== "GUILD_VOICE"],
+			["stickerCreate", 1, 0, 2, true],
+			["stickerDelete", 1, 0, 2, true],
+			["threadCreate", 1, 0, 2, true],
+			["threadDelete", 1, 0, 2, true],
+			["stickerUpdate", 1, 3, 4, true],
+			["threadUpdate", 1, 3, 4, true],
+			["threadMemberUpdate", 1, 3, 100, true],
+			[],
+			["inviteCreate", 1, 0, 2],
+			["inviteDelete", 1, 0, 2],
+		];
+	};
 
-Events.data = Events.generateData();
-
-Events.registerEvents = function (bot) {
-	$evts = Bot.$evts;
-	for (let i = 0; i < this.data.length; i++) {
-		const d = this.data[i];
-		if (d.length > 0 && $evts[String(i)]) {
-			bot.on(d[0], this.callEvents.bind(this, String(i), d[1], d[2], d[3], !!d[4], d[5]));
+	static registerEvents (bot: djs.Client) {
+		$evts = Bot.$evts;
+		for (let i = 0; i < this.data.length; i++) {
+			const d: any[] = this.data[i];
+			if (d.length > 0 && $evts[String(i)]) {
+				bot.on(d[0], this.callEvents.bind(this, String(i), d[1], d[2], d[3], !!d[4], d[5]));
+			}
 		}
-	}
-	if ($evts["28"]) bot.on("messageReactionAdd", this.onReaction.bind(this, "28"));
-	if ($evts["29"]) bot.on("messageReactionRemove", this.onReaction.bind(this, "29"));
-	if ($evts["34"]) bot.on("typingStart", this.onTyping.bind(this, "34"));
-};
-
-Events.callEvents = function (id, temp1, temp2, server, mustServe, condition, arg1, arg2) {
-	if (mustServe && ((temp1 > 0 && !arg1.guild) || (temp2 > 0 && !arg2.guild))) return;
-	if (condition && !condition(arg1, arg2)) return;
-	const events = $evts[id];
-	if (!events) return;
-	for (let i = 0; i < events.length; i++) {
-		const event = events[i];
-		const temp = {};
-		if (event.temp) temp[event.temp] = this.getObject(temp1, arg1, arg2);
-		if (event.temp2) temp[event.temp2] = this.getObject(temp2, arg1, arg2);
-		Actions.invokeEvent(event, this.getObject(server, arg1, arg2), temp);
-	}
-};
-
-Events.getObject = function (id, arg1, arg2) {
-	switch (id) {
-		case 1:
-			return arg1;
-		case 2:
-			return arg1.guild;
-		case 3:
-			return arg2;
-		case 4:
-			return arg2.guild;
-		case 100:
-			return arg1.guildMember.guild;
-		case 200:
-			return arg1.user;
-	}
-};
-
-Events.onInitialization = function (bot) {
-	const events = $evts["1"];
-	for (let i = 0; i < events.length; i++) {
-		const event = events[i];
-		for (const server of bot.guilds.cache.values()) {
-			Actions.invokeEvent(event, server, {});
+		if ($evts["28"]) bot.on("messageReactionAdd", this.onReaction.bind(this, "28"));
+		if ($evts["29"]) bot.on("messageReactionRemove", this.onReaction.bind(this, "29"));
+		if ($evts["34"]) bot.on("typingStart", this.onTyping.bind(this, "34"));
+	};
+	
+	static callEvents (id: string, temp1: number, temp2: number, objectExtractorType: number, mustServe: boolean, condition: Function | null, arg1: any, arg2: any | null = null) {
+		if (mustServe && ((temp1 > 0 && !arg1.guild) || (temp2 > 0 && !arg2.guild))) return;
+		if (condition && !condition(arg1, arg2)) return;
+		const events = $evts[id];
+		if (!events) return;
+		for (let i = 0; i < events.length; i++) {
+			const event = events[i];
+			const temp = {};
+			if (event.temp) temp[event.temp] = this.getObject(temp1, arg1, arg2);
+			if (event.temp2) temp[event.temp2] = this.getObject(temp2, arg1, arg2);
+			Actions.invokeEvent(event, this.getObject(objectExtractorType, arg1, arg2), temp);
 		}
-	}
-};
-
-Events.onInitializationOnce = function (bot) {
-	const events = $evts["48"];
-	const server = bot.guilds.cache.first();
-	for (let i = 0; i < events.length; i++) {
-		Actions.invokeEvent(events[i], server, {});
-	}
-};
-
-Events.setupIntervals = function (bot) {
-	const events = $evts["3"];
-	for (let i = 0; i < events.length; i++) {
-		const event = events[i];
-		const time = event.temp ? parseFloat(event.temp) : 60;
-		setInterval(() => {
+	};
+	
+	static getObject (id, arg1, arg2) {
+		switch (id) {
+			case 1:
+				return arg1;
+			case 2:
+				return arg1.guild;
+			case 3:
+				return arg2;
+			case 4:
+				return arg2.guild;
+			case 100:
+				return arg1.guildMember.guild;
+			case 200:
+				return arg1.user;
+		}
+	};
+	
+	static onInitialization (bot) {
+		const events = $evts["1"];
+		for (let i = 0; i < events.length; i++) {
+			const event = events[i];
 			for (const server of bot.guilds.cache.values()) {
 				Actions.invokeEvent(event, server, {});
 			}
-		}, time * 1e3).unref();
-	}
-};
+		}
+	};
+	
+	static onInitializationOnce (bot) {
+		const events = $evts["48"];
+		const server = bot.guilds.cache.first();
+		for (let i = 0; i < events.length; i++) {
+			Actions.invokeEvent(events[i], server, {});
+		}
+	};
+	
+	static setupIntervals (bot) {
+		const events = $evts["3"];
+		for (let i = 0; i < events.length; i++) {
+			const event = events[i];
+			const time = event.temp ? parseFloat(event.temp) : 60;
+			setInterval(() => {
+				for (const server of bot.guilds.cache.values()) {
+					Actions.invokeEvent(event, server, {});
+				}
+			}, time * 1e3).unref();
+		}
+	};
+	
+	static onReaction (id, reaction, user) {
+		const events = $evts[id];
+		if (!events) return;
+		const server = reaction.message?.guild;
+		const member = server?.members.resolve(user);
+		if (!member) return;
+		for (let i = 0; i < events.length; i++) {
+			const event = events[i];
+			const temp = {};
+			if (event.temp) temp[event.temp] = reaction;
+			if (event.temp2) temp[event.temp2] = member;
+			Actions.invokeEvent(event, server, temp);
+		}
+	};
+	
+	static onTyping (id: string, typing: djs.Typing) {
+		const events = $evts[id];
+		if (!events) return;
+		const server = (typing.channel as any).guild;
+		const member = server?.members.resolve(typing.user);
+		if (!member) return;
+		for (let i = 0; i < events.length; i++) {
+			const event = events[i];
+			const temp = {};
+			if (event.temp) temp[event.temp] = typing.channel;
+			if (event.temp2) temp[event.temp2] = member;
+			Actions.invokeEvent(event, server, temp);
+		}
+	};
+	
+	static onError (text, text2, cache) {
+		const events = $evts["37"];
+		if (!events) return;
+		for (let i = 0; i < events.length; i++) {
+			const event = events[i];
+			const temp = {};
+			if (event.temp) temp[event.temp] = text;
+			if (event.temp2) temp[event.temp2] = text2;
+			Actions.invokeEvent(event, cache.server, temp);
+		}
+	};
+}
 
-Events.onReaction = function (id, reaction, user) {
-	const events = $evts[id];
-	if (!events) return;
-	const server = reaction.message?.guild;
-	const member = server?.members.resolve(user);
-	if (!member) return;
-	for (let i = 0; i < events.length; i++) {
-		const event = events[i];
-		const temp = {};
-		if (event.temp) temp[event.temp] = reaction;
-		if (event.temp2) temp[event.temp2] = member;
-		Actions.invokeEvent(event, server, temp);
-	}
-};
-
-Events.onTyping = function (id, channel, user) {
-	const events = $evts[id];
-	if (!events) return;
-	const server = channel.guild;
-	const member = server?.members.resolve(user);
-	if (!member) return;
-	for (let i = 0; i < events.length; i++) {
-		const event = events[i];
-		const temp = {};
-		if (event.temp) temp[event.temp] = channel;
-		if (event.temp2) temp[event.temp2] = member;
-		Actions.invokeEvent(event, server, temp);
-	}
-};
-
-Events.onError = function (text, text2, cache) {
-	const events = $evts["37"];
-	if (!events) return;
-	for (let i = 0; i < events.length; i++) {
-		const event = events[i];
-		const temp = {};
-		if (event.temp) temp[event.temp] = text;
-		if (event.temp2) temp[event.temp2] = text2;
-		Actions.invokeEvent(event, cache.server, temp);
-	}
-};
+DBM.Events = Events;
 
 //#endregion
 
