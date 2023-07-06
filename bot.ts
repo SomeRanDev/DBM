@@ -289,7 +289,8 @@ namespace dbm {
 		restriction: string,
 		actions: Action[],
 
-		_aliases?: string[]
+		_aliases?: string[],
+		_timeRestriction?: number;
 	}
 
 	export type Event = {
@@ -1203,16 +1204,1380 @@ DBM.Bot = Bot;
 // Contains functions for bot actions.
 //---------------------------------------------------------------------
 
-const Actions: any = (DBM.Actions = {});
+class Actions {
+	static actionsLocation = null;
+	static eventsLocation = null;
+	static extensionsLocation = null;
 
-Actions.actionsLocation = null;
-Actions.eventsLocation = null;
-Actions.extensionsLocation = null;
+	static server = {};
+	static global = {};
 
-Actions.server = {};
-Actions.global = {};
+	static timeStamps: Record<string, Date>[] = [];
 
-Actions.timeStamps = [];
+	static modInitReferences: Record<string, Function> = {};
+
+	static _letterEmojis = "🇦 🇧 🇨 🇩 🇪 🇫 🇬 🇭 🇮 🇯 🇰 🇱 🇲 🇳 🇴 🇵 🇶 🇷 🇸 🇹 🇺 🇻 🇼 🇽 🇾 🇿".split(" ");
+
+	static __cachedText: Record<string, boolean> | undefined;
+
+	static _temporaryInteractionIdMax: number;
+	static _temporaryInteractions: Record<string, { customId: string, userId: string, callback: Function, uniqueId: string }[] | Function>;
+
+	static exists (action) {
+		if (!action) return false;
+		return typeof this[action] === "function";
+	};
+
+	static getLocalFile (url) {
+		return require("node:path").join(process.cwd(), url);
+	};
+
+	static getDBM () {
+		return DBM;
+	};
+
+	static async callListFunc (list, funcName, args) {
+		let result: any[] = [];
+
+		const len = list.length;
+		for(let i = 0; i < len; i++) {
+			const item = list[i];
+			if (typeof item?.[funcName] === "function") {
+				try {
+					result.push(await item[funcName].apply(item, args));
+				} catch(e) {
+				}
+			}
+		}
+
+		return result;
+	};
+
+	static getActionVariable (name, defaultValue) {
+		if (this[name] === undefined && defaultValue !== undefined) {
+			this[name] = defaultValue;
+		}
+		return this[name];
+	};
+
+	static getSlashParameter (interaction, name, defaultValue) {
+		if (!interaction) {
+			return defaultValue ?? null;
+		}
+
+		if (interaction.__originalInteraction) {
+			const result = this.getParameterFromInteraction(interaction.__originalInteraction, name);
+			if (result !== null) {
+				return result;
+			}
+		}
+
+		const result = this.getParameterFromInteraction(interaction, name);
+		if (result !== null) {
+			return result;
+		}
+
+		return defaultValue !== undefined ? defaultValue : result;
+	};
+
+	static convertTextToEmojis (text, useRegional = true) {
+		let result = "";
+		for (let i = 0; i < text.length; i++) {
+			const code = text.toUpperCase().charCodeAt(i) - 65;
+			if (code >= 0 && code <= 26) {
+				result += useRegional
+					? ":regional_indicator_" + text[i].toLowerCase() + ":"
+					: "\\" + this._letterEmojis[code];
+			} else {
+				result += text[i];
+			}
+		}
+		return result;
+	};
+
+	static getFlagEmoji (flagName) {
+		if (flagName.startsWith("flag_")) {
+			flagName = flagName.substring(5);
+		}
+		flagName = flagName.toUpperCase();
+		return this._letterEmojis[flagName.charCodeAt(0) - 65] + this._letterEmojis[flagName.charCodeAt(1) - 65];
+	};
+
+	static getCustomEmoji (nameOrId) {
+		return Bot.bot.emojis.cache.get(nameOrId) ?? Bot.bot.emojis.cache.find((e) => e.name === nameOrId);
+	};
+
+	static eval (content, cache, logError = true) {
+		if (!content) return false;
+		const DBM = this.getDBM();
+		const tempVars = this.getActionVariable.bind(cache.temp);
+		let serverVars: Function | null = null;
+		if (cache.server) {
+			serverVars = this.getActionVariable.bind(this.server[cache.server.id]);
+		}
+		const globalVars = this.getActionVariable.bind(this.global);
+		const slashParams = this.getSlashParameter.bind(this, cache.interaction);
+		const customEmoji = this.getCustomEmoji.bind(this);
+		const msg = cache.msg;
+		const interaction = cache.interaction;
+		const button = interaction?._button ?? "";
+		const select = interaction?._select ?? "";
+		const server = cache.server;
+		const client = DBM.Bot.bot;
+		const bot = DBM.Bot.bot;
+		const me = server?.members?.me ?? null;
+		let user = "",
+			member = "",
+			channel = "",
+			mentionedUser = "",
+			mentionedChannel = "",
+			defaultChannel = "";
+		if (msg) {
+			user = msg.author;
+			member = msg.member;
+			channel = msg.channel;
+			mentionedUser = msg.mentions.users.first() ?? "";
+			mentionedChannel = msg.mentions.channels.first() ?? "";
+		}
+		if (interaction) {
+			user = interaction.user;
+			member = interaction.member;
+			channel = interaction.channel;
+			if (interaction.options) {
+				mentionedUser = interaction.options.resolved?.users?.first?.() ?? "";
+				mentionedChannel = interaction.options.resolved?.channels?.first?.() ?? "";
+			}
+		}
+		if (server) {
+			defaultChannel = server.getDefaultChannel();
+		}
+		try {
+			return eval(content);
+		} catch (e) {
+			if (logError) console.error(e);
+			return false;
+		}
+	};
+
+	static evalMessage (content, cache) {
+		if (!content) return "";
+		if (!content.match(/\$\{.*\}/im)) return content;
+		return this.eval("`" + content.replace(/`/g, "\\`") + "`", cache);
+	};
+
+	static evalIfPossible (content, cache) {
+		this.__cachedText ??= {};
+		if (content in this.__cachedText) return content;
+		let result = this.eval(content, cache, false);
+		if (result === false) result = this.evalMessage(content, cache);
+		if (result === false) {
+			this.__cachedText[content] = true;
+			result = content;
+		}
+		return result;
+	};
+
+	static initMods () {
+		this.modInitReferences = {};
+		const fs = require("node:fs");
+		const path = require("node:path");
+		this.modDirectories().forEach((dir) => {
+			fs.readdirSync(dir).forEach((file) => {
+				if (!/\.js/i.test(file)) return;
+				const action = require(path.join(dir, file));
+				if (action.action) {
+					this[action.name] = action.action;
+				}
+				if (action.modInit) {
+					this.modInitReferences[action.name] = action.modInit;
+				}
+				if (action.mod) {
+					try {
+						action.mod(DBM);
+					} catch (e) {
+						console.error(e);
+					}
+				}
+			});
+		});
+	};
+
+	static modDirectories () {
+		const result = [this.actionsLocation];
+		if (Files.verifyDirectory(Actions.eventsLocation)) {
+			result.push(this.eventsLocation);
+		}
+		if (Files.verifyDirectory(Actions.extensionsLocation)) {
+			result.push(this.extensionsLocation);
+		}
+		return result;
+	};
+
+	static preformActionsFromMessage (msg, cmd) {
+		if (
+			this.checkConditions(msg.guild, msg.member, msg.author, cmd) &&
+			this.checkTimeRestriction(msg.author, msg, cmd)
+		) {
+			this.invokeActions(msg, cmd.actions, cmd);
+		}
+	};
+
+	static preformActionsFromInteraction (interaction: djs.MessageComponentInteraction, cmd: dbm.Command, passMeta: boolean = false, initialTempVars: Record<string, any> | null = null) {
+		const invalidPermissions = this.getInvalidPermissionsResponse();
+		const invalidCooldown = this.getInvalidCooldownResponse();
+		if (this.checkConditions(interaction.guild, interaction.member, interaction.user, cmd)) {
+			const timeRestriction = this.checkTimeRestriction(interaction.user, interaction, cmd, true);
+			if (timeRestriction === true) {
+				this.invokeInteraction(interaction, cmd.actions, initialTempVars, passMeta ? cmd : null);
+			} else if (invalidCooldown) {
+				const { format } = require("node:util");
+				const content =
+					typeof timeRestriction === "string" ? format(invalidCooldown, timeRestriction) : invalidCooldown;
+				interaction.reply({ content: content, ephemeral: true });
+			}
+		} else if (invalidPermissions) {
+			interaction.reply({ content: invalidPermissions, ephemeral: true });
+		}
+	};
+
+	static preformActionsFromSelectInteraction (interaction: djs.StringSelectMenuInteraction, select, passMeta: boolean = false, initialTempVars: Record<string, any> | null = null) {
+		const tempVars = initialTempVars ?? {};
+		if (typeof select.tempVarName === "string") {
+			const values = interaction.values;
+			tempVars[select.tempVarName] = !values || values.length === 0 ? 0 : values.length === 1 ? values[0] : values;
+		}
+		this.preformActionsFromInteraction(interaction, select, passMeta, tempVars);
+	};
+
+	static checkConditions (guild, member, user, cmd) {
+		const isServer = Boolean(guild && member);
+		const restriction = parseInt(cmd.restriction, 10);
+		switch (restriction) {
+			case 0:
+			case 1: {
+				if (isServer) {
+					return (
+						this.checkPermissions(member, cmd.permissions) && this.checkPermissions(member, cmd.permissions2)
+					);
+				}
+				return restriction === 0;
+			}
+			case 2:
+				return isServer && guild.ownerId === member.id;
+			case 3:
+				return !isServer;
+			case 4:
+				return Files.data.settings.ownerId && user.id === Files.data.settings.ownerId;
+			default:
+				return true;
+		}
+	};
+
+	static checkTimeRestriction (user, msgOrInteraction, cmd: dbm.Command, returnTimeString = false) {
+		if (!cmd._timeRestriction) return true;
+		if (!user) return false;
+		const mid = user.id;
+		const cid = cmd._id;
+		if (!this.timeStamps[cid]) {
+			this.timeStamps[cid] = [];
+			this.timeStamps[cid][mid] = Date.now();
+			return true;
+		} else if (!this.timeStamps[cid][mid]) {
+			this.timeStamps[cid][mid] = Date.now();
+			return true;
+		} else {
+			const time = Date.now();
+			const diff = time - this.timeStamps[cid][mid];
+			if (cmd._timeRestriction <= Math.floor(diff / 1000)) {
+				this.timeStamps[cid][mid] = time;
+				return true;
+			} else {
+				const remaining = cmd._timeRestriction - Math.floor(diff / 1000);
+				const timeString = this.generateTimeString(remaining);
+				Events.callEvents("38", 1, 3, 2, false, "", msgOrInteraction?.member, timeString);
+				return returnTimeString ? timeString : false;
+			}
+		}
+	};
+
+	static generateTimeString (milliseconds) {
+		let remaining = milliseconds;
+		const times: string[] = [];
+
+		const days = Math.floor(remaining / 60 / 60 / 24);
+		if (days > 0) {
+			remaining -= days * 60 * 60 * 24;
+			times.push(days + (days === 1 ? " day" : " days"));
+		}
+		const hours = Math.floor(remaining / 60 / 60);
+		if (hours > 0) {
+			remaining -= hours * 60 * 60;
+			times.push(hours + (hours === 1 ? " hour" : " hours"));
+		}
+		const minutes = Math.floor(remaining / 60);
+		if (minutes > 0) {
+			remaining -= minutes * 60;
+			times.push(minutes + (minutes === 1 ? " minute" : " minutes"));
+		}
+		const seconds = Math.floor(remaining);
+		if (seconds > 0) {
+			remaining -= seconds;
+			times.push(seconds + (seconds === 1 ? " second" : " seconds"));
+		}
+
+		let result = "";
+		if (times.length === 1) {
+			result = times[0];
+		} else if (times.length === 2) {
+			result = times[0] + " and " + times[1];
+		} else if (times.length === 3) {
+			result = times[0] + ", " + times[1] + ", and " + times[2];
+		} else if (times.length === 4) {
+			result = times[0] + ", " + times[1] + ", " + times[2] + ", and " + times[3];
+		}
+		return result;
+	};
+
+	static checkPermissions (member, permissions) {
+		if (!permissions) return true;
+		if (!member) return false;
+		if (permissions === "NONE") return true;
+		if (member.guild?.ownerId === member.id) return true;
+		return member.permissions.has(permissions);
+	};
+
+	static invokeActions (msg, actions, cmd: any = null) {
+		if (actions.length > 0) {
+			this.callNextAction(
+				new ActionsCache(actions, msg.guild, {
+					msg,
+					meta: {
+						name: cmd?.name,
+						isEvent: false,
+					},
+				}),
+			);
+		}
+	};
+
+	static invokeInteraction (interaction, actions, initialTempVars, meta: { name: string } | null = null) {
+		const cacheData: any = {
+			interaction,
+			temp: initialTempVars || {},
+		};
+		if (meta) {
+			cacheData.meta = {
+				name: meta?.name,
+				isEvent: false,
+			};
+		}
+		const cache = new ActionsCache(actions, interaction.guild, cacheData);
+		this.callNextAction(cache);
+	};
+
+	static invokeEvent (event, server, temp) {
+		const actions = event.actions;
+		if (actions.length > 0) {
+			const cache = new ActionsCache(actions, server, {
+				temp: { ...temp },
+				meta: {
+					name: event.name,
+					isEvent: true,
+				},
+			});
+			this.callNextAction(cache);
+		}
+	};
+
+	static callNextAction (cache) {
+		cache.index++;
+		const index = cache.index;
+		const actions = cache.actions;
+		const act = actions[index];
+		if (!act) {
+			this.endActions(cache);
+			return;
+		}
+		if (this.exists(act.name)) {
+			try {
+				this[act.name](cache);
+			} catch (e) {
+				this.displayError(act, cache, e);
+			}
+		} else {
+			PrintError(MsgType.MISSING_ACTION, act.name);
+			this.callNextAction(cache);
+		}
+	};
+
+	static endActions (cache: ActionsCache) {
+		cache.callback?.();
+		cache.onCompleted?.();
+	};
+
+	static getInvalidButtonResponseText () {
+		return Files.data.settings.invalidButtonText ?? "Button response no longer valid.";
+	};
+
+	static getInvalidSelectResponseText () {
+		return Files.data.settings.invalidSelectText ?? "Select menu response no longer valid.";
+	};
+
+	static getDefaultResponseText () {
+		return Files.data.settings.autoResponseText ?? "Command successfully run!";
+	};
+
+	static getInvalidPermissionsResponse () {
+		return Files.data.settings.invalidPermissionsText ?? "Invalid permissions!";
+	};
+
+	static getInvalidUserResponse () {
+		return Files.data.settings.invalidUserText ?? "Invalid user!";
+	};
+
+	static getInvalidCooldownResponse () {
+		return Files.data.settings.invalidCooldownText ?? "Must wait %s before using this action.";
+	};
+
+	static getErrorString (data: { name: string } | null, cache: ActionsCache) {
+		const location = cache.toString();
+		return GetActionErrorText(location, cache.index + 1, data?.name ?? null);
+	};
+
+	static displayError (data, cache, err) {
+		if (!data) data = cache.actions[cache.index];
+		const dbm = this.getErrorString(data, cache);
+		console.error(dbm + ":\n" + (err.stack ?? err));
+		Events.onError(dbm, err.stack ?? err, cache);
+	};
+
+	static getParameterFromInteraction (interaction, name) {
+		if (interaction.__originalInteraction) {
+			const result = this.getParameterFromInteraction(interaction.__originalInteraction, name);
+			if (result !== null) {
+				return result;
+			}
+		}
+		if (interaction?.options?.get) {
+			const option = interaction.options.get(name.toLowerCase());
+			return this.getParameterFromParameterData(option);
+		}
+		return null;
+	};
+
+	static getParameterFromParameterData (option) {
+		if (typeof option === "object") {
+			// ApplicationCommandOptionType
+			// https://discord-api-types.dev/api/discord-api-types-v10/enum/ApplicationCommandOptionType
+			switch (option?.type) {
+				case DiscordJS.ApplicationCommandOptionType.String:
+				case DiscordJS.ApplicationCommandOptionType.Integer:
+				case DiscordJS.ApplicationCommandOptionType.Boolean:
+				case DiscordJS.ApplicationCommandOptionType.Number: {
+					return option.value;
+				}
+				case DiscordJS.ApplicationCommandOptionType.User: {
+					return option.member ?? option.user;
+				}
+				case DiscordJS.ApplicationCommandOptionType.Channel: {
+					return option.channel;
+				}
+				case DiscordJS.ApplicationCommandOptionType.Role: {
+					return option.role;
+				}
+				case DiscordJS.ApplicationCommandOptionType.Mentionable: {
+					return option.member ?? option.channel ?? option.role ?? option.user;
+				}
+				case DiscordJS.ApplicationCommandOptionType.Attachment: {
+					return option.attachment?.url ?? "";
+				}
+			}
+		}
+		return null;
+	};
+
+	static async findMemberOrUserFromName (name, server) {
+		if (!Bot.hasMemberIntents) {
+			PrintError(MsgType.MISSING_MEMBER_INTENT_FIND_USER_ID);
+		}
+		const user = Bot.bot.users.cache.find((user) => user.username === name);
+		if (user) {
+			const result = await server.members.fetch(user);
+			if (result) {
+				return result;
+			}
+		} else if (server) {
+			const allMembers = await server.members.fetch();
+			const member = allMembers.find((user) => user.username === name);
+			if (member) {
+				return member;
+			}
+		}
+		return null;
+	};
+
+	static async findMemberOrUserFromID (id, server) {
+		if (!Bot.hasMemberIntents) {
+			PrintError(MsgType.MISSING_MEMBER_INTENT_FIND_USER_ID);
+			return null;
+		}
+		if (!id) {
+			PrintError(MsgType.CANNOT_FIND_USER_BY_ID, id);
+			return null;
+		}
+
+		if (server) {
+			const member = await server.members.fetch(id).catch(noop);
+			if (member) {
+				return member;
+			}
+		}
+
+		const user = await Bot.bot.users.fetch(id).catch(noop);
+		if (user) {
+			return user;
+		}
+		return null;
+	};
+
+	static getTargetFromVariableOrParameter (varType, varName, cache) {
+		switch (varType) {
+			case 0:
+				return cache.temp[varName];
+			case 1:
+				const server = cache.server;
+				if (server && this.server[server.id]) {
+					return this.server[server.id][varName];
+				}
+				break;
+			case 2:
+				return this.global[varName];
+			case 3:
+				const interaction = cache.interaction;
+				const result = this.getParameterFromInteraction(interaction, varName);
+				if (result !== null) {
+					return result;
+				}
+				break;
+			default:
+				break;
+		}
+		return null;
+	};
+
+	static async getSendTargetFromData (typeData, varNameData, cache) {
+		return await this.getSendTarget(parseInt(typeData, 10), this.evalMessage(varNameData, cache), cache);
+	};
+
+	static async getSendTarget (type, varName, cache) {
+		const { interaction, msg, server } = cache;
+		switch (type) {
+			case 0:
+				if (interaction) {
+					return interaction.channel;
+				} else if (msg) {
+					return msg.channel;
+				}
+				break;
+			case 1:
+				if (interaction) {
+					return interaction.user;
+				} else if (msg) {
+					return msg.author;
+				}
+				break;
+			case 2: {
+				const users = interaction?.options?.resolved?.users ?? msg?.mentions?.users;
+				if (users?.size) {
+					return users.first();
+				}
+				break;
+			}
+			case 3: {
+				const channels = interaction?.options?.resolved?.channels ?? msg?.mentions?.channels;
+				if (channels?.size) {
+					return channels.first();
+				}
+				break;
+			}
+			case 4:
+				if (server) {
+					return server.getDefaultChannel();
+				}
+				break;
+			case 9:
+				if (interaction?._targetMember) {
+					return interaction._targetMember;
+				}
+				break;
+			case 10:
+				if (server) {
+					return server.publicUpdatesChannel;
+				}
+				break;
+			case 11:
+				if (server) {
+					return server.rulesChannel;
+				}
+				break;
+			case 12:
+				if (server) {
+					return server.systemChannel;
+				}
+				break;
+			case 100: {
+				const searchValue = this.evalMessage(varName, cache);
+				const result = await this.findMemberOrUserFromName(searchValue, cache.server);
+				if (result) {
+					return result;
+				}
+				break;
+			}
+			case 101: {
+				const searchValue = this.evalMessage(varName, cache);
+				const result = await this.findMemberOrUserFromID(searchValue, cache.server);
+				if (result) {
+					return result;
+				}
+				break;
+			}
+			case 102: {
+				const searchValue = this.evalMessage(varName, cache);
+				const result = Bot.bot.channels.cache.find(
+					(channel: djs.Channel) => (channel as djs.GuildChannel).name === searchValue
+				);
+				if (result) {
+					return result;
+				}
+				break;
+			}
+			case 103: {
+				const searchValue = this.evalMessage(varName, cache);
+				const result = Bot.bot.channels.cache.get(searchValue);
+				if (result) {
+					return result;
+				}
+				break;
+			}
+			default:
+				return this.getTargetFromVariableOrParameter(type - 5, varName, cache);
+		}
+		return null;
+	};
+
+	static async getSendReplyTarget (type, varName, cache) {
+		const { interaction, msg, server } = cache;
+		switch (type) {
+			case 13:
+				const msg = cache.getMessage();
+				if (msg) {
+					return msg;
+				}
+				break;
+			default:
+				return await this.getSendTarget(type, varName, cache);
+		}
+		return null;
+	};
+
+	static async getMemberFromData (typeData, varNameData, cache) {
+		return await this.getMember(parseInt(typeData, 10), this.evalMessage(varNameData, cache), cache);
+	};
+
+	static async getMember (type, varName, cache) {
+		const { interaction, msg } = cache;
+		switch (type) {
+			case 0: {
+				const members = interaction?.options?.resolved?.members ?? msg?.mentions?.members;
+				if (members?.size) {
+					return members.first();
+				}
+				break;
+			}
+			case 1:
+				if (interaction) {
+					return interaction.member ?? interaction.user;
+				} else if (msg) {
+					return msg.member ?? msg.author;
+				}
+				break;
+			case 6:
+				if (interaction?._targetMember) {
+					return interaction._targetMember;
+				}
+				break;
+			case 100: {
+				const searchValue = this.evalMessage(varName, cache);
+				const result = await this.findMemberOrUserFromName(searchValue, cache.server);
+				if (result) {
+					return result;
+				}
+				break;
+			}
+			case 101: {
+				const searchValue = this.evalMessage(varName, cache);
+				const result = await this.findMemberOrUserFromID(searchValue, cache.server);
+				if (result) {
+					return result;
+				}
+				break;
+			}
+			default:
+				return this.getTargetFromVariableOrParameter(type - 2, varName, cache);
+		}
+		return null;
+	};
+
+	static async getMessageFromData (typeData, varNameData, cache) {
+		return await this.getMessage(parseInt(typeData, 10), this.evalMessage(varNameData, cache), cache);
+	};
+
+	static async getMessage (type, varName, cache) {
+		switch (type) {
+			case 0:
+				const msg = cache.getMessage();
+				if (msg) {
+					return msg;
+				}
+				break;
+			default:
+				return this.getTargetFromVariableOrParameter(type - 1, varName, cache);
+		}
+		return null;
+	};
+
+	static async getServerFromData (typeData, varNameData, cache) {
+		return await this.getServer(parseInt(typeData, 10), this.evalMessage(varNameData, cache), cache);
+	};
+
+	static async getServer (type, varName, cache) {
+		const server = cache.server;
+		switch (type) {
+			case 0:
+				if (server) {
+					return server;
+				}
+				break;
+			case 100: {
+				const searchValue = this.evalMessage(varName, cache);
+				const result = Bot.bot.guilds.cache.find((guild) => guild.name === searchValue);
+				if (result) {
+					return result;
+				}
+				break;
+			}
+			case 101: {
+				const searchValue = this.evalMessage(varName, cache);
+				const result = Bot.bot.guilds.cache.get(searchValue);
+				if (result) {
+					return result;
+				}
+				break;
+			}
+			default:
+				return this.getTargetFromVariableOrParameter(type - 1, varName, cache);
+		}
+		return null;
+	};
+
+	static async getRoleFromData (typeData, varNameData, cache) {
+		return await this.getRole(parseInt(typeData, 10), this.evalMessage(varNameData, cache), cache);
+	};
+
+	static async getRole (type, varName, cache) {
+		const { interaction, msg, server } = cache;
+		switch (type) {
+			case 0: {
+				const roles = interaction?.options?.resolved?.roles ?? msg?.mentions?.roles;
+				if (roles?.size) {
+					return roles.first();
+				}
+				break;
+			}
+			case 1: {
+				const member = interaction?.member ?? msg?.member;
+				if (member?.roles?.cache?.size) {
+					return msg.member.roles.cache.first();
+				}
+				break;
+			}
+			case 2: {
+				if (server?.roles?.cache?.size) {
+					return server.roles.cache.first();
+				}
+				break;
+			}
+			case 100: {
+				if (server) {
+					const searchValue = this.evalMessage(varName, cache);
+					const result = server.roles.cache.find((role) => role.name === searchValue);
+					if (result) {
+						return result;
+					}
+				}
+				break;
+			}
+			case 101: {
+				if (server) {
+					const searchValue = this.evalMessage(varName, cache);
+					const result = server.roles.cache.get(searchValue);
+					if (result) {
+						return result;
+					}
+				}
+				break;
+			}
+			default:
+				return this.getTargetFromVariableOrParameter(type - 3, varName, cache);
+		}
+		return null;
+	};
+
+	static async getChannelFromData (typeData, varNameData, cache) {
+		return await this.getChannel(parseInt(typeData, 10), this.evalMessage(varNameData, cache), cache);
+	};
+
+	static async getChannel (type, varName, cache) {
+		const { interaction, msg, server } = cache;
+		switch (type) {
+			case 0:
+				if (interaction) {
+					return interaction.channel;
+				} else if (msg) {
+					return msg.channel;
+				}
+				break;
+			case 1: {
+				const channels = interaction?.options?.resolved?.channels ?? msg?.mentions?.channels;
+				if (channels?.size) {
+					return channels.first();
+				}
+				break;
+			}
+			case 2:
+				if (server) {
+					return server.getDefaultChannel();
+				}
+				break;
+			case 7:
+				if (server) {
+					return server.publicUpdatesChannel;
+				}
+				break;
+			case 8:
+				if (server) {
+					return server.rulesChannel;
+				}
+				break;
+			case 9:
+				if (server) {
+					return server.systemChannel;
+				}
+				break;
+			case 100: {
+				const searchValue = this.evalMessage(varName, cache);
+				const result = Bot.bot.channels.cache.find(
+					(channel: djs.Channel) => (channel as djs.GuildChannel).name === searchValue
+				);
+				if (result) {
+					return result;
+				}
+				break;
+			}
+			case 101: {
+				const searchValue = this.evalMessage(varName, cache);
+				const result = Bot.bot.channels.cache.get(searchValue);
+				if (result) {
+					return result;
+				}
+				break;
+			}
+			default:
+				return this.getTargetFromVariableOrParameter(type - 3, varName, cache);
+		}
+		return null;
+	};
+
+	static async getVoiceChannelFromData (typeData, varNameData, cache) {
+		return await this.getVoiceChannel(parseInt(typeData, 10), this.evalMessage(varNameData, cache), cache);
+	};
+
+	static async getVoiceChannel (type, varName, cache) {
+		const { interaction, msg, server } = cache;
+		switch (type) {
+			case 0: {
+				const member = interaction?.member ?? msg?.member;
+				if (member) {
+					return member.voice?.channel;
+				}
+				break;
+			}
+			case 1: {
+				const members = interaction?.options?.resolved?.members ?? msg?.mentions?.members;
+				if (members?.size) {
+					const member = members.first();
+					if (member) {
+						return member.voice?.channel;
+					}
+				}
+				break;
+			}
+			case 2:
+				if (server) {
+					return server.getDefaultVoiceChannel();
+				}
+				break;
+			case 7:
+				if (server) {
+					return server.afkChannel;
+				}
+				break;
+			case 100: {
+				const searchValue = this.evalMessage(varName, cache);
+				const result = Bot.bot.channels.cache.find(
+					(channel: djs.Channel) => (channel as djs.GuildChannel).name === searchValue
+				);
+				if (result) {
+					return result;
+				}
+				break;
+			}
+			case 101: {
+				const searchValue = this.evalMessage(varName, cache);
+				const result = Bot.bot.channels.cache.get(searchValue);
+				if (result) {
+					return result;
+				}
+				break;
+			}
+			default:
+				return this.getTargetFromVariableOrParameter(type - 3, varName, cache);
+		}
+		return null;
+	};
+
+	static async getAnyChannel (type, varName, cache) {
+		switch (type) {
+			case 10:
+				return await this.getVoiceChannel(0, varName, cache);
+			case 11:
+				return await this.getVoiceChannel(1, varName, cache);
+			case 12:
+				return await this.getVoiceChannel(7, varName, cache);
+			case 13:
+				return await this.getVoiceChannel(2, varName, cache);
+			default:
+				return await this.getChannel(type, varName, cache);
+		}
+		return null;
+	};
+
+	static async getListFromData (typeData, varNameData, cache) {
+		return await this.getList(parseInt(typeData, 10), this.evalMessage(varNameData, cache), cache);
+	};
+
+	static async getList (type, varName, cache) {
+		const { interaction, msg, server } = cache;
+		switch (type) {
+			case 0:
+				if (server) {
+					return [...server.members.cache.values()];
+				}
+				break;
+			case 1:
+				if (server) {
+					return [...server.channels.cache.values()];
+				}
+				break;
+			case 2:
+				if (server) {
+					return [...server.roles.cache.values()];
+				}
+				break;
+			case 3:
+				if (server) {
+					return [...server.emojis.cache.values()];
+				}
+				break;
+			case 4:
+				return [...Bot.bot.guilds.cache.values()];
+			case 5: {
+				const members = interaction?.options?.resolved?.members ?? msg?.mentions?.members;
+				if (members?.size) {
+					return [...members.first().roles.cache.values()];
+				}
+				break;
+			}
+			case 6: {
+				const member = interaction?.member ?? msg?.member;
+				if (member) {
+					return [...member.roles.cache.values()];
+				}
+				break;
+			}
+			default:
+				return this.getTargetFromVariableOrParameter(type - 7, varName, cache);
+		}
+	};
+
+	static getVariable (type, varName, cache) {
+		return this.getTargetFromVariableOrParameter(type - 1, varName, cache);
+	};
+
+	static storeValue (value, type, varName, cache) {
+		const server = cache.server;
+		switch (type) {
+			case 1:
+				cache.temp[varName] = value;
+				break;
+			case 2:
+				if (server) {
+					this.server[server.id] ??= {};
+					this.server[server.id][varName] = value;
+				}
+				break;
+			case 3:
+				this.global[varName] = value;
+				break;
+			default:
+				break;
+		}
+	};
+
+	static executeResults (result, data, cache) {
+		const type = parseInt(result ? data.iftrue : data.iffalse, 10);
+		switch (type) {
+			case 0: {
+				this.callNextAction(cache);
+				break;
+			}
+			case 1: {
+				this.endActions(cache);
+				break;
+			}
+			case 2: {
+				const val = parseInt(this.evalMessage(result ? data.iftrueVal : data.iffalseVal, cache), 10);
+				const index = Math.max(val - 1, 0);
+				if (cache.actions[index]) {
+					cache.index = index - 1;
+					this.callNextAction(cache);
+				}
+				break;
+			}
+			case 3: {
+				const amount = parseInt(this.evalMessage(result ? data.iftrueVal : data.iffalseVal, cache), 10);
+				const index2 = cache.index + amount + 1;
+				if (cache.actions[index2]) {
+					cache.index = index2 - 1;
+					this.callNextAction(cache);
+				}
+				break;
+			}
+			case 4: {
+				const anchorName = this.evalMessage(result ? data.iftrueVal : data.iffalseVal, cache);
+				cache.goToAnchor(anchorName);
+				break;
+			}
+			case 99: {
+				this.executeSubActionsThenNextAction(result ? data.iftrueActions : data.iffalseActions, cache);
+				break;
+			}
+			default:
+				break;
+		}
+	};
+
+	static executeSubActionsThenNextAction (actions, cache) {
+		return this.executeSubActions(actions, cache, () => this.callNextAction(cache));
+	};
+
+	static executeSubActions (actions, cache, callback: (() => void) | null = null) {
+		if (!actions) {
+			callback?.();
+			return false;
+		}
+		const newCache = this.generateSubCache(cache, actions);
+		newCache.callback = () => callback?.();
+		this.callNextAction(newCache);
+		return true;
+	};
+
+	static generateSubCache (cache, actions) {
+		return ActionsCache.extend(cache, actions);
+	};
+
+	static generateButton (button, cache) {
+		const style = button.url ? DiscordJS.ButtonStyle.Link : this.convertStringButtonStyleToEnum(button.type);
+		const buttonData: djs.APIButtonComponentBase<djs.ButtonStyle> = {
+			type: DiscordJS.ComponentType.Button,
+			label: this.evalMessage(button.name, cache),
+			style,
+		};
+		if (button.url) {
+			(buttonData as djs.APIButtonComponentWithURL).url = this.evalMessage(button.url, cache);
+		} else {
+			(buttonData as djs.APIButtonComponentWithCustomId).custom_id = this.evalMessage(button.id, cache);
+		}
+		if (button.emoji) {
+			buttonData.emoji = this.evalMessage(button.emoji, cache);
+		}
+		return buttonData;
+	};
+
+	static convertStringButtonStyleToEnum (style) {
+		switch (style) {
+			case "PRIMARY":
+				return DiscordJS.ButtonStyle.Primary;
+			case "SECONDARY":
+				return DiscordJS.ButtonStyle.Secondary;
+			case "SUCCESS":
+				return DiscordJS.ButtonStyle.Success;
+			case "DANGER":
+				return DiscordJS.ButtonStyle.Danger;
+			case "LINK":
+				return DiscordJS.ButtonStyle.Link;
+		}
+		return DiscordJS.ButtonStyle.Primary;
+	};
+
+	static generateSelectMenu (select, cache) {
+		const selectData = {
+			type: DiscordJS.ComponentType.SelectMenu,
+			customId: this.evalMessage(select.id, cache),
+			placeholder: this.evalMessage(select.placeholder, cache),
+			minValues: parseInt(this.evalMessage(select.min, cache), 10) ?? 1,
+			maxValues: parseInt(this.evalMessage(select.max, cache), 10) ?? 1,
+			options: select.options.map((option, index) => {
+				option.label = this.evalMessage(option.label, cache) || "No Label";
+				option.description = this.evalMessage(option.description, cache) || "";
+				option.value = this.evalMessage(option.value, cache) || index.toString();
+				return option;
+			}),
+		};
+		return selectData;
+	};
+
+	static generateTextInput (textInput, defaultCustomId, cache) {
+		const inputTextData = {
+			type: DiscordJS.ComponentType.TextInput,
+			customId: !!textInput.id ? textInput.id : defaultCustomId,
+			label: this.evalMessage(textInput.name, cache),
+			placeholder: this.evalMessage(textInput.placeholder, cache),
+			minLength: parseInt(this.evalMessage(textInput.minLength, cache), 10) ?? 0,
+			maxLength: parseInt(this.evalMessage(textInput.maxLength, cache), 10) ?? 100,
+			style: this.convertStringTextInputStyleToEnum(textInput.style),
+			required: textInput.required === "true",
+		};
+		return inputTextData;
+	};
+
+	static convertStringTextInputStyleToEnum (style) {
+		switch (style) {
+			case "PARAGRAPH":
+				return DiscordJS.TextInputStyle.Paragraph;
+			case "SHORT":
+				return DiscordJS.TextInputStyle.Short;
+		}
+		return DiscordJS.TextInputStyle.Short;
+	};
+
+	static addButtonToActionRowArray (array, rowText, buttonData, cache) {
+		let row = 0;
+		if (!rowText) {
+			let found = false;
+			for (let i = 0; i < array.length; i++) {
+				if (array[i].length < 5) {
+					if (array[i].length === 0 || array[i][0]?.type === DiscordJS.ComponentType.Button) {
+						found = true;
+						row = i;
+						break;
+					}
+				}
+			}
+			if (!found && array.length !== 0) {
+				row = array.length - 1;
+				if (array[row].length >= 5) {
+					row++;
+				}
+			}
+		} else {
+			row = parseInt(rowText, 10) - 1;
+		}
+		if (row >= 0 && row < 5) {
+			while (array.length <= row + 1) {
+				array.push([]);
+			}
+			if (array[row].length >= 5) {
+				this.displayError(null, cache, "Action row #" + row + " exceeded the maximum of 5 buttons!");
+			} else {
+				array[row].push(buttonData);
+			}
+		} else {
+			this.displayError(null, cache, 'Invalid action row: "' + rowText + '".');
+		}
+	};
+
+	static addSelectToActionRowArray (array, rowText, selectData, cache) {
+		let row = 0;
+		if (!rowText) {
+			if (array.length !== 0) {
+				row = array.length - 1;
+				if (array[row].length >= 5) {
+					row++;
+				}
+			}
+		} else {
+			row = parseInt(rowText, 10) - 1;
+		}
+		if (row >= 0 && row < 5) {
+			while (array.length <= row + 1) {
+				array.push([]);
+			}
+			if (array[row].length >= 1) {
+				this.displayError(
+					null,
+					cache,
+					`Action row #${row} cannot have a select menu when there are any buttons on it!`,
+				);
+			} else {
+				array[row].push(selectData);
+			}
+		} else {
+			this.displayError(null, cache, `Invalid action row: '${rowText}'.`);
+		}
+	};
+
+	static addTextInputToActionRowArray (array, rowText, textInput, cache) {
+		let row = 0;
+		if (!rowText) {
+			if (array.length !== 0) {
+				row = array.length - 1;
+				if (array[row].length >= 5) {
+					row++;
+				}
+			}
+		} else {
+			row = parseInt(rowText, 10) - 1;
+		}
+		if (row >= 0 && row < 5) {
+			while (array.length <= row + 1) {
+				array.push([]);
+			}
+			if (array[row].length >= 1) {
+				this.displayError(
+					null,
+					cache,
+					`Action row #${row} cannot have a text input when there are any buttons on it!`,
+				);
+			} else {
+				array[row].push(textInput);
+			}
+		} else {
+			this.displayError(null, cache, `Invalid action row: '${rowText}'.`);
+		}
+	};
+
+	static checkTemporaryInteractionResponses (interaction) {
+		const customId = interaction.customId;
+		const messageId = interaction.message?.id;
+		if (this._temporaryInteractions?.[messageId]) {
+			const interactions = this._temporaryInteractions[messageId];
+			for (let i = 0; i < interactions.length; i++) {
+				const interData = interactions[i];
+				const usersMatch = !interData.userId || interData.userId === interaction.user.id;
+				if (interData.customId === customId) {
+					if (usersMatch) {
+						interData.callback?.(interaction);
+					} else {
+						const invalidUserText = this.getInvalidUserResponse();
+						if (invalidUserText) {
+							interaction.reply({ content: invalidUserText, ephemeral: true });
+						}
+					}
+					return true;
+				}
+			}
+		}
+		return false;
+	};
+
+	static registerTemporaryInteraction (messageId, time, customId, userId, multi, interactionCallback) {
+		this._temporaryInteractionIdMax ??= 0;
+		this._temporaryInteractions ??= {};
+		this._temporaryInteractions[messageId] ??= [];
+
+		const uniqueId = this._temporaryInteractionIdMax++;
+		let removed = false;
+
+		const removeInteraction = () => {
+			if (!removed) removed = true;
+			else return;
+			this.removeTemporaryInteraction(messageId, uniqueId);
+		};
+
+		const callback = (interaction) => {
+			interactionCallback?.(interaction);
+			if (!multi) {
+				removeInteraction();
+			}
+		};
+
+		(this._temporaryInteractions[messageId] as any).push({ customId, userId, callback, uniqueId });
+		if (time > 0) {
+			require("node:timers").setTimeout(removeInteraction, time).unref();
+		}
+	};
+
+	static removeTemporaryInteraction (messageId, uniqueOrCustomId) {
+		const interactions = this._temporaryInteractions?.[messageId] as { uniqueId: string, customId: string }[];
+		if (interactions) {
+			let i = 0;
+			for (; i < interactions.length; i++) {
+				if (
+					(typeof uniqueOrCustomId === "string" && interactions[i].customId === uniqueOrCustomId) ||
+					interactions[i].uniqueId === uniqueOrCustomId
+				) {
+					break;
+				}
+			}
+			if (i < interactions.length) interactions.splice(i, 1);
+		}
+	};
+
+	static clearTemporaryInteraction (messageId, customId) {
+		if (this._temporaryInteractions?.[messageId]) {
+			this.removeTemporaryInteraction(messageId, customId);
+		}
+	};
+
+	static clearAllTemporaryInteractions (messageId) {
+		if (this._temporaryInteractions?.[messageId]) {
+			delete this._temporaryInteractions[messageId];
+		}
+	};
+
+	static registerModalSubmitResponses (interactionId, callback) {
+		this._temporaryInteractions ??= {};
+		this._temporaryInteractions[interactionId] = callback;
+
+		// clear up interaction after a while
+		require("node:timers")
+			.setTimeout(() => {
+				this.clearAllTemporaryInteractions(interactionId);
+			}, 60 * 60 * 1000)
+			.unref();
+	};
+
+	static checkModalSubmitResponses (interaction) {
+		const interactionId = interaction.customId;
+		if (this._temporaryInteractions?.[interactionId]) {
+			(this._temporaryInteractions[interactionId] as Function)(interaction);
+			this.clearAllTemporaryInteractions(interactionId);
+		}
+	};
+}
+
+DBM.Actions = Actions;
 
 type ActionsCacheMeta = { isEvent: boolean, name: string };
 
@@ -1225,6 +2590,8 @@ class ActionsCache {
 	interaction: djs.CommandInteraction | djs.MessageComponentInteraction | null;
 	isSubCache: boolean;
 	meta: ActionsCacheMeta;
+
+	callback: Function | undefined;
 
 	constructor(actions, server, options: any = {}) {
 		this.actions = actions;
@@ -1308,1363 +2675,7 @@ class ActionsCache {
 	}
 };
 
-Actions.ActionsCache = ActionsCache;
-
-Actions.exists = function (action) {
-	if (!action) return false;
-	return typeof this[action] === "function";
-};
-
-Actions.getLocalFile = function (url) {
-	return require("node:path").join(process.cwd(), url);
-};
-
-Actions.getDBM = function () {
-	return DBM;
-};
-
-Actions.callListFunc = async function (list, funcName, args) {
-	let result: any[] = [];
-
-	const len = list.length;
-	for(let i = 0; i < len; i++) {
-		const item = list[i];
-		if (typeof item?.[funcName] === "function") {
-			try {
-				result.push(await item[funcName].apply(item, args));
-			} catch(e) {
-			}
-		}
-	}
-
-	return result;
-};
-
-Actions.getActionVariable = function (name, defaultValue) {
-	if (this[name] === undefined && defaultValue !== undefined) {
-		this[name] = defaultValue;
-	}
-	return this[name];
-};
-
-Actions.getSlashParameter = function (interaction, name, defaultValue) {
-	if (!interaction) {
-		return defaultValue ?? null;
-	}
-
-	if (interaction.__originalInteraction) {
-		const result = this.getParameterFromInteraction(interaction.__originalInteraction, name);
-		if (result !== null) {
-			return result;
-		}
-	}
-
-	const result = this.getParameterFromInteraction(interaction, name);
-	if (result !== null) {
-		return result;
-	}
-
-	return defaultValue !== undefined ? defaultValue : result;
-};
-
-Actions._letterEmojis = "🇦 🇧 🇨 🇩 🇪 🇫 🇬 🇭 🇮 🇯 🇰 🇱 🇲 🇳 🇴 🇵 🇶 🇷 🇸 🇹 🇺 🇻 🇼 🇽 🇾 🇿".split(" ");
-
-Actions.convertTextToEmojis = function (text, useRegional = true) {
-	let result = "";
-	for (let i = 0; i < text.length; i++) {
-		const code = text.toUpperCase().charCodeAt(i) - 65;
-		if (code >= 0 && code <= 26) {
-			result += useRegional
-				? ":regional_indicator_" + text[i].toLowerCase() + ":"
-				: "\\" + this._letterEmojis[code];
-		} else {
-			result += text[i];
-		}
-	}
-	return result;
-};
-
-Actions.getFlagEmoji = function (flagName) {
-	if (flagName.startsWith("flag_")) {
-		flagName = flagName.substring(5);
-	}
-	flagName = flagName.toUpperCase();
-	return this._letterEmojis[flagName.charCodeAt(0) - 65] + this._letterEmojis[flagName.charCodeAt(1) - 65];
-};
-
-Actions.getCustomEmoji = function (nameOrId) {
-	return Bot.bot.emojis.cache.get(nameOrId) ?? Bot.bot.emojis.cache.find((e) => e.name === nameOrId);
-};
-
-Actions.eval = function (content, cache, logError = true) {
-	if (!content) return false;
-	const DBM = this.getDBM();
-	const tempVars = this.getActionVariable.bind(cache.temp);
-	let serverVars = null;
-	if (cache.server) {
-		serverVars = this.getActionVariable.bind(this.server[cache.server.id]);
-	}
-	const globalVars = this.getActionVariable.bind(this.global);
-	const slashParams = this.getSlashParameter.bind(this, cache.interaction);
-	const customEmoji = this.getCustomEmoji.bind(this);
-	const msg = cache.msg;
-	const interaction = cache.interaction;
-	const button = interaction?._button ?? "";
-	const select = interaction?._select ?? "";
-	const server = cache.server;
-	const client = DBM.Bot.bot;
-	const bot = DBM.Bot.bot;
-	const me = server?.members?.me ?? null;
-	let user = "",
-		member = "",
-		channel = "",
-		mentionedUser = "",
-		mentionedChannel = "",
-		defaultChannel = "";
-	if (msg) {
-		user = msg.author;
-		member = msg.member;
-		channel = msg.channel;
-		mentionedUser = msg.mentions.users.first() ?? "";
-		mentionedChannel = msg.mentions.channels.first() ?? "";
-	}
-	if (interaction) {
-		user = interaction.user;
-		member = interaction.member;
-		channel = interaction.channel;
-		if (interaction.options) {
-			mentionedUser = interaction.options.resolved?.users?.first?.() ?? "";
-			mentionedChannel = interaction.options.resolved?.channels?.first?.() ?? "";
-		}
-	}
-	if (server) {
-		defaultChannel = server.getDefaultChannel();
-	}
-	try {
-		return eval(content);
-	} catch (e) {
-		if (logError) console.error(e);
-		return false;
-	}
-};
-
-Actions.evalMessage = function (content, cache) {
-	if (!content) return "";
-	if (!content.match(/\$\{.*\}/im)) return content;
-	return this.eval("`" + content.replace(/`/g, "\\`") + "`", cache);
-};
-
-Actions.evalIfPossible = function (content, cache) {
-	this.__cachedText ??= {};
-	if (content in this.__cachedText) return content;
-	let result = this.eval(content, cache, false);
-	if (result === false) result = this.evalMessage(content, cache);
-	if (result === false) {
-		this.__cachedText[content] = true;
-		result = content;
-	}
-	return result;
-};
-
-Actions.initMods = function () {
-	this.modInitReferences = {};
-	const fs = require("node:fs");
-	const path = require("node:path");
-	this.modDirectories().forEach((dir) => {
-		fs.readdirSync(dir).forEach((file) => {
-			if (!/\.js/i.test(file)) return;
-			const action = require(path.join(dir, file));
-			if (action.action) {
-				this[action.name] = action.action;
-			}
-			if (action.modInit) {
-				this.modInitReferences[action.name] = action.modInit;
-			}
-			if (action.mod) {
-				try {
-					action.mod(DBM);
-				} catch (e) {
-					console.error(e);
-				}
-			}
-		});
-	});
-};
-
-Actions.modDirectories = function () {
-	const result = [this.actionsLocation];
-	if (Files.verifyDirectory(Actions.eventsLocation)) {
-		result.push(this.eventsLocation);
-	}
-	if (Files.verifyDirectory(Actions.extensionsLocation)) {
-		result.push(this.extensionsLocation);
-	}
-	return result;
-};
-
-Actions.preformActionsFromMessage = function (msg, cmd) {
-	if (
-		this.checkConditions(msg.guild, msg.member, msg.author, cmd) &&
-		this.checkTimeRestriction(msg.author, msg, cmd)
-	) {
-		this.invokeActions(msg, cmd.actions, cmd);
-	}
-};
-
-Actions.preformActionsFromInteraction = function (interaction, cmd, passMeta: boolean = false, initialTempVars = null) {
-	const invalidPermissions = this.getInvalidPermissionsResponse();
-	const invalidCooldown = this.getInvalidCooldownResponse();
-	if (this.checkConditions(interaction.guild, interaction.member, interaction.user, cmd)) {
-		const timeRestriction = this.checkTimeRestriction(interaction.user, interaction, cmd, true);
-		if (timeRestriction === true) {
-			this.invokeInteraction(interaction, cmd.actions, initialTempVars, passMeta ? cmd : null);
-		} else if (invalidCooldown) {
-			const { format } = require("node:util");
-			const content =
-				typeof timeRestriction === "string" ? format(invalidCooldown, timeRestriction) : invalidCooldown;
-			interaction.reply({ content: content, ephemeral: true });
-		}
-	} else if (invalidPermissions) {
-		interaction.reply({ content: invalidPermissions, ephemeral: true });
-	}
-};
-
-Actions.preformActionsFromSelectInteraction = function (interaction, select, passMeta: boolean = false, initialTempVars = null) {
-	const tempVars = initialTempVars ?? {};
-	if (typeof select.tempVarName === "string") {
-		const values = interaction.values;
-		tempVars[select.tempVarName] = !values || values.length === 0 ? 0 : values.length === 1 ? values[0] : values;
-	}
-	this.preformActionsFromInteraction(interaction, select, passMeta, tempVars);
-};
-
-Actions.checkConditions = function (guild, member, user, cmd) {
-	const isServer = Boolean(guild && member);
-	const restriction = parseInt(cmd.restriction, 10);
-	switch (restriction) {
-		case 0:
-		case 1: {
-			if (isServer) {
-				return (
-					this.checkPermissions(member, cmd.permissions) && this.checkPermissions(member, cmd.permissions2)
-				);
-			}
-			return restriction === 0;
-		}
-		case 2:
-			return isServer && guild.ownerId === member.id;
-		case 3:
-			return !isServer;
-		case 4:
-			return Files.data.settings.ownerId && user.id === Files.data.settings.ownerId;
-		default:
-			return true;
-	}
-};
-
-Actions.checkTimeRestriction = function (user, msgOrInteraction, cmd, returnTimeString = false) {
-	if (!cmd._timeRestriction) return true;
-	if (!user) return false;
-	const mid = user.id;
-	const cid = cmd._id;
-	if (!this.timeStamps[cid]) {
-		this.timeStamps[cid] = [];
-		this.timeStamps[cid][mid] = Date.now();
-		return true;
-	} else if (!this.timeStamps[cid][mid]) {
-		this.timeStamps[cid][mid] = Date.now();
-		return true;
-	} else {
-		const time = Date.now();
-		const diff = time - this.timeStamps[cid][mid];
-		if (cmd._timeRestriction <= Math.floor(diff / 1000)) {
-			this.timeStamps[cid][mid] = time;
-			return true;
-		} else {
-			const remaining = cmd._timeRestriction - Math.floor(diff / 1000);
-			const timeString = this.generateTimeString(remaining);
-			Events.callEvents("38", 1, 3, 2, false, "", msgOrInteraction?.member, timeString);
-			return returnTimeString ? timeString : false;
-		}
-	}
-};
-
-Actions.generateTimeString = function (milliseconds) {
-	let remaining = milliseconds;
-	const times: string[] = [];
-
-	const days = Math.floor(remaining / 60 / 60 / 24);
-	if (days > 0) {
-		remaining -= days * 60 * 60 * 24;
-		times.push(days + (days === 1 ? " day" : " days"));
-	}
-	const hours = Math.floor(remaining / 60 / 60);
-	if (hours > 0) {
-		remaining -= hours * 60 * 60;
-		times.push(hours + (hours === 1 ? " hour" : " hours"));
-	}
-	const minutes = Math.floor(remaining / 60);
-	if (minutes > 0) {
-		remaining -= minutes * 60;
-		times.push(minutes + (minutes === 1 ? " minute" : " minutes"));
-	}
-	const seconds = Math.floor(remaining);
-	if (seconds > 0) {
-		remaining -= seconds;
-		times.push(seconds + (seconds === 1 ? " second" : " seconds"));
-	}
-
-	let result = "";
-	if (times.length === 1) {
-		result = times[0];
-	} else if (times.length === 2) {
-		result = times[0] + " and " + times[1];
-	} else if (times.length === 3) {
-		result = times[0] + ", " + times[1] + ", and " + times[2];
-	} else if (times.length === 4) {
-		result = times[0] + ", " + times[1] + ", " + times[2] + ", and " + times[3];
-	}
-	return result;
-};
-
-Actions.checkPermissions = function (member, permissions) {
-	if (!permissions) return true;
-	if (!member) return false;
-	if (permissions === "NONE") return true;
-	if (member.guild?.ownerId === member.id) return true;
-	return member.permissions.has(permissions);
-};
-
-Actions.invokeActions = function (msg, actions, cmd: any = null) {
-	if (actions.length > 0) {
-		this.callNextAction(
-			new ActionsCache(actions, msg.guild, {
-				msg,
-				meta: {
-					name: cmd?.name,
-					isEvent: false,
-				},
-			}),
-		);
-	}
-};
-
-Actions.invokeInteraction = function (interaction, actions, initialTempVars, meta: { name: string } | null = null) {
-	const cacheData: any = {
-		interaction,
-		temp: initialTempVars || {},
-	};
-	if (meta) {
-		cacheData.meta = {
-			name: meta?.name,
-			isEvent: false,
-		};
-	}
-	const cache = new ActionsCache(actions, interaction.guild, cacheData);
-	this.callNextAction(cache);
-};
-
-Actions.invokeEvent = function (event, server, temp) {
-	const actions = event.actions;
-	if (actions.length > 0) {
-		const cache = new ActionsCache(actions, server, {
-			temp: { ...temp },
-			meta: {
-				name: event.name,
-				isEvent: true,
-			},
-		});
-		this.callNextAction(cache);
-	}
-};
-
-Actions.callNextAction = function (cache) {
-	cache.index++;
-	const index = cache.index;
-	const actions = cache.actions;
-	const act = actions[index];
-	if (!act) {
-		this.endActions(cache);
-		return;
-	}
-	if (this.exists(act.name)) {
-		try {
-			this[act.name](cache);
-		} catch (e) {
-			this.displayError(act, cache, e);
-		}
-	} else {
-		PrintError(MsgType.MISSING_ACTION, act.name);
-		this.callNextAction(cache);
-	}
-};
-
-Actions.endActions = function (cache) {
-	cache.callback?.();
-	cache.onCompleted?.();
-};
-
-Actions.getInvalidButtonResponseText = function () {
-	return Files.data.settings.invalidButtonText ?? "Button response no longer valid.";
-};
-
-Actions.getInvalidSelectResponseText = function () {
-	return Files.data.settings.invalidSelectText ?? "Select menu response no longer valid.";
-};
-
-Actions.getDefaultResponseText = function () {
-	return Files.data.settings.autoResponseText ?? "Command successfully run!";
-};
-
-Actions.getInvalidPermissionsResponse = function () {
-	return Files.data.settings.invalidPermissionsText ?? "Invalid permissions!";
-};
-
-Actions.getInvalidUserResponse = function () {
-	return Files.data.settings.invalidUserText ?? "Invalid user!";
-};
-
-Actions.getInvalidCooldownResponse = function () {
-	return Files.data.settings.invalidCooldownText ?? "Must wait %s before using this action.";
-};
-
-Actions.getErrorString = function (data: { name: string } | null, cache: ActionsCache) {
-	const location = cache.toString();
-	return GetActionErrorText(location, cache.index + 1, data?.name ?? null);
-};
-
-Actions.displayError = function (data, cache, err) {
-	if (!data) data = cache.actions[cache.index];
-	const dbm = this.getErrorString(data, cache);
-	console.error(dbm + ":\n" + (err.stack ?? err));
-	Events.onError(dbm, err.stack ?? err, cache);
-};
-
-Actions.getParameterFromInteraction = function (interaction, name) {
-	if (interaction.__originalInteraction) {
-		const result = this.getParameterFromInteraction(interaction.__originalInteraction, name);
-		if (result !== null) {
-			return result;
-		}
-	}
-	if (interaction?.options?.get) {
-		const option = interaction.options.get(name.toLowerCase());
-		return this.getParameterFromParameterData(option);
-	}
-	return null;
-};
-
-Actions.getParameterFromParameterData = function (option) {
-	if (typeof option === "object") {
-		// ApplicationCommandOptionType
-		// https://discord-api-types.dev/api/discord-api-types-v10/enum/ApplicationCommandOptionType
-		switch (option?.type) {
-			case DiscordJS.ApplicationCommandOptionType.String:
-			case DiscordJS.ApplicationCommandOptionType.Integer:
-			case DiscordJS.ApplicationCommandOptionType.Boolean:
-			case DiscordJS.ApplicationCommandOptionType.Number: {
-				return option.value;
-			}
-			case DiscordJS.ApplicationCommandOptionType.User: {
-				return option.member ?? option.user;
-			}
-			case DiscordJS.ApplicationCommandOptionType.Channel: {
-				return option.channel;
-			}
-			case DiscordJS.ApplicationCommandOptionType.Role: {
-				return option.role;
-			}
-			case DiscordJS.ApplicationCommandOptionType.Mentionable: {
-				return option.member ?? option.channel ?? option.role ?? option.user;
-			}
-			case DiscordJS.ApplicationCommandOptionType.Attachment: {
-				return option.attachment?.url ?? "";
-			}
-		}
-	}
-	return null;
-};
-
-Actions.findMemberOrUserFromName = async function (name, server) {
-	if (!Bot.hasMemberIntents) {
-		PrintError(MsgType.MISSING_MEMBER_INTENT_FIND_USER_ID);
-	}
-	const user = Bot.bot.users.cache.find((user) => user.username === name);
-	if (user) {
-		const result = await server.members.fetch(user);
-		if (result) {
-			return result;
-		}
-	} else if (server) {
-		const allMembers = await server.members.fetch();
-		const member = allMembers.find((user) => user.username === name);
-		if (member) {
-			return member;
-		}
-	}
-	return null;
-};
-
-Actions.findMemberOrUserFromID = async function (id, server) {
-	if (!Bot.hasMemberIntents) {
-		PrintError(MsgType.MISSING_MEMBER_INTENT_FIND_USER_ID);
-		return null;
-	}
-	if (!id) {
-		PrintError(MsgType.CANNOT_FIND_USER_BY_ID, id);
-		return null;
-	}
-
-	if (server) {
-		const member = await server.members.fetch(id).catch(noop);
-		if (member) {
-			return member;
-		}
-	}
-
-	const user = await Bot.bot.users.fetch(id).catch(noop);
-	if (user) {
-		return user;
-	}
-	return null;
-};
-
-Actions.getTargetFromVariableOrParameter = function (varType, varName, cache) {
-	switch (varType) {
-		case 0:
-			return cache.temp[varName];
-		case 1:
-			const server = cache.server;
-			if (server && this.server[server.id]) {
-				return this.server[server.id][varName];
-			}
-			break;
-		case 2:
-			return this.global[varName];
-		case 3:
-			const interaction = cache.interaction;
-			const result = this.getParameterFromInteraction(interaction, varName);
-			if (result !== null) {
-				return result;
-			}
-			break;
-		default:
-			break;
-	}
-	return null;
-};
-
-Actions.getSendTargetFromData = async function (typeData, varNameData, cache) {
-	return await this.getSendTarget(parseInt(typeData, 10), this.evalMessage(varNameData, cache), cache);
-};
-
-Actions.getSendTarget = async function (type, varName, cache) {
-	const { interaction, msg, server } = cache;
-	switch (type) {
-		case 0:
-			if (interaction) {
-				return interaction.channel;
-			} else if (msg) {
-				return msg.channel;
-			}
-			break;
-		case 1:
-			if (interaction) {
-				return interaction.user;
-			} else if (msg) {
-				return msg.author;
-			}
-			break;
-		case 2: {
-			const users = interaction?.options?.resolved?.users ?? msg?.mentions?.users;
-			if (users?.size) {
-				return users.first();
-			}
-			break;
-		}
-		case 3: {
-			const channels = interaction?.options?.resolved?.channels ?? msg?.mentions?.channels;
-			if (channels?.size) {
-				return channels.first();
-			}
-			break;
-		}
-		case 4:
-			if (server) {
-				return server.getDefaultChannel();
-			}
-			break;
-		case 9:
-			if (interaction?._targetMember) {
-				return interaction._targetMember;
-			}
-			break;
-		case 10:
-			if (server) {
-				return server.publicUpdatesChannel;
-			}
-			break;
-		case 11:
-			if (server) {
-				return server.rulesChannel;
-			}
-			break;
-		case 12:
-			if (server) {
-				return server.systemChannel;
-			}
-			break;
-		case 100: {
-			const searchValue = this.evalMessage(varName, cache);
-			const result = await this.findMemberOrUserFromName(searchValue, cache.server);
-			if (result) {
-				return result;
-			}
-			break;
-		}
-		case 101: {
-			const searchValue = this.evalMessage(varName, cache);
-			const result = await this.findMemberOrUserFromID(searchValue, cache.server);
-			if (result) {
-				return result;
-			}
-			break;
-		}
-		case 102: {
-			const searchValue = this.evalMessage(varName, cache);
-			const result = Bot.bot.channels.cache.find(
-				(channel: djs.Channel) => (channel as djs.GuildChannel).name === searchValue
-			);
-			if (result) {
-				return result;
-			}
-			break;
-		}
-		case 103: {
-			const searchValue = this.evalMessage(varName, cache);
-			const result = Bot.bot.channels.cache.get(searchValue);
-			if (result) {
-				return result;
-			}
-			break;
-		}
-		default:
-			return this.getTargetFromVariableOrParameter(type - 5, varName, cache);
-	}
-	return null;
-};
-
-Actions.getSendReplyTarget = async function (type, varName, cache) {
-	const { interaction, msg, server } = cache;
-	switch (type) {
-		case 13:
-			const msg = cache.getMessage();
-			if (msg) {
-				return msg;
-			}
-			break;
-		default:
-			return await this.getSendTarget(type, varName, cache);
-	}
-	return null;
-};
-
-Actions.getMemberFromData = async function (typeData, varNameData, cache) {
-	return await this.getMember(parseInt(typeData, 10), this.evalMessage(varNameData, cache), cache);
-};
-
-Actions.getMember = async function (type, varName, cache) {
-	const { interaction, msg } = cache;
-	switch (type) {
-		case 0: {
-			const members = interaction?.options?.resolved?.members ?? msg?.mentions?.members;
-			if (members?.size) {
-				return members.first();
-			}
-			break;
-		}
-		case 1:
-			if (interaction) {
-				return interaction.member ?? interaction.user;
-			} else if (msg) {
-				return msg.member ?? msg.author;
-			}
-			break;
-		case 6:
-			if (interaction?._targetMember) {
-				return interaction._targetMember;
-			}
-			break;
-		case 100: {
-			const searchValue = this.evalMessage(varName, cache);
-			const result = await this.findMemberOrUserFromName(searchValue, cache.server);
-			if (result) {
-				return result;
-			}
-			break;
-		}
-		case 101: {
-			const searchValue = this.evalMessage(varName, cache);
-			const result = await this.findMemberOrUserFromID(searchValue, cache.server);
-			if (result) {
-				return result;
-			}
-			break;
-		}
-		default:
-			return this.getTargetFromVariableOrParameter(type - 2, varName, cache);
-	}
-	return null;
-};
-
-Actions.getMessageFromData = async function (typeData, varNameData, cache) {
-	return await this.getMessage(parseInt(typeData, 10), this.evalMessage(varNameData, cache), cache);
-};
-
-Actions.getMessage = async function (type, varName, cache) {
-	switch (type) {
-		case 0:
-			const msg = cache.getMessage();
-			if (msg) {
-				return msg;
-			}
-			break;
-		default:
-			return this.getTargetFromVariableOrParameter(type - 1, varName, cache);
-	}
-	return null;
-};
-
-Actions.getServerFromData = async function (typeData, varNameData, cache) {
-	return await this.getServer(parseInt(typeData, 10), this.evalMessage(varNameData, cache), cache);
-};
-
-Actions.getServer = async function (type, varName, cache) {
-	const server = cache.server;
-	switch (type) {
-		case 0:
-			if (server) {
-				return server;
-			}
-			break;
-		case 100: {
-			const searchValue = this.evalMessage(varName, cache);
-			const result = Bot.bot.guilds.cache.find((guild) => guild.name === searchValue);
-			if (result) {
-				return result;
-			}
-			break;
-		}
-		case 101: {
-			const searchValue = this.evalMessage(varName, cache);
-			const result = Bot.bot.guilds.cache.get(searchValue);
-			if (result) {
-				return result;
-			}
-			break;
-		}
-		default:
-			return this.getTargetFromVariableOrParameter(type - 1, varName, cache);
-	}
-	return null;
-};
-
-Actions.getRoleFromData = async function (typeData, varNameData, cache) {
-	return await this.getRole(parseInt(typeData, 10), this.evalMessage(varNameData, cache), cache);
-};
-
-Actions.getRole = async function (type, varName, cache) {
-	const { interaction, msg, server } = cache;
-	switch (type) {
-		case 0: {
-			const roles = interaction?.options?.resolved?.roles ?? msg?.mentions?.roles;
-			if (roles?.size) {
-				return roles.first();
-			}
-			break;
-		}
-		case 1: {
-			const member = interaction?.member ?? msg?.member;
-			if (member?.roles?.cache?.size) {
-				return msg.member.roles.cache.first();
-			}
-			break;
-		}
-		case 2: {
-			if (server?.roles?.cache?.size) {
-				return server.roles.cache.first();
-			}
-			break;
-		}
-		case 100: {
-			if (server) {
-				const searchValue = this.evalMessage(varName, cache);
-				const result = server.roles.cache.find((role) => role.name === searchValue);
-				if (result) {
-					return result;
-				}
-			}
-			break;
-		}
-		case 101: {
-			if (server) {
-				const searchValue = this.evalMessage(varName, cache);
-				const result = server.roles.cache.get(searchValue);
-				if (result) {
-					return result;
-				}
-			}
-			break;
-		}
-		default:
-			return this.getTargetFromVariableOrParameter(type - 3, varName, cache);
-	}
-	return null;
-};
-
-Actions.getChannelFromData = async function (typeData, varNameData, cache) {
-	return await this.getChannel(parseInt(typeData, 10), this.evalMessage(varNameData, cache), cache);
-};
-
-Actions.getChannel = async function (type, varName, cache) {
-	const { interaction, msg, server } = cache;
-	switch (type) {
-		case 0:
-			if (interaction) {
-				return interaction.channel;
-			} else if (msg) {
-				return msg.channel;
-			}
-			break;
-		case 1: {
-			const channels = interaction?.options?.resolved?.channels ?? msg?.mentions?.channels;
-			if (channels?.size) {
-				return channels.first();
-			}
-			break;
-		}
-		case 2:
-			if (server) {
-				return server.getDefaultChannel();
-			}
-			break;
-		case 7:
-			if (server) {
-				return server.publicUpdatesChannel;
-			}
-			break;
-		case 8:
-			if (server) {
-				return server.rulesChannel;
-			}
-			break;
-		case 9:
-			if (server) {
-				return server.systemChannel;
-			}
-			break;
-		case 100: {
-			const searchValue = this.evalMessage(varName, cache);
-			const result = Bot.bot.channels.cache.find(
-				(channel: djs.Channel) => (channel as djs.GuildChannel).name === searchValue
-			);
-			if (result) {
-				return result;
-			}
-			break;
-		}
-		case 101: {
-			const searchValue = this.evalMessage(varName, cache);
-			const result = Bot.bot.channels.cache.get(searchValue);
-			if (result) {
-				return result;
-			}
-			break;
-		}
-		default:
-			return this.getTargetFromVariableOrParameter(type - 3, varName, cache);
-	}
-	return null;
-};
-
-Actions.getVoiceChannelFromData = async function (typeData, varNameData, cache) {
-	return await this.getVoiceChannel(parseInt(typeData, 10), this.evalMessage(varNameData, cache), cache);
-};
-
-Actions.getVoiceChannel = async function (type, varName, cache) {
-	const { interaction, msg, server } = cache;
-	switch (type) {
-		case 0: {
-			const member = interaction?.member ?? msg?.member;
-			if (member) {
-				return member.voice?.channel;
-			}
-			break;
-		}
-		case 1: {
-			const members = interaction?.options?.resolved?.members ?? msg?.mentions?.members;
-			if (members?.size) {
-				const member = members.first();
-				if (member) {
-					return member.voice?.channel;
-				}
-			}
-			break;
-		}
-		case 2:
-			if (server) {
-				return server.getDefaultVoiceChannel();
-			}
-			break;
-		case 7:
-			if (server) {
-				return server.afkChannel;
-			}
-			break;
-		case 100: {
-			const searchValue = this.evalMessage(varName, cache);
-			const result = Bot.bot.channels.cache.find(
-				(channel: djs.Channel) => (channel as djs.GuildChannel).name === searchValue
-			);
-			if (result) {
-				return result;
-			}
-			break;
-		}
-		case 101: {
-			const searchValue = this.evalMessage(varName, cache);
-			const result = Bot.bot.channels.cache.get(searchValue);
-			if (result) {
-				return result;
-			}
-			break;
-		}
-		default:
-			return this.getTargetFromVariableOrParameter(type - 3, varName, cache);
-	}
-	return null;
-};
-
-Actions.getAnyChannel = async function (type, varName, cache) {
-	switch (type) {
-		case 10:
-			return await this.getVoiceChannel(0, varName, cache);
-		case 11:
-			return await this.getVoiceChannel(1, varName, cache);
-		case 12:
-			return await this.getVoiceChannel(7, varName, cache);
-		case 13:
-			return await this.getVoiceChannel(2, varName, cache);
-		default:
-			return await this.getChannel(type, varName, cache);
-	}
-	return null;
-};
-
-Actions.getListFromData = async function (typeData, varNameData, cache) {
-	return await this.getList(parseInt(typeData, 10), this.evalMessage(varNameData, cache), cache);
-};
-
-Actions.getList = async function (type, varName, cache) {
-	const { interaction, msg, server } = cache;
-	switch (type) {
-		case 0:
-			if (server) {
-				return [...server.members.cache.values()];
-			}
-			break;
-		case 1:
-			if (server) {
-				return [...server.channels.cache.values()];
-			}
-			break;
-		case 2:
-			if (server) {
-				return [...server.roles.cache.values()];
-			}
-			break;
-		case 3:
-			if (server) {
-				return [...server.emojis.cache.values()];
-			}
-			break;
-		case 4:
-			return [...Bot.bot.guilds.cache.values()];
-		case 5: {
-			const members = interaction?.options?.resolved?.members ?? msg?.mentions?.members;
-			if (members?.size) {
-				return [...members.first().roles.cache.values()];
-			}
-			break;
-		}
-		case 6: {
-			const member = interaction?.member ?? msg?.member;
-			if (member) {
-				return [...member.roles.cache.values()];
-			}
-			break;
-		}
-		default:
-			return this.getTargetFromVariableOrParameter(type - 7, varName, cache);
-	}
-};
-
-Actions.getVariable = function (type, varName, cache) {
-	return this.getTargetFromVariableOrParameter(type - 1, varName, cache);
-};
-
-Actions.storeValue = function (value, type, varName, cache) {
-	const server = cache.server;
-	switch (type) {
-		case 1:
-			cache.temp[varName] = value;
-			break;
-		case 2:
-			if (server) {
-				this.server[server.id] ??= {};
-				this.server[server.id][varName] = value;
-			}
-			break;
-		case 3:
-			this.global[varName] = value;
-			break;
-		default:
-			break;
-	}
-};
-
-Actions.executeResults = function (result, data, cache) {
-	const type = parseInt(result ? data.iftrue : data.iffalse, 10);
-	switch (type) {
-		case 0: {
-			this.callNextAction(cache);
-			break;
-		}
-		case 1: {
-			this.endActions(cache);
-			break;
-		}
-		case 2: {
-			const val = parseInt(this.evalMessage(result ? data.iftrueVal : data.iffalseVal, cache), 10);
-			const index = Math.max(val - 1, 0);
-			if (cache.actions[index]) {
-				cache.index = index - 1;
-				this.callNextAction(cache);
-			}
-			break;
-		}
-		case 3: {
-			const amount = parseInt(this.evalMessage(result ? data.iftrueVal : data.iffalseVal, cache), 10);
-			const index2 = cache.index + amount + 1;
-			if (cache.actions[index2]) {
-				cache.index = index2 - 1;
-				this.callNextAction(cache);
-			}
-			break;
-		}
-		case 4: {
-			const anchorName = this.evalMessage(result ? data.iftrueVal : data.iffalseVal, cache);
-			cache.goToAnchor(anchorName);
-			break;
-		}
-		case 99: {
-			this.executeSubActionsThenNextAction(result ? data.iftrueActions : data.iffalseActions, cache);
-			break;
-		}
-		default:
-			break;
-	}
-};
-
-Actions.executeSubActionsThenNextAction = function (actions, cache) {
-	return this.executeSubActions(actions, cache, () => this.callNextAction(cache));
-};
-
-Actions.executeSubActions = function (actions, cache, callback: (() => void) | null = null) {
-	if (!actions) {
-		callback?.();
-		return false;
-	}
-	const newCache = this.generateSubCache(cache, actions);
-	newCache.callback = () => callback?.();
-	this.callNextAction(newCache);
-	return true;
-};
-
-Actions.generateSubCache = function (cache, actions) {
-	return ActionsCache.extend(cache, actions);
-};
-
-Actions.generateButton = function (button, cache) {
-	const style = button.url ? DiscordJS.ButtonStyle.Link : this.convertStringButtonStyleToEnum(button.type);
-	const buttonData: djs.APIButtonComponentBase<djs.ButtonStyle> = {
-		type: DiscordJS.ComponentType.Button,
-		label: this.evalMessage(button.name, cache),
-		style,
-	};
-	if (button.url) {
-		(buttonData as djs.APIButtonComponentWithURL).url = this.evalMessage(button.url, cache);
-	} else {
-		(buttonData as djs.APIButtonComponentWithCustomId).custom_id = this.evalMessage(button.id, cache);
-	}
-	if (button.emoji) {
-		buttonData.emoji = this.evalMessage(button.emoji, cache);
-	}
-	return buttonData;
-};
-
-Actions.convertStringButtonStyleToEnum = function (style) {
-	switch (style) {
-		case "PRIMARY":
-			return DiscordJS.ButtonStyle.Primary;
-		case "SECONDARY":
-			return DiscordJS.ButtonStyle.Secondary;
-		case "SUCCESS":
-			return DiscordJS.ButtonStyle.Success;
-		case "DANGER":
-			return DiscordJS.ButtonStyle.Danger;
-		case "LINK":
-			return DiscordJS.ButtonStyle.Link;
-	}
-	return DiscordJS.ButtonStyle.Primary;
-};
-
-Actions.generateSelectMenu = function (select, cache) {
-	const selectData = {
-		type: DiscordJS.ComponentType.SelectMenu,
-		customId: this.evalMessage(select.id, cache),
-		placeholder: this.evalMessage(select.placeholder, cache),
-		minValues: parseInt(this.evalMessage(select.min, cache), 10) ?? 1,
-		maxValues: parseInt(this.evalMessage(select.max, cache), 10) ?? 1,
-		options: select.options.map((option, index) => {
-			option.label = this.evalMessage(option.label, cache) || "No Label";
-			option.description = this.evalMessage(option.description, cache) || "";
-			option.value = this.evalMessage(option.value, cache) || index.toString();
-			return option;
-		}),
-	};
-	return selectData;
-};
-
-Actions.generateTextInput = function (textInput, defaultCustomId, cache) {
-	const inputTextData = {
-		type: DiscordJS.ComponentType.TextInput,
-		customId: !!textInput.id ? textInput.id : defaultCustomId,
-		label: this.evalMessage(textInput.name, cache),
-		placeholder: this.evalMessage(textInput.placeholder, cache),
-		minLength: parseInt(this.evalMessage(textInput.minLength, cache), 10) ?? 0,
-		maxLength: parseInt(this.evalMessage(textInput.maxLength, cache), 10) ?? 100,
-		style: this.convertStringTextInputStyleToEnum(textInput.style),
-		required: textInput.required === "true",
-	};
-	return inputTextData;
-};
-
-Actions.convertStringTextInputStyleToEnum = function (style) {
-	switch (style) {
-		case "PARAGRAPH":
-			return DiscordJS.TextInputStyle.Paragraph;
-		case "SHORT":
-			return DiscordJS.TextInputStyle.Short;
-	}
-	return DiscordJS.TextInputStyle.Short;
-};
-
-Actions.addButtonToActionRowArray = function (array, rowText, buttonData, cache) {
-	let row = 0;
-	if (!rowText) {
-		let found = false;
-		for (let i = 0; i < array.length; i++) {
-			if (array[i].length < 5) {
-				if (array[i].length === 0 || array[i][0]?.type === DiscordJS.ComponentType.Button) {
-					found = true;
-					row = i;
-					break;
-				}
-			}
-		}
-		if (!found && array.length !== 0) {
-			row = array.length - 1;
-			if (array[row].length >= 5) {
-				row++;
-			}
-		}
-	} else {
-		row = parseInt(rowText, 10) - 1;
-	}
-	if (row >= 0 && row < 5) {
-		while (array.length <= row + 1) {
-			array.push([]);
-		}
-		if (array[row].length >= 5) {
-			this.displayError(null, cache, "Action row #" + row + " exceeded the maximum of 5 buttons!");
-		} else {
-			array[row].push(buttonData);
-		}
-	} else {
-		this.displayError(null, cache, 'Invalid action row: "' + rowText + '".');
-	}
-};
-
-Actions.addSelectToActionRowArray = function (array, rowText, selectData, cache) {
-	let row = 0;
-	if (!rowText) {
-		if (array.length !== 0) {
-			row = array.length - 1;
-			if (array[row].length >= 5) {
-				row++;
-			}
-		}
-	} else {
-		row = parseInt(rowText, 10) - 1;
-	}
-	if (row >= 0 && row < 5) {
-		while (array.length <= row + 1) {
-			array.push([]);
-		}
-		if (array[row].length >= 1) {
-			this.displayError(
-				null,
-				cache,
-				`Action row #${row} cannot have a select menu when there are any buttons on it!`,
-			);
-		} else {
-			array[row].push(selectData);
-		}
-	} else {
-		this.displayError(null, cache, `Invalid action row: '${rowText}'.`);
-	}
-};
-
-Actions.addTextInputToActionRowArray = function (array, rowText, textInput, cache) {
-	let row = 0;
-	if (!rowText) {
-		if (array.length !== 0) {
-			row = array.length - 1;
-			if (array[row].length >= 5) {
-				row++;
-			}
-		}
-	} else {
-		row = parseInt(rowText, 10) - 1;
-	}
-	if (row >= 0 && row < 5) {
-		while (array.length <= row + 1) {
-			array.push([]);
-		}
-		if (array[row].length >= 1) {
-			this.displayError(
-				null,
-				cache,
-				`Action row #${row} cannot have a text input when there are any buttons on it!`,
-			);
-		} else {
-			array[row].push(textInput);
-		}
-	} else {
-		this.displayError(null, cache, `Invalid action row: '${rowText}'.`);
-	}
-};
-
-Actions.checkTemporaryInteractionResponses = function (interaction) {
-	const customId = interaction.customId;
-	const messageId = interaction.message?.id;
-	if (this._temporaryInteractions?.[messageId]) {
-		const interactions = this._temporaryInteractions[messageId];
-		for (let i = 0; i < interactions.length; i++) {
-			const interData = interactions[i];
-			const usersMatch = !interData.userId || interData.userId === interaction.user.id;
-			if (interData.customId === customId) {
-				if (usersMatch) {
-					interData.callback?.(interaction);
-				} else {
-					const invalidUserText = this.getInvalidUserResponse();
-					if (invalidUserText) {
-						interaction.reply({ content: invalidUserText, ephemeral: true });
-					}
-				}
-				return true;
-			}
-		}
-	}
-	return false;
-};
-
-Actions.registerTemporaryInteraction = function (messageId, time, customId, userId, multi, interactionCallback) {
-	this._temporaryInteractionIdMax ??= 0;
-	this._temporaryInteractions ??= {};
-	this._temporaryInteractions[messageId] ??= [];
-
-	const uniqueId = this._temporaryInteractionIdMax++;
-	let removed = false;
-
-	const removeInteraction = () => {
-		if (!removed) removed = true;
-		else return;
-		this.removeTemporaryInteraction(messageId, uniqueId);
-	};
-
-	const callback = (interaction) => {
-		interactionCallback?.(interaction);
-		if (!multi) {
-			removeInteraction();
-		}
-	};
-
-	this._temporaryInteractions[messageId].push({ customId, userId, callback, uniqueId });
-	if (time > 0) {
-		require("node:timers").setTimeout(removeInteraction, time).unref();
-	}
-};
-
-Actions.removeTemporaryInteraction = function (messageId, uniqueOrCustomId) {
-	const interactions = this._temporaryInteractions?.[messageId];
-	if (interactions) {
-		let i = 0;
-		for (; i < interactions.length; i++) {
-			if (
-				(typeof uniqueOrCustomId === "string" && interactions[i].customId === uniqueOrCustomId) ||
-				interactions[i].uniqueId === uniqueOrCustomId
-			) {
-				break;
-			}
-		}
-		if (i < interactions.length) interactions.splice(i, 1);
-	}
-};
-
-Actions.clearTemporaryInteraction = function (messageId, customId) {
-	if (this._temporaryInteractions?.[messageId]) {
-		this.removeTemporaryInteraction(messageId, customId);
-	}
-};
-
-Actions.clearAllTemporaryInteractions = function (messageId) {
-	if (this._temporaryInteractions?.[messageId]) {
-		this._temporaryInteractions[messageId] = null;
-		delete this._temporaryInteractions[messageId];
-	}
-};
-
-Actions.registerModalSubmitResponses = function (interactionId, callback) {
-	this._temporaryInteractions ??= {};
-	this._temporaryInteractions[interactionId] = callback;
-
-	// clear up interaction after a while
-	require("node:timers")
-		.setTimeout(() => {
-			this.clearAllTemporaryInteractions(interactionId);
-		}, 60 * 60 * 1000)
-		.unref();
-};
-
-Actions.checkModalSubmitResponses = function (interaction) {
-	const interactionId = interaction.customId;
-	if (this._temporaryInteractions?.[interactionId]) {
-		this._temporaryInteractions[interactionId](interaction);
-		this.clearAllTemporaryInteractions(interactionId);
-	}
-};
+(Actions as any).ActionsCache = ActionsCache;
 
 //#endregion
 
