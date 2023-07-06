@@ -4,15 +4,24 @@
  * Robert Borghese
  ******************************************************/
 
+//---------------------------------------------------------------------
+// Imports
+//---------------------------------------------------------------------
 import * as djs from "discord.js";
 import * as djsvoice from "@discordjs/voice";
 
+//---------------------------------------------------------------------
+// Globals
+//---------------------------------------------------------------------
 const DBM: any = {};
 DBM.version = "2.2.0";
 
 const DiscordJS = require("discord.js");
 DBM.DiscordJS = DiscordJS;
 
+//---------------------------------------------------------------------
+// Check Discord.JS version
+//---------------------------------------------------------------------
 const requiredDjsVersion = "14.11.0";
 if (requiredDjsVersion.localeCompare(DiscordJS.version, undefined, { numeric: true, sensitivity: "base" }) > 0) {
 	console.log(
