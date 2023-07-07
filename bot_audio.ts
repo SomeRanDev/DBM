@@ -4,7 +4,7 @@
  * Robert Borghese
  ******************************************************/
 
-import { Bot, Files, MsgType, PrintError, DBMExport } from "./bot.ts";
+import { Bot, Files, ActionsCache, MsgType, PrintError, DBMExport } from "./bot.ts";
 
 import * as djs from "discord.js";
 import * as djsvoice from "@discordjs/voice";
@@ -32,7 +32,7 @@ type PlayInfo = [string, PlayOptions, string];
 //---------------------------------------------------------------------
 
 @DBMExport()
-export class Audio {
+class Audio {
 	static ytdl: typeof import("ytdl-core") | null = null;
 	static voice: typeof djsvoice | null = null;
 	static player: dplayer.Player | null = null;
@@ -192,7 +192,7 @@ export class Audio {
 		subscription.queue = playResult.queue;
 	}
 
-	static async clearQueue (cache) {
+	static async clearQueue (cache: ActionsCache) {
 		if (!cache.server) return;
 		const subscription = await this.getSubscription(cache.server);
 		if (!subscription) return;
@@ -223,3 +223,5 @@ class Subscription {
 		voiceConnection.subscribe(this.audioPlayer);
 	}
 };
+
+export default Audio;
