@@ -197,7 +197,7 @@ class Audio {
 		const subscription = await this.getSubscription(cache.server);
 		if (!subscription) return;
 		subscription.queue?.clear();
-	};
+	}
 }
 
 @DBMExport(Audio)
