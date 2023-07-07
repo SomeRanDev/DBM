@@ -1,4 +1,11 @@
-module.exports = {
+import * as djs from "discord.js";
+import { Actions, ActionsCache, dbm } from "../bot.ts";
+import Audio from "../bot_audio.ts";
+import { Subscription } from "../bot_audio.ts";
+
+type SkipQueueData = { amount: string };
+
+export default {
 	//---------------------------------------------------------------------
 	// Action Name
 	//
@@ -21,7 +28,7 @@ module.exports = {
 	// This function generates the subtitle displayed next to the name.
 	//---------------------------------------------------------------------
 
-	subtitle(data, presets) {
+	subtitle(data: SkipQueueData, presets: any) {
 		return `Skip ${data.amount} Items`;
 	},
 
@@ -58,7 +65,7 @@ module.exports = {
 	// so edit the HTML to reflect this.
 	//---------------------------------------------------------------------
 
-	html(isEvent, data) {
+	html(isEvent: boolean, data: any) {
 		return `
 <div style="float: left; width: 80%;">
 	<span class="dbminputlabel">Amount to Skip</span><br>
@@ -84,18 +91,18 @@ module.exports = {
 	// so be sure to provide checks for variable existence.
 	//---------------------------------------------------------------------
 
-	action(cache) {
-		const data = cache.actions[cache.index];
-		const Audio = this.getDBM().Audio;
+	async action(this: typeof Actions, cache: ActionsCache) {
+		const data = cache.actions[cache.index] as dbm.Action & SkipQueueData;
 		const server = cache.server;
-		const subscription = Audio.subscriptions.get(server.id);
+		const subscription: Subscription | null = await Audio.getSubscription(server);
 		if (!subscription) {
 			this.callNextAction(cache);
 			return;
 		}
 
-		const amount = parseInt(this.evalMessage(data.amount, cache), 10);
-		for (let i = 0; i < amount; i++) subscription.audioPlayer.stop();
+		const amount: number = parseInt(this.evalMessage(data.amount, cache), 10);
+		subscription.skip(amount);
+
 		this.callNextAction(cache);
 	},
 

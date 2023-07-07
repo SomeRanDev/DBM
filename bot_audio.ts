@@ -222,6 +222,17 @@ export class Subscription {
 		this.audioPlayer.on("error", console.error);
 		voiceConnection.subscribe(this.audioPlayer);
 	}
+
+	skip(amount: number = 1) {
+		if(amount < 1) return;
+		if(this.queue) {
+			for(let i = 0; i < amount; i++) {
+				if(!this.queue.node.skip()) {
+					break;
+				}
+			}
+		}
+	}
 };
 
 export default Audio;
