@@ -1413,8 +1413,13 @@ export class Actions {
 		const path = require("node:path");
 		this.modDirectories().forEach((dir) => {
 			fs.readdirSync(dir).forEach((file) => {
-				if (!/\.js/i.test(file)) return;
-				const action = require(path.join(dir, file));
+				if (!/\.(?:js|ts)$/i.test(file)) {
+					return;
+				}
+				let action = require(path.join(dir, file));
+				if(action.default) {
+					action = action.default;
+				}
 				if (action.action) {
 					this[action.name] = action.action;
 				}
