@@ -1,3 +1,9 @@
+import * as djs from "discord.js";
+import { Actions, ActionsCache, dbm } from "../bot.ts";
+import Audio from "../bot_audio.ts";
+
+type SetAudioVolume = { volume: string };
+
 module.exports = {
 	//---------------------------------------------------------------------
 	// Action Name
@@ -21,7 +27,7 @@ module.exports = {
 	// This function generates the subtitle displayed next to the name.
 	//---------------------------------------------------------------------
 
-	subtitle(data, presets) {
+	subtitle(data: SetAudioVolume, presets: any) {
 		return `Set Volume to ${data.volume}`;
 	},
 
@@ -58,7 +64,7 @@ module.exports = {
 	// so edit the HTML to reflect this.
 	//---------------------------------------------------------------------
 
-	html(isEvent, data) {
+	html(isEvent: boolean, data: any) {
 		return `
 <div style="float: left; width: 80%;">
 	<span class="dbminputlabel">Volume (min: 0; max: 100)</span>
@@ -84,13 +90,12 @@ module.exports = {
 	// so be sure to provide checks for variable existence.
 	//---------------------------------------------------------------------
 
-	action(cache) {
-		const data = cache.actions[cache.index];
-		const Audio = this.getDBM().Audio;
-		const server = cache.server;
+	async action(this: typeof Actions, cache: ActionsCache) {
+		const data = cache.actions[cache.index] as dbm.Action & SetAudioVolume;
+		const server: djs.Guild = cache.server;
 		if (server) {
-			const volume = parseInt(this.evalMessage(data.volume, cache), 10) / 100;
-			Audio.setVolume(volume, server);
+			const volume: number = parseInt(this.evalMessage(data.volume, cache), 10);
+			await Audio.setVolume(volume, server);
 		}
 		this.callNextAction(cache);
 	},
