@@ -1,4 +1,10 @@
-module.exports = {
+import * as djs from "discord.js";
+import { Actions, ActionsCache, dbm } from "../bot.ts";
+import Audio from "../bot_audio.ts";
+
+type JoinVoiceChannelData = { channel: number, varName: string };
+
+export default {
 	//---------------------------------------------------------------------
 	// Action Name
 	//
@@ -21,7 +27,7 @@ module.exports = {
 	// This function generates the subtitle displayed next to the name.
 	//---------------------------------------------------------------------
 
-	subtitle(data, presets) {
+	subtitle(data: JoinVoiceChannelData, presets: any) {
 		return `${presets.getVoiceChannelText(data.channel, data.varName)}`;
 	},
 
@@ -58,7 +64,7 @@ module.exports = {
 	// so edit the HTML to reflect this.
 	//---------------------------------------------------------------------
 
-	html(isEvent, data) {
+	html() {
 		return `<voice-channel-input dropdownLabel="Voice Channel" selectId="channel" variableContainerId="varNameContainer" variableInputId="varName" selectWidth="45%" variableInputWidth="50%"></voice-channel-input>`;
 	},
 
@@ -80,13 +86,12 @@ module.exports = {
 	// so be sure to provide checks for variable existence.
 	//---------------------------------------------------------------------
 
-	async action(cache) {
-		const data = cache.actions[cache.index];
-		const Audio = this.getDBM().Audio;
-
+	async action(this: typeof Actions, cache: ActionsCache) {
+		const data = cache.actions[cache.index] as dbm.Action & JoinVoiceChannelData;
 		const channel = await this.getVoiceChannelFromData(data.channel, data.varName, cache);
+
 		if (channel) {
-			Audio.connectToVoice(channel);
+			await Audio.connectToVoice(channel);
 		}
 
 		this.callNextAction(cache);
