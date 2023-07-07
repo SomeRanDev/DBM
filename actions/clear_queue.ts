@@ -1,4 +1,8 @@
-module.exports = {
+import * as djs from "discord.js";
+import { Actions, ActionsCache, dbm } from "../bot.ts";
+import Audio from "../bot_audio.ts";
+
+export default {
 	//---------------------------------------------------------------------
 	// Action Name
 	//
@@ -21,7 +25,7 @@ module.exports = {
 	// This function generates the subtitle displayed next to the name.
 	//---------------------------------------------------------------------
 
-	subtitle(data, presets) {
+	subtitle(data: {}, presets: any) {
 		return "The queue is cleared.";
 	},
 
@@ -58,7 +62,7 @@ module.exports = {
 	// so edit the HTML to reflect this.
 	//---------------------------------------------------------------------
 
-	html(isEvent, data) {
+	html() {
 		return "";
 	},
 
@@ -80,13 +84,8 @@ module.exports = {
 	// so be sure to provide checks for variable existence.
 	//---------------------------------------------------------------------
 
-	action(cache) {
-		const { Audio } = this.getDBM();
-		const server = cache.server;
-		if (server) {
-			const subscription = Audio.subscriptions.get(server.id);
-			if (subscription) subscription.queue = [];
-		}
+	async action(this: typeof Actions, cache: ActionsCache) {
+		await Audio.clearQueue(cache);
 		this.callNextAction(cache);
 	},
 
