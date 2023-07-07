@@ -299,7 +299,7 @@ function GetActionErrorText(location: string, index: number, dataName: string | 
 //---------------------------------------------------------------------
 
 // TODO: most of these are incomplete, add to them when needed.
-namespace dbm {
+export namespace dbm {
 	export type Command = {
 		name: string;
 		_id: string;
