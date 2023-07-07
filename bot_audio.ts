@@ -201,7 +201,7 @@ class Audio {
 }
 
 @DBMExport(Audio)
-class Subscription {
+export class Subscription {
 	voiceConnection: djsvoice.VoiceConnection;
 	channel: djs.BaseGuildVoiceChannel;
 	audioPlayer: djsvoice.AudioPlayer | null;
