@@ -1,4 +1,7 @@
-module.exports = {
+import { Bot, Actions, ActionsCache, dbm } from "../bot.ts";
+import Audio from "../bot_audio.ts";
+
+export default {
 	//---------------------------------------------------------------------
 	// Action Name
 	//
@@ -21,7 +24,7 @@ module.exports = {
 	// This function generates the subtitle displayed next to the name.
 	//---------------------------------------------------------------------
 
-	subtitle(data, presets) {
+	subtitle(data: any, presets: any) {
 		return `${presets.getConditionsText(data)}`;
 	},
 
@@ -58,7 +61,7 @@ module.exports = {
 	// so edit the HTML to reflect this.
 	//---------------------------------------------------------------------
 
-	html(isEvent, data) {
+	html(isEvent: boolean, data: any) {
 		return `<conditional-input id="branch"></conditional-input>`;
 	},
 
@@ -75,7 +78,7 @@ module.exports = {
 	// the data required for official DBM action compatibility.
 	//---------------------------------------------------------------------
 
-	preInit(data, formatters) {
+	preInit(data: any, formatters: any) {
 		return formatters.compatibility_2_0_0_iftruefalse_to_branch(data);
 	},
 
@@ -97,14 +100,13 @@ module.exports = {
 	// so be sure to provide checks for variable existence.
 	//---------------------------------------------------------------------
 
-	action(cache) {
-		const data = cache.actions[cache.index];
-		const Audio = this.getDBM().Audio;
-		let result = false;
+	async action(this: typeof Actions, cache: ActionsCache) {
+		const data = cache.actions[cache.index] as dbm.Action & { branch: any };
+		let result: boolean = false;
 		if (cache.server) {
-			result = !!Audio.getSubscription(cache.server);
+			result = (await Audio.getSubscription(cache.server)) !== null;
 			if (!result) {
-				result = !!cache.server.members?.me?.voice?.channelId;
+				result = !!cache.server.members.me?.voice.channelId;
 			}
 		}
 		this.executeResults(result, data?.branch ?? data, cache);
@@ -123,7 +125,7 @@ module.exports = {
 	// recursively iterated through.
 	//---------------------------------------------------------------------
 
-	modInit(data) {
+	modInit(this: typeof Bot, data: any) {
 		this.prepareActions(data.branch?.iftrueActions);
 		this.prepareActions(data.branch?.iffalseActions);
 	},
