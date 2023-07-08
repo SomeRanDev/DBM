@@ -80,10 +80,12 @@ module.exports = {
 	// so be sure to provide checks for variable existence.
 	//---------------------------------------------------------------------
 
-	action(cache) {
+	async action(cache) {
 		const server = cache.server;
 		const { Audio } = this.getDBM();
-		if (server) Audio.disconnectFromVoice(server);
+		if (server) {
+			await Audio.disconnectFromVoice(server);
+		}
 		this.callNextAction(cache);
 	},
 

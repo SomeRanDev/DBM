@@ -80,10 +80,10 @@ module.exports = {
 	// so be sure to provide checks for variable existence.
 	//---------------------------------------------------------------------
 
-	action(cache) {
+	async action(cache) {
 		const Audio = this.getDBM().Audio;
 		const server = cache.server;
-		const subscription = Audio.getSubscription(server);
+		const subscription = await Audio.getSubscription(server);
 		const queue = subscription?.queue.slice();
 
 		if (!queue?.length) {

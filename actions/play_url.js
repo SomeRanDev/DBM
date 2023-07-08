@@ -112,7 +112,7 @@ module.exports = {
 	// so be sure to provide checks for variable existence.
 	//---------------------------------------------------------------------
 
-	action(cache) {
+	async action(cache) {
 		const data = cache.actions[cache.index];
 		const Audio = this.getDBM().Audio;
 		const options = {};
@@ -128,7 +128,7 @@ module.exports = {
 		const url = this.evalMessage(data.url, cache);
 		if (url) {
 			const info = ["url", options, url];
-			Audio.addAudio(info, cache.server, data.type === "0");
+			await Audio.addAudio(info, cache.server, data.type === "0");
 		}
 		this.callNextAction(cache);
 	},
