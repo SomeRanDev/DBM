@@ -100,7 +100,13 @@ module.exports = {
 	action(cache) {
 		const data = cache.actions[cache.index];
 		const Audio = this.getDBM().Audio;
-		const result = cache.server ? Audio.getSubscription(cache.server) : false;
+		let result = false;
+		if (cache.server) {
+			result = !!Audio.getSubscription(cache.server);
+			if (!result) {
+				result = !!cache.server.members?.me?.voice?.channelId;
+			}
+		}
 		this.executeResults(result, data?.branch ?? data, cache);
 	},
 
