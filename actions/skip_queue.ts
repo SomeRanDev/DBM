@@ -1,7 +1,8 @@
 import * as djs from "discord.js";
-import { Actions, ActionsCache, dbm } from "../bot.ts";
+import { Actions, ActionsCache } from "../bot.ts";
 import Audio from "../bot_audio.ts";
 import { Subscription } from "../bot_audio.ts";
+import { Action, ActionMod } from "../types.ts";
 
 type SkipQueueData = { amount: string };
 
@@ -92,7 +93,7 @@ export default {
 	//---------------------------------------------------------------------
 
 	async action(this: typeof Actions, cache: ActionsCache) {
-		const data = cache.actions[cache.index] as dbm.Action & SkipQueueData;
+		const data = cache.actions[cache.index] as Action & SkipQueueData;
 		const server = cache.server;
 		const subscription: Subscription | null = await Audio.getSubscription(server);
 		if (!subscription) {
@@ -116,4 +117,4 @@ export default {
 	//---------------------------------------------------------------------
 
 	mod() {},
-};
+} satisfies ActionMod;

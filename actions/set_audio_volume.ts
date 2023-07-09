@@ -1,6 +1,7 @@
 import * as djs from "discord.js";
-import { Actions, ActionsCache, dbm } from "../bot.ts";
+import { Actions, ActionsCache } from "../bot.ts";
 import Audio from "../bot_audio.ts";
+import { Action, ActionMod } from "../types.ts";
 
 type SetAudioVolume = { volume: string };
 
@@ -91,7 +92,7 @@ module.exports = {
 	//---------------------------------------------------------------------
 
 	async action(this: typeof Actions, cache: ActionsCache) {
-		const data = cache.actions[cache.index] as dbm.Action & SetAudioVolume;
+		const data = cache.actions[cache.index] as Action & SetAudioVolume;
 		const server: djs.Guild = cache.server;
 		if (server) {
 			const volume: number = parseInt(this.evalMessage(data.volume, cache), 10);
@@ -110,4 +111,4 @@ module.exports = {
 	//---------------------------------------------------------------------
 
 	mod() {},
-};
+} satisfies ActionMod;

@@ -1,5 +1,6 @@
-import { Bot, Actions, ActionsCache, dbm } from "../bot.ts";
+import { Bot, Actions, ActionsCache } from "../bot.ts";
 import Audio from "../bot_audio.ts";
+import { Action, ActionMod } from "../types.ts";
 
 export default {
 	//---------------------------------------------------------------------
@@ -101,7 +102,7 @@ export default {
 	//---------------------------------------------------------------------
 
 	async action(this: typeof Actions, cache: ActionsCache) {
-		const data = cache.actions[cache.index] as dbm.Action & { branch: any };
+		const data = cache.actions[cache.index] as Action & { branch: any };
 		let result: boolean = false;
 		if (cache.server) {
 			result = (await Audio.getSubscription(cache.server)) !== null;
@@ -140,4 +141,4 @@ export default {
 	//---------------------------------------------------------------------
 
 	mod() {},
-};
+} satisfies ActionMod;

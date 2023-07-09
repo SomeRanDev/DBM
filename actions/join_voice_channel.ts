@@ -1,6 +1,6 @@
-import * as djs from "discord.js";
-import { Actions, ActionsCache, dbm } from "../bot.ts";
+import { Actions, ActionsCache } from "../bot.ts";
 import Audio from "../bot_audio.ts";
+import { Action, ActionMod } from "../types.ts";
 
 type JoinVoiceChannelData = { channel: number, varName: string };
 
@@ -87,7 +87,7 @@ export default {
 	//---------------------------------------------------------------------
 
 	async action(this: typeof Actions, cache: ActionsCache) {
-		const data = cache.actions[cache.index] as dbm.Action & JoinVoiceChannelData;
+		const data = cache.actions[cache.index] as Action & JoinVoiceChannelData;
 		const channel = await this.getVoiceChannelFromData(data.channel, data.varName, cache);
 
 		if (channel) {
@@ -115,4 +115,4 @@ export default {
 	//---------------------------------------------------------------------
 
 	mod() {},
-};
+} satisfies ActionMod;

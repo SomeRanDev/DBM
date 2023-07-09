@@ -1,6 +1,6 @@
-import * as djs from "discord.js";
-import { Actions, ActionsCache, dbm } from "../bot.ts";
+import { Actions, ActionsCache } from "../bot.ts";
 import Audio from "../bot_audio.ts";
+import { ActionMod } from "../types.ts";
 
 export default {
 	//---------------------------------------------------------------------
@@ -99,4 +99,4 @@ export default {
 	//---------------------------------------------------------------------
 
 	mod() {},
-};
+} satisfies ActionMod;
