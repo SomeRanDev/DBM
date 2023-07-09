@@ -8,6 +8,7 @@
 // Imports
 //---------------------------------------------------------------------
 import * as djs from "discord.js";
+import * as dbm from "./types.ts";
 
 //---------------------------------------------------------------------
 // Globals
@@ -289,48 +290,6 @@ export function PrintError(type: MsgType, ...args: any[]) {
 
 function GetActionErrorText(location: string, index: number, dataName: string | null) {
 	return "Error with the " + location + (dataName ? ` - Action #${index} (${dataName})` : "");
-}
-
-//#endregion
-
-//---------------------------------------------------------------------
-//#region Types
-// Contains core types defined by Discord Bot Maker.
-//---------------------------------------------------------------------
-
-// TODO: most of these are incomplete, add to them when needed.
-export namespace dbm {
-	export type Command = {
-		name: string;
-		_id: string;
-		comType: string;
-		permissions: string;
-		permissions2: string;
-		restriction: string;
-		actions: Action[];
-
-		_aliases?: string[];
-		_timeRestriction?: number;
-	};
-
-	export type Event = {
-		name: string;
-		_id: string;
-		"event-type": string;
-		temp?: string;
-		temp2?: string;
-		actions: Action[];
-	};
-
-	export type Action = {
-		name: string;
-	};
-
-	export type CommandList = Command[];
-	export type CommandMap = Record<string, Command>;
-
-	export type ActionList = Action[];
-	export type ActionMap = Record<string, Action>;
 }
 
 //#endregion
