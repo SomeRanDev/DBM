@@ -973,13 +973,13 @@ export class Bot {
 	static populateTagRegex() {
 		if (this.tagRegex) return;
 		const tag = Files.data.settings.tag;
-		const allowPrefixSpace = Files.data.settings.allowPrefixSpace === "true";
+		const allowPrefixSpace = Files.data.settings.allowPrefixSpace === dbm.StringBoolean.True;
 		this.tagRegex = this.generateTagRegex(tag, allowPrefixSpace);
 		return this.tagRegex;
 	}
 
 	static checkTag(content) {
-		const allowPrefixSpace = Files.data.settings.allowPrefixSpace === "true";
+		const allowPrefixSpace = Files.data.settings.allowPrefixSpace === dbm.StringBoolean.True;
 		const tag = Files.data.settings.tag;
 		this.populateTagRegex();
 		const separator = Files.data.settings.separator || "\\s+";
@@ -2352,7 +2352,7 @@ export class Actions {
 			minLength: parseInt(this.evalMessage(textInput.minLength, cache), 10) ?? 0,
 			maxLength: parseInt(this.evalMessage(textInput.maxLength, cache), 10) ?? 100,
 			style: this.convertStringTextInputStyleToEnum(textInput.style),
-			required: textInput.required === "true",
+			required: textInput.required === dbm.StringBoolean.True,
 		};
 		return inputTextData;
 	}
@@ -2933,7 +2933,9 @@ export class Images {
 
 @DBMExport()
 export class Files {
-	static data: any = {};
+	// @ts-ignore
+	static data: dbm.EditorData & dbm.SaveData = {};
+
 	static writers = {};
 	static crypto = require("node:crypto");
 	static dataFiles = [

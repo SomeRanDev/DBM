@@ -4,7 +4,8 @@
  * Robert Borghese
  ******************************************************/
 
-import { Bot, Files, ActionsCache, MsgType, PrintError, DBMExport } from "./bot.ts";
+import DBM, { Bot, Files, ActionsCache, MsgType, PrintError, DBMExport } from "./bot.ts";
+import { StringBoolean } from "./types.ts";
 
 import * as djs from "discord.js";
 import * as djsvoice from "@discordjs/voice";
@@ -76,7 +77,7 @@ class Audio {
 			await this.initPlayer();
 		}
 
-		this.inlineVolume ??= (Files.data.settings.mutableVolume ?? "true") === "true";
+		this.inlineVolume ??= (Files.data.settings.mutableVolume ?? StringBoolean.True) === StringBoolean.True;
 
 		var existingSubscription: Subscription | null = this.subscriptions.get(voiceChannel?.guild?.id) ?? null;
 		if (existingSubscription) {
@@ -98,7 +99,7 @@ class Audio {
 				adapterCreator: voiceChannel.guild.voiceAdapterCreator,
 				channelId: voiceChannel.id,
 				guildId: voiceChannel.guildId,
-				selfDeaf: (Files.data.settings.autoDeafen ?? "true") === "true",
+				selfDeaf: (Files.data.settings.autoDeafen ?? StringBoolean.True) === StringBoolean.True,
 			}),
 			voiceChannel
 		);

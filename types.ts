@@ -9,6 +9,20 @@ import { Bot, Actions, ActionsCache } from "./bot";
 // The types for the JSON data loaded from the Discord Bot Maker editor.
 //---------------------------------------------------------------------
 
+export type EditorData = {
+	commands: Command[];
+	events: Event[];
+	settings: Settings;
+}
+
+export type SaveData = {
+	serverVars: Record<string, any>;
+	globalVars: Record<string, any>;
+	players: Record<string, any>;
+	servers: Record<string, any>;
+	messages: Record<string, any>;
+}
+
 export type Command = {
 	name: string;
 	_id: string;
@@ -34,6 +48,42 @@ export type Event = {
 export type Action = {
 	name: string;
 };
+
+export type Settings = {
+	// Bot Settings
+	ownerId: string;
+	token: string;
+
+	// Bot Settings 2
+	invalidButtonText: string;
+	invalidSelectText: string;
+	invalidUserText: string;
+
+	autoDeafen: StringBoolean;
+	mutableVolume: StringBoolean;
+
+	// Slash Command Options
+	slashType: SlashCommandInitializationType;
+	slashServers: string;
+	ignoreCommandScopeErrors: boolean;
+	clearUnlistedServers: boolean;
+
+	autoResponseText: string;
+	noDescriptionText: string;
+	invalidPermissionsText: string;
+	invalidCooldownText: string;
+
+	// Text Command Options
+	tag: string;
+	separator: string;
+	case: StringBoolean;
+	allowPrefixSpace: StringBoolean;
+}
+
+export enum StringBoolean {
+	True = "true",
+	False = "false"
+}
 
 export enum SlashCommandInitializationType {
 	Global = "2_global",
