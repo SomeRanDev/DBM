@@ -35,6 +35,11 @@ export type Action = {
 	name: string;
 };
 
+export enum SlashCommandInitializationType {
+	Global = "2_global",
+	Limited = "2_limited"
+}
+
 //---------------------------------------------------------------------
 // * Common Data Structure Types
 // Data structure types for the editor types.

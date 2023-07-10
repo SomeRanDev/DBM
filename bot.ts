@@ -331,7 +331,7 @@ export class Bot {
 	static _dmTextCommandCount: number;
 	static _caseSensitive: boolean;
 
-	static _slashCommandCreateType: string;
+	static _slashCommandCreateType: dbm.SlashCommandInitializationType;
 	static _slashCommandServerList: string[];
 
 	// CONSTANTS
@@ -436,7 +436,7 @@ export class Bot {
 		this._hasTextCommands = false;
 		this._textCommandCount = 0;
 		this._dmTextCommandCount = 0;
-		this._caseSensitive = Files.data.settings.case === "true";
+		this._caseSensitive = Files.data.settings.case === dbm.StringBoolean.True;
 		for (let i = 0; i < data.length; i++) {
 			const com = data[i];
 			if (com) {
@@ -811,38 +811,17 @@ export class Bot {
 	}
 
 	static registerApplicationCommands() {
-		let slashType = Files.data.settings.slashType ?? "auto";
-
-		if (slashType === "auto") {
-			const serverCount = this.bot.guilds.cache.size;
-			if (serverCount <= 15) {
-				slashType = "all";
-			} else {
-				slashType = "global";
-			}
-		}
+		let slashType: dbm.SlashCommandInitializationType = Files.data.settings.slashType ?? dbm.SlashCommandInitializationType.Global;
 
 		this._slashCommandCreateType = slashType;
 		this._slashCommandServerList = Files.data.settings?.slashServers?.split?.(/[\n\r]+/) ?? [];
 
-		switch (slashType) {
-			case "all": {
-				this.setAllServerCommands(this.applicationCommandData);
-				this.setGlobalCommands([]);
-				break;
-			}
-			case "global": {
-				this.setAllServerCommands([], false);
-				this.setGlobalCommands(this.applicationCommandData);
-				break;
-			}
-			case "manual": {
+		switch(slashType) {
+			case dbm.SlashCommandInitializationType.Limited: {
 				this.setCertainServerCommands(this.applicationCommandData, this._slashCommandServerList);
-				this.setGlobalCommands([]);
 				break;
 			}
-			case "manualglobal": {
-				this.setCertainServerCommands(this.applicationCommandData, this._slashCommandServerList);
+			default: {
 				this.setGlobalCommands(this.applicationCommandData);
 				break;
 			}
@@ -855,10 +834,8 @@ export class Bot {
 
 	static initializeCommandsForNewServer(guild) {
 		switch (this._slashCommandCreateType) {
-			case "all":
-			case "manual":
-			case "manualglobal": {
-				if (this._slashCommandCreateType === "all" || this._slashCommandServerList.includes(guild.id)) {
+			case dbm.SlashCommandInitializationType.Limited: {
+				if (this._slashCommandServerList.includes(guild.id)) {
 					this.setCommandsForServer(guild, this.applicationCommandData, true);
 				}
 				break;
@@ -900,6 +877,9 @@ export class Bot {
 		}
 	}
 
+	/**
+	 * @deprecated DBM no longer has option for setting all slash commands for all servers. Use global commands instead.
+	 */
 	static setAllServerCommands(commands: djs.ApplicationCommandData[], printMissingAccessError = true) {
 		this.bot.guilds.cache.forEach((value: djs.Guild, key: string, map: Map<string, djs.Guild>) => {
 			this.bot.guilds
