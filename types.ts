@@ -27,8 +27,9 @@ export type Command = {
 	name: string;
 	_id: string;
 	comType: string;
-	permissions: string;
-	permissions2: string;
+	requiredPermissions: string[];
+	permissions: string; // deprecated
+	permissions2: string; // deprecated
 	restriction: string;
 	actions: Action[];
 

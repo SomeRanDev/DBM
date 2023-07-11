@@ -1054,9 +1054,9 @@ export class Bot {
 
 	static async onInteraction(interaction: djs.BaseInteraction) {
 		if (interaction.isChatInputCommand()) {
-			this.onSlashCommandInteraction(interaction);
+			await this.onSlashCommandInteraction(interaction);
 		} else if (interaction.isContextMenuCommand()) {
-			this.onContextMenuInteraction(interaction);
+			await this.onContextMenuInteraction(interaction);
 		} else if (interaction.isModalSubmit()) {
 			Actions.checkModalSubmitResponses(interaction);
 		} else if(interaction.isMessageComponent()) {
@@ -1067,15 +1067,15 @@ export class Bot {
 			}
 			if (!Actions.checkTemporaryInteractionResponses(interaction)) {
 				if (interaction.isButton()) {
-					this.onButtonInteraction(interaction);
+					await this.onButtonInteraction(interaction);
 				} else if (interaction.isStringSelectMenu()) {
-					this.onSelectMenuInteraction(interaction);
+					await this.onSelectMenuInteraction(interaction);
 				}
 			}
 		}
 	}
 
-	static onSlashCommandInteraction(interaction: djs.ChatInputCommandInteraction) {
+	static async onSlashCommandInteraction(interaction: djs.ChatInputCommandInteraction) {
 		let interactionName = interaction.commandName;
 
 		const group = interaction.options.getSubcommandGroup(false);
@@ -1089,59 +1089,51 @@ export class Bot {
 		}
 
 		if (this.$slash[interactionName]) {
-			Actions.preformActionsFromInteraction(interaction, this.$slash[interactionName], true);
+			await Actions.preformActionsFromInteraction(interaction, this.$slash[interactionName], true);
 		}
 	}
 
-	static onContextMenuInteraction(interaction: djs.ContextMenuCommandInteraction) {
+	static async onContextMenuInteraction(interaction: djs.ContextMenuCommandInteraction) {
 		if (interaction.isUserContextMenuCommand()) {
-			this.onUserContextMenuInteraction(interaction);
+			await this.onUserContextMenuInteraction(interaction);
 		} else if (interaction.isMessageContextMenuCommand()) {
-			this.onMessageContextMenuInteraction(interaction);
+			await this.onMessageContextMenuInteraction(interaction);
 		}
 	}
 
-	static onUserContextMenuInteraction(interaction: djs.UserContextMenuCommandInteraction) {
+	static async onUserContextMenuInteraction(interaction: djs.UserContextMenuCommandInteraction) {
 		const interactionName = interaction.commandName;
 		if (this.$user[interactionName]) {
 			if (interaction.guild) {
-				interaction.guild.members
-					.fetch(interaction.targetId)
-					.then((member) => {
-						(interaction as any)._targetMember = member;
-						Actions.preformActionsFromInteraction(interaction, this.$user[interactionName], true);
-					})
-					.catch(console.error);
+				const member = await interaction.guild.members.fetch(interaction.targetId);
+				(interaction as any)._targetMember = member;
+				await Actions.preformActionsFromInteraction(interaction, this.$user[interactionName], true);
 			} else {
 				(interaction as any)._targetMember = interaction.targetUser;
-				Actions.preformActionsFromInteraction(interaction, this.$user[interactionName], true);
+				await Actions.preformActionsFromInteraction(interaction, this.$user[interactionName], true);
 			}
 		}
 	}
 
-	static onMessageContextMenuInteraction(interaction: djs.MessageContextMenuCommandInteraction) {
+	static async onMessageContextMenuInteraction(interaction: djs.MessageContextMenuCommandInteraction) {
 		const interactionName = interaction.commandName;
 		if (this.$msge[interactionName]) {
 			const msg = interaction.targetMessage;
 			if (!(msg instanceof DiscordJS.Message) && interaction.channel) {
-				interaction.channel.messages
-					.fetch(interaction.targetId)
-					.then((message) => {
-						(interaction as any)._targetMessage = message;
-						Actions.preformActionsFromInteraction(interaction, this.$msge[interactionName], true);
-					})
-					.catch(console.error);
+				const message = await interaction.channel.messages.fetch(interaction.targetId);
+				(interaction as any)._targetMessage = message;
+				await Actions.preformActionsFromInteraction(interaction, this.$msge[interactionName], true);
 			} else {
 				(interaction as any)._targetMessage = msg;
-				Actions.preformActionsFromInteraction(interaction, this.$msge[interactionName], true);
+				await Actions.preformActionsFromInteraction(interaction, this.$msge[interactionName], true);
 			}
 		}
 	}
 
-	static onButtonInteraction(interaction: djs.ButtonInteraction) {
+	static async onButtonInteraction(interaction: djs.ButtonInteraction) {
 		const interactionId = interaction.customId;
 		if (this.$button[interactionId]) {
-			Actions.preformActionsFromInteraction(interaction, this.$button[interactionId]);
+			await Actions.preformActionsFromInteraction(interaction, this.$button[interactionId]);
 		} else {
 			const response = Actions.getInvalidButtonResponseText();
 			if (response) {
@@ -1387,16 +1379,16 @@ export class Actions {
 		return result;
 	}
 
-	static preformActionsFromMessage(msg: djs.Message, cmd) {
+	static async preformActionsFromMessage(msg: djs.Message, cmd) {
 		if (
-			this.checkConditions(msg.guild, msg.member, msg.author, cmd) &&
+			await this.checkConditions(msg.guild, msg.member, msg.author, cmd) &&
 			this.checkTimeRestriction(msg.author, msg, cmd)
 		) {
 			this.invokeActions(msg, cmd.actions, cmd);
 		}
 	}
 
-	static preformActionsFromInteraction(
+	static async preformActionsFromInteraction(
 		interaction: djs.CommandInteraction | djs.MessageComponentInteraction,
 		cmd: dbm.Command,
 		passMeta: boolean = false,
@@ -1404,7 +1396,7 @@ export class Actions {
 	) {
 		const invalidPermissions = this.getInvalidPermissionsResponse();
 		const invalidCooldown = this.getInvalidCooldownResponse();
-		if (this.checkConditions(interaction.guild, interaction.member, interaction.user, cmd)) {
+		if (await this.checkConditions(interaction.guild, interaction.member, interaction.user, cmd)) {
 			const timeRestriction = this.checkTimeRestriction(interaction.user, interaction, cmd, true);
 			if (timeRestriction === true) {
 				this.invokeInteraction(interaction, cmd.actions, initialTempVars, passMeta ? cmd : null);
@@ -1434,29 +1426,120 @@ export class Actions {
 		this.preformActionsFromInteraction(interaction, select, passMeta, tempVars);
 	}
 
-	static checkConditions(guild, member, user, cmd) {
-		const isServer = Boolean(guild && member);
+	static async checkConditions(guild: djs.Guild | null, member: djs.GuildMember | djs.APIGuildMember | null, user: djs.User, cmd: dbm.Command): Promise<boolean> {
+		// If a `djs.APIGuildMember`, convert to `djs.GuildMember` (or null if impossible).
+		if(member !== null && !(member instanceof djs.GuildMember)) {
+			if(member.user?.id) {
+				member = await guild?.members.fetch(member.user?.id) ?? null;
+			} else {
+				member = null;
+			}
+		}
+
+		const isServer = guild !== null && member !== null;
 		const restriction = parseInt(cmd.restriction, 10);
 		switch (restriction) {
 			case 0:
 			case 1: {
 				if (isServer) {
+					if(Array.isArray(cmd.requiredPermissions)) {
+						return this.checkPermissions(member!,
+							cmd.requiredPermissions
+								.map(str => this.convertPermissionStringToResolvable(str))
+								.filter(
+									function(p: djs.PermissionResolvable | null): p is djs.PermissionResolvable {
+										return p !== null;
+									}
+								)
+						);
+					}
+
+					// deprecated implementation for compatibility
 					return (
-						this.checkPermissions(member, cmd.permissions) &&
-						this.checkPermissions(member, cmd.permissions2)
+						this.checkPermissionString(member!, cmd.permissions) &&
+						this.checkPermissionString(member!, cmd.permissions2)
 					);
 				}
 				return restriction === 0;
 			}
 			case 2:
-				return isServer && guild.ownerId === member.id;
+				return isServer && guild!.ownerId === member!.id;
 			case 3:
 				return !isServer;
 			case 4:
-				return Files.data.settings.ownerId && user.id === Files.data.settings.ownerId;
+				return !!Files.data.settings.ownerId && user.id === Files.data.settings.ownerId;
 			default:
 				return true;
 		}
+	}
+
+	static checkPermissionString(member: djs.GuildMember, permissionString: string): boolean {
+		if(permissionString && permissionString !== "NONE") {
+			const resolvable = this.convertPermissionStringToResolvable(permissionString);
+			if(resolvable !== null) {
+				return this.checkPermissions(member, resolvable);
+			}
+		}
+		return true;
+	}
+
+	static checkPermissions(member: djs.GuildMember, permissions: djs.PermissionResolvable): boolean {
+		if (!permissions) return true;
+		if (!member) return false;
+		if (member.guild?.ownerId === member.id) return true;
+		return member.permissions.has(permissions);
+	}
+
+	static convertPermissionStringToResolvable(permissionName: string): djs.PermissionResolvable | null {
+		switch(permissionName) {
+			case "CREATE_INSTANT_INVITE": return djs.PermissionFlagsBits.CreateInstantInvite;
+			case "KICK_MEMBERS": return djs.PermissionFlagsBits.KickMembers;
+			case "BAN_MEMBERS": return djs.PermissionFlagsBits.BanMembers;
+			case "ADMINISTRATOR": return djs.PermissionFlagsBits.Administrator;
+			case "MANAGE_CHANNELS": return djs.PermissionFlagsBits.ManageChannels;
+			case "MANAGE_GUILD": return djs.PermissionFlagsBits.ManageGuild;
+			case "ADD_REACTIONS": return djs.PermissionFlagsBits.AddReactions;
+			case "VIEW_AUDIT_LOG": return djs.PermissionFlagsBits.ViewAuditLog;
+			case "PRIORITY_SPEAKER": return djs.PermissionFlagsBits.PrioritySpeaker;
+			case "STREAM": return djs.PermissionFlagsBits.Stream;
+			case "VIEW_CHANNEL": return djs.PermissionFlagsBits.ViewChannel;
+			case "SEND_MESSAGES": return djs.PermissionFlagsBits.SendMessages;
+			case "SEND_TTS_MESSAGES": return djs.PermissionFlagsBits.SendTTSMessages;
+			case "MANAGE_MESSAGES": return djs.PermissionFlagsBits.ManageMessages;
+			case "EMBED_LINKS": return djs.PermissionFlagsBits.EmbedLinks;
+			case "ATTACH_FILES": return djs.PermissionFlagsBits.AttachFiles;
+			case "READ_MESSAGE_HISTORY": return djs.PermissionFlagsBits.ReadMessageHistory;
+			case "MENTION_EVERYONE": return djs.PermissionFlagsBits.MentionEveryone;
+			case "USE_EXTERNAL_EMOJIS": return djs.PermissionFlagsBits.UseExternalEmojis;
+			case "VIEW_GUILD_INSIGHTS": return djs.PermissionFlagsBits.ViewGuildInsights;
+			case "CONNECT": return djs.PermissionFlagsBits.Connect;
+			case "SPEAK": return djs.PermissionFlagsBits.Speak;
+			case "MUTE_MEMBERS": return djs.PermissionFlagsBits.MuteMembers;
+			case "DEAFEN_MEMBERS": return djs.PermissionFlagsBits.DeafenMembers;
+			case "MOVE_MEMBERS": return djs.PermissionFlagsBits.MoveMembers;
+			case "USE_VAD": return djs.PermissionFlagsBits.UseVAD;
+			case "CHANGE_NICKNAME": return djs.PermissionFlagsBits.ChangeNickname;
+			case "MANAGE_NICKNAMES": return djs.PermissionFlagsBits.ManageNicknames;
+			case "MANAGE_ROLES": return djs.PermissionFlagsBits.ManageRoles;
+			case "MANAGE_WEBHOOKS": return djs.PermissionFlagsBits.ManageWebhooks;
+			case "MANAGE_EMOJIS_AND_STICKERS": return djs.PermissionFlagsBits.ManageEmojisAndStickers;
+			case "MANAGE_GUILD_EXPRESSIONS": return djs.PermissionFlagsBits.ManageGuildExpressions;
+			case "USE_APPLICATION_COMMANDS": return djs.PermissionFlagsBits.UseApplicationCommands;
+			case "REQUEST_TO_SPEAK": return djs.PermissionFlagsBits.RequestToSpeak;
+			case "MANAGE_EVENTS": return djs.PermissionFlagsBits.ManageEvents;
+			case "MANAGE_THREADS": return djs.PermissionFlagsBits.ManageThreads;
+			case "CREATE_PUBLIC_THREADS": return djs.PermissionFlagsBits.CreatePublicThreads;
+			case "CREATE_PRIVATE_THREADS": return djs.PermissionFlagsBits.CreatePrivateThreads;
+			case "USE_EXTERNAL_STICKERS": return djs.PermissionFlagsBits.UseExternalStickers;
+			case "SEND_MESSAGES_IN_THREADS": return djs.PermissionFlagsBits.SendMessagesInThreads;
+			case "USE_EMBEDDED_ACTIVITIES": return djs.PermissionFlagsBits.UseEmbeddedActivities;
+			case "MODERATE_MEMBERS": return djs.PermissionFlagsBits.ModerateMembers;
+			case "VIEW_CREATOR_MONETIZATION_ANALYTICS": return djs.PermissionFlagsBits.ViewCreatorMonetizationAnalytics;
+			case "USE_SOUNDBOARD": return djs.PermissionFlagsBits.UseSoundboard;
+			case "USE_EXTERNAL_SOUNDS": return djs.PermissionFlagsBits.UseExternalSounds;
+			case "SEND_VOICE_MESSAGES": return djs.PermissionFlagsBits.SendVoiceMessages;
+		}
+		return null;
 	}
 
 	static checkTimeRestriction(user, msgOrInteraction, cmd: dbm.Command, returnTimeString = false) {
@@ -1522,14 +1605,6 @@ export class Actions {
 			result = times[0] + ", " + times[1] + ", " + times[2] + ", and " + times[3];
 		}
 		return result;
-	}
-
-	static checkPermissions(member, permissions) {
-		if (!permissions) return true;
-		if (!member) return false;
-		if (permissions === "NONE") return true;
-		if (member.guild?.ownerId === member.id) return true;
-		return member.permissions.has(permissions);
 	}
 
 	static invokeActions(msg, actions, cmd: any = null) {
