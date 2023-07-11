@@ -1725,7 +1725,11 @@ export class Actions {
 
 	static displayError(data, cache, err) {
 		if(err.code === 10062) {
-			// TODO: extra details about expired interaction
+			console.log(
+				"NOTE! The error below is caused because your Discord bot took too long to respond.\n" +
+				"To fix this, set the \"Command Defer\" option on your command to \"Defer At Start\" or " + 
+				"\"Defer Secretly\" to let Discord know your bot needs more time to process the command."
+			);
 		}
 		if (!data) data = cache.actions[cache.index];
 		const dbm = this.getErrorString(data, cache);
