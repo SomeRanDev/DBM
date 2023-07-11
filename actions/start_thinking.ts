@@ -1,4 +1,9 @@
-module.exports = {
+import { Actions, ActionsCache } from "../bot.ts";
+import { Action, ActionMod } from "../types.ts";
+
+type StartThinkingData = { ephemeral: boolean };
+
+export default {
 	//---------------------------------------------------------------------
 	// Action Name
 	//
@@ -21,7 +26,7 @@ module.exports = {
 	// This function generates the subtitle displayed next to the name.
 	//---------------------------------------------------------------------
 
-	subtitle(data, presets) {
+	subtitle(data: StartThinkingData, presets: any) {
 		return "Inform User " + (data.ephemeral ? "Privately" : "Publicly");
 	},
 
@@ -58,7 +63,7 @@ module.exports = {
 	// so edit the HTML to reflect this.
 	//---------------------------------------------------------------------
 
-	html(isEvent, data) {
+	html(isEvent: boolean, data: any) {
 		return `
 <div style="padding: 8px;">
 	<dbm-checkbox id="ephemeral" label="Inform User Privately (Ephemeral)"></dbm-checkbox>
@@ -83,16 +88,19 @@ module.exports = {
 	// so be sure to provide checks for variable existence.
 	//---------------------------------------------------------------------
 
-	action(cache) {
-		const data = cache.actions[cache.index];
-		if (cache.interaction) {
-			cache.interaction
-				.deferReply({ ephemeral: data.ephemeral })
-				.then(() => this.callNextAction(cache))
-				.catch((err) => this.displayError(data, cache, err));
-		} else {
-			this.callNextAction(cache);
+	async action(this: typeof Actions, cache: ActionsCache) {
+		const data = cache.actions[cache.index] as Action & StartThinkingData;
+
+		if(cache.canDefer()) {
+			try {
+				cache.onInteractionReplySent();
+				await cache.interaction!.deferReply({ ephemeral: data.ephemeral });
+			} catch(err: any) {
+				this.displayError(data, cache, err);
+			}
 		}
+
+		this.callNextAction(cache);
 	},
 
 	//---------------------------------------------------------------------
@@ -105,4 +113,4 @@ module.exports = {
 	//---------------------------------------------------------------------
 
 	mod() {},
-};
+} satisfies ActionMod;

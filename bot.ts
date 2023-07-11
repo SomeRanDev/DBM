@@ -334,6 +334,8 @@ export class Bot {
 	static _slashCommandCreateType: dbm.SlashCommandInitializationType;
 	static _slashCommandServerList: string[];
 
+	static _interactionDeferType: dbm.InteractionDeferType | null = null;
+
 	// CONSTANTS
 	static PRIVILEGED_INTENTS: djs.GatewayIntentBits =
 		djs.IntentsBitField.Flags.GuildMembers |
@@ -1052,18 +1054,38 @@ export class Bot {
 		}
 	}
 
-	static onInteraction(interaction) {
+	static getInteractionDeferType(): dbm.InteractionDeferType {
+		if(this._interactionDeferType === null) {
+			this._interactionDeferType = Files.data.settings.interactionDeferType ?? dbm.InteractionDeferType.Automatic;
+		}
+		return this._interactionDeferType;
+	}
+
+	static async onInteraction(interaction: djs.BaseInteraction) {
+		await this.onInteractionReceived(interaction);
+		this.respondToInteraction(interaction);
+	}
+
+	static async onInteractionReceived(interaction: djs.BaseInteraction) {
+		if(this.getInteractionDeferType() === dbm.InteractionDeferType.Always) {
+			if(interaction.isChatInputCommand() || interaction.isContextMenuCommand() || interaction.isMessageComponent()) {
+				await interaction.deferReply({ ephemeral: true });
+			}			
+		}
+	}
+
+	static respondToInteraction(interaction: djs.BaseInteraction) {
 		if (interaction.isChatInputCommand()) {
 			this.onSlashCommandInteraction(interaction);
 		} else if (interaction.isContextMenuCommand()) {
 			this.onContextMenuInteraction(interaction);
 		} else if (interaction.isModalSubmit()) {
 			Actions.checkModalSubmitResponses(interaction);
-		} else {
+		} else if(interaction.isMessageComponent()) {
 			if (interaction.component?.type === DiscordJS.ComponentType.Button) {
-				interaction._button = interaction.component;
+				(interaction as any)._button = interaction.component;
 			} else if (interaction.component?.type === DiscordJS.ComponentType.SelectMenu) {
-				interaction._select = interaction.component;
+				(interaction as any)._select = interaction.component;
 			}
 			if (!Actions.checkTemporaryInteractionResponses(interaction)) {
 				if (interaction.isButton()) {
@@ -1075,7 +1097,7 @@ export class Bot {
 		}
 	}
 
-	static onSlashCommandInteraction(interaction) {
+	static onSlashCommandInteraction(interaction: djs.ChatInputCommandInteraction) {
 		let interactionName = interaction.commandName;
 
 		const group = interaction.options.getSubcommandGroup(false);
@@ -1093,7 +1115,7 @@ export class Bot {
 		}
 	}
 
-	static onContextMenuInteraction(interaction) {
+	static onContextMenuInteraction(interaction: djs.ContextMenuCommandInteraction) {
 		if (interaction.isUserContextMenuCommand()) {
 			this.onUserContextMenuInteraction(interaction);
 		} else if (interaction.isMessageContextMenuCommand()) {
@@ -1101,25 +1123,25 @@ export class Bot {
 		}
 	}
 
-	static onUserContextMenuInteraction(interaction) {
+	static onUserContextMenuInteraction(interaction: djs.UserContextMenuCommandInteraction) {
 		const interactionName = interaction.commandName;
 		if (this.$user[interactionName]) {
 			if (interaction.guild) {
 				interaction.guild.members
 					.fetch(interaction.targetId)
 					.then((member) => {
-						interaction._targetMember = member;
+						(interaction as any)._targetMember = member;
 						Actions.preformActionsFromInteraction(interaction, this.$user[interactionName], true);
 					})
 					.catch(console.error);
 			} else {
-				interaction._targetMember = interaction.targetUser;
+				(interaction as any)._targetMember = interaction.targetUser;
 				Actions.preformActionsFromInteraction(interaction, this.$user[interactionName], true);
 			}
 		}
 	}
 
-	static onMessageContextMenuInteraction(interaction) {
+	static onMessageContextMenuInteraction(interaction: djs.MessageContextMenuCommandInteraction) {
 		const interactionName = interaction.commandName;
 		if (this.$msge[interactionName]) {
 			const msg = interaction.targetMessage;
@@ -1127,18 +1149,18 @@ export class Bot {
 				interaction.channel.messages
 					.fetch(interaction.targetId)
 					.then((message) => {
-						interaction._targetMessage = message;
+						(interaction as any)._targetMessage = message;
 						Actions.preformActionsFromInteraction(interaction, this.$msge[interactionName], true);
 					})
 					.catch(console.error);
 			} else {
-				interaction._targetMessage = msg;
+				(interaction as any)._targetMessage = msg;
 				Actions.preformActionsFromInteraction(interaction, this.$msge[interactionName], true);
 			}
 		}
 	}
 
-	static onButtonInteraction(interaction) {
+	static onButtonInteraction(interaction: djs.ButtonInteraction) {
 		const interactionId = interaction.customId;
 		if (this.$button[interactionId]) {
 			Actions.preformActionsFromInteraction(interaction, this.$button[interactionId]);
@@ -1150,7 +1172,7 @@ export class Bot {
 		}
 	}
 
-	static onSelectMenuInteraction(interaction) {
+	static onSelectMenuInteraction(interaction: djs.StringSelectMenuInteraction) {
 		const interactionId = interaction.customId;
 		if (this.$select[interactionId]) {
 			Actions.preformActionsFromSelectInteraction(interaction, this.$select[interactionId]);
@@ -1264,7 +1286,7 @@ export class Actions {
 		return result;
 	}
 
-	static getFlagEmoji(flagName) {
+	static getFlagEmoji(flagName: string): string {
 		if (flagName.startsWith("flag_")) {
 			flagName = flagName.substring(5);
 		}
@@ -1272,11 +1294,11 @@ export class Actions {
 		return this._letterEmojis[flagName.charCodeAt(0) - 65] + this._letterEmojis[flagName.charCodeAt(1) - 65];
 	}
 
-	static getCustomEmoji(nameOrId) {
+	static getCustomEmoji(nameOrId: string): djs.GuildEmoji | undefined {
 		return Bot.bot.emojis.cache.get(nameOrId) ?? Bot.bot.emojis.cache.find((e) => e.name === nameOrId);
 	}
 
-	static eval(content, cache, logError = true) {
+	static eval(content: string, cache: ActionsCache, logError: boolean = true) {
 		if (!content) return false;
 		const DBM = this.getDBM();
 		const tempVars = this.getActionVariable.bind(cache.temp);
@@ -1289,36 +1311,36 @@ export class Actions {
 		const customEmoji = this.getCustomEmoji.bind(this);
 		const msg = cache.msg;
 		const interaction = cache.interaction;
-		const button = interaction?._button ?? "";
-		const select = interaction?._select ?? "";
+		const button = (interaction as any)?._button ?? "";
+		const select = (interaction as any)?._select ?? "";
 		const server = cache.server;
 		const client = DBM.Bot.bot;
 		const bot = DBM.Bot.bot;
 		const me = server?.members?.me ?? null;
-		let user = "",
-			member = "",
-			channel = "",
-			mentionedUser = "",
-			mentionedChannel = "",
+		let user: djs.User | string = "",
+			member: djs.GuildMember | djs.APIInteractionGuildMember | string = "",
+			channel: djs.Channel | string = "",
+			mentionedUser: djs.User | string = "",
+			mentionedChannel: djs.Channel | string = "",
 			defaultChannel = "";
 		if (msg) {
 			user = msg.author;
-			member = msg.member;
+			member = msg.member ?? "";
 			channel = msg.channel;
 			mentionedUser = msg.mentions.users.first() ?? "";
 			mentionedChannel = msg.mentions.channels.first() ?? "";
 		}
 		if (interaction) {
 			user = interaction.user;
-			member = interaction.member;
-			channel = interaction.channel;
-			if (interaction.options) {
+			member = interaction.member ?? "null";
+			channel = interaction.channel ?? "null";
+			if (interaction instanceof djs.ChatInputCommandInteraction && interaction.options) {
 				mentionedUser = interaction.options.resolved?.users?.first?.() ?? "";
 				mentionedChannel = interaction.options.resolved?.channels?.first?.() ?? "";
 			}
 		}
 		if (server) {
-			defaultChannel = server.getDefaultChannel();
+			defaultChannel = (server as any).getDefaultChannel();
 		}
 		try {
 			return eval(content);
@@ -1328,13 +1350,13 @@ export class Actions {
 		}
 	}
 
-	static evalMessage(content, cache) {
+	static evalMessage(content: string, cache: ActionsCache): any {
 		if (!content) return "";
 		if (!content.match(/\$\{.*\}/im)) return content;
 		return this.eval("`" + content.replace(/`/g, "\\`") + "`", cache);
 	}
 
-	static evalIfPossible(content, cache) {
+	static evalIfPossible(content: string, cache: ActionsCache): any {
 		this.__cachedText ??= {};
 		if (content in this.__cachedText) return content;
 		let result = this.eval(content, cache, false);
@@ -1376,18 +1398,18 @@ export class Actions {
 		});
 	}
 
-	static modDirectories() {
-		const result = [this.actionsLocation];
-		if (Files.verifyDirectory(Actions.eventsLocation)) {
-			result.push(this.eventsLocation);
+	static modDirectories(): string[] {
+		const result: string[] = [this.actionsLocation!];
+		if (Files.verifyDirectory(this.eventsLocation)) {
+			result.push(this.eventsLocation!);
 		}
-		if (Files.verifyDirectory(Actions.extensionsLocation)) {
-			result.push(this.extensionsLocation);
+		if (Files.verifyDirectory(this.extensionsLocation)) {
+			result.push(this.extensionsLocation!);
 		}
 		return result;
 	}
 
-	static preformActionsFromMessage(msg, cmd) {
+	static preformActionsFromMessage(msg: djs.Message, cmd) {
 		if (
 			this.checkConditions(msg.guild, msg.member, msg.author, cmd) &&
 			this.checkTimeRestriction(msg.author, msg, cmd)
@@ -1397,7 +1419,7 @@ export class Actions {
 	}
 
 	static preformActionsFromInteraction(
-		interaction: djs.MessageComponentInteraction,
+		interaction: djs.CommandInteraction | djs.MessageComponentInteraction,
 		cmd: dbm.Command,
 		passMeta: boolean = false,
 		initialTempVars: Record<string, any> | null = null,
@@ -1546,7 +1568,7 @@ export class Actions {
 		}
 	}
 
-	static invokeInteraction(interaction, actions, initialTempVars, meta: { name: string } | null = null) {
+	static invokeInteraction(interaction: djs.CommandInteraction | djs.MessageComponentInteraction, actions, initialTempVars, meta: { name: string } | null = null) {
 		const cacheData: any = {
 			interaction,
 			temp: initialTempVars || {},
@@ -1559,6 +1581,18 @@ export class Actions {
 		}
 		const cache = new ActionsCache(actions, interaction.guild, cacheData);
 		this.callNextAction(cache);
+
+		// If the interaction hasn't been responded to at this point, an asynchronous action is being used.
+		if(Bot.getInteractionDeferType() === dbm.InteractionDeferType.Automatic) {
+			cache.defer();
+		}
+	}
+
+	static async deferInteractionIfNecessary(cache: ActionsCache) {
+		if(cache.canDefer()) {
+			cache.onInteractionReplySent();
+			await cache.interaction!.deferReply({ ephemeral: true });
+		}
 	}
 
 	static invokeEvent(event, server, temp) {
@@ -2554,7 +2588,7 @@ export class Actions {
 			.unref();
 	}
 
-	static checkModalSubmitResponses(interaction) {
+	static checkModalSubmitResponses(interaction: djs.ModalSubmitInteraction) {
 		const interactionId = interaction.customId;
 		if (this._temporaryInteractions?.[interactionId]) {
 			(this._temporaryInteractions[interactionId] as Function)(interaction);
@@ -2583,6 +2617,9 @@ export class ActionsCache {
 	isSubCache: boolean;
 	meta: ActionsCacheMeta;
 
+	_interactionReplySent: boolean;
+	_deferPromise: Promise<djs.InteractionResponse> | null;
+
 	callback: Function | undefined;
 
 	constructor(actions, server, options: any = {}) {
@@ -2594,6 +2631,8 @@ export class ActionsCache {
 		this.interaction = options.interaction ?? null;
 		this.isSubCache = options.isSubCache ?? false;
 		this.meta = options.meta ?? { isEvent: false, name: "" };
+		this._interactionReplySent = false;
+		this._deferPromise = null;
 	}
 
 	onCompleted() {
@@ -2654,6 +2693,50 @@ export class ActionsCache {
 			result += ", Select Menu" + (s ? ` "${s.placeholder}"` : "");
 		}
 		return result;
+	}
+
+	async replyToInteraction(options: djs.InteractionReplyOptions & { fetchReply: true; }) {
+		if(!this.interaction) throw "Interaction doesn't exist.";
+		await this.awaitDeferIfNecessary();
+		if (this.interaction.deferred) {
+			return this.interaction.editReply(options);
+		} else {
+			this.onInteractionReplySent();
+			return this.interaction.reply(options);
+		}
+	}
+
+	onInteractionReplySent() {
+		if(!this._interactionReplySent) {
+			this._interactionReplySent = true;
+		}
+	}
+
+	canDefer(): boolean {
+		if(!this.interaction) {
+			return false;
+		}
+		if(this._interactionReplySent) {
+			return false;
+		}
+		if(!this.interaction.deferred && !this.interaction.replied) {
+			return true;
+		}
+		return false;
+	}
+
+	defer() {
+		if(this.canDefer()) {
+			this.onInteractionReplySent();
+			this._deferPromise = this.interaction!.deferReply();
+			this._deferPromise.then(() => this._deferPromise = null);
+		}
+	}
+
+	async awaitDeferIfNecessary() {
+		if(this._deferPromise !== null) {
+			await this._deferPromise;
+		}
 	}
 
 	static extend(other, actions) {
