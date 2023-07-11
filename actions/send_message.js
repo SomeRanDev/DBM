@@ -817,7 +817,6 @@ module.exports = {
 
 			defaultResultMsg = cache.interaction?.message;
 
-			await cache.awaitDeferIfNecessary();
 			if (cache.interaction?.replied && cache.interaction?.editReply) {
 				promise = cache.interaction.editReply(messageOptions);
 			} else if (cache?.interaction?.update) {
@@ -847,12 +846,14 @@ module.exports = {
 			messageOptions.fetchReply = true;
 			if (data.ephemeral === true) {
 				messageOptions.ephemeral = true;
-			} else {
-				messageOptions.ephemeral = false;
 			}
-			cache.replyToInteraction(messageOptions)
-				.then(onComplete)
-				.catch((err) => this.displayError(data, cache, err));
+			let promise = null;
+			if (cache.interaction.deferred || cache.interaction.replied) {
+				promise = cache.interaction.editReply(messageOptions);
+			} else {
+				promise = cache.interaction.reply(messageOptions);
+			}
+			promise.then(onComplete).catch((err) => this.displayError(data, cache, err));
 		} else if (target?.send) {
 			target
 				.send(messageOptions)

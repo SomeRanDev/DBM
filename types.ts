@@ -55,7 +55,6 @@ export type Settings = {
 	token: string;
 
 	// Bot Settings 2
-	interactionDeferType: InteractionDeferType;
 	invalidButtonText: string;
 	invalidSelectText: string;
 	invalidUserText: string;
@@ -84,12 +83,6 @@ export type Settings = {
 export enum StringBoolean {
 	True = "true",
 	False = "false"
-}
-
-export enum InteractionDeferType {
-	Always = "always",
-	Automatic = "automatic",
-	Manual = "manual"
 }
 
 export enum SlashCommandInitializationType {

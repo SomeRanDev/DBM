@@ -91,9 +91,8 @@ export default {
 	async action(this: typeof Actions, cache: ActionsCache) {
 		const data = cache.actions[cache.index] as Action & StartThinkingData;
 
-		if(cache.canDefer()) {
+		if(cache.interaction && !cache.interaction.deferred && !cache.interaction.replied) {
 			try {
-				cache.onInteractionReplySent();
 				await cache.interaction!.deferReply({ ephemeral: data.ephemeral });
 			} catch(err: any) {
 				this.displayError(data, cache, err);

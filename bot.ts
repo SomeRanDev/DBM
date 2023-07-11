@@ -334,8 +334,6 @@ export class Bot {
 	static _slashCommandCreateType: dbm.SlashCommandInitializationType;
 	static _slashCommandServerList: string[];
 
-	static _interactionDeferType: dbm.InteractionDeferType | null = null;
-
 	// CONSTANTS
 	static PRIVILEGED_INTENTS: djs.GatewayIntentBits =
 		djs.IntentsBitField.Flags.GuildMembers |
@@ -1054,27 +1052,7 @@ export class Bot {
 		}
 	}
 
-	static getInteractionDeferType(): dbm.InteractionDeferType {
-		if(this._interactionDeferType === null) {
-			this._interactionDeferType = Files.data.settings.interactionDeferType ?? dbm.InteractionDeferType.Automatic;
-		}
-		return this._interactionDeferType;
-	}
-
 	static async onInteraction(interaction: djs.BaseInteraction) {
-		await this.onInteractionReceived(interaction);
-		this.respondToInteraction(interaction);
-	}
-
-	static async onInteractionReceived(interaction: djs.BaseInteraction) {
-		if(this.getInteractionDeferType() === dbm.InteractionDeferType.Always) {
-			if(interaction.isChatInputCommand() || interaction.isContextMenuCommand() || interaction.isMessageComponent()) {
-				await interaction.deferReply({ ephemeral: true });
-			}			
-		}
-	}
-
-	static respondToInteraction(interaction: djs.BaseInteraction) {
 		if (interaction.isChatInputCommand()) {
 			this.onSlashCommandInteraction(interaction);
 		} else if (interaction.isContextMenuCommand()) {
@@ -1580,19 +1558,8 @@ export class Actions {
 			};
 		}
 		const cache = new ActionsCache(actions, interaction.guild, cacheData);
+		// TODO: command defer option
 		this.callNextAction(cache);
-
-		// If the interaction hasn't been responded to at this point, an asynchronous action is being used.
-		if(Bot.getInteractionDeferType() === dbm.InteractionDeferType.Automatic) {
-			cache.defer();
-		}
-	}
-
-	static async deferInteractionIfNecessary(cache: ActionsCache) {
-		if(cache.canDefer()) {
-			cache.onInteractionReplySent();
-			await cache.interaction!.deferReply({ ephemeral: true });
-		}
 	}
 
 	static invokeEvent(event, server, temp) {
@@ -1665,6 +1632,9 @@ export class Actions {
 	}
 
 	static displayError(data, cache, err) {
+		if(err.code === 10062) {
+			// TODO: extra details about expired interaction
+		}
 		if (!data) data = cache.actions[cache.index];
 		const dbm = this.getErrorString(data, cache);
 		console.error(dbm + ":\n" + (err.stack ?? err));
@@ -2617,9 +2587,6 @@ export class ActionsCache {
 	isSubCache: boolean;
 	meta: ActionsCacheMeta;
 
-	_interactionReplySent: boolean;
-	_deferPromise: Promise<djs.InteractionResponse> | null;
-
 	callback: Function | undefined;
 
 	constructor(actions, server, options: any = {}) {
@@ -2631,8 +2598,6 @@ export class ActionsCache {
 		this.interaction = options.interaction ?? null;
 		this.isSubCache = options.isSubCache ?? false;
 		this.meta = options.meta ?? { isEvent: false, name: "" };
-		this._interactionReplySent = false;
-		this._deferPromise = null;
 	}
 
 	onCompleted() {
@@ -2693,50 +2658,6 @@ export class ActionsCache {
 			result += ", Select Menu" + (s ? ` "${s.placeholder}"` : "");
 		}
 		return result;
-	}
-
-	async replyToInteraction(options: djs.InteractionReplyOptions & { fetchReply: true; }) {
-		if(!this.interaction) throw "Interaction doesn't exist.";
-		await this.awaitDeferIfNecessary();
-		if (this.interaction.deferred) {
-			return this.interaction.editReply(options);
-		} else {
-			this.onInteractionReplySent();
-			return this.interaction.reply(options);
-		}
-	}
-
-	onInteractionReplySent() {
-		if(!this._interactionReplySent) {
-			this._interactionReplySent = true;
-		}
-	}
-
-	canDefer(): boolean {
-		if(!this.interaction) {
-			return false;
-		}
-		if(this._interactionReplySent) {
-			return false;
-		}
-		if(!this.interaction.deferred && !this.interaction.replied) {
-			return true;
-		}
-		return false;
-	}
-
-	defer() {
-		if(this.canDefer()) {
-			this.onInteractionReplySent();
-			this._deferPromise = this.interaction!.deferReply();
-			this._deferPromise.then(() => this._deferPromise = null);
-		}
-	}
-
-	async awaitDeferIfNecessary() {
-		if(this._deferPromise !== null) {
-			await this._deferPromise;
-		}
 	}
 
 	static extend(other, actions) {
