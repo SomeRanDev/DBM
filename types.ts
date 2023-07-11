@@ -24,13 +24,19 @@ export type SaveData = {
 }
 
 export type Command = {
-	name: string;
 	_id: string;
+
+	name: string;
 	comType: string;
+
+	description: string;
+	restriction: string;
+
 	requiredPermissions: string[];
 	permissions: string; // deprecated
 	permissions2: string; // deprecated
-	restriction: string;
+	defer: CommandDeferType;
+
 	actions: Action[];
 
 	_aliases?: string[];
@@ -84,6 +90,12 @@ export type Settings = {
 export enum StringBoolean {
 	True = "true",
 	False = "false"
+}
+
+export enum CommandDeferType {
+	Manual = "manual",
+	PublicDefer = "defer",
+	EphemeralDefer = "ephemeral"
 }
 
 export enum SlashCommandInitializationType {

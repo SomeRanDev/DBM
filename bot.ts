@@ -1394,21 +1394,38 @@ export class Actions {
 		passMeta: boolean = false,
 		initialTempVars: Record<string, any> | null = null,
 	) {
-		const invalidPermissions = this.getInvalidPermissionsResponse();
-		const invalidCooldown = this.getInvalidCooldownResponse();
-		if (await this.checkConditions(interaction.guild, interaction.member, interaction.user, cmd)) {
-			const timeRestriction = this.checkTimeRestriction(interaction.user, interaction, cmd, true);
-			if (timeRestriction === true) {
-				this.invokeInteraction(interaction, cmd.actions, initialTempVars, passMeta ? cmd : null);
-			} else if (invalidCooldown) {
-				const { format } = require("node:util");
-				const content =
-					typeof timeRestriction === "string" ? format(invalidCooldown, timeRestriction) : invalidCooldown;
-				interaction.reply({ content: content, ephemeral: true });
+		// Check command conditions
+		const passesConditions = await this.checkConditions(interaction.guild, interaction.member, interaction.user, cmd);
+		if (!passesConditions) {
+			const invalidPermissions = this.getInvalidPermissionsResponse();
+			if(invalidPermissions) {
+				interaction.reply({ content: invalidPermissions, ephemeral: true });
 			}
-		} else if (invalidPermissions) {
-			interaction.reply({ content: invalidPermissions, ephemeral: true });
+			return;
 		}
+
+		// Check command cooldown
+		const invalidCooldown = this.getInvalidCooldownResponse();
+		const timeRestriction = this.checkTimeRestriction(interaction.user, interaction, cmd, true);
+		if (timeRestriction !== true) {
+			if(!invalidCooldown) {
+				return;
+			}
+			const { format } = require("node:util");
+			const content =
+				typeof timeRestriction === "string" ? format(invalidCooldown, timeRestriction) : invalidCooldown;
+			interaction.reply({ content: content, ephemeral: true });
+			return;
+		}
+
+		// Defer command
+		if(cmd.defer !== dbm.CommandDeferType.Manual) {
+			await interaction.deferReply({
+				ephemeral: cmd.defer === dbm.CommandDeferType.EphemeralDefer
+			});
+		}
+
+		this.invokeInteraction(interaction, cmd.actions, initialTempVars, passMeta ? cmd : null);
 	}
 
 	static preformActionsFromSelectInteraction(
@@ -1632,8 +1649,8 @@ export class Actions {
 				isEvent: false,
 			};
 		}
+
 		const cache = new ActionsCache(actions, interaction.guild, cacheData);
-		// TODO: command defer option
 		this.callNextAction(cache);
 	}
 
