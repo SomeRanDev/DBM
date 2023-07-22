@@ -56,6 +56,8 @@ export enum MsgType {
 	DATA_PARSING_ERROR,
 	MISSING_ACTIONS,
 
+	DEPRECATED_EVENT,
+
 	DUPLICATE_SLASH_COMMAND,
 	INVALID_SLASH_NAME,
 	DUPLICATE_USER_COMMAND,
@@ -101,6 +103,16 @@ export function PrintError(type: MsgType, ...args: any[]) {
 			error(
 				format(
 					'[Missing Actions]\nPlease copy the "Actions" folder from the Discord Bot Maker directory to this bot\'s directory: \n%s',
+					args[0],
+				),
+			);
+			break;
+		}
+
+		case MsgType.DEPRECATED_EVENT: {
+			error(
+				format(
+					'"%s" event is no longer supported by the Discord API.',
 					args[0],
 				),
 			);
@@ -2776,72 +2788,102 @@ export class ActionsCache {
 
 let $evts: Record<string, dbm.Event[]> = {};
 
+export enum EventArgType {
+	None = 0,
+	Arg1,
+	Arg2,
+	Arg1Guild,
+	Arg2Guild,
+	Arg1User,
+	Arg1MemberGuild,
+}
+
+/**
+ * The first array is for event bound to djs.Client event.
+ * [event, argumentType1, argumentType2, guildArgument, requiresGuild, filterFunction]
+ * 
+ * The second is for a feature that was deprecated.
+ * [eventNameInDBM]
+ * 
+ * The third array is for event that is called manually through other means.
+ * []
+ */
+type EventData = ([keyof djs.ClientEvents, EventArgType, EventArgType, EventArgType, boolean?, Function?] | [string] | []);
+
 @DBMExport()
 export class Events {
 	static data = Events.generateData();
 
-	static generateData(): ([string, number, number, number, boolean?, Function?] | [])[] {
+	static generateData(): EventData[] {
+		const {
+			None, Arg1, Arg2, Arg1Guild, Arg2Guild,
+			Arg1User, Arg1MemberGuild
+		} = EventArgType;
 		return [
 			[],
 			[],
 			[],
 			[],
-			["guildCreate", 0, 0, 1],
-			["guildDelete", 0, 0, 1],
-			["guildMemberAdd", 1, 0, 2],
-			["guildMemberRemove", 1, 0, 2],
-			["channelCreate", 1, 0, 2, true, (channel: djs.BaseChannel) => channel.type === djs.ChannelType.GuildText],
-			["channelDelete", 1, 0, 2, true, (channel: djs.BaseChannel) => channel.type === djs.ChannelType.GuildText],
-			["roleCreate", 1, 0, 2],
-			["roleDelete", 1, 0, 2],
-			["guildBanAdd", 200, 0, 2],
-			["guildBanRemove", 200, 0, 2],
-			["channelCreate", 1, 0, 2, true, (channel: djs.BaseChannel) => channel.type === djs.ChannelType.GuildVoice],
-			["channelDelete", 1, 0, 2, true, (channel: djs.BaseChannel) => channel.type === djs.ChannelType.GuildVoice],
-			["emojiCreate", 1, 0, 2],
-			["emojiDelete", 1, 0, 2],
-			["messageDelete", 1, 0, 2, true],
-			["guildUpdate", 1, 3, 3],
-			["guildMemberUpdate", 1, 3, 4],
-			["presenceUpdate", 1, 3, 4],
-			["voiceStateUpdate", 1, 3, 4],
-			["channelUpdate", 1, 3, 4, true],
-			["channelPinsUpdate", 1, 0, 2, true],
-			["roleUpdate", 1, 3, 4],
-			["messageUpdate", 1, 3, 4, true, (arg1, arg2) => !!arg2.content],
-			["emojiUpdate", 1, 3, 4],
+			["guildCreate",       None, None, Arg1],
+			["guildDelete",       None, None, Arg1],
+			["guildMemberAdd",    Arg1, None, Arg1Guild],
+			["guildMemberRemove", Arg1, None, Arg1Guild],
+			["channelCreate",     Arg1, None, Arg1Guild, true, (channel: djs.BaseChannel) => channel.type === djs.ChannelType.GuildText],
+			["channelDelete",     Arg1, None, Arg1Guild, true, (channel: djs.BaseChannel) => channel.type === djs.ChannelType.GuildText],
+			["roleCreate",        Arg1, None, Arg1Guild],
+			["roleDelete",        Arg1, None, Arg1Guild],
+			["guildBanAdd",       Arg1User, None, Arg1Guild],
+			["guildBanRemove",    Arg1User, None, Arg1Guild],
+			["channelCreate",     Arg1, None, Arg1Guild, true, (channel: djs.BaseChannel) => channel.type === djs.ChannelType.GuildVoice],
+			["channelDelete",     Arg1, None, Arg1Guild, true, (channel: djs.BaseChannel) => channel.type === djs.ChannelType.GuildVoice],
+			["emojiCreate",       Arg1, None, Arg1Guild],
+			["emojiDelete",       Arg1, None, Arg1Guild],
+			["messageDelete",     Arg1, None, Arg1Guild, true],
+			["guildUpdate",       Arg1, Arg2, Arg2],
+			["guildMemberUpdate", Arg1, Arg2, Arg2Guild],
+			["presenceUpdate",    Arg1, Arg2, Arg2Guild],
+			["voiceStateUpdate",  Arg1, Arg2, Arg2Guild],
+			["channelUpdate",     Arg1, Arg2, Arg2Guild, true],
+			["channelPinsUpdate", Arg1, None, Arg1Guild, true],
+			["roleUpdate",        Arg1, Arg2, Arg2Guild],
+			["messageUpdate",     Arg1, Arg2, Arg2Guild, true, (arg1, arg2) => !!arg2.content],
+			["emojiUpdate",       Arg1, Arg2, Arg2Guild],
 			[],
 			[],
-			["messageReactionRemoveAll", 1, 0, 2, true],
-			["guildMemberAvailable", 1, 0, 2],
-			["guildMembersChunk", 1, 0, 3],
-			["guildMemberSpeaking", 1, 3, 2],
+			["messageReactionRemoveAll", Arg1, None, Arg1Guild, true],
+			["guildMemberAvailable",     Arg1, None, Arg1Guild],
+			["guildMembersChunk",        Arg1, None, Arg2],
+			["Member Starts/Stops Speaks"], // "guildMemberSpeaking" deprecated
 			[],
 			[],
-			["guildUnavailable", 1, 0, 1],
+			["guildUnavailable", Arg1, None, Arg1],
 			[],
 			[],
-			["channelCreate", 1, 0, 2, true, (channel: djs.BaseChannel) => channel.type !== djs.ChannelType.GuildText && channel.type !== djs.ChannelType.GuildVoice],
-			["channelDelete", 1, 0, 2, true, (channel: djs.BaseChannel) => channel.type !== djs.ChannelType.GuildText && channel.type !== djs.ChannelType.GuildVoice],
-			["stickerCreate", 1, 0, 2, true],
-			["stickerDelete", 1, 0, 2, true],
-			["threadCreate", 1, 0, 2, true],
-			["threadDelete", 1, 0, 2, true],
-			["stickerUpdate", 1, 3, 4, true],
-			["threadUpdate", 1, 3, 4, true],
-			["threadMemberUpdate", 1, 3, 100, true],
+			["channelCreate",      Arg1, None, Arg1Guild, true, (channel: djs.BaseChannel) => channel.type !== djs.ChannelType.GuildText && channel.type !== djs.ChannelType.GuildVoice],
+			["channelDelete",      Arg1, None, Arg1Guild, true, (channel: djs.BaseChannel) => channel.type !== djs.ChannelType.GuildText && channel.type !== djs.ChannelType.GuildVoice],
+			["stickerCreate",      Arg1, None, Arg1Guild, true],
+			["stickerDelete",      Arg1, None, Arg1Guild, true],
+			["threadCreate",       Arg1, None, Arg1Guild, true],
+			["threadDelete",       Arg1, None, Arg1Guild, true],
+			["stickerUpdate",      Arg1, Arg2, Arg2Guild, true],
+			["threadUpdate",       Arg1, Arg2, Arg2Guild, true],
+			["threadMemberUpdate", Arg1, Arg2, Arg1MemberGuild, true],
 			[],
-			["inviteCreate", 1, 0, 2],
-			["inviteDelete", 1, 0, 2],
+			["inviteCreate", Arg1, None, Arg1Guild],
+			["inviteDelete", Arg1, None, Arg1Guild],
 		];
 	}
 
 	static registerEvents(bot: djs.Client) {
 		$evts = Bot.$evts;
 		for (let i = 0; i < this.data.length; i++) {
-			const d: any[] = this.data[i];
-			if (d.length > 0 && $evts[String(i)]) {
-				bot.on(d[0], this.callEvents.bind(this, String(i), d[1], d[2], d[3], !!d[4], d[5]));
+			const d: EventData = this.data[i];
+			if($evts[String(i)]) {
+				if (d.length > 1) {
+					bot.on(d[0]!, this.callEvents.bind(this, String(i), d[1]!, d[2]!, d[3]!, !!d[4]!, d[5]!));
+				} else if (d.length === 1) {
+					PrintError(MsgType.DEPRECATED_EVENT, d[0]);
+				}
 			}
 		}
 		if ($evts["28"]) bot.on("messageReactionAdd", this.onReaction.bind(this, "28"));
@@ -2851,40 +2893,53 @@ export class Events {
 
 	static callEvents(
 		id: string,
-		temp1: number,
-		temp2: number,
-		objectExtractorType: number,
-		mustServe: boolean,
+		temp1: EventArgType,
+		temp2: EventArgType,
+		guildArg: EventArgType,
+		guildRequired: boolean,
 		condition: Function | null,
 		arg1: any,
 		arg2: any | null = null,
 	) {
-		if (mustServe && ((temp1 > 0 && !arg1.guild) || (temp2 > 0 && !arg2.guild))) return;
 		if (condition && !condition(arg1, arg2)) return;
 		const events = $evts[id];
 		if (!events) return;
 		for (let i = 0; i < events.length; i++) {
 			const event = events[i];
-			const temp = {};
-			if (event.temp) temp[event.temp] = this.getObject(temp1, arg1, arg2);
-			if (event.temp2) temp[event.temp2] = this.getObject(temp2, arg1, arg2);
-			Actions.invokeEvent(event, this.getObject(objectExtractorType, arg1, arg2), temp);
+			this.callEvent(event, temp1, temp2, guildArg, guildRequired, arg1, arg2);
 		}
 	}
 
-	static getObject(id, arg1, arg2) {
+	static callEvent(
+		event: dbm.Event,
+		temp1: EventArgType,
+		temp2: EventArgType,
+		guildArg: EventArgType,
+		guildRequired: boolean,
+		arg1: any,
+		arg2: any | null,
+	) {
+		const temp = {};
+		const guild = this.findArgument(guildArg, arg1, arg2);
+		if (guildRequired && !guild) return;
+		if (event.temp) temp[event.temp] = this.findArgument(temp1, arg1, arg2);
+		if (event.temp2) temp[event.temp2] = this.findArgument(temp2, arg1, arg2);
+		Actions.invokeEvent(event, guild, temp);
+	}
+
+	static findArgument(id: EventArgType, arg1: any, arg2: any) {
 		switch (id) {
-			case 1:
+			case EventArgType.Arg1:
 				return arg1;
-			case 2:
+			case EventArgType.Arg1Guild:
 				return arg1.guild;
-			case 3:
+			case EventArgType.Arg2:
 				return arg2;
-			case 4:
+			case EventArgType.Arg2Guild:
 				return arg2.guild;
-			case 100:
+			case EventArgType.Arg1MemberGuild:
 				return arg1.guildMember.guild;
-			case 200:
+			case EventArgType.Arg1User:
 				return arg1.user;
 		}
 	}
